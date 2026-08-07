@@ -1,0 +1,42 @@
+module Pictures where
+
+type Picture = ....
+
+-- The horse example used in Craft3e, and a white picture.
+
+horse , white :: Picture
+horse = ....
+white = ....
+
+-- Getting a picture onto the screen.
+
+printPicture :: Picture -> IO ()
+printPicture = ....
+
+-- Reflection in vertical and horizontal mirrors.
+
+flipV , flipH :: Picture -> Picture
+flipV = map reverse
+flipH = reverse
+
+-- One picture above another. To maintain the rectangular 
+-- property, the pictures need to have the same width.
+
+above :: Picture -> Picture -> Picture
+above = (++)
+
+-- One picture next to another. To maintain the rectangular 
+-- property, the pictures need to have the same height.
+
+beside :: Picture -> Picture -> Picture
+beside = zipWith (++)
+
+-- Superimpose two pictures (assumed to be same size). 
+
+superimpose :: Picture -> Picture -> Picture
+superimpose = ....
+
+-- Invert the black and white in the picture.
+
+invertColour :: Picture -> Picture
+invertColour = ....

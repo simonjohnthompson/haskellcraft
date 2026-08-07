@@ -1,0 +1,49 @@
+From 3f619be821b0edeb21c3fa7589d714e3d17cae72 Mon Sep 17 00:00:00 2001
+From: Reed Mullanix <reedmullanix@gmail.com>
+Date: Tue, 7 Jan 2025 10:55:51 -0500
+Subject: [PATCH 3/3] fix: Move `fail` from Monad into MonadFail in
+ CalcParseLib.hs
+
+The `fail` method was removed from Monad in GHC 8.8; this line
+causes Craft3e to cause build errors on recent versions of GHC.
+I've also bumped the lower bound on `base` to 4.9.0.0, which
+corresponds to the introduction of `MonadFail`.
+---
+ Calculator/CalcParseLib.hs | 4 +++-
+ Craft3e.cabal              | 2 +-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/Calculator/CalcParseLib.hs b/Calculator/CalcParseLib.hs
+index 662eb61..8f09d0a 100644
+--- a/Calculator/CalcParseLib.hs
++++ b/Calculator/CalcParseLib.hs
+@@ -125,10 +125,12 @@ newtype SParse a b = SParse { sparse :: (Parse a b) }
+ 
+ instance Monad (SParse a) where
+   return x = SParse (succeed x)
+-  fail s   = SParse none
+   (SParse pr) >>= f 
+     = SParse (\st -> concat [ sparse (f x) rest | (x,rest) <- pr st ])
+ 
++instance MonadFail (SParse a) where
++  fail s   = SParse none
++
+ instance Applicative (SParse a) where
+   pure = return
+   (<*>) = ap
+diff --git a/Craft3e.cabal b/Craft3e.cabal
+index e42e207..57367e8 100644
+--- a/Craft3e.cabal
++++ b/Craft3e.cabal
+@@ -36,7 +36,7 @@ extra-source-files:
+ 
+ library
+   build-depends:
+-    base >= 4 && < 5,
++    base >= 4.9.0.0 && < 5,
+     QuickCheck >= 2.1 && < 3,
+     old-locale == 1.0.*,
+     time >= 1.1 && < 2.0,
+-- 
+2.39.1
+

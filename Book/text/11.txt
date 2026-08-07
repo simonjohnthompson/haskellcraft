@@ -1,0 +1,1481 @@
+Higher-order functions
+======================
+
+[gen2]
+
+Haskell is a *functional* programming language: that means that the main
+way in which we compute things is by defining functions which describe
+how to transform the inputs into the required output. Haskell has a
+collection of built-in data types which we can use to model the data in
+the problem domain, including numbers, booleans, lists, tuples and
+`data` types.
+
+Haskell is also functional in a more distinctive way: *functions are
+data* in Haskell, and can be treated just like data of any other type.
+
+-   Functions can be combined using *operators*, just like the numbers
+    can be combined using the arithmetical operators.
+
+-   Haskell provides *lambda abstractions*, which allow us to describe
+    functions directly by expressions, rather than having to define and
+    name a function in order to use it.
+
+-   Functions can be the inputs and outputs of other functions in
+    exactly the same way as any other type. Functions which have other
+    functions as arguments or results are called *higher-order
+    functions*.
+
+-   In particular, the syntax of Haskell makes it particularly easy to
+    *partially apply* functions and operators, so that functions are
+    returned as the results of applying functions.
+
+This chapter covers these topics, setting the scene for Chapter
+[developingHOPs] where will put these ideas into practice.
+
+Finally, we’ll also see that we can start to write function-level
+definitions – sometimes called ‘point-free’ definitions – which can be
+more concise, more readable and more suitable for program verification
+and transformation. Indeed, the chapter concludes with some examples of
+program verification involving higher-order polymorphic functions, and
+we see there that the theorems proved about them are reusable in exactly
+the same way that the functions themselves are reusable.
+
+Operators: function composition and application
+-----------------------------------------------
+
+This section describes the built-in operators for function composition
+and application, as well as defining a new operator, forward
+composition, which composes functions in the ‘natural’ order.
+
+### Function composition: `.` {#function-composition-. .unnumbered}
+
+![image](Pictures/compos.pdf)
+
+[funComp]
+
+Function composition is one of the simplest ways of structuring a
+program: do a number of things one after the other: each part can be
+designed and implemented separately.
+
+Haskell has the **function composition** operator over functions built
+in. The operator, which is denoted by the ‘`.`’ between the two
+functions, has the effect of ‘wiring together’ two functions: passing
+the output of one to the input of another, and it is . This is pictured
+in Figure [funComp], where the annotations of the arrows in the diagram
+indicate the types of elements involved.
+
+For any functions `f` and `g`, the effect of `f.g` is given by the
+definition
+
+`(f.g) x = f (g x)(comp.1)`
+
+Not all pairs of functions can be composed. The output of `g`, `g x`,
+becomes the input of `f`, so that the output type of `g` must equal the
+input type of `f`.
+
+Recalling the `Picture` example, we have already seen a definition of
+`rotate`:
+
+\
+`rotate :: Picture -> Picture`\
+`rotate pic = flipV (flipH pic)(rotate.1)`
+
+Using the composition operator we can say directly that `rotate` is the
+composition of `flipH` with `flipV`: like
+
+`rotate = flipV . flipH(rotate.2)`
+
+Notice that we explained the definition `(rotate.2)` as the ‘composition
+of `flipH` with `flipV`’: why that way round? We do this because `flipH`
+is the function that is applied first, with `flipV` being applied to the
+result of the first application. We are able to compose `flipH` with
+`flipV` because the output of `flipH` and the input of `flipV` are both
+of `Picture` type.
+
+In general, the constraint on which functions can be composed is
+expressed by giving ‘`.`’ the type
+
+![image](Pictures/composType.pdf)
+
+which shows that, if we call the first input `f` and the second `g`,
+
+The input of `f` and the output of `g` are of the same type: `b`.
+
+The result `f.g` has the same input type, `a`, as `g` and the same
+output type, `c`, as `f`.
+
+Composition is <span>**associative**</span>, that is `f.(g.h) ` is equal
+to `(f.g).h` for all `f`, `g` and `h`. We can therefore write `f.g.h`
+unambiguously to mean ‘do `h`, then `g`, then `f`’.[^1]
+
+### Forward composition: `>.>` {#forward-composition-. .unnumbered}
+
+The order in `f.g` is significant, and can be confusing; `(f.g)` means
+‘first apply `g` and then apply `f` to the result’, so the function that
+is applied first comes second in the composition.
+
+It is simple in Haskell to define an operator for composition which
+takes its arguments in the opposite order to ‘`.`’, like this:
+
+\
+`infixl 9 >.>`\
+\
+`(>.>) :: (a -> b) -> (b -> c) -> (a -> c)`\
+\
+`g >.> f = f . g(fcomp.1)`
+
+This definition has the effect that
+
+`(g >.> f) x = (f.g) x = f (g x)(fcomp.2)`
+
+showing that, as it were, the order of the `f` and `g` is swapped before
+the functions are applied. The `rotate` example can then be written
+
+\
+`rotate = flipH >.> flipV  `
+
+which we can read as `flipH` <span>*then*</span> `flipV`, with the
+functions being applied *from left to right*.
+
+The notation ‘`>.>`’ contains a ‘`.`’ to show that it is a form of
+composition, with the arrows showing the direction in which information
+is flowing. We will tend to use ‘`>.>`’ in situations where a number of
+functions are composed, and it is therefore tiresome to read some lines
+down the page in order to work out the effect of a function definition.
+
+### The application operator: `$` {#the-application-operator .unnumbered}
+
+We’re familiar in Haskell with how to write the application of a
+function `f` to an argument `e`: we just write `f` next to `e`, like
+this: `f e`. In other words, we **juxtapose** the function and its
+argument.
+
+We can also explicitly write down an application using the application
+operator, ‘`$`’, like this: `f $ e`. Why on earth would we want to do
+this, when we can write it without the ‘`$`’? There are two reasons that
+an explicit application gets used:
+
+-   Many Haskell programmers use ‘`$`’ as an alternative to parentheses,
+    so you may well see this in libraries that people have written.
+    Instead of writing something like
+
+    `flipV (flipH (rotate horse))`
+
+    it is possible to write:
+
+    `flipV `$\ flipH\ $` rotate horse`
+
+    with the same meaning. Arguably this is a little clearer, and it is
+    shorter! Incidentally you can see from this example that ‘`$`’ is
+    **right associative**.
+
+-   We need to use the application operator as a function, as in the
+    example
+
+    `zipWith (`
+
+    where the application operator is applied to corresponding elements
+    of the two lists.
+
+Redefine the function `printBill` from the supermarket billing exercise
+in Section [superBill] so that composition is used. Repeat the exercise
+using forward composition, `>.>`.
+
+If `id` is the polymorphic identity function, defined by `id x = x`,
+explain the behaviour of the expressions
+
+`(id.f)         (f.id)         id f`
+
+If `f` is of type `Int -> Bool`, at what instance of its most general
+type `a -> a` is `id` used in each case? What type does `f` have if
+`f id` is properly typed?
+
+Define a function `composeList` which composes a list of functions into
+a single function. You should give the type of `composeList`, and
+explain why the function has this type. What is the effect of your
+function on an empty list of functions?
+
+What is the type of the application operator, `$`?
+
+What is the result of the expression given above:
+
+`zipWith (`
+
+If `id` is the polymorphic identity function, defined by `id x = x`,
+explain the behaviour of the expressions
+
+`(id $ f)         (f $ id)         id ($)`
+
+If `f` is of type `Int -> Bool`, at what instance of its most general
+type `a -> a` is `id` used in each case? What type does `f` have if
+`f $ id` is properly typed?
+
+Expressions for functions: lambda abstractions {#exprFuns}
+----------------------------------------------
+
+Haskell definitions give us a way of defining functions, and once we
+have defined a function we can use its name to refer to it, as in the
+application
+
+`map addOne [2,3,4]`
+
+assuming that we’ve already defined
+
+`addOne x = x+1`
+
+Haskell gives us a way of writing down an expression that means ‘the
+function that adds one to a number’ directly, without having to give it
+a name. We write
+
+`x -> x+1`
+
+which we can read as saying ‘the function that takes `x` to `x+1`’, the
+initial ‘’ signalling that it’s a function. So, we can add one to all
+the numbers in the list `[2,3,4]` by writing the expression
+
+`map (x -> x+1) [2,3,4]`
+
+An expression like `(x -> x+1)` is called a *lambda abstraction*.
+
+### Examples of lambda abstractions {#examples-of-lambda-abstractions .unnumbered}
+
+Let’s take a look at some other uses of this notation now. Suppose that
+we want to take a list of functions and apply them all to a particular
+argument,
+
+`mapFuns :: [a->b] -> a -> [b]`
+
+giving a list of results. We might do this in playing a game of Rock -
+Paper - Scissors where we apply a number of different strategies to the
+current game position, and then compare the different results; we’ll
+come back to this scenario later in the chapter.
+
+We could define the function by recursion, like this:
+
+`mapFuns [] x     = []`\
+`mapFuns (f:fs) x = f x : mapFuns fs x`
+
+but in fact we can use `map` in making the definition: what we have to
+do at each element of the list (remember, each element is a function) is
+to apply it to `x`, so
+
+`mapFuns fs x = map (f -> f x) fs`
+
+What’s important to see here is that the function `(f -> f x)` depends
+on the value of `x`, and so we cannot define it as a top level function.
+We could, alternatively, define it in a `where` clause,
+
+`mapFuns fs x = map applyToX fs`\
+`               where`\
+`               applyToX f = f x`
+
+The first definition is clearer, and defines the operative function
+directly, rather than having to name and define it in a `where` clause,
+separately from where it is used; of course, either is OK, and it’s a
+matter of taste which you might use.
+
+One of the main uses of lambda abstractions is to define functions which
+are the results of functions. Let’s look at the example of the function
+
+`addNum :: Integer -> (Integer -> Integer)`
+
+The function takes an integer, 17 say, and returns a function: in this
+case the function that adds 17 to its argument. The definition says this
+directly:
+
+`addNum n = ( -> n+m)`
+
+### ‘Plumbing’ functions together {#plumbing-functions-together .unnumbered}
+
+Another example which uses a lambda abstraction is given by the
+‘plumbing’ illustrated in Figure [plumb].
+
+![image](Pictures/comp2.pdf)
+
+[plumb]
+
+The object shown is a function, whose arguments are `x` and `y`. The
+result of the function is
+
+`g (f x) (f y)`
+
+so the overall effect is to give a function which applies `f` to each of
+its (two) arguments before applying `g` to the results. Again, the
+definition states this directly:
+
+\
+`comp2 :: (a -> b) -> (b -> b -> c) -> (a -> a -> c)`\
+\
+`comp2 f g = ( y -> g (f x) (f y))`
+
+To add together the squares of `3` and `4` we can write
+
+`comp2 sq add 3 4`
+
+where `add` and `sq` have the obvious definitions.
+
+In general, a lambda abstraction is an **anonymous** version of the sort
+of function we have defined earlier. In other words, the function `f`
+defined by
+
+`f x y z = result`
+
+and the function
+
+`x y z -> result`
+
+have exactly the same effect.
+
+We shall see in the next section that partial application will make many
+definitions – including some of the functions here – more
+straightforward. On the other hand the lambda abstraction is more
+general, and thus can be used in situations when a partial application
+could not.
+
+Using a lambda abstraction, the Boolean function `not` and the built-in
+function `elem` describe a function of type Char -\> Bool which is
+`True` only on non-whitespace characters, that is those which are not
+elements of the list ` `.
+
+Define a function `total` total :: (Integer -\> Integer) -\> (Integer
+-\> Integer) so that `total f` is the function which at value `n` gives
+the total f 0 + f 1 + …+ f n You should be able to do this using
+built-in functions, rather than using recursion.
+
+Given a function `f` of type `a -> b -> c`, write down a lambda
+abstraction that describes the function of type `b -> a -> c` which
+behaves like `f` but which takes its arguments in the other order.
+Pictorially,
+
+![image](Pictures/flip.pdf)
+
+Using the last exercise, or otherwise, give a definition of the function
+flip :: (a -\> b -\> c) -\> (b -\> a -\> c) which reverses the order in
+which its function argument takes its arguments.
+
+Partial application
+-------------------
+
+In this section we’ll discover how it is possible to *partially apply*
+functions in Haskell, and what the effect of this is. Underlying the
+Haskell approach to functions is what is called the *curried*
+representation of functions, in honour of Haskell Curry; this is
+introduced in the section after this.
+
+### Introducing partial application {#introducing-partial-application .unnumbered}
+
+The function `multiply` multiplies together two arguments,
+
+`multiply :: Int -> Int -> Int`\
+`multiply x y = x*y`
+
+We can view the function as a box, with two input arrows and an output
+arrow.
+
+If we apply the function to two arguments, the result is a number; so
+that, for instance, `multiply 2 3` equals `6`.
+
+![image](Pictures/mult2.pdf)
+
+What happens if `multiply` is applied to **one** argument `2`?
+Pictorially, we have
+
+![image](Pictures/mult3.pdf)
+
+From the picture we can see that this represents a function, as there is
+still one input arrow to the function awaiting a value. This function
+will, when given the awaited argument `y`, return double its value,
+namely `2*y`.
+
+This is an example of a general phenomenon: any function taking two or
+more arguments can be **partially applied** to one or more arguments.
+This gives a powerful way of forming functions as results.
+
+### Example: the `doubleAll` function {#example-the-doubleall-function .unnumbered}
+
+To illustrate, we at the example of the function which doubles every
+element in a list of integers. The function can be defined like this:
+
+`doubleAll :: [Int] -> [Int]`\
+`doubleAll = map (multiply 2)`
+
+In this definition there are two partial applications:
+
+`multiply 2` is a function from integers to integers, given by applying
+`multiply` to one rather than two arguments;
+
+`map (multiply 2)` is a function from `[Int]` to `[Int]`, given by
+partially applying `map`.
+
+Partial application is being put to two different uses here.
+
+In the first case – `multiply 2` – the partial application is used to
+form the function which multiplies by two, and which is passed to `map`
+to form the `doubleAll` function.
+
+the second partial application – of `map` to `multiply 2` – could be
+avoided by writing the argument to `doubleAll`
+
+`doubleAll xs = map (multiply 2) xs`
+
+but it is quite possible to write a *function level* definition like
+this, and it is shorter and clearer than the definition with the
+arguments supplied.
+
+In Section [exprFuns] we saw the example of `addNum`,
+
+\
+`addNum n = ( -> n+m)`
+
+which when applied to an integer `n` was intended to return the function
+which adds `n` to its argument. With partial application we have a
+simpler mechanism, as we can say
+
+`addNum n m = n+m`
+
+since when `addNum` is applied to one argument `n` it returns the
+function adding `n` to its argument.
+
+### Partially applied operators: operator sections {#partially-applied-operators-operator-sections .unnumbered}
+
+[opsecs]
+
+The operators of the language can be partially applied, giving what are
+known as <span>**operator sections**</span>. Examples include
+
+(+2) & The function which adds two to its argument.\
+(2+) & The function which adds two to its argument.\
+(\>2) & The function which returns whether a number is greater than
+two.\
+(3:) & The function which puts the number `3` on the front of a list.\
+(++“”) & The function which puts a newline at the end of a string.\
+(“”++) & The function which puts a newline at the beginning of a
+string.\
+(\$ 3) & The function which applies its argument – which will have to be
+a function – to the integer `3`.\
+
+The general rule here is that a section of the operator `op` will put
+its argument to the side which completes the application. That is,
+
+`(op x) y = y op x`\
+`(x op) y = x op y`
+
+When combined with higher-order functions like `map`, `filter` and
+composition, the notation is both powerful and elegant, enabling us to
+make a whole lot more function-level definitions. For example,
+
+`filter (>0) . map (+1)`
+
+is the function which adds one to each member of a list, and then
+removes those elements which are not positive.
+
+### Using partial applications {#using-partial-applications .unnumbered}
+
+The partial application and operator sections is important in Haskell
+programming. We have already seen that many functions can be defined as
+<span>**specializations**</span> of general operations like `map`,
+`filter` and so on. These specializations arise by passing a function to
+the general operation – this function is often given by a partial
+application, as in the examples from the pictures case study first seen
+in Chapter [intro]:
+
+\
+`flipV  = map reverse`\
+`beside = zipWith (++)`
+
+We return to look at the `Picture` case study in greater detail in
+Section [hofPicture].
+
+More examples of partial applications will be seen throughout the
+material to come, and can be used to simplify and clarify many of the
+preceding examples. Three simple examples are the text processing
+functions we first looked at in Section [textProc]:
+
+`dropSpace = dropWhile (member whitespace)`\
+`dropWord  = dropWhile (not .`\
+`member whitespace)`\
+`getWord   = takeWhile (not .`\
+`member whitespace)`
+
+where
+
+`member xs x = elem x xs`
+
+Use partial applications to define the functions `comp2` and `total`
+given in Section [exprFuns] and its exercises.
+
+Find operator sections `` and `` so that
+
+`map  . filter `
+
+has the same effect as
+
+`filter (>0) .`\
+`map (+1)`
+
+Re-define the function `mapFuns`, first defined in Section [exprFuns],
+using an operator section of the application operator, `$`.
+
+Under the hood: curried functions
+---------------------------------
+
+Functions in Haskell are represented in **curried** form, where they
+take their arguments one at a time. This is called
+<span>**currying**</span> after Haskell Curry[^2] who was one of the
+pioneers of the $\lambda$-calculus and after whom the Haskell language
+is named. This section explains how curried functions work, and how we
+can covert to and fro between curried and uncurried form.
+
+Why are Haskell functions in curried form? A major reason is that it
+supports partial application, as explored in the previous section; it
+also gives a ‘clean’ readable form to the syntax. One reason against
+choosing a curried representation is its unfamiliarity to most
+programmers; another is discussed towards the end of the section.
+
+### Curried functions and function arguments {#curried-functions-and-function-arguments .unnumbered}
+
+Partial application can appear confusing: in some contexts functions
+appear to take one argument, and in others more than one. In fact,
+<span>*every function in Haskell takes exactly one argument*</span>.
+This is called the **curried** representation of functions.If this
+application yields a function, then this function may be applied to a
+further argument, and so on. Consider the multiplication function again.
+
+`multiply :: Int -> Int -> Int`
+
+This is shorthand for
+
+`multiply :: Int -> (Int -> Int)`
+
+and so it can therefore be applied to an integer. Doing this gives (for
+example)
+
+`multiply 2 :: Int -> Int`
+
+This can itself be applied to give
+
+`(multiply 2) 5 :: Int`
+
+which, since function application is left associative, can be written
+
+`multiply 2 5 :: Int`
+
+Our explanations earlier in the book are consistent with this full
+explanation of the system. We hid the fact that
+
+`f   … `\
+` ->  -> …  -> t`
+
+were shorthand for
+
+`( …((f ) ) … )`\
+` -> ( -> (…( -> t)…))`
+
+but this did no harm to our understanding of how to use the Haskell
+language. It is to support this shorthand that function application is
+made left associative and `->` is made right associative.
+
+### The types of partial applications {#the-types-of-partial-applications .unnumbered}
+
+How is the type of a partial application determined? There is a simple
+rule which explains it.
+
+<span>Rule of cancellation</span>
+
+> If the type of a function `f` is -\> -\> ... -\> -\> t and it is
+> applied to arguments ::, ::, …, ::
+> (where$\;$`k\leqn`)$\;$then$\;$the$\;$result$\;$type$\;$is$\;$given$\;$by$\;$<span>**cancelling**</span>$\;$the$\;$types$\;$``$\;$to 
+>
+> -\> -\> ... -\> -\> -\> ... -\> -\> t which gives the type -\> -\> ...
+> -\> -\> t
+
+For example, using this rule we can see that we get the following types
+
+`multiply 2      :: Int -> Int`\
+`multiply 2 3    :: Int`\
+`doubleAll       :: [Int] -> [Int]`\
+`doubleAll [2,3] :: [Int]`
+
+### Currying and uncurrying {#curry .unnumbered}
+
+In Haskell we have a choice of how to model functions of two or more
+arguments. For instance, a function to multiply two integers would
+normally be defined thus:
+
+\
+`multiply :: Int -> Int -> Int`\
+`multiply x y = x*y`
+
+while an <span>**uncurried**</span> version can be given by bundling the
+arguments into a pair, thus:
+
+\
+`multiplyUC :: (Int,Int) -> Int`\
+`multiplyUC (x,y) = x*y`
+
+Why do we usually opt for the curried form? There are a number of
+reasons.
+
+The notation is somewhat neater; we apply a function to a single
+argument by juxtaposing the two, `f x`, and application to two arguments
+is done by extending this thus: `g x y`.
+
+It permits partial application. In the case of multiplication we can
+write expressions like `multiply 2`, which returns a function, while
+this is not possible if the two arguments are bundled into a pair, as is
+the case for `multiplyUC`.
+
+We can in any case move between the curried and uncurried
+representations with little difficulty, and indeed we can define two
+higher-order functions which convert between curried and uncurried
+functions.
+
+Suppose first that we want to write a curried version of a function `g`,
+which is itself uncurried and of type `(a,b) -> c`.
+
+![image](Pictures/curry.pdf)
+
+This function expects its arguments as a pair, but its curried version,
+`curry g`, will take them separately – we therefore have to form them
+into a pair before applying `g` to them:
+
+`curry :: ((a,b) -> c) -> (a -> b -> c)`\
+`curry g x y = g (x,y)`
+
+`curry multiplyUC` will be exactly the same function as `multiply`.
+
+Suppose now that `f` is a curried function, of type `a -> b -> c`.
+
+![image](Pictures/uncurry.pdf)
+
+The function `uncurry f` will expect its arguments as a pair, and these
+will have to be separated before `f` can be applied to them:
+
+`uncurry :: (a -> b -> c) -> ((a,b) -> c)`\
+`uncurry f (x,y) = f x y`
+
+`uncurry multiply` will be exactly the same function as `multiplyUC`.
+The functions `curry` and `uncurry` are inverse to each other.
+
+A disadvantage of the curried representation of functions is that the
+inverse of a function like
+
+`unzip ::`\
+`([a,b]) -> ([a],[b])`
+
+is not `zip :: [a] -> [b] -> [(a,b)]` but in fact
+
+`uncurry zip :: ([a],[b]) -> [(a,b)]`
+
+(or `zip’` as we called it earlier in the book) so that statements of
+properties of these functions, such as
+
+`prop`~`z`~`ip xs = uncurry zip (unzip xs) == xs`
+
+will necessarily involve the uncurried version of the binary function,
+rather than the curried.
+
+What is the effect of `uncurry ($)`? What is its type? Answer a similiar
+question for `uncurry (:)`, `uncurry (.)`.
+
+<span>[Harder]</span> What are the effects and types of
+`uncurry uncurry`, `curry uncurry`.
+
+Can you state a property relating `unzip` and `uncurry zip`, where the
+latter is the function applied first?
+
+Can you define functions
+
+`curry3 :: ((a,b,c) -> d) -> (a -> b -> c -> d)`\
+`uncurry3 :: (a -> b -> c -> d) -> ((a,b,c) -> d)`
+
+which perform the analogue of `curry` and `uncurry` but for three
+arguments rather than two? Can you use `curry` and `uncurry` in these
+definitions?
+
+<span>[Harder]</span> Can you define functions
+
+`curryList :: ([a] -> d) -> (a -> [a] -> d)`\
+`uncurryList :: (a -> [a] -> d) -> ([a] -> d)`
+
+which perform the analogue of `curry` and `uncurry` but for a list of
+arguments rather than two distinct arguments? Can you use `curry` and
+`uncurry` in these definitions?
+
+Defining higher-order functions {#defHOFs}
+-------------------------------
+
+This section revises the different ways that we can use to define
+higher-order functions, and in particular functions that return
+functions as results. These functions are one of the features of
+functional programming not shared with most other programming languages
+that you might be familiar with, and give Haskell particular elegance
+and power.
+
+### Using the operators {#using-the-operators .unnumbered}
+
+We can use the built-in operators in defining functions directly. We
+already saw that we could define forward composition in terms of
+composition,
+
+`f >.> g = g.f`
+
+We also saw this in action in the definition of `rotate` from the
+`Picture` case study:
+
+\
+`rotate :: Picture -> Picture`\
+`rotate = flipV . flipH`
+
+where again the function is defined directly as the *composition* of two
+other functions. The meaning of this definition is just the same as one
+which has explicit arguments:
+
+\
+`rotate pic = flipV (flipH pic)`
+
+but the earlier definition is clearer to read and to modify; we see
+*explicitly* that the definition is a composition of two functions,
+rather than having to see it as a consequence of the way the right-hand
+side is defined in the latter equation.
+
+More importantly, if we state a definition in this form, then we can
+apply properties of ‘`.`’ in analysing how `rotate` behaves. This means
+that in proofs we are able to use properties of composition, as well as
+being able to see examples of program transformations which will apply
+because of the form of composition involved. In general these remarks
+will apply to all higher-order, polymorphic functions, and we see
+examples of this in Section [verifGen] below.
+
+Let’s look at some more examples which use composition in their
+definitions: the simplest is this:
+
+`twice f = f.f (twice.1)`
+
+`f` is a function, and the result is `f` composed with itself. For this
+to work, it needs to have the same input and output type, so we have
+
+`twice :: (a -> a) -> (a -> a)`
+
+This states that `twice` takes one argument, a function of type
+`(a -> a)`, and returns a result of the same type. For instance, if
+`succ` is the function to add one to an integer,
+
+`succ :: Integer -> Integer`\
+`succ n = n+1`
+
+then applying `twice` to it gives the example
+
+`(twice succ) 12`\
+` (succ.succ) 12  `<span>` by`</span>` (twice.1)`\
+` succ (succ 12)  `<span>` by definition of `</span>` .`\
+` 14`
+
+We can generalize `twice` so that we pass a parameter giving the number
+of times the functional argument is to be composed with itself
+
+`iter :: Integer -> (a -> a) -> (a -> a)`\
+\
+`iter n f `\
+`  | n>0         = f . iter (n-1) f(iter.1)`\
+`  | otherwise   = id(iter.2)`
+
+This is a standard primitive recursion over the integer argument; in the
+positive case we take the composition of `f` with itself `n-1` times and
+compose once more with `f`. In the zero case we apply `f` no times, so
+the result is a function which returns its argument unchanged, namely
+`id`.
+
+As an example of using `iter`, we can define `` as `iter n double 1`, if
+`double` doubles its argument.
+
+Give calculations of iter 3 double 1 (comp2 succ (\*)) 3 4 comp2 sq add
+3 4
+
+What is the type and effect of the function
+
+` -> iter n succ`
+
+Give an alternative “constructive” definition of `iter` which creates
+the list of `n` copies of `f`
+
+`[f,f,...,f]`
+
+and then composes these functions by folding in the operator ‘`.`’ to
+give
+
+`f . f . …`\
+`. f`
+
+### Using local definitions {#using-local-definitions .unnumbered}
+
+Local definitions allow us to define functions as a subsidiary part of a
+function definition. We looked earlier at the example of
+
+`addNum :: Integer -> Integer -> Integer`
+
+We can use a local definition to give the result, either using a `where`
+
+`addNum n = addN`\
+`           where`\
+`           addN m = n+m`
+
+or a `let`
+
+`addNum n = let `\
+`             addN m = n+m`\
+`           in`\
+`             addN`
+
+This gives us a way of defining results which are functions by locally
+defining that function and returning it as the result; it has the
+advantage of not requiring any more advanced machinery, but the
+disadvantage of introducing a named definition of `addN` which is
+extraneous to the actual result.
+
+### Lambda abstractions {#lambda-abstractions .unnumbered}
+
+Let’s try to define a function that takes a binary function as argument,
+and which returns a binary function that takes its arguments in the
+opposite order; let’s call it `flip`:
+
+`flip :: (a -> b -> c) -> (b -> a -> c)`
+
+We can use a lambda abstraction to give the result:
+
+`flip f = x y -> f y x(flip.1)`
+
+This makes clear that a function like `flip map` takes as its first
+argument the list and as its second the function to be mapped; it can
+then be partially applied to its first argument, having the effect of
+applying `map` to its second only. This allows us to do a partial
+application to the second argument of a two argument function.
+
+### Partial application {#partial-application-1 .unnumbered}
+
+Partial applications give us a particularly direct way of defining some
+higher order functions. Taking the example we have just looked at, we
+can instead say
+
+\
+`flip f x y = f y x`
+
+If we apply `flip` to one argument, we have a function which behaves
+just as described in `(flip.1)`. Similarly, the behaviour of
+
+`addNum n = addN`\
+`           where`\
+`           addN m = n+m`
+
+is given by the simple definition
+
+`addNum n m = n+m`
+
+partially applied to `n`.
+
+### Examples {#examples .unnumbered}
+
+We conclude this section by exploring how partial applications and
+operator sections can be used to simplify and shorten definitions in a
+number of other examples. Often it is possible to avoid giving an
+explicit function definition if we can use a partial application to
+return a function. Revisiting the examples of Chapter [defFunLists] we
+see that to double all the elements in a list we can write
+
+`doubleAll :: [Int] -> [Int]`\
+`doubleAll = map (*2)`
+
+using an operator section `(*2)` to replace the `double` function, and
+giving the function definition directly by partially applying `map`.
+
+To filter out the even elements in a numerical list, we have to check
+whether the remainder on dividing by two is equal to zero. As a function
+we can write
+
+`` (==0).(`mod` 2) ``
+
+This is the composition of two operator sections: first find the
+remainder on dividing by two, then check if it is equal to zero. (Why
+can we not write `` (`mod` 2 == 0) ``?) The filtering function can then
+be written
+
+\
+`getEvens :: [Int] -> [Int]`\
+`` getEvens = filter ((==0).(`mod` 2)) ``
+
+Our final example comes from the list splitting study. We defined
+
+`getWord xs `\
+`  = getUntil p xs`\
+`    where `\
+`    p x = elem x whitespace`
+
+The local definition is not now needed, as we can define the function
+`p` by an operator section:
+
+\
+`` getWord xs = getUntil (`elem` whitespace) xs ``
+
+Note the way that we partially apply a function to its
+<span>*second*</span> argument, by forming an operator section. This
+works because
+
+`` (`elem` whitespace) x ``\
+`` = x `elem` whitespace ``\
+`= elem x whitespace`
+
+as required.
+
+Finally, the function `getWord` can itself be given a direct definition,
+by partial application thus
+
+`` getWord = getUntil (`elem` whitespace) ``
+
+This definition reads like an informal explanation – to get a word, get
+characters until a whitespace character is found.
+
+Using partial application re-define the function
+
+`mapFuns :: [a->b] -> a -> [b]`
+
+first defined in Section [exprFuns].
+
+<span>[Harder]</span> Define a function slope :: (Float -\> Float) -\>
+(Float -\> Float) which takes a function `f` as argument, and returns
+(an approximation to) its derivative `f’` as result.
+
+<span>[Harder]</span> Define a function integrate :: (Float -\> Float)
+-\> (Float -\> Float -\> Float) which takes a function `f` as argument,
+and returns (an approximation to) the two argument function which gives
+the area under its graph between two end points as its result.
+
+Verification and general functions
+----------------------------------
+
+[verifGen]
+
+Verification can take on a different character when we look at
+higher-order polymorphic functions. We can start to prove equalities
+between functions, rather than between values of functions, and we shall
+also see that we are able to prove theorems which resemble their
+subjects in being general and reusable, and so applicable in many
+contexts.
+
+### Function-level verification {#function-level-verification .unnumbered}
+
+We claimed in Section [defHOFs] that the function `iter` is a
+generalization of `twice`, since
+
+\
+`iter 2 f`\
+`  = f . iter 1 f `<span>` by`</span>` (iter.1)`\
+`  = f . (f . iter 0 f) `<span>` by`</span>` (iter.1)`\
+`  = f . (f . id) `<span>` by`</span>` (iter.2)`\
+`  = f . f `<span>` by`</span>` (compId)`\
+`  = twice f `<span>` by`</span>` (twice.1)`
+
+In proving this we have used the equality between two functions
+
+`f . id = f  ``(compId)`
+
+How is this proved? We examine how each side behaves on an arbitrary
+argument `x`
+
+`(f . id) x`\
+`  = f (id x)`\
+`  = f x`
+
+so that for any argument `x` the two functions have the same behaviour.
+As black boxes, they are therefore the same. As what interests us here
+is their behaviour, we say that they are equal. We call this ‘black-box’
+concept of equality **extensional**.
+
+<span>Principle of extensionality:</span>
+
+Two functions `f` and `g` are equal if they have the same value at every
+argument.
+
+This is called extensionality in contrast to the idea of
+**intensionality** in which we say two functions are the same only if
+they have the same definitions – we no longer think of them as black
+boxes; we are allowed to look inside them to see how the mechanisms
+work, as it were. If we are interested in the results of our programs,
+all that matters are the values given by functions, not how they are
+arrived at. We therefore use extensionality when we are reasoning about
+function behaviour in Haskell. If we are interested in **efficiency** or
+other performance aspects of programs, then the way in which a result is
+found <span>*will*</span> be significant, however. This is discussed
+further in Chapter [behaviour].
+
+Using the principle of extensionality, show that function composition is
+associative: that is, for all `f`, <span>g</span> and `h`,
+
+`f . (g . h) = (f . g) . h`
+
+Show that for all `f`,
+
+`id . f = f`
+
+Show that the function `flip` defined in Section [curry] satisfies
+
+`flip . flip = id`
+
+Hint: to show this, you might want to prove that for any `f`,
+
+`flip (flip f) = f`
+
+Two functions `f` and `g` are **inverses** if it can be shown that
+
+`f . g = id              g . f = id`
+
+Prove that the functions `curry` and `uncurry` of Section [curry] are
+inverses. Can you think of other pairs of inverse functions?
+
+Using induction, prove that for all natural numbers `n`,
+
+`iter n id = id`
+
+A function `f` is called **idempotent** if
+
+`f . f = f`
+
+Show that the functions `abs` and `signum` are idempotent. Can you think
+of any other idempotent functions?
+
+### Higher-level proofs {#higher-level-proofs .unnumbered}
+
+Our verification thus far has concentrated on first-order, monomorphic
+functions. Just as `map`, `filter` and `fold` generalize patterns of
+definition, we shall find that proofs about these functions generalize
+results we have seen already. To give some examples, it is not hard to
+prove that
+
+`doubleAll (xs++ys) = doubleAll xs ++ doubleAll ys`
+
+holds for all finite lists `xs` and `ys`. When `doubleAll` is defined as
+`map (*2)` it becomes clear that we have an example of a general result,
+
+\
+`map f (xs++ys) = map f xs ++ map f ys(map++)`
+
+which is valid for <span>*any*</span> function `f`. We also claimed in
+an earlier exercise that
+
+`sum (xs++ys) = sum xs + sum ys (sum.3)`
+
+for all finite lists `xs`, `ys`. The function `sum` is given by folding
+in `(+)`,
+
+\
+`sum = foldr (+) 0`
+
+and we have, generally, if `f` is associative, and `st` is an identity
+for `f`, that is,
+
+`[assocId]`\
+`` x `f` (y `f` z) = (x `f` y) `f` z ``\
+`` x `f` st = x = st `f` x ``
+
+for all `x`, `y`, `z` then the equation
+
+`foldr f st (xs++ys) = f (foldr f st xs) (foldr f st ys) (foldr.3)`
+
+holds for all finite `xs` and `ys`. Obviously `(+)` is associative and
+has `0` as an identity, and so `(sum.3)` is a special case of
+`(foldr.3)`. Now we give three proofs of examples in the same vein.
+
+### `map` and composition {#map-and-composition .unnumbered}
+
+A first example concerns `map` and composition. Recall the definitions
+
+`map f []     = []  (map.1)`\
+`map f (x:xs) = f x : map f xs (map.2)`\
+`(f . g) x    = f (g x) (comp.1)`
+
+It is not hard to see that we should be able to prove that
+
+`map (f . g) xs = (map f . map g) xs  (map.3)`
+
+holds for every finite list `xs`.
+
+![image](Pictures/mapComp.pdf)
+
+Applying `(f . g)` to every member of a list should be the same as
+applying `g` to every member of the list and then applying `f` to every
+member of the result. It is proved just as easily, by structural
+induction. The `(base)` case requires the identity to be proved for the
+empty list.
+
+`map (f . g) [] = []  `<span>` by`</span>` (map.1)`\
+\
+`(map f . map g) [] `\
+`  = map f (map g [])  `<span>` by`</span>` (comp.1)`\
+`  = map f []  `<span>` by`</span>` (map.1)`\
+`  = []  `<span>` by`</span>` (map.1)`
+
+Assuming that
+
+`map (f .`\
+`g) xs = (map f .`\
+`map g) xs(hyp)`
+
+is true, it is now necessary to prove that
+
+`map (f . g) (x:xs) = (map f . map g) (x:xs)(ind)`
+
+Again, it is enough to analyse each side of the equation.
+
+`map (f . g) (x:xs) `\
+`  = (f . g) x : map (f . g) xs  `<span>` by`</span>` (map.2)`\
+`  = f (g x) : map (f . g) xs  `<span>` by`</span>` (comp.1)`\
+\
+`(map f . map g) (x:xs) `\
+`  = map f (map g (x:xs))  `<span>` by`</span>` (comp.1)`\
+`  = map f (g x : map g xs)  `<span>` by`</span>` (map.2)`\
+`  = f (g x) : map f (map g xs)  `<span>` by`</span>` (map.2)`\
+`  = f (g x) : (map f . map g) xs  `<span>` by`</span>` (comp.1)`
+
+The induction hypothesis is exactly what is needed to prove the two
+sides equal, completing the proof of the induction step and the proof
+itself.
+
+Each Haskell list type, besides containing finite lists, also contains
+infinite and partial lists. In Chapter [lazy] these will be explained
+and it will be shown that `(map.3)` is true for <span>*all*</span> lists
+`xs`, and therefore that the functional equation
+
+`map (f . g) = (map f) . (map g)`
+
+holds in general.
+
+### `map` and `filter` {#map-and-filter .unnumbered}
+
+The proof above showed how properties of functional programs could be
+proved from the definitions of the functions in a straightforward way.
+The properties can state how the program behaves – that a sorting
+function returns an ordered list, for instance – or can relate one
+program to another. This latter idea underlies **program
+transformation** for functional languages. This section introduces an
+example called **filter promotion** which is one of the most useful of
+the basic functional transformations.
+
+`filter p . map f = map f . filter (p . f)(filter/map)[filterMap]`
+
+The equation says that a `map` followed by a `filter` can be replaced by
+a `filter` followed by a `map`. The right-hand side is potentially more
+efficient than the left, since the `map` operation will there be applied
+to a shorter list, consisting of just those elements with the property
+`(p . f)`. An example is given by the function first defined in Section
+[opsecs].
+
+`filter (0<) . map (+1)`
+
+Instead of mapping first, the function can be replaced by
+
+`map (+1) . filter ((0<) . (+1))`\
+` = map (+1) . filter (0<=)`
+
+and it is clear that here the transformed version is more efficient,
+since the test `(0<=)` is no more costly than `(0<)`. The proof that
+
+`(filter p . map f) xs = (map f . filter (p . f)) xs`
+
+for finite lists `xs` is by structural induction. First we reiterate the
+definitions of `map`, `filter` and <span>composition</span>.
+
+`map f []        = []  (map.1)`\
+`map f (x:xs)    = f x : map f xs (map.2)`\
+\
+`filter p []     = [] (filter.1)`\
+`filter p (x:xs) `\
+`  | p x         = x : filter p xs (filter.2)`\
+`  | otherwise   =     filter p xs (filter.3)`\
+\
+`(f . g) x       = f (g x) (comp.1)`
+
+The base case consists of a proof of
+
+`(filter p . map f) [] = (map f . filter (p . f)) []  (base)`
+
+This is true since
+
+`(filter p . map f) []`\
+`  = filter p (map f [])  `<span>` by`</span>` (comp.1)`\
+`  = filter p []  `<span>` by`</span>` (map.1)`\
+`  = []  `<span>` by`</span>` (filter.1)`
+
+and
+
+`(map f . filter (p . f)) []`\
+`  = map f (filter (p . f) [])   `<span>` by`</span>` (comp.1)`\
+`  = map f []   `<span>` by`</span>` (filter.1)`\
+`  = []   `<span>` by`</span>` (map.1)`
+
+In the induction step, a proof of
+
+`(filter p . map f) (x:xs) = (map f . filter (p . f)) (x:xs)  (ind)`
+
+is required, using the induction hypothesis
+
+`(filter p . map f) xs = (map f . filter (p . f)) xs  (hyp)`
+
+The proof begins with an analysis of the left-hand side of `(ind)`.
+
+`(filter p . map f) (x:xs)`\
+`  = filter p (map f (x:xs))   `<span>` by`</span>` (comp.1)`\
+`  = filter p (f x : map f xs)  `<span>` by`</span>` (map.2)`
+
+There are two[^3] cases to consider: whether `p (f x)` is `True` or
+`False`. Taking the case where `p (f x)` is `True`, we continue to
+examine the left-hand side of `(ind)`, giving
+
+`  = f x : filter p (map f xs)   `<span>` by`</span>` (filter.2)`\
+`  = f x : (filter p . map f) xs  `<span>` by`</span>` (comp.1)`\
+`  = f x : (map f . filter (p . f)) xs  `<span>` by`</span>` (hyp)`
+
+Now we look at the right-hand side of `(ind)`, also assuming that
+`p (f x)` is `True`:
+
+`(map f . filter (p . f)) (x:xs) `\
+`  = map f (filter (p . f) (x:xs)) `<span>` by`</span>` (comp.1) `\
+`  = map f (x: (filter (p . f) xs)) `<span>` by`</span>` (filter.2) `\
+`  = f x : map f (filter (p . f) xs) `<span>` by`</span>` (map.2)`\
+`  = f x : (map f . filter (p . f)) xs  `<span>` by`</span>` (comp.1)`
+
+which shows that `(ind)` holds in the case that `p (f x)` is `True`.
+
+A similar chain of reasoning gives the same result in the case where
+`p (f x)` is `False`. This establishes `(ind)` assuming `(hyp)`, and so
+together with `(base)` completes the proof of the filter promotion
+transformation in the case of finite lists; it holds, in fact, for all
+lists.
+
+[QChofs]We’ve already seen that QuickCheck is a very good way of
+checking whether particular properties hold for functions that we
+define. QuickCheck works by generating random test data and checking
+whether properties hold at these values. While generating data is not
+entirely straightforward for structured types like lists and algebraic
+types, it can be done. Generating random functions is more difficult,
+and isn’t supported “out of the box” by QuickCheck: for it to work we
+need to be able to “show” functions. We examine how to do this, and so
+how to use QuickCheck to test properties involving higher-order
+functions, in Chapter [dsls]. In the meantime we look at how to check
+properties for given functions and randomly-generated lists.
+
+Let’s take the example of the property for `map` and `filter`,
+`(filter/map)` introduced on page :
+
+`prop`~`m`~`f p f = `\
+\
+\
+\
+\
+\
+`xs -> (filter p . map f) xs == (map f . filter (p . f)) xs`
+
+We can check this for specific values of `p` and `f` like this
+
+*`Prompt>`*` quickCheck (prop`~`m`~`f (>0) (x -> x*x))`\
+\
+*`+++ OK, passed 100 tests.`*\
+\
+*`Prompt>`*` quickCheck (prop`~`m`~`f (>=0) (x -> x*x*x))`\
+\
+*`+++ OK, passed 100 tests.`*
+
+where for each instance of `p` and `f` the property is tested for 100
+randomly generated values.
+
+### `map`, `reverse` and the `Picture` case study {#map-reverse-and-the-picture-case-study .unnumbered}
+
+When we introduced the `Picture` case study in Chapter [intro] we
+claimed that we could prove that `flipV` and `flipH` can be applied in
+either order to give the same result. Our implementation defines them
+thus
+
+\
+`flipH = reverse`\
+`flipV = map reverse`
+
+and we can see informally that
+
+-   `reverse` affects the order of the elements, while leaving the
+    elements unchanged;
+
+-   `map reverse` affects each of the elements, while keeping their
+    order the same.
+
+The second observation is a consequence of the function being a `map`,
+and so we make the more general claim that for all finite lists `xs` and
+all functions `f`,
+
+`map f (reverse xs) = reverse (map f xs)(map/reverse)`
+
+This has the consequence that
+
+`flipV (flipH xs) = flipH (flipV xs)`
+
+if we replace `f` in `(map/reverse)` by `reverse`. We will see in
+Chapter [lazy] that we can establish `(map/reverse)` for all lists `xs`
+and so conclude that the functional equations hold:
+
+`map f . reverse = reverse . map f`\
+`flipV . flipH   = flipH . flipV`
+
+We now prove `(map/reverse)` by induction over `xs`.
+
+We have seen the definition of `map` in the previous examples; `reverse`
+is defined thus.
+
+`reverse []     = [](reverse.1)`\
+`reverse (z:zs) = reverse zs ++ [z](reverse.2)`
+
+###### Statement
+
+We first have to prove the base case:
+
+`map f (reverse []) = reverse (map f [])(base)`
+
+and then we need to prove the induction step,
+
+`map f (reverse (x:xs)) = reverse (map f (x:xs))(ind)`
+
+assuming the induction hypothesis:
+
+`map f (reverse xs) = reverse (map f xs)(hyp)`
+
+###### Base
+
+Looking at the two sides of the base case in turn, we have
+
+`map f (reverse [])`\
+`  = map f []  `<span>` by`</span>` (reverse.1)`\
+`  = []  `<span>` by`</span>` (map.1)`\
+\
+`reverse (map f [])`\
+`  = reverse []  `<span>` by`</span>` (map.1)`\
+`  = []  `<span>` by`</span>` (reverse.1)`
+
+and this shows that the two sides of the base case equation have the
+same value, and so we move on to the induction case.
+
+###### Induction
+
+We start by examining the left-hand side of `(ind)`:
+
+`map f (reverse (x:xs)) `\
+`  = map f (reverse xs ++ [x]) `<span>` by`</span>` (reverse.2)`
+
+Now, it is not hard to prove that
+
+`map f (ys++zs) = map f ys ++ map f zs (map++)`
+
+(we leave this proof as an exercise for the reader) and using `(map++)`
+we can continue to simplify the left-hand side
+
+`  = map f (reverse xs) ++ map f [x]  `<span>` by`</span>` (map++)`\
+`  = map f (reverse xs) ++ [f x]   `<span>` by`</span>` (map.1),(map.2)`
+
+Using the induction hypothesis, we can make one more step,
+
+`  = reverse (map f xs) ++ [f x] `<span>` by`</span>` (hyp)`
+
+Now looking at the right-hand side,
+
+`reverse (map f (x:xs))`\
+`  = reverse (f x : map f xs)  `<span>` by`</span>` (map.2)`\
+`  = reverse (map f xs) ++ [f x] `<span>` by`</span>` (reverse.2) `
+
+and now we see that the two sides are equal, which establishes the
+induction step and so completes the proof.
+
+### Libraries of theorems {#libraries-of-theorems .unnumbered}
+
+We have seen in this section that we can prove properties of general
+functions like `map`, `filter` and `foldr`. This means that when we
+define a function which uses `map`, say, we can call on a whole library
+of properties of `map`, including, for all finite `xs` and `ys`:
+
+`map (f . g) xs        = (map f . map g) xs`\
+`(filter p . map f) xs = (map f . filter (p . f)) xs`\
+`map f (reverse xs)    = reverse (map f xs)`\
+`map f (ys++zs)        = map f ys ++ map f zs`
+
+We have seen that using the general functions `map`, `filter` and others
+allowed us to make direct definitions of new functions rather than
+having to define them ‘from scratch’ using recursion. In exactly the
+same way, these general theorems will mean that in many cases we can
+avoid writing an induction proof about our specific function, and
+instead simply use one of these theorems.
+
+Prove that for all `ys` and `zs` the equation
+
+`map f (ys++zs) = map f ys ++ map f zs (map++)`
+
+as was used in the proof of the theorem about `map` and `reverse`.
+
+If `f` is associative, and `st` is an identity for <span>f</span> –
+these notions were defined on page – then prove that the equation
+`(foldr.3)`:
+
+`foldr f st (xs++ys) = f (foldr f st xs) (foldr f st ys)`
+
+holds for all finite `xs` and `ys`.
+
+Argue that the result
+
+`concat (xs ++ ys) = concat xs ++ concat ys`
+
+is a special case of `(foldr.3)`, using
+
+`concat = foldr (++) []`
+
+as the definition of `concat`.
+
+Prove that for all finite lists `xs`, and functions `f`,
+
+`concat (map (map f) xs) = map f (concat xs)`
+
+Prove that over the type `Int`
+
+`(0<) . (+1) = (0<=)`
+
+as is used in the theorem relating `map` and `filter`.
+
+Prove for all finite lists `xs` that
+
+`filter p (filter q xs) = filter (p &&& q) xs`
+
+where the operator `&&&` is defined by
+
+`p &&& q =  -> (p x && q x)`
+
+We have seen in this chapter how we can write functions with functions
+as results. This means that we can create the functions by applying
+operations like `map`, `filter` and `foldr` within our programs, and
+that we can indeed treat functions as ‘first-class citizens’ of our
+programming language. A consequence of this has been that we are able to
+explain the definitions of some of the `Picture` operations first seen
+in Chapter [intro].
+
+The main mechanisms introduced here have allowed us to create functions
+by applying functions or operators to fewer arguments than we expected,
+thus creating partial applications and operator sections. We also saw
+how the Haskell-type system and syntax were adapted to deal with the
+curried form of function definitions, by which multi-argument functions
+take their arguments one at a time.
+
+We concluded by showing that we could prove general properties about
+general functions like `map`, and thus build up libraries of results
+about these functions which can potentially be applied whenever the
+general function is reused.
+
+[^1]: For technical reasons, the ‘`.`’ is treated as right associative
+    in the Haskell standard prelude.
+
+[^2]: In fact the first person to describe the idea was Schönfinkel, but
+    ‘Schönfinkeling’ does not sound so snappy!
+
+[^3]: We should also think about what happens when <span>p (f x)</span>
+    is undefined; in this case both sides will be undefined, and so
+    equal.

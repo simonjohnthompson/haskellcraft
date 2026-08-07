@@ -1,0 +1,158 @@
+Only in Craft3e-0.1.0.10: .stack-work
+diff -ur Craft3e-0.1.0.10-orig/Calculator/CalcParseLib.hs Craft3e-0.1.0.10/Calculator/CalcParseLib.hs
+--- Craft3e-0.1.0.10-orig/Calculator/CalcParseLib.hs	2015-10-16 23:18:40.000000000 -0400
++++ Craft3e-0.1.0.10/Calculator/CalcParseLib.hs	2015-10-16 23:12:38.000000000 -0400
+@@ -14,6 +14,7 @@
+ 
+ module CalcParseLib where
+ 
++import Control.Monad (liftM, ap)
+ import Data.Char
+ 
+ infixr 5 >*>
+@@ -127,3 +128,10 @@
+   fail s   = SParse none
+   (SParse pr) >>= f 
+     = SParse (\st -> concat [ sparse (f x) rest | (x,rest) <- pr st ])
++
++instance Applicative (SParse a) where
++  pure = return
++  (<*>) = ap
++
++instance Functor (SParse a) where
++  fmap = liftM
+diff -ur Craft3e-0.1.0.10-orig/Chapter18.hs Craft3e-0.1.0.10/Chapter18.hs
+--- Craft3e-0.1.0.10-orig/Chapter18.hs	2015-10-16 23:18:40.000000000 -0400
++++ Craft3e-0.1.0.10/Chapter18.hs	2015-10-16 23:17:18.000000000 -0400
+@@ -13,10 +13,11 @@
+ 
+ import Prelude hiding (lookup)
+ import System.IO 
++import Control.Monad (liftM, ap)
+ import Control.Monad.Identity
+ import Chapter8 (getInt)
+ import Data.Time
+-import System.Locale
++import System.Locale hiding (defaultTimeLocale)
+ import System.IO.Unsafe (unsafePerformIO)
+ 
+ -- Programming with monads
+@@ -224,6 +225,13 @@
+                      in
+                      trans newTab)
+ 
++instance Applicative (State a) where
++  pure = return
++  (<*>) = ap
++
++instance Functor (State a) where
++  fmap = liftM
++
+ 
+ -- Example: Monadic computation over trees
+ -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+diff -ur Craft3e-0.1.0.10-orig/Chapter7.hs Craft3e-0.1.0.10/Chapter7.hs
+--- Craft3e-0.1.0.10-orig/Chapter7.hs	2015-10-16 23:18:40.000000000 -0400
++++ Craft3e-0.1.0.10/Chapter7.hs	2015-10-16 23:17:56.000000000 -0400
+@@ -17,7 +17,7 @@
+ -- standard Prelude. They are repeated in this file, and so the original
+ -- definitions have to be hidden when the Prelude is imported:
+ 
+-import Prelude hiding (id,head,tail,null,sum,concat,(++),zip,take,getLine)
++import Prelude hiding (Word,id,head,tail,null,sum,concat,(++),zip,take,getLine)
+ import qualified Prelude
+ 
+ import Chapter5 (digits,isEven) 
+diff -ur Craft3e-0.1.0.10-orig/Chapter8.hs Craft3e-0.1.0.10/Chapter8.hs
+--- Craft3e-0.1.0.10-orig/Chapter8.hs	2015-10-16 23:18:40.000000000 -0400
++++ Craft3e-0.1.0.10/Chapter8.hs	2015-10-16 23:16:11.000000000 -0400
+@@ -11,7 +11,7 @@
+ module Chapter8 where
+ 
+ import Data.Time
+-import System.Locale
++import System.Locale hiding (defaultTimeLocale)
+ import System.IO.Unsafe
+ import System.IO
+ import Test.QuickCheck
+diff -ur Craft3e-0.1.0.10-orig/Craft3e.cabal Craft3e-0.1.0.10/Craft3e.cabal
+--- Craft3e-0.1.0.10-orig/Craft3e.cabal	2015-10-16 23:18:40.000000000 -0400
++++ Craft3e-0.1.0.10/Craft3e.cabal	2015-10-16 23:08:36.000000000 -0400
+@@ -40,7 +40,7 @@
+     QuickCheck >= 2.1 && < 3,
+     old-locale == 1.0.*,
+     time >= 1.1 && < 2.0,
+-    mtl >= 1.1 && < 2.2,
++    mtl >= 1.1 && < 2.3,
+     HUnit == 1.2.*
+   
+   exposed-modules:
+diff -ur Craft3e-0.1.0.10-orig/Index.hs Craft3e-0.1.0.10/Index.hs
+--- Craft3e-0.1.0.10-orig/Index.hs	2015-10-16 23:18:40.000000000 -0400
++++ Craft3e-0.1.0.10/Index.hs	2015-10-16 23:18:16.000000000 -0400
+@@ -12,6 +12,7 @@
+ 
+ module Index where
+ 
++import Prelude hiding (Word)
+ import Chapter11 ((>.>))
+ import qualified Chapter7
+ 
+@@ -116,4 +117,4 @@
+ shorten 
+   = filter sizer 
+     where
+-    sizer (nl,wd) = length wd > 3
+\ No newline at end of file
++    sizer (nl,wd) = length wd > 3
+diff -ur Craft3e-0.1.0.10-orig/ParseLib.hs Craft3e-0.1.0.10/ParseLib.hs
+--- Craft3e-0.1.0.10-orig/ParseLib.hs	2015-10-16 23:18:40.000000000 -0400
++++ Craft3e-0.1.0.10/ParseLib.hs	2015-10-16 23:15:52.000000000 -0400
+@@ -13,6 +13,7 @@
+ 
+ module ParseLib where
+ 
++import Control.Monad (liftM, ap)
+ import Data.Char
+ 
+ infixr 5 >*>
+@@ -125,6 +126,13 @@
+   (SParse pr) >>= f 
+     = SParse (\st -> concat [ sparse (f a) rest | (a,rest) <- pr st ])
+ 
++instance Applicative (SParse a) where
++  pure = return
++  (<*>) = ap
++
++instance Functor (SParse a) where
++  fmap = liftM
++
+ sparse :: SParse a b -> Parse a b
+ 
+ sparse (SParse pr) = pr
+diff -ur Craft3e-0.1.0.10-orig/RPS.hs Craft3e-0.1.0.10/RPS.hs
+--- Craft3e-0.1.0.10-orig/RPS.hs	2015-10-16 23:18:40.000000000 -0400
++++ Craft3e-0.1.0.10/RPS.hs	2015-10-16 23:14:44.000000000 -0400
+@@ -9,7 +9,7 @@
+ module RPS where
+ 
+ import Data.Time
+-import System.Locale
++import System.Locale hiding (defaultTimeLocale)
+ import System.IO.Unsafe
+ import System.IO
+ import Test.QuickCheck
+diff -ur Craft3e-0.1.0.10-orig/UseMonads.hs Craft3e-0.1.0.10/UseMonads.hs
+--- Craft3e-0.1.0.10-orig/UseMonads.hs	2015-10-16 23:18:40.000000000 -0400
++++ Craft3e-0.1.0.10/UseMonads.hs	2015-10-16 23:13:13.000000000 -0400
+@@ -2,9 +2,6 @@
+ 
+ import Control.Monad.Identity
+ 
+-instance Show a => Show (Identity a) where
+- show (Identity x) = show x
+-
+ example1 = do { x <- [1,2]; y<-[3,4]; return (x+y)}
+ 
+ example2 = do { x <- Just 1; y<- Just 2; return (x+y)}
+Only in Craft3e-0.1.0.10: stack.yaml

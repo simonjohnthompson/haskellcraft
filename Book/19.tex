@@ -1,0 +1,864 @@
+\chapter{Domain-Specific Languages}
+\chapstart
+\label{dsls}\index{DSL|(}
+
+One area where Haskell has been particularly successful is in building implementations of domain-specific languages (DSLs). Haskell algebraic types give a straightforward representation of language structure, and the rich collection of types, including functions as data, give us great flexibility in modelling phenomena, as we saw, for instance, with strategies in Rock - Paper - Scissors being modelled as functions. Moreover monads provide an additional expressive power.
+
+This chapter first looks at what DSLs are, and why they are important. We then ask what it means to be a DSL in Haskell, and cover the different approaches to writing Haskell DSLs, both as combinator libraries and as monadic languages. We also discuss different types of embedding -- shallow and deep -- and contrast how these approaches apply in particular case studies, including pictures and regular expressions. We also revisit QuickCheck as a DSL for generating random data. We conclude by looking at a number of examples of practical Haskell DSLs.
+
+\section{Programming languages everywhere}
+
+In using computers, we are at every point using programming languages.\index{programming language}
+\begin{itemize}
+\item
+As a programmer, we'll solve problems by writing programs in programming languages.
+\item 
+To use our program we need to run it, and to run a program on hardware, like an intel chip, we need to translate the high-level program into machine code that that chip can execute. A compiler like GHC works by successively transforming a source program written in Haskell into Haskell Core, a stripped-down functional programming language, then into STG, code for an abstract machine. Finally, via C-{}-, a C variant designed as `high-level machine code', programs in C, LLVM and machine code are the output, as illustrated in Figure \ref{GHClanguages}.\index{GHC!languages within}
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=4in]{Pictures/GHClanguages.pdf}
+\end{center}
+\caption{Languages in the Glasgow Haskell Compiler}
+\label{GHClanguages}
+\end{figure}
+\item
+Network communications work through `stacks' of protocols, each layer in the stack can be programmed using the services provided by the one below: effectively we have `languages all the way down'\footnote{See the entry for "Turtles all the way down" in Wikipedia.} to the hardware providing the communication.
+\item
+In some cases the hardware itself will be programmable: a field-programmable gate array (FPGA) is a chip designed to be programmed after manufacture; all other hardware will have been designed and configured in a variety of programming languages, including VHDL and Lava.
+\end{itemize}
+
+\subsection*{Domain-specific languages}
+
+Haskell, Java, C, C\# and so forth are \emph{general purpose programming languages}: in principle we can program anything we like in Haskell, Java or C. Other languages are designed to work in particular application areas: we call these \textbf{domain-specific languages} or DSLs. Let's look at some examples.\index{DSL!examples}
+\begin{itemize}
+\item
+VHDL and Lava are DSLs for hardware design: instead of data types for strings, lists and so forth, the languages have data types representing transistors, logic gates, signals and so on. The results of processing them are circuit designs and layouts, to be fed to fabricators.
+\item
+This book is being written using LaTeX, a text processing language. I write commands to express layout and other configurations and these, together with pictures (see below), get processed into a PDF file. PDF itself is a low-level language that also gets processed into bitmaps (on a display of some sort) or marks on paper (by printing).
+\item
+Images can be described in `little languages'. The Scalable Vector Graphics (SVG) standard provides a way of building high-quality images that can be rendered in a browser or into  PDF. Bitmaps themselves are described in a particular data format.
+\item
+We can see the spreadsheet language of Excel as the most widely used functional programming language in the world. Excel formulas describe how values in one call are calculated from values in others, and re-computing values is done automatically when values change.
+\end{itemize}
+Some DSLs serve to \emph{model the world}: an Excel spreadsheet embodying a business plan will allow us to forecast future profits, for example. Others more directly \emph{affect the world}: a DSL for robotic control will make machines move, while a VHDL design will ultimately become a complex physical artifact.
+
+DSLs like VHDL, LaTeX and SVG have many of the features of general purpose languages. Their programs have structure, they have simple data types -- like numbers, as well as ways of naming sub-components for re-use: think of the `cut and paste' to replicate a formula in Excel, or named circuits in VHDL. 
+
+On the other hand, they also have special types and constructs designed to make them work particularly well in their own domain. So, if you want to write a book, draw a picture, design a circuit or work out your cash flow, you will most likely use the DSL rather than starting from scratch to program the solution in Haskell or Java.
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=4in]{Pictures/DSLtypes.pdf}
+\end{center}
+\caption{Stand-alone and embedded DSLs}
+\label{DSLtypes}
+\end{figure}
+
+
+\subsection*{Implementing Domain-Specific Languages}
+
+So, suppose that we decide to implement a DSL using Haskell: how do we start? The first decision we have to take is whether or not the language is stand-alone or embedded, as pictured in Figure \ref{DSLtypes}.
+
+A language is \textbf{stand-alone}\index{DSL!stand-alone} if it uses Haskell for its implementation, but nothing else. An example of this is the `little language' for the calculator covered earlier in the book. Expressions in this language look like
+\begin{alltt}
+s:(23-s)
+\end{alltt}
+and we have to \emph{parse} or translate them into Haskell to interpret them. Another way of seeing that this language is stand-alone is the fact that we could choose to implement it in any programming language whatever: the process would still involve parsing strings like \texttt{"s:(23-s)"} into that programming language to work with them. Another example of a stand-alone DSL would be a language for pictures with expressions like:
+\begin{alltt}
+Put pic1 above pic2, and this picture beside a copy of itself.
+\end{alltt}
+
+The advantages of implementing a stand-alone DSL are that we have complete control of the syntax of the language, and also of its semantics -- that is what programs in the language mean. We can also have complete control of any error messages that we send back to a user if things go wrong in some way: for instance if an expression is mal-formed.
+
+On the other hand, we have to build the implementation up from scratch: the string \texttt{"23"} has nothing intrinsically to do with the number \texttt{23}, until our implementation defines that we should interpret that string as that particular number.
+
+
+On the other hand, a DSL is  \textbf{embedded}\index{DSL!embedded} if it builds on features of the 
+host language in which it is written. Going back to the examples, we can build a language for expressions using algebraic data types, building on the numbers built into Haskell. Doing this, we get numerical expressions like this
+\begin{alltt}
+Assign s (Op Sub (Lit 23) s)
+\end{alltt}
+and for pictures, we can use the normal syntax for function application and local definitions to describe pictures this way:
+\begin{alltt}\label{localPicDef}
+let 
+  pic = pic1 `above` pic2 \hfill{(pic)}
+in 
+  pic `beside` pic
+\end{alltt}
+The advantage of the embedded approach is that we can `piggy back' on the facilities of Haskell to make the language implementation much more straightforward. To use the language a user doesn't necessarily need to understand the whole of Haskell: for instance putting together pictures just needs \texttt{let} and (infix) function application.
+
+On the other hand, we do lose the freedom to completely determine the syntax: for Haskell functions to be infix they do need to use \texttt{`...`} or operator syntax: we can't just say that a function should be infix. It is also possible that the error messages that come back from a DSL might `leak' and say something about the host language which is not meaningful to the user. 
+
+On balance, it is the embedded approach which has been successful in Haskell, and that is what we'll concentrate on here; in the remainder of the chapter, when we say DSL, we'll mean `embedded DSL'.
+
+\section{Why DSLs in Haskell?}\index{DSL!why in Haskell?}
+
+Why has Haskell been particularly successful as a language for embedding DSLs? A number of features combine to make it a good choice.
+\begin{description}
+\item[Purely functional.] Haskell functions are really functions in the mathematics sense: the output of a function is determined only by its inputs, and it has no side-effects. A Haskell function can therefore be used directly to model ways in which elements of a domain can be combined together into more complex objects. 
+
+In the pictures example, there is a function which takes two pictures and returns the picture made up of one argument above the other
+Contrast this with an object-oriented programming language like Java. In OO style the combination operation would be a method on an object, which would destructively update that object in some way.
+
+\item[Higher-order.] Functions in Haskell are themselves data values, and so can be used to model elements of the domain of interest. The operations which work over the domain elements are then higher-order functions, which are often called \textbf{combinators},\index{combinator} as they are used to combine other functions. Many DSLs in Haskell use functions: parsers are represented by functions in Chapter \ref{lazy}, strategies in Rock - Paper - Scissors are functions (Chapter \ref{io}). In both cases there are sets of combinators too: for parsers in Section \ref{parsing} and for strategies in Section \ref{strategyCombs}.
+
+Again, this representation of functions as data is not accessible in an OO language like Java, and even if closures are added to Java at some point in the future it is unlikely that their will be so directly accessible as functions in Haskell.
+
+\item[Expressive type system.] Haskell's type system is both expressive and rigorous: it is possible to express complex constraints on the type of functions, and for these to be checked statically, so that no type errors occur at run time. The extensions to the type system implemented in GHC make the language more powerful, too. 
+
+The effect of this is to make it easier for the types of a DSL to be reflected in the types of Haskell itself; obviously this is not always the case, since domain-specific constraints may be of a different nature, only allowing objects of the same `size' or `shape' to be combined, for instance, but Haskell is a better choice of language than one with a weaker type system.
+
+\item[Monadic \texttt{do} notation.] Haskell is purely functional, but also allows side-effecting computations to be described by programs in the \texttt{do} notation. Monads in Haskell can describe `impure' aspects of languages such as I/O, naming or identifying objects, parallelism and so forth, and this gives a way for a pure language like Haskell to host not only pure DSLs but also more general DSLs.
+
+\end{description}
+
+\section{Shallow and deep Embeddings}
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=4in]{Pictures/ShallowDeep.pdf}
+\end{center}
+\caption{Shallow and deep embeddings}
+\label{ShallowDeep}
+\end{figure}
+
+This section looks at the two main approaches to writing an embedded domain-specific language in Haskell.
+
+\subsection*{Shallow embeddings}\index{DSL!shallow embedding}\index{shallow embedding}
+
+We have already seen that we can build a domain-specific language for pictures; indeed, we saw two different ways of modelling pictures in Haskell in Section \ref{two-models}. First we saw that we could manipulate SVG pictures, as shown in Figure \ref{svgpix}, and then we saw that pictures can be represented by lists of strings. Both of these DSLs are what are called \textbf{shallow} embeddings: the pictures are directly modelled by the SVG data or the list of strings, and the operations over pictures are functions over that data. Taking the list model, we have:
+\begin{alltt}\index{pictures|(}\minx{Picture}
+type Picture = [[Char]]
+
+horse :: Picture
+horse = ...
+
+above, beside :: Picture -> Picture -> Picture
+above  = (++)
+beside = zipWith (++)
+
+flipH, flipV :: Picture -> Picture
+flipH = reverse
+flipV = map reverse
+
+ ... etc. ...
+\end{alltt}
+
+\subsection*{Using the \texttt{Picture} DSL}
+
+We can use an embedded DSL like \texttt{Picture} in a number of ways. Using the API provided, together with \emph{function application} we can describe objects of the domain like this:
+\begin{alltt}
+above horse horse :: Picture
+\end{alltt}
+We can also use \emph{local definitions} in descriptions of more complex objects, like \texttt{(pic)} on page \pageref{localPicDef}, which uses a \texttt{let} to define a sub-object used in the overall definition.
+
+We can also define new functions over the domain too, as well as types which extend the original domain. In fact there are two possible ways of doing extending the functionality. We can either implement them on top of the existing functionality, as in the definition of \texttt{rotate}:
+\begin{alltt}
+rotate = flipV .\ flipH
+\end{alltt}
+or we can manipulate the underlying data types, like this:
+\begin{alltt}\minx{substChar}
+substChar x y
+  = map (map (\bs{z} -> if z==x then y else z))
+\end{alltt}
+to give an entirely new operation.
+
+DSL users don't have to be Haskell experts: users can build applicative expressions and define simple functions like \texttt{rotate} without being knowledgeable about Haskell; to define something like \texttt{substChar} requires more, but can still be achieved with relatively limited exposure to parts of the language relevant to the particular DSL. 
+
+\subsection*{Deep embeddings}\index{DSL!deep embedding}\index{deep embedding}
+
+An alternative approach is to build a \textbf{deep} embedding. A deep embedding builds a syntactic \textbf{representation} of pictures, like this:
+\begin{alltt}\minx{Pic}
+data Pic = Horse |
+           Above Pic Pic |
+           Beside Pic Pic |
+           FlipH Pic |
+           FlipV Pic |
+           ...
+\end{alltt}
+so that the 
+corresponding \texttt{Pic} to the \texttt{Picture} above is 
+\begin{alltt}
+Above Horse Horse :: Picture
+\end{alltt}
+Once we have a representation like this, we can do a whole lot of different things with it:
+\begin{titemize}
+\item
+We can \textbf{interpret}\index{interpreter} or convert a \texttt{Pic} to a \texttt{Picture} like this:
+\begin{alltt}\minx{interpretPic}
+interpretPic :: Pic -> Picture
+interpretPic Horse = horse
+interpretPic (Above pic1 pic2)
+  = above (interpretPic pic1)  (interpretPic pic2)
+  ...
+\end{alltt}
+\item 
+We can \textbf{transform}\index{program transformation} the \texttt{Pic}: we can remove redundant flips, and move all flips inwards through the other constructors, like this:
+\begin{alltt}\minx{tidyPic}
+tidyPic :: Pic -> Pic
+
+tidyPic (FlipV (FlipV pic)) 
+  = tidyPic pic
+tidyPic (FlipV (FlipH pic)) 
+  = FlipH (tidyPic (FlipV pic)) \hfill (\ensuremath{\dagger})
+
+tidyPic (FlipV (Above pic1 pic2))
+  = Above (tidyPic (FlipV pic1)) (tidyPic (FlipV pic2)) 
+tidyPic (FlipV (Beside pic1 pic2))
+  = Beside (tidyPic (FlipV pic2)) (tidyPic (FlipV pic1)) 
+  
+  ... similarly for FlipH ...
+\end{alltt}
+(Note that equation (\ensuremath{\dagger}) is designed to put all \texttt{FLipV}s inside the \texttt{FlipH} constructors). 
+
+The result of this process is that we have located the flip operations at the pictures at the leaves of the tree. For many of these we will have efficient mechanisms for performing the operation: for example, over a symmetrical picture we need do nothing.
+
+\item
+As well as transforming the \texttt{Pic} representation we can also \textbf{analyze} it.  For instance, if we had the ability to overlay one picture on top of another, it would be possible to analyse whether the top picture completely overlaid the bottom one, and so whether the bottom one could be completely discarded from the representation.
+
+\item
+Finally, because we have a representation of domain objects, we can directly \textbf{compile} these into executable `machine code'. In the case of \texttt{Pic} this might be a compilation into PDF or PostScript, which can then be printed directly.
+\end{titemize}
+
+\subsection*{Using the \texttt{Pic} DSL}
+
+In using a deeply-embedded DSL like \texttt{Pic} we can \emph{interpret} expressions, and so describe objects in the model just as we did for \texttt{Picture} earlier. To work directly with values of \texttt{Pic} type we need to understand appreciative syntax for \texttt{data} types, and in writing transformations and analyses we'll need this knowledge as well.
+
+\index{pictures|)}
+
+\subsection*{Shallow or deep?}\index{DSL!shallow or deep?}
+
+If you are going to implement a DSL, should you make it shallow or deep? The advantages of the \textbf{shallow} embedding are, first, that it is a simple implementation of the semantics of the domain that you are interested in. Secondly, if we want to add new operations to the language, that's straightforward, as we saw when we discussed how to use an embedded DSL earlier. 
+
+On the other hand, a \textbf{deep} embedding allows us to do much more than simply manipulating the domain: we're able to manipulate representations, and so to transform, compile etc. On the other hand, extending a deep embedding is more complex: representation and all the interpretation, transformation and analysis all need to be extended to handle and addition to the representation. 
+
+\section{A DSL for regular expressions}\index{regular expressions|(}\index{DSL!regular expressions|(}
+
+Regular expressions give a way of writing down patterns in which letters or patterns which can be sequenced, repeated or chosen between. For instance, as we first saw in Section \ref{regExps}, the regular expression \texttt{((a|b)(a|b))*} will match all strings of \texttt{a}s and \texttt{b}s of even length. This section introduced an implementation of regular expressions through the type
+\begin{alltt}
+type RegExp = String -> Bool
+\end{alltt}
+This is a typical example of a \emph{shallow} DSL, mapping the domain directly to something that models their behaviour: here a function which returns \texttt{True} on those strings which match the pattern. 
+
+It is typical of a Haskell DSL because we have used \emph{functions} to represent individual regular expressions, with higher-order functions, or \emph{combinators}, representing the ways that regular expressions can be combined together, such as
+\begin{alltt}
+(|||), (<*>) :: RegExp -> RegExp -> RegExp
+star :: RegExp -> RegExp
+\end{alltt}
+However, \emph{all} we can do with this DSL is to check pattern matches, whereas a deep embedding allows us more. A deep embedding would be based on a \texttt{data} type definition like this
+\begin{alltt}\minx{RE}\minx{:*:}\minx{:"|:}
+infixr 7 :*:
+infixr 5 :|:
+
+data RE = Eps |
+          Ch Char |
+          RE :|: RE |
+          RE :*: RE |
+          St RE |
+          Plus RE
+          deriving(Eq,Show)
+\end{alltt}
+where we have made fixity declarations which reflect the fixity of the operators, \texttt{St} binding more tightly than \texttt{:*:}, which binds more tightly than \texttt{:|:}. We can write an interpreter for \texttt{RE} into \texttt{RegExp},
+\begin{alltt}\minx{interp}
+interp :: RE -> RegExp
+\end{alltt}
+which we leave as an exercise for the reader.
+
+Regular expressions match strings, and \texttt{RegExp} is the type of \emph{recognisers} for these expressions: using a recogniser we can tell whether or not a particular string  matches a given expression. 
+
+\subsection*{Enumerating}\index{regular expressions!enumerating}
+
+Instead of this writing a recogniser, let's map a regular expression into a list of \emph{all} the strings that it matches. These lists might be infinite, but because Haskell uses lazy evaluation, that's not a problem.
+\begin{alltt}\minx{enumerate}
+enumerate :: RE -> [String]
+
+enumerate Eps = [""]
+
+enumerate (Ch ch) = [[ch]]
+
+enumerate (re1 :|: re2)
+    = enumerate re1 `interleave` enumerate re2
+
+enumerate  (re1 :*: re2)
+    = enumerate re1 `cartesian` enumerate re2
+
+enumerate (St re)
+    = result 
+      where
+        result =
+            [""] ++ (enumerate re `cartesian` result)
+\end{alltt}
+Let's step through this one clause at a time.
+\begin{titemize}
+\item
+The only string matching \texttt{Eps} is the empty string, \texttt{""}.
+\item
+The only string matching \texttt{(Ch ch)} is the string, containing \texttt{ch} on its own, \texttt{[ch]}.
+\item
+The strings matching \texttt{(re1 :|:\ re2)} either match \texttt{re1} or \texttt{re2}, so the list we're looking for is got by putting together the lists for \texttt{re1} and \texttt{re2}. Because these lists might be infinite, we can't just use \texttt{++} to join them together, so instead we will interleave the contents, like this:
+\begin{alltt}
+  interleave :: [a] -> [a] -> [a]
+
+  interleave [] ys     = ys
+  interleave (x:xs) ys = x : interleave ys xs
+\end{alltt}
+\item
+The strings matching \texttt{(re1 :*:\ re2)} are of the form \texttt{x++y} where \texttt{x} matches \texttt{re1} and \texttt{y} matches \texttt{re2}. So, we need to generate all possible combinations of elements from the two listings.
+\begin{alltt}
+  cartesian :: [[a]] -> [[a]] -> [[a]]
+
+  cartesian [] ys = []
+  cartesian (x:xs) ys 
+      = [ x++y | y<-ys ] `interleave` cartesian xs ys
+\end{alltt}
+Supposing that the first argument is \texttt{x:xs} then  we get all the combinations by taking \texttt{x} with all choices from \texttt{ys}, and interleaving the results with all combinations from \texttt{xs} and \texttt{ys}. To give an example,
+\begin{alltt}
+  \textsl{*RegExp>} cartesian [ "", "a", "aa", "aaa"] ["", "b", "bb"]
+  \textsl{["","a","b","aa","bb","ab","aaa","abb","aab","aaab","aabb","aaabb"]}
+\end{alltt}
+\item
+Finally, the definition for \texttt{(St re)} exactly mirrors the informal definition of `star \texttt{e}', that is `either match the empty string, or match \texttt{e} followed by star \texttt{e}'.
+\end{titemize}
+
+\begin{figure}[t]\index{DSL!value recursion}
+\beware{Value recursion: extending the domain}{
+Haskell uses lazy evaluation, and so Haskell \texttt{data} types contain partial and infinite values. For example, the string
+\begin{alltt}
+abs = "ab" ++ abs
+\end{alltt}
+is a perfectly good member of the \texttt{String} type: our enumeration will not contain these values, and only contains \emph{finite} strings.
+
+\medskip
+\noindent
+The \texttt{RE} type also has recursively defined members, like this:
+\begin{alltt}
+anbn = Eps :|: (a :*: (anbn :*: b)) 
+\end{alltt}
+which describes this set:
+\begin{alltt}
+\textsl{*RegExp>} enumerate anbn
+\\
+\textsl{["","ab","aabb","aaabbb","aaaabbbb","aaaaabbbbb",
+\\ 
+"aaaaaabbbbbb","aaaaaaabbbbbbb","aaaaaaaabbbbbbbb",
+\\ 
+"aaaaaaaaabbbbbbbbb","aaaaaaaaaabbbbbbbbbb",...}
+\end{alltt}
+It is well known that this set \emph{cannot} be described by a regular expression \cite{dragon2ed}, so what is going on here? What we have effectively is an \emph{infinite regular expression}, and so that goes beyond what we can usually write as a regular expression. 
+
+\medskip
+\noindent
+This extension is a particular consequence of using a lazy language; it would not be the case in a strict language like ML or F\#. On the other hand, embedding a DSL in a general purpose language will extend its capability, because it is in a more powerful context: the point here is that this deep embedding adds elements to the representation itself.
+}
+\end{figure}
+
+\subsection*{Extending the DSL}\index{DSL!extension}
+
+We have given the minimal set of regular expression constructors, but in practice there are many more in use, such as \texttt{(e)+} for \emph{one or more occurrences of \texttt{e}} and \texttt{(e)?} for \emph{zero or one occurrences of \texttt{e}}. How could we extend the DSL to include `plus', say?
+\begin{titemize}
+\item
+We can define a \emph{function} to define `plus' from other constructors:
+\begin{alltt}
+plus :: RE -> RE
+plus re = re :*: St re
+\end{alltt}
+\item
+We can define a new \emph{constructor}, adding this to \texttt{RE}:
+\begin{alltt}
+data RE = ... |
+          Plus RE
+\end{alltt}
+\end{titemize}
+What are the advantages and disadvantages of these two proposals?
+\begin{description}
+\item[Function \texttt{plus}.]
+This option has the advantage of simplicity: we don't need to extend any other functions  once we have added this definition. The disadvantage is that we are always committed to processing \texttt{(e)+} as \texttt{e} followed by \texttt{(e)*}.
+\item[Constructor \texttt{Plus}.]
+This option has the disadvantage that we have to extend all the functions which deal with the \texttt{RE} type to include the new case of \texttt{Plus re}. The advantage of this is that we then have the option to deal with this \emph{differently} from simply translating it out. For instance, we could make sure that a `plus' was pretty printed as 
+\texttt{"(e)+"} rather than \texttt{"e(e)*"}, which would be the result if we were to take the first option.
+\end{description}
+
+\subsection*{Transformation and `smart constructors'}\index{DSL!transformation}\index{smart constructor}
+
+Regular expressions give us a lot of different ways of writing the same thing, and often we can \emph{simplify} regular expressions from their orginal form. Some simple examples include \texttt{((e)*)*} and \texttt{(e)*}; \texttt{((e)+)*} and \texttt{(e)*}; \texttt{((e)*)+} and \texttt{(e)*}; \texttt{((e)+)+} and \texttt{(e)+}; \texttt{(e|e)} and \texttt{e}. We can describe these simplifications as a function,
+\begin{alltt}\minx{simplify}
+simplify :: RE -> RE
+
+simplify (St (St re))     = simplify (St re)
+simplify (St (Plus re))   = simplify (St re)
+simplify (Plus (St re))   = simplify (St re)
+simplify (Plus (Plus re)) = simplify (Plus re)
+simplify (re1 :|: re2) =
+    if sre1==sre2 then sre1 else (sre1 :|: sre2) 
+          where
+            sre1 = simplify re1; sre2 = simplify re2
+simplify re = re
+\end{alltt}
+With this approach we build complex expressions, and then simplify them afterwards. An alternative is never to build the complicated forms in the first place, and we do this by defining \textbf{smart constructors} which do the simplification as they are applied. For example, we can write
+\begin{alltt}
+starC :: RE -> RE
+starC (St re) = re
+starC (Plus re) = re
+starC re = (St re)
+\end{alltt}
+so that nested stars are never built:
+\begin{alltt}
+\textsl{*RegExp>} starC (starC (starC (Ch 'a')))
+\textsl{St (Ch 'a')}
+\end{alltt} 
+As well as simplifying data, smart constructors can be used to enforce constraints on data, so that, for instance, in building geometrical shapes, lengths of the sides are positive, and the triangle inequality on the three sides of a triangle hold too:
+\begin{alltt}
+triangleC :: Float -> FLoat -> Float -> Shape
+triangleC a b c
+  | a>0 && ... && triEq = Triangle a b c
+  | otherwise = error ("Illegal triangle: " ++ show a ++ ...)
+    where triEq = ...
+\end{alltt}
+The DSLs we have looked at so far are all functional; in the next section we will see that we can also add other aspects to a DSL, by making it monadic.
+
+\begin{exercises}
+
+\item
+Define the interpreter function
+for \texttt{RE} into \texttt{RegExp},
+\begin{alltt}
+interp :: RE -> RegExp
+\end{alltt}
+You should use the functions already defined over \texttt{RegExp} to help you in doing this.
+
+\item
+Choose a suitable notation for writing down regular expressions as strings (e.g. as used in Section \ref{regExps}) and then define functions to parse these strings into \texttt{RE}, and to pretty-print elements of \texttt{RE} as strings:
+\begin{alltt}
+parseRE  :: String -> RE
+prettyRE :: RE -> String
+\end{alltt}
+Can you define QuickCheck properties that you would expect these functions to satisfy?
+
+\item
+Define a recursive regular expression which will generate all palindromes built from \texttt{a}s and \texttt{b}s. 
+
+\item{[Harder]}
+Can you give a recursive regular expression which generates all (non-recursive) regular expressions?
+
+\item{[Harder]}
+Is there any limit to what else you can define using recursive regular expressions: can you, for example, define all the strings which are strings of \texttt{a}s then \texttt{b}s, and then \texttt{c}s, each of the same length, as in \texttt{aaabbbccc}?
+
+
+
+\item
+Show how to extend the DSL to include these constructs:
+\begin{titemize}
+\item
+To say that an expression is matched a given \emph{number} of times.
+\item
+To match something in a \emph{range} of characters, e.g. \texttt{'a'} to \texttt{'z'}.
+\item
+To match a character in this \emph{collection} of characters.
+\item
+To match a character that is \emph{not} in this collection of characters.
+\end{titemize}
+
+\item{[Harder]}
+Show how to extend the DSL to include these constructs:
+\begin{titemize}
+\item
+To say that an expression should match \emph{both of} these two expressions.
+\item
+To \emph{fail to} match this regular expression.
+\end{titemize}
+
+\end{exercises}
+
+\index{regular expressions|)}\index{DSL!regular expressions|)}
+
+\section{Monadic DSLs}\index{DSL!monadic|(}
+
+
+The domain specific languages that we have looked at so far are all \emph{functional} DSLs: we embed the language as a functional API or a concrete representation of the language as a \texttt{data} type, and then build expressions and functions over that.
+
+We have seen in Chapter \ref{actions} that the \texttt{do} notation gives a way of dealing with different kinds of computation: non-deterministic, side-effecting, state-based and so on. As important, the notation gives us a way of \emph{naming} objects within our DSL, and we begin this section by discussing that in the context of a language of pictures. We will the look at other examples of \emph{monadic} DSLs with non-functional behaviour, including the QuickCheck data generation language -- where random values are generated -- and hardware description languages.
+
+\subsection*{Naming within a DSL}\index{DSL!naming}\index{pictures|(}
+
+Haskell provides us with ways of naming \emph{values}, through top-level and local definitions. A typical expression may take the form
+\begin{alltt}
+let x=horse; y=horse in
+  x `above` y
+\end{alltt}
+in which \texttt{x} and \texttt{y} appear to refer to the left-hand and right-hand horses in a picture. However, this expression has exactly the same meaning as
+\begin{alltt}
+let x=horse in
+  x `above` x
+\end{alltt}
+or indeed the simple \texttt{horse `above` horse}.
+
+How can we build a DSL so that it allows us to \emph{identify} particular components and use these names in the language? Let's look at the case study of a simple DSL to \emph{lay out pictures}. We'd like to 
+\begin{titemize}
+\item
+\emph{name} pictures as they are positioned, and
+\item
+\emph{use those names} to position other pictures, by placing their \texttt{NW} corner.
+\end{titemize}
+An example is shown in Figure \ref{PositioningImages} where
+\begin{titemize}
+\item
+\texttt{pic1} is positioned at coordinates (10,10),
+\item
+\texttt{pic2} is positioned at the \texttt{Center} of \texttt{pic1},
+\item
+the third (unnamed) \texttt{horse} is positioned at the \texttt{SW} corner of \texttt{pic2}.
+\end{titemize}
+The names will have to be added to the language somehow, and one option is to build a data structure of the form
+\begin{alltt}
+[(Name, Picture, Position)]
+\end{alltt}
+to keep track of all the information. However, in this case we -- as programmers -- will be responsible for checking that names are defined before they are used, that names are defined uniquely and so forth. We leave it as an exercise for you to try doing this. 
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[height=2in]{Pictures/PositionedImages.pdf}
+\caption{Positioned images}
+\label{PositioningImages}
+\end{center}
+\end{figure}
+
+
+The alternative is to use a \emph{monadic} DSL, so that we can write the program to position the pictures just like this:
+\begin{alltt}
+do
+  pic  <- placeId horse (10,10)
+  pic2 <- positionId horse pic Center
+  position horse pic2 SW
+\end{alltt} 
+The underlying implementation is the \texttt{(Def a)} monad, a state monad (as described in Section \ref{monadicTrees}) in which a unique identifier (an \texttt{Id}) is associated with each picture that has been positioned. The user interface to the monad is provided by the functions:
+\begin{alltt}
+placeId :: Picture -> Point -> Def Id
+place   :: Picture -> Point -> Def ()
+
+positionId :: Picture -> Id -> Position -> Def Id
+position   :: Picture -> Id -> Position -> Def ()
+\end{alltt}
+The \texttt{place} functions put a picture at a particular position; the \texttt{position} functions position a picture relative to a named picture. In each case there are two variants: one returning an \texttt{Id}, the other not. We leave the implementation of this as an extended exercise.
+
+This approach we use here is of value wherever we need to be able to identify instances of objects within a DSL; other examples include identifying instances of components in a hardware layout DSL, where the same component is replicated many times in a design. Monads are of use within DSLs for more than simply naming, and we turn to the general case now.
+
+\begin{exercises}
+\item
+Define the state monad \texttt{(Def a)} which implements the information about the position of pictures, and in particular give the \texttt{instance} declaration which establishes that this is a monad.
+
+\item
+Define the functions \texttt{placeId}, \texttt{place}, \texttt{positionId} and \texttt{position} over the \texttt{(Def a)} monad.
+
+\item
+Define a function or functions which allow you to extract the pictures from the \texttt{(Def a)} monad so that they can be rendered somehow.
+
+\item{[Harder]}
+Give an extension to regular expressions so that sub-components can be \emph{named} and the names used subsequently in the expression. An informal example would be 
+\begin{alltt}
+((a|b)*:x)a<x>
+\end{alltt}
+which should match an arbitrary string of \texttt{a}s and \texttt{b}s (which is named \texttt{x}) followed by an \texttt{a} and then a repeat of the string \texttt{x}. For example; \texttt{abbaaabba} would match this regular expression, but \texttt{abbaabba} would not.
+
+You will first need to think about how to make this idea `watertight' and then for the best way to implement a DSL embodying this. 
+
+\index{pictures|)}
+
+\end{exercises}
+
+
+\section{DSLs for computation: generating data in QuickCheck}\index{QuickCheck|(}
+\label{qcGens}
+
+Many domain-specifc languages allow for different kinds of `computational effects': that might be because the language goes beyond the purely functional -- in embodying state, exceptions or whatever -- or that it affects the world directly: think of a robotic control language. In this section we'll look at the example of QuickCheck, which has at its heart a DSL to describe \emph{random} or \emph{arbitrary} data.
+
+Data is generated in QuickCheck using Haskell's random number generation. The principal concept is that of a \emph{generator},\index{generator}\index{QuickCheck!generator}
+\begin{alltt}\minx{Arbitrary}\minx{arbitrary}
+class Arbitrary a where
+  arbitrary :: Gen a
+\end{alltt}
+where \texttt{(Gen a)} is a monad, returning an arbitrary value of type \texttt{a}. The underlying representation is a function from a random number to the type \texttt{a}; the monad does the `plumbing' of passing around random values appropriately.
+
+QuickCheck comes with instances of \texttt{Arbitrary} for many built-in types. You can see a sample for a particular type by typing, here for the \texttt{Int} type:
+\begin{alltt}\minx{sample}
+sample (arbitrary :: Gen Int)
+\end{alltt} 
+where the type signature has to be specified to show which type you are interested in.
+
+\subsection*{Simple data types}
+
+\begin{figure}[t] 
+\begin{center}
+\begin{alltt}\minx{Info}
+data Info = Number Int | Email String
+            deriving (Eq, Show)
+
+instance Arbitrary Info where
+    arbitrary =
+        do
+          boo <- arbitrary
+          if boo
+            then do
+              int <- arbitrary
+              return (Number int) 
+            else do
+              string <- arbitrary
+              return (Email string)
+\end{alltt}
+\end{center}
+\caption{Generating values of type \texttt{Info}}
+\label{InfoQC}
+\end{figure}
+
+
+
+If we define types for ourselves, then we need to generate random data for them. Let's look at some examples:
+\begin{alltt}\minx{Card}
+data Card = Card Int String
+            deriving (Eq,Show)
+
+instance Arbitrary Card where
+    arbitrary =
+        do
+          int    <- arbitrary -- of type Gen Int
+          string <- arbitrary -- of type Gen String
+          return (Card int string)
+\end{alltt}
+To generate a random \texttt{Card} we need both a random \texttt{Int} and a random \texttt{String}. We use a \texttt{do} block to do this:
+\begin{titemize}
+\item
+first we generate an arbitrary integer, and call it \texttt{int};
+\item
+next we generate an arbitrary string, and call it \texttt{string};
+\item
+finally we \texttt{return} the value \texttt{(Card int string)}.
+\end{titemize}
+Note here that we're using the notation to \emph{name results of computations}, that is the two random values that have been generated. We have given the types of the generators in comments, we don't have to make this part of the program because the type inference mechanism can detect their types from the way that the result is constructed.
+
+\begin{figure}[t] 
+\begin{center}
+\begin{alltt}\minx{arbExpr}
+arbExpr :: Int -> Gen Expr
+
+arbExpr 0 = 
+    do int <- arbitrary
+       return (Lit int)
+
+arbExpr n
+    | n>0 =
+        do
+          pick <- choose (0,2::Int)
+          case pick of
+            0 -> do 
+              int <- arbitrary
+              return (Lit int)
+            1 -> do 
+              left  <- subExp
+              right <- subExp
+              return (Add left right)
+            2 -> do 
+              left  <- subExp
+              right <- subExp
+              return (Sub left right)
+        where
+          subExp = arbExpr (div n 2)
+\end{alltt}
+\end{center}
+\caption{Generating `sized' expressions}
+\label{arbExpr}
+\end{figure}
+
+
+What happens in the case when there is more than one alternative in the \texttt{data} type definition? We give an example in Figure \ref{InfoQC}.
+In this case we pick between the two cases by choosing an arbitrary Boolean, \texttt{boo}: in the \texttt{True} case we generate a \texttt{(Number int)} and otherwise an \texttt{(Email string)}. 
+
+\subsection*{Recursive generators}\index{generator}
+
+
+In a similar way we can declare an instance for a list type that we define ourselves:
+\begin{alltt}
+data List a = Empty | Cons a (List a)
+              deriving (Eq, Show)
+
+instance Arbitrary a => Arbitrary (List a) where
+    arbitrary = ... exercise ...
+\end{alltt}
+
+
+
+
+
+
+\begin{figure}[t]\index{QuickCheck!showing functions}
+\beware{Showing functions with QuickCheck}{
+To use QuickCheck with randomly-generated \emph{function} inputs QuickCheck needs to be able to \texttt{show} the functions that it generates. One way of doing this is
+\begin{alltt}
+\ \ instance Show (a->b) where
+
+\ \ \ \ show f = "<function>"
+\end{alltt}
+but that doesn't tell us anything about the particular function. Instead, we can use random data generated by QuickCheck as a sample input to a function, and show the corresponding input/output pairs for the function. We use the QuickCheck function
+\begin{alltt}
+\ \ sample' :: Gen a -> IO [a]
+\end{alltt} 
+to generate a list of samples within the \texttt{IO} monad, and process it like this
+\begin{alltt}
+\ \ sampleFun :: (Arbitrary a, Show a, Show b) => 
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (a -> b) -> IO String
+
+\ \ sampleFun f =
+
+\ \ \ \ \ \ do
+
+\ \ \ \ \ \ \ \ inputs <- sample' arbitrary
+
+\ \ \ \ \ \ \ \ let list = [ (a, f a) | a <- inputs ]
+
+\ \ \ \ \ \ \ \ return (showMap list)
+\end{alltt} 
+where \texttt{showMap} is used to show the list of pairs (an exercise). To make a \texttt{Show} instance we need to extract the \texttt{String} from the \texttt{IO} monad. We use the function
+\begin{alltt}
+\ \ unsafePerformIO :: IO a -> a
+\end{alltt}
+which is defined in \texttt{System.IO.Unsafe}. This function should be used with care. Finally we can say
+\begin{alltt}
+\ \ instance (Arbitrary a, Show a, Show b) => Show (a -> b) where
+
+\ \ \ \ show = unsafePerformIO . sampleFun
+\end{alltt}
+This code is contained in the \texttt{QCfuns.hs} module distributed with the book.}
+\end{figure}
+
+\begin{figure}[t]\index{QuickCheck!and higher-order functions}
+\beware{Testing higher-order functions in QuickCheck}{
+Using the \texttt{Show} instance for functions in the module \texttt{QCfuns.hs} we can now \emph{see} the functions that falsify a property such as
+\begin{alltt}
+\ \ prop\_map f g xs =
+
+\ \ \ \ map (f::Int->Int) (map (g::Int -> Int) xs) == map (g.f) xs
+\end{alltt}
+when we test it using QuickCheck:
+\begin{alltt}
+\ \ \textsl{*QC>} quickCheck prop\_map
+
+\ \ \textsl{*** Failed! Falsifiable (after 3 tests and 2 shrinks):}   
+ 
+\ \ \textsl{(1|->1) ,(0|->0) ,(-1|->0) ,\ \ \ ... function f ...}
+
+\ \ \textsl{(1|->-1) ,(-1|->0) ,(-2|->0) , ... function g ...}
+
+\ \ \textsl{[1]}
+\end{alltt} 
+(where some of the function values have been elided). It is not difficult to see how the functions do indeed give different results on \texttt{1} when applied in different composition orders. Of course, if we replace \texttt{g.f} by \texttt{f.g} in the property, then it passes all the tests. 
+
+\medskip
+Without the type annotations this would be a polymorphic property, and GHCi would be unable to decide for which types to generate the data, so the type annotations are essential here.
+}
+\end{figure}
+
+While this approach works for the list type, we need to do something more sophisticated in the case of generating data for arbitrary recursive types, such as the expressions used in the calculator case study. 
+
+Here we need to control the \emph{size} of the values generated, so that the recursion arising from generating expressions within expressions will terminate. We do this by stating
+\begin{alltt}
+instance Arbitrary Expr where
+    arbitrary = sized arbExpr
+\end{alltt}
+where the function has type \texttt{arbExpr ::\ Int -> Gen Expr}, generating expressions based on a size parameter. The \texttt{sized} function does the work of generation to make sure that termination happens, assuming that we write a sensible definition for \texttt{arbExpr}, as shown in Figure \ref{arbExpr}. The crucial point here is that the recursively generated sub-expressions come from the \texttt{subExpr} generator, which is defined to be \texttt{arbExpr (div n 2)} rather than \texttt{arbExpr n}.
+
+
+\subsection*{Going further with QuickCheck}\index{QuickCheck!going further}
+
+We've used the basics of QuickCheck in giving generators for simple types. QuickCheck also provides facilities for controlling the distribution of data by specifying the (relative) frequency of generators, using
+\begin{alltt}\minx{frequency}
+frequency :: [(Int, Gen a)] -> Gen a
+\end{alltt}
+For example, the generator
+\begin{alltt}
+frequency [(1,gen1),(2,gen2)]
+\end{alltt} 
+We generate values from the \texttt{gen1} and \texttt{gen2} in the ratio 1:2, so 33\% of the values will come from \texttt{gen1}. We can use this to give a variant of the generator for expressions presented in Figure \ref{arbExpr}:
+\begin{alltt}\label{arbExpr2}
+arbExpr :: Int -> Gen Expr
+
+arbExpr 0 = liftM Lit arbitrary
+
+arbExpr n = frequency
+    [(1, liftM Lit arbitrary),
+     (2, liftM2 Add subExp subExp),
+     (2, liftM2 Sub subExp subExp)]
+        where
+          subExp = arbExpr (div n 2)
+\end{alltt}
+Note that we have used
+\begin{alltt}\minx{liftM}\minx{liftM2}
+liftM  :: (Monad m) => (a -> b) -> m a -> m b
+liftM2 :: (Monad m) => (a -> b -> c) -> m a -> m b -> m c
+\end{alltt}
+which `lift' an operation over values to the corresponding function over monadic values.
+The values generated by this new generator for \texttt{Expr}s will be larger, as only 20\% at any level will be literals (rather than 33\% in our earlier definition).
+
+\begin{figure}[t]
+\beware{Overloading and QuickCheck}{
+As we saw when we looked at \texttt{infoCheck} in Chapter \ref{classes}, page \pageref{infoCheck}, it is possible to use overloading to make a DSL easier to use: instead of a whole collection of \texttt{infoCheckN} functions of different types, we were able to overload the name \texttt{infoCheck} to denote them all; the same is done in defining\texttt{quickCheck}. 
+
+\medskip
+If it were possible to overload constructor names, then we could avoid using \texttt{liftM} etc. in defining the \texttt{arbExpr} generator on page \pageref{arbExpr2}; we could manage this instead by defining overloaded functions \texttt{lit} and so forth, mirroring the constructors, and so hiding the `plumbing' underlying the monadic language.}
+\end{figure}
+
+QuickCheck has had a wide impact on programming practice in Haskell and other languages. The original paper was published in 2000, and in 2010 it was awarded an award for being the most influential paper presented at the International Conference on Functional Programming in 2000. The citation reads 
+\begin{quote}This paper presented a very simple but powerful system for testing Haskell programs that has had significant impact on the practice of debugging programs in Haskell. The paper describes a clever way to use type classes and monads to automatically generate random test data. QuickCheck has since become an extremely popular Haskell library that is widely used by programmers, and has been incorporated into many undergraduate courses in Haskell. The techniques described in the paper have spawned a significant body of follow-on work in test case generation. They have also been adapted to other languages, leading to their commercialisation for Erlang and C.\end{quote}
+More information about using QuickCheck can be found in a number of places, including
+in the original paper on QuickCheck, \cite{quickCheck}, as well as follow-up papers \cite{monadicQC,specBasedTesting};
+in other texts on programming, including \cite{realWorldHaskell}, and
+online at \texttt{URL}. Note that there are a small number of differences between QuickCheck 1 and 2; we use version 2 in this text.
+
+
+
+
+\begin{exercises}
+\item
+Define a function which will give a pretty printed version of a sample from the generator for expressions.
+
+\item
+Define QuickCheck generators for the types used in the interactive version of the calculator, as described in Section \ref{interactiveCalc}. Define properties that you would expect (parts of) the calculator to satisfy, and test them using your generators and QuickCheck.
+
+\item
+Define a function
+\begin{alltt}
+  showMap :: (Show a, Show b) => [(a,b)] -> String
+\end{alltt}
+so that \texttt{[(1,1),(0,0),(-2,0)]} is shown as
+\begin{alltt}
+  (1|->1) ,(0|->0) ,(-2|->0)
+\end{alltt}
+
+\end{exercises}
+
+\index{QuickCheck|)}
+
+\index{DSL!monadic|)}
+
+\section{Taking it further}\index{DSL!taking it further}
+
+This chapter is intended to be an introduction to how DSLs are written in Haskell. We have been able to discuss the two major ideas underlying Haskell DSLs: first, we have seen that having functions as data allows us to use functions to represent complex behaviours from the domain. Secondly, we have seen that monads -- and in particular the \texttt{do} notation -- allow us to write languages with `effects', such as naming, side-effects or non-determinacy, safely within Haskell.
+
+However, we have only really scratched the surface of this topic. Let's look at the particular example of the Paradise\index{Paradise} DSL \cite{paradise}, a two-stage language for building components which are used for pricing financial products. The first stage constructs models of these components; the second compiles them into Excel or .NET code, for integration with other financial modelling tools. In order to gain \emph{type safety}, the implementation uses phantom types to avoid constructing objects which are ill-typed from the point of view of the domain (even if they are perfectly OK in Haskell). For \emph{ease of use} numerical constants and operators are overloaded -- using Haskell classes -- so that they apply not only to numbers but also to numerical computations: this avoids introducing the \texttt{liftM} functions we saw in the previous section. The full implementation uses facilities well beyond the Haskell 2010 standard, many of which are implemented in GHC, and this is by no means unusual for larger-scale DSLs. 
+
+Naming in DSLs can be handled in many different ways. We saw already that using a monadic approach gives us naming, but names in a monad aren't given recursive definitions. Looking at the example of a small logic circuit, note that the output from the XOR gate is fed back into the gate after a delay.
+\begin{center}
+\includegraphics[width=3in]{Pictures/Gill.pdf}
+\end{center} 
+When this is programmed in a typical hardware description DSL\index{DSL!hardware description} (using a \emph{shallow} embedding) will appear like this:
+\begin{alltt}
+parity :: Bit -> Bit
+ 
+parity input = output
+  where 
+  output = xor (delay output) input
+\end{alltt}
+How to observe the sharing of the \texttt{output} value?
+One approach is to allow a `recursive \texttt{do}' which builds recursive value bindings within a monad, so allowing recursion in the DSL; \cite{typeSafeSharing}, discusses this and other approaches, proposing a new mechanism based on using stable names and the IO monad. 
+
+Other example DSLs in Haskell include HaXML \cite{haxml} for XML programming, Orc \cite{orc} for concurrent orchestration and Lava \cite{lava} for hardware description. A list of many more papers on specific DSLs and general implementation approaches can be found on the Haskell Wiki.
+
+\index{DSL|)}

@@ -1,0 +1,83 @@
+%\documentclass{book}\usepackage{sjtfonts}\usepackage{includegraphics}\usepackage{alltt}\usepackage{latexsym}
+%\usepackage{array}\usepackage{multicol}
+%\begin{document}\input{defs0}\input{miradefs}\appendix
+
+
+%\minitocoptionfalse
+\chapter{Haskell operators}
+\label{hsOps}
+\index{operator!table of properties}
+\index{floating point operators}
+\normalfont\normalsize
+The operators in the Haskell prelude are listed below in decreasing order of binding power:
+see Section \ref{operators} for a discussion of associativity and binding power.
+
+\begin{center}
+%\psframebox[cornersize=absolute,linearc=6pt,linecolor=black,linewidth=0.5pt,framesep=0pt]
+{\begin{tabular}{p{.3in}p{1in}p{1.5in}p{1in}}
+\\[-9pt]
+ & Left associative & Non-associative & Right associative\\
+\hline
+9 & \ttfamily !! & & . \\
+8 & & & \ttfamily **, \^{}, \^{}\^{}\\
+7 & \ttfamily   *, /, `div`, `mod`, `rem`, `quot`& \\
+6 & \ttfamily +, - & & \ttfamily \\
+5 & \ttfamily &  & \ttfamily :, ++ \\
+4 & & \ttfamily /=, <, <=, ==, >, >=, `elem`, `notElem` \\
+3 & & & \ttfamily \&\& \\
+2 & & & \ttfamily || \\
+1 & \ttfamily >>, >>= \\
+0 & & & \ttfamily \$, \$!, `seq` \\[3pt]
+\end{tabular}}
+\end{center}
+\minx{"!}\minx{"!"!}\minx{.}
+\minx{**}\minx{\^{}}\minx{\^{}\^{}}
+\minx{*}\minx{/}\index{mod@\texttt{`mod`}}\index{div@\texttt{`div`}}\index{rem@\texttt{`rem `}}\index{quot@\texttt{`quot `}}
+\minx{+}\minx{-}
+\minx{:}\minx{++}
+\minx{/=}\minx{<}\minx{<=}\minx{==}\minx{>}\minx{>=}\index{elem@\texttt{`elem`}}\index{notElem@\texttt{`notElem`}}
+\minx{\&\&}\minx{"|"|}\minx{>>}\minx{\$}\minx{\$"!}\index{seq@\texttt{`seq`}}
+\medskip
+\noindent
+Also defined in this text are the operators
+\index{\symbol{62}\symbol{62}\symbol{61}@\texttt{\symbol{62}\symbol{62}\symbol{61}}}
+\index{\symbol{62}\symbol{46}\symbol{62}@\texttt{\symbol{62}\symbol{46}\symbol{62}}}
+\index{\symbol{62}\symbol{42}\symbol{62}@\texttt{\symbol{62}\symbol{42}\symbol{62}}}
+\begin{center}
+%\psframebox[cornersize=absolute,linearc=6pt,linecolor=black,linewidth=0.5pt,framesep=0pt]
+{\begin{tabular}{p{.3in}p{1in}p{1.5in}p{1in}}
+\\[-9pt]
+9 & \ttfamily  >.> \\ 
+5 & & & \ttfamily >*> \\[3pt]
+\end{tabular}}
+\end{center}
+
+\medskip
+\noindent
+The restrictions on names of operators, which are formed using the characters
+\begin{alltt}
+! \# \$ \% \& * + . / < = > ? \@ \bs{} \^{} | : - \twid
+\end{alltt}
+are that operators must not start with a colon; this character starts an infix
+\emph{constructor}. The operators \texttt{-} and \texttt{!} can be user-defined, but note that they have
+a special meaning in certain circumstances -- the obvious advice here is not to use them. 
+Finally, certain combinations of symbols are reserved,
+and cannot be used: {\ttfamily ..\ :\ ::\ => = @ \bs{} | \^{} <- ->}.
+
+
+
+To change the associativity or binding power of an operator, {\ttfamily \&\&\&} say,
+we make a declaration like\index{fixity!declaration}
+\begin{alltt}
+infixl 7 \&\&\&
+\end{alltt}
+which states that {\ttfamily \&\&\&} has binding power 7, and is a left associative
+operator. We can also declare operators as non-associative ({\ttfamily infix}) and
+right associative ({\ttfamily infixr}). Omitting the binding power gives a default
+of 9. These declarations can also be used for back-quoted function names, as
+in
+\begin{alltt}
+infix 0 `poodle`
+\end{alltt}
+
+%\end{document}

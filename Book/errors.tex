@@ -1,0 +1,336 @@
+%\documentclass{book}\usepackage{sjtfonts}\usepackage{includegraphics}\usepackage{alltt}\usepackage{latexsym}
+%\usepackage{array}\usepackage{multicol}
+%\begin{document}\input{defs0}\input{miradefs}\appendix
+
+
+%\minitocoptionfalse
+\chapter{GHCi errors}
+\label{hugsErrors}
+\index{errors|(}\index{GHCi!errors|(}
+
+This appendix examines some of the more common programming errors in Haskell,
+and shows the error messages to which they give rise in GHCi.
+
+The programs we write all too often contain errors. On encountering an error,
+the system either halts, and gives an \textbf{error message\/}, or
+continues, but gives a \textbf{warning message\/} to tell us that something
+unusual has happened, which might signal that
+we have made an error. In this
+appendix, we look at a selection of the messages output by GHCi;
+we have
+chosen the messages which are both common and require some explanation;
+messages like
+\begin{alltt}
+*** Exception: Prelude.head: empty list
+\end{alltt}
+are self-explanatory. The messages are classified into roughly distinct
+areas. Syntax errors show up malformed programs, while type errors show
+well-formed programs in which objects are used at the wrong types. In fact,
+an ill-formed expression can often show itself as a type error and not as a
+syntax error, so the boundaries are not clear.
+
+\section*{Syntax errors}
+\index{errors!syntax}\index{syntax error}
+
+A Haskell system attempts to match the input we give to the
+syntax of the language. Commonly, when something goes wrong, we type
+something \emph{unexpected}. 
+\begin{itemize}
+
+\item
+Typing `\texttt{2==3)}' will provoke the error
+message
+\begin{alltt}
+<interactive>:1:4: parse error on input `)'
+\end{alltt}
+\item
+If a part of a definition is missing, as in
+\begin{alltt}
+fun x
+fun 2 = 34
+\end{alltt}
+we receive the message
+\begin{alltt}
+Errors.hs:3:0: Not in scope: `fun'
+Errors.hs:3:4: Not in scope: `x'
+\end{alltt}
+The problem here is that the system tries to understand \texttt{fun} and \texttt{x} and these are not (yet) defined. 
+
+\item
+A similar error results when the two lines are reversed, as in 
+\begin{alltt}
+fun 2 = 34
+fun x
+\end{alltt}
+when the error message is 
+\begin{alltt}
+Errors.hs:4:4: Not in scope: `x'
+\end{alltt}
+
+\item
+The inclusion of a type definition in a \texttt{where}
+clause, like this
+\begin{alltt}
+fun x = x+1
+        where
+          type MyInt = Int
+\end{alltt}
+is signalled by 
+\begin{alltt}
+Errors.hs:8:10: parse error on input `type'
+\end{alltt}
+
+\item
+The syntax of patterns is more restricted
+than the full expression syntax, and so we get error messages like
+\begin{alltt}
+Errors.hs:6:5:
+    Conflicting definitions for `x'
+    Bound at: Errors.hs:6:5
+              Errors.hs:6:7
+    In the definition of `fun'
+\end{alltt}
+when we use the same variable more than once within a pattern, as in the definition
+\begin{alltt}
+fun (x,x) = x+1
+\end{alltt}
+
+\item
+In specifying constants, we can make errors: floating-point numbers can be
+too large, and characters specified by an out-of-range ASCII code: for example, on typing \texttt{'\bs{}9999999999999999'} as input we get
+\begin{alltt}
+<interactive>:1:18:
+    lexical error in string/character literal at character '\bs{}''
+    \end{alltt}
+
+\item
+Not every string can be used as a name; some words in Haskell are
+\textbf{keywords} or \textbf{reserved identifiers},
+and will give an error if used as an identifier. The keywords
+are
+\index{keyword}
+\index{identifier!reserved}
+\begin{alltt}
+case class data default deriving do else if import in infix
+infixl infixr instance let module newtype of then type where
+\end{alltt}
+For example, including the definition 
+\begin{alltt}
+do (x,y) = x+1
+\end{alltt}
+gives this error message
+\begin{alltt}
+Errors.hs:6:0: Parse error in pattern
+\end{alltt}
+and the definition
+\begin{alltt}
+data (x,y) = x+1
+\end{alltt}
+gives this message
+\begin{alltt}
+Errors.hs:6:13: Not a data constructor: `x'
+\end{alltt}
+As you can see from the two examples, the error message in a case like this reflects the  meaning of the keyword.
+
+\item
+The special identifiers \texttt{as}, \texttt{qualified} and
+\texttt{hiding} have special meanings in certain contexts but can be
+used as ordinary identifiers.
+
+\item
+The final restriction on names is that names of constructors and types
+must begin with a
+capital letter; nothing else can do so, and hence we get error messages like
+\begin{alltt}
+Errors.hs:6:0: Not in scope: data constructor `Montana'
+\end{alltt}
+if we try to define a function called \texttt{Montana}.
+\end{itemize}
+
+\section*{Type errors}
+\index{errors!type}\index{type error}
+
+In this section we look at various different type errors that we can provoke in GHCi.
+
+\begin{itemize}
+\item  
+As we have seen in the body of the text, the main type error we meet is
+exemplified by the response to typing \texttt{'c' \&\& True} to the GHCi prompt:
+\begin{alltt}
+Couldn't match expected type `Bool' against inferred type `Char'
+In the first argument of `(\&\&)', namely 'c'
+In the expression: 'c' \&\& True
+In the definition of `it': it = 'c' \&\& True
+\end{alltt}
+which is provoked by using a \texttt{Char} where an \texttt{Bool} is expected. 
+\item
+Other type errors, such as
+\begin{alltt}
+True + 4        
+\end{alltt}
+provoke the error message
+\begin{alltt}
+No instance for (Num Bool)
+  arising from a use of `+' at <interactive>:1:0-7
+Possible fix: add an instance declaration for (Num Bool)
+In the expression: True + 4
+In the definition of `it': it = True + 4
+\end{alltt}
+This comes from the class mechanism: the system attempts to make \texttt{Bool}
+an instance of the class \texttt{Num} of numeric types over which `\texttt{+}' is
+defined. The error results since there is no such instance
+declaration making \texttt{Bool} belong to the class \texttt{Num}.
+\item 
+As we said before,
+we can get type errors from syntax errors. For example, writing \texttt{abs -2}
+instead of \texttt{abs (-2)} gives the error message
+\begin{alltt}
+No instance for (Num (a -> a))
+  arising from a use of `-' at <interactive>:1:0-5
+Possible fix: add an instance declaration for (Num (a -> a))
+In the expression: abs - 2
+In the definition of `it': it = abs - 2
+\end{alltt}
+because it is parsed as \texttt{2} subtracted from \texttt{abs::a->a}, and
+the operator `\texttt{-}' expects something in the class \texttt{Num}, 
+rather than a function of type
+\texttt{a->a}. Other common type errors come from confusing the roles of `\texttt{:}'
+and `\texttt{++}' as in \texttt{2++[2]} and \texttt{[2]:[2]}.
+\item
+We always give type declarations for our definitions; one advantage of this is
+to spot when our definition does not conform to its declared type. For
+example,
+\begin{alltt}
+myCheck :: Char -> Bool
+myCheck n = toEnum n == 6
+\end{alltt}
+gives the error message
+\begin{alltt}
+Couldn't match expected type `Int' against inferred type `Char'
+In the first argument of `toEnum', namely `n'
+In the first argument of `(==)', namely `toEnum n'
+In the expression: toEnum n == 6
+\end{alltt}
+Without the type declaration the definition would be accepted, only to give
+an error (presumably) when it is used.
+\item
+A definition like
+\begin{alltt}
+asc x y 
+  | x <= y  = x y
+\end{alltt}
+will give this error:
+\begin{alltt}
+Occurs check: cannot construct the infinite type: a = a -> t
+Probable cause: `x' is applied to too many arguments
+In the expression: x y
+In the definition of `asc': asc x y | x <= y = x y
+\end{alltt}
+The problem here is that \texttt{x} is \emph{compared with} \texttt{y} in the guard (type \texttt{a}), but \emph{applied to} \texttt{y} in the body (type \texttt{a->t}): the unification required here produces an infinite type, which is not allowed.
+\item
+A final error related to types is given by definitions like
+\begin{alltt}
+type Fred = (Fred,Int) \hfill (Fred)
+\end{alltt}
+a \textbf{recursive\/} type synonym; these are signalled by
+\begin{alltt}
+Cycle in type synonym declarations:
+  Errors.hs:9:0-21: type Fred = (Fred, Int)
+\end{alltt}
+The effect of \texttt{(Fred)} can be modelled by the algebraic type definition
+\begin{alltt}
+data Fred = Node Fred Int
+\end{alltt}
+which introduces the \textbf{constructor\/} \texttt{Node} to identify objects of
+this type.
+\end{itemize}
+
+
+\section*{Program errors}
+\index{errors!program}\index{program error}
+
+Once we have written a syntactically and type
+correct script, and asked for the value of an
+expression which is itself acceptable, other errors can be produced during
+the \textbf{evaluation\/} of the expression.
+\begin{itemize}
+\item
+The first class of errors comes from missing cases in definitions. If we
+have written a definition like
+\begin{alltt}
+bat [] = 45
+\end{alltt} 
+and applied it to \texttt{[34]} we get the response
+\begin{alltt}
+*** Exception: Errors.hs:11:0-10: Non-exhaustive patterns 
+               in function bat
+\end{alltt}
+which shows the point at which evaluation can go no further, since there is no
+case in the definition of \texttt{bat} to cover a non-empty list. Similar errors
+come from built-in functions, such as \texttt{head}.
+
+\item
+Other errors happen because an \textbf{arithmetical constraint\/} has been
+broken. These include an out-of-range list index, division by zero, using a
+fraction where an integer is expected and floating-point calculations which go
+out of range; the error messages all have the same form. For example, suppose that we evaluate 
+\begin{alltt}
+3 `div` 0
+\end{alltt}
+then the error is
+\begin{alltt} 
+*** Exception: divide by zero
+\end{alltt}
+
+\item
+If we make a conformal definition, like
+\begin{alltt}
+[a,b] = [1 ..\ 10]
+\end{alltt}
+this will fail with the message
+\begin{alltt}
+*** Exception: Errors.hs:13:0-16: Irrefutable pattern failed 
+               for pattern [a, b]
+\end{alltt}
+\noindent
+when either \texttt{a} or \texttt{b} is evaluated.
+
+\end{itemize}
+\vspace{-8pt}
+
+\section*{Module errors}
+\index{errors!module}\index{modules!errors}
+\vspace{-5pt}
+
+The \texttt{module} and \texttt{import} statements can provoke a variety of
+error messages: files may not be present, or may contain errors; names may be
+included more than once, or an alias on inclusion may cause a name clash. The
+error messages for these and other errors are self-explanatory.
+\vspace{-8pt}
+
+\section*{System messages}
+\index{system messages}
+\vspace{-5pt}
+
+In response to some commands and interrupts, the system generates messages,
+including
+\begin{itemize}
+\item
+\begin{alltt}
+\^{}C ... Interrupted
+\end{alltt}
+signalling the interruption of the current task by typing \texttt{Ctrl-C}.
+\item
+The message
+\begin{alltt}
+<interactive>: memory allocation failed (requested 2097152 bytes)
+\end{alltt}
+which shows that the space consumption of the evaluation exceeds that
+available. One way around this is to increase the size of the heap. 
+\end{itemize}
+
+A measure of the space complexity of a function, as described in Chapter
+\ref{behaviour}, is given by the size of the smallest heap in which the
+evaluation can take place; how this `residency' is measured is described in that chapter.\index{errors|)}\index{GHCi!errors|)}
+
+%\end{document}

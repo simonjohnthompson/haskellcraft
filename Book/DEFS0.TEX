@@ -1,0 +1,193 @@
+%	These definitions were written by Simon Thompson, 1989-1991.
+%
+%	(c) Simon Thompson 1991.
+
+% This file produced June 1994. Cut-down version of defs1.tex. Also
+% includes new fonts and other changes.
+
+\newfont{\latt}{cmtt12}
+\newfont{\mytt}{cmtt10}
+\newfont{\smtt}{cmtt8}
+\newcommand{\mi}{\mytt}
+
+% Force the separation between paragraphs to be zero.
+
+\setlength{\parskip}{0pt}
+
+%	First something to give Miranda source code listings.
+%	Then a lot of abbreviations, to work in both LR and
+%	math modes. These don't work in arrays, etc.
+%	Finally, the basic macros for proof rules.
+
+%	Definitions of environment, a change to the
+%	obeyspaces macro (cf ref. for details) and
+%	a number of definitions of new commands to
+%	use quantifiers and logical operations outside
+%	math mode.
+
+%change of catcode commented out - 12.6.92
+\newenvironment{ttdisplay}{\begin{alltt}%
+\mi\obeylines\obeyspaces\frenchspacing\catcode`\_=12%
+\setlength{\parskip}{0pt}%
+}{\end{alltt}}
+
+\newcommand{\so}{\begin{ttdisplay}\parindent 1pc}
+\newcommand{\st}{\end{ttdisplay} \noindent }
+\newcommand{\stt}{\end{ttdisplay}}
+
+\newcommand{\inso}{\mi\catcode`\_=12}
+\newcommand{\inst}{\rm}
+
+% An environment which allows Miranda text to be printed in a verbatim
+% form, whilst at the same time allowing math style quantifiers and
+% the like.
+% The change of catcode for underscore is to disable its
+% special interpretation under TeX. We can therefore
+% still use it within Miranda identifiers, etc.
+% The abbreviations \so \st are used for historical reasons, as
+% similar ones were used in troff -ms.
+% The \noindent in the \st is to ensure that we can use \st
+% within a paragraph to perform some displaying, without
+% the line that follows starting with an indentation.
+
+{\obeyspaces\global\let =\ }
+
+% See pages 380-381 of the TeX book for the source of the line above.
+% It makes sure that spaces are really treated as spaces by the 
+% obeyspaces macro, and so by the ttdisplay environment.
+
+% Tight itemized lists: make \itemsep zero
+
+\newenvironment{titemize}{\begin{list}
+                        {$\bullet$}
+                         {\setlength{\itemsep}{0pt}}}{\end{list}}
+
+% Logical symbols -- uses the 2e \ensuremath command
+
+\newcommand{\all}{\ensuremath{\forall}}
+\newcommand{\allv}{\ensuremath{\forall_{\hspace*{-1.5pt}v\hspace*{1pt}}}}
+\newcommand{\exi}{\ensuremath{\exists}}
+\newcommand{\ou}{\ifmmode \vee \else$\vee$\fi}
+\newcommand{\an}{\ensuremath{\wedge}}
+\newcommand{\imp}{\ensuremath{\Rightarrow}}
+\newcommand{\no}{\ensuremath{\neg}}
+\newcommand{\bi}{\ensuremath{\Leftrightarrow}}
+\newcommand{\turn}{\ensuremath{\vdash}}
+\newcommand{\bo}{\ensuremath{\bot}}
+\newcommand{\se}{\ensuremath{\equiv}}
+
+% Logical symbols for 209: commented out
+
+%\newcommand{\an}{\ifmmode \wedge \else$\wedge$\fi}
+%\newcommand{\all}{\ifmmode \forall \else$\forall$\fi}
+%\newcommand{\exi}{\ifmmode \exists \else$\exists$\fi}
+%\newcommand{\imp}{\ifmmode \Rightarrow \else$\Rightarrow$\fi}
+%\newcommand{\no}{\ifmmode \neg \else$\neg$\fi}
+%\newcommand{\bi}{\ifmmode \Leftrightarrow \else$\Leftrightarrow$\fi}
+%\newcommand{\turn}{\ifmmode \vdash \else$\vdash$\fi}
+%\newcommand{\bo}{\ifmmode \bot \else$\bot$\fi}
+%\newcommand{\se}{\ifmmode \equiv \else$\equiv$\fi}
+
+% Backslash and Or in mi font
+
+\newcommand{\bs}[1]{{\ttfamily \symbol{92}#1}}
+\newcommand{\mor}{{\ttfamily \symbol{92}/}}
+
+% Miranda quantifiers
+ 
+%\newcommand{\alldf}{\ifmmode \forall_{\tt\,\!def} \else $\forall_{\tt\,\!def}$\fi}
+%\newcommand{\allfdf}{\ifmmode \forall_{\tt fin-def} \else $\forall_{\tt fin-def}$\fi}
+%\newcommand{\allfin}{\ifmmode \forall_{\tt fin} \else $\forall_{\tt fin}$\fi}
+
+% A proper twiddle, with height adjusted.
+
+\newcommand{\twid}{\raisebox{0ex}[0ex][0ex]{\Large\raisebox{-5pt}{$\,\tilde{}\:$}}}
+
+% Comment symbol in a draft.
+
+\newcommand{\comment}[1]{\noindent $\bigcirc$ {\large \sl #1}}
+
+% Exercises
+
+\newcommand{\exer}{\vspace{0.1in}\noindent{\textsf{\textbf{
+  Exercises}}}\nopagebreak}%\vspace{0.1in}\nopagebreak}
+\newcommand{\exone}{\vspace{0.1in}\noindent{\textsf{\textbf{
+  Exercise}}}
+ \nopagebreak\vspace{0.1in}\nopagebreak}
+\newcommand{\case}{\medskip\noindent{\bf Case}}
+
+% Numbering Exercises. Restart numbering in each chapter
+% -- this needs to be done by a restart at the beginning
+% of each chapter. See \chapstart below
+
+% \exn is the command to give the next exercise number
+
+\newcounter{exnum}
+
+\newcommand{\exn}{\medskip\noindent\addtocounter{exnum}{1}\arabic{chapter}.\arabic{exnum}\ }
+
+% Cross-referencing of exercises. NB only allows backwards references!
+
+% \sexn{XXX} generates the next exercise number and saves the typeset text
+% in the \sbox called XXX; available boxes currently are \locala, \localb
+% \sexn uses \exnshort, not used elsewhere.
+
+\newcommand{\exnshort}{\addtocounter{exnum}{1}\arabic{chapter}.\arabic{exnum}}
+\newcommand{\sexn}[1]{\sbox{#1}{\exnshort}\medskip\noindent\usebox{#1}}
+
+% Chapter start macro - reset exercise counter to zero.
+
+\newcommand{\chapstart}{\setcounter{exnum}{0}}
+
+% Tables
+
+\newenvironment{mytable}{\begin{tabular}{>{\hskip1pc}p{1.3in}p{3in}}}{\end{tabular}}
+\newenvironment{mytablethree}{\begin{tabular}{p{0.7in}p{1.5in}p{2in}}}{\end{tabular}}
+
+% Local references: use the boxes \locala \localb
+
+\newsavebox{\locala}
+\newsavebox{\localb}
+
+% Drawing a vertical line: the argument is its height. It has zero width
+% and is defined not to extend beyond the line on which it lies.
+
+\newcommand{\vertline}[1]{
+\hspace*{2pt}\raisebox{0pt}[0pt][0pt]{\rule{0.5pt}{#1}}\hspace*{-2.5pt}} 
+
+% start and end of proof
+
+\newcommand{\startpr}{\subparagraph{Proof}}
+\newcommand{\blackbox}{\hfill\rule{8pt}{8pt}}  
+
+% explaining an equation
+
+\newcommand{\push}[1]{\hfill{\rm #1}}
+
+
+% Natural deduction rule layout.
+
+\newcommand{\tworule}[3]
+{\begin{array}{cc}
+#1 & #2 \\
+\hline
+\multicolumn{2}{c}{#3}
+\end{array} }
+
+\newcommand{\threerule}[4]
+{\begin{array}{ccc}
+#1 & #2 & #3 \\
+\hline
+\multicolumn{3}{c}{#4}
+\end{array} }
+
+
+% Semantic brackets (1/98)
+
+\newcommand{\seml}{\ensuremath{[\![}}
+\newcommand{\semr}{\ensuremath{]\!]}}
+
+% One step of a calculation (6/98)
+
+\newcommand{\step}{{\ensuremath\leadsto\ }}
+

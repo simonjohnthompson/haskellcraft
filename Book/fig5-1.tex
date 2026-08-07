@@ -1,0 +1,44 @@
+\begin{figure}
+\begin{center}
+\begin{tabular}{>{\ttfamily}p{0.7in}>{\ttfamily}p{1.5in}>{\setlength{\rightskip}{0pt plus 1fil}}p{2.5in}}
+: & a -> [a] -> [a] & Add a single element to the front of a list.\\
+&& \texttt{3:[2,3] \step [3,2,3]}\\ \\
+++ & [a] -> [a] -> [a] & Join two lists together.\\ 
+&& \texttt{"Ron"++"aldo" \step "Ronaldo"}\\ \\
+!! & [a] -> Int -> a & \texttt{x!!n} returns the element of \texttt{x}
+at position \texttt{n}, counting from \texttt{0}. \texttt{[14,7,3]!!1 \step 7}\\ \\
+concat & [[a]] -> [a] & Concatenate a list of lists into a single
+list.\\
+&& \texttt{concat [[2,3],[],[4]] \step [2,3,4]}\\ \\
+length & [a] -> Int & The length of the list.\\
+&& \texttt{length "word" \step 4}\\ \\
+head,last & [a] -> a & The first/last element of the list.\\
+&& \texttt{head "word" \step 'w'}\\
+&& \texttt{last "word" \step 'd'}\\ \\
+tail,init & [a] -> [a] & All but the first/last element of the list.\\
+&& \texttt{tail "word" \step "ord"}\\
+&& \texttt{init "word" \step "wor"}\\ \\
+replicate & Int -> a -> [a] & Make a list of \texttt{n} copies of the
+item.\\
+&& \texttt{replicate 3 'c' \step "ccc"}\\ \\
+take & Int -> [a] -> [a] & Take \texttt{n} elements from the front of a
+list.\\
+&& \texttt{take 3 "Peccary" \step "Pec"}\\ \\
+drop & Int -> [a] -> [a] & Drop \texttt{n} elements from the front of a
+list.\\
+&& \texttt{drop 3 "Peccary" \step "cary"}\\ \\
+splitAt & Int->[a]->([a],[a]) & Split a list at a given position.\\
+&& \mbox{\texttt{splitAt 3 "Peccary" \step ("Pec","cary")}}\\ \\
+reverse & [a] -> [a] & Reverse the order of the elements.\\
+&& \texttt{reverse [2,1,3] \step [3,1,2]}\\ \\
+zip & [a]->[b]->[(a,b)] & Take a pair of lists into a list of
+pairs.\\
+&& \texttt{zip [1,2] [3,4,5] \step [(1,3),(2,4)]}\\ \\
+unzip & [(a,b)] -> ([a],[b]) & Take a list of pairs into a pair of
+lists.\\
+&& \mbox{\texttt{unzip [(1,5),(3,6)] \step ([1,3],[5,6])}}
+\end{tabular}
+\end{center}
+\caption{Some polymorphic list operations from \texttt{Prelude.hs}}
+\label{polyListOps}
+\end{figure}

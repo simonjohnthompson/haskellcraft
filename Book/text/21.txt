@@ -1,0 +1,295 @@
+Conclusion
+==========
+
+[conclusion]
+
+This book has covered the basics of functional programming in the lazy
+language Haskell. It has shown how to craft programs, both by giving
+extensive examples as each new aspect of the language was introduced,
+and also by giving a series of larger case studies that run through the
+book.
+
+The power of functional programming {#the-power-of-functional-programming .unnumbered}
+-----------------------------------
+
+A functional programmer models the real world at a high level of
+abstraction, concentrating on what relationships there are between
+values, embodied in function definitions. This contrasts with a
+lower-level view in which the details of how items are related
+predominate. For instance, in Haskell lists are simply values, whereas
+in C or C++ they become data structures built from pointers, and even in
+Java or C\# it is difficult to present a suitably abstract model of
+lists. This higher-level approach has a number of consequences, which
+have come out in the course of the book.
+
+-   Higher-order functions and polymorphism combine to support the
+    construction of general-purpose libraries of functions, such as the
+    list functions in the Haskell standard prelude and library. The
+    `map` function, for instance,
+
+    `map :: (a -> b) -> [a] -> [b]`
+
+    embodies the ‘pattern’ of applying the same transformation to every
+    element in a list, which will be **reused** in a host of
+    applications of lists. Also supporting reuse through **overloading**
+    are type classes, used for instance in giving the function
+
+    `elem :: Eq a => a -> [a] -> Bool`
+
+    which tests for membership of a list using the overloaded equality
+    function.
+
+-   The definitions of functions are equations which express properties
+    of the functions defined. We can also express other properties of
+    functions in a similar way. For example, we can relate `map` and
+    function composition, ‘`.`’, by saying that for all functions `f`
+    and `g`,
+
+    `map (f . g) ==  map f . map g`
+
+    We can get *strong evidence* that this property holds by testing it
+    for randomly generated values of `f` and `g` using QuickCheck.
+
+    If we want to do some more work, we can *prove* this property from
+    the definitions of `map` and composition. Proof provides a user with
+    assurance about how a program behaves on all arguments, in contrast
+    to testing which can only give direct information about its
+    behaviour on a (hopefully) representative selection of inputs.
+
+-   Data structures can be introduced in a directly recursive manner,
+    giving trees, queues and so forth without having to look at their
+    representations. Algorithms are written at the same level as they
+    would be described informally, in contrast with more traditional
+    approaches which make the representation very clear.
+
+-   Pulling all this together, we can use these and other facilities of
+    Haskell to build implementations of domain-specific languages (DSLs)
+    embedded in Haskell. These DSLs allow users to express problems and
+    models in a language appropriate to the domain, but at the same time
+    to use all the power of Haskell when necessary.
+
+A text like this can only provide an introduction to a subject as rich
+and developed as functional programming; the rest of this concluding
+chapter discusses other aspects of the subject, as well as giving
+pointers to other sources on the Web and in books and articles.
+
+Further Haskell {#further-haskell .unnumbered}
+---------------
+
+The purpose of this text is to introduce functional programming ideas
+using the Haskell language. It covers the important aspects of the
+language, but does not aim to be complete. Among the topics omitted are
+data types with labelled fields, which resemble records or structures in
+other languages; strictness annotations, which are used to make data
+type constructors strict in some or all of their arguments; details of
+the `Read` class and the numeric types and classes.
+
+Further information about all these can be found in the Haskell language
+report @haskell2010, and the ‘Gentle Introduction’ of @gentle98 also
+contains useful information about some of them, as well as providing an
+overview of the language for an experienced functional programmer. Both
+of these, as well as many other Haskell resources, can be found at the
+Haskell home page, `http://www.haskell.org/`.
+
+Where can you go to find out what to do next in Haskell? Again the
+`haskell.org` site has many links, but three specific things you might
+like to look at are
+
+-   *Real World Haskell* @realWorldHaskell which is available in print
+    and also online. It starts from the beginning, but goes at a faster
+    pace than we did here, and so covers a number of practical aspects
+    of Haskell which we weren’t able to do, such as the foreign function
+    interface. So, it’s the perfect follow-on read.
+
+-   *Learn You a Haskell for Great Good!* @learnYou is a website and
+    soon to be a printed book which introduces Haskell for those who are
+    familiar with imperative programming. It’s written in a very
+    approachable style, and complements what we have covered here, as
+    well as going into some topics – like monads and zippers – in much
+    more detail.
+
+-   *Pearls of Functional Algorithm Design* @BirdPearls this delightful
+    book looks at a series of 30 problems, and solves them using the
+    *design by calculation* approach, which is ideally suited to writing
+    functional programs in Haskell.
+
+The text has discussed many of the most important functions in the
+standard prelude but on the whole has avoided discussing the contents of
+the libraries in detail. As we explained in Chapter [progLists], they
+are documented in Haddock, and this documentation is available online
+for type- and name-based search in Hoogle. Moreover, the packages in
+Hackage are themselves documented and have information available in
+Hayoo.
+
+### The future of Haskell {#the-future-of-haskell .unnumbered}
+
+Haskell was first defined in 1987, and has been modified and extended a
+number of times since then. This text is written in Haskell 2010, which
+is meant to provide a stable base system consisting of tried and tested
+features.
+
+The progress of research in functional programming makes it clear that a
+language like Haskell will not stand still, and Haskell is now
+undergoing regular language standard updates. These are set to
+incorporate features which have become *de facto* parts of the language
+through their implementation in GHC, as well as more advanced features,
+particularly in the type system. The Haskell home page can be relied
+upon to contain up-to-date information on the status of Haskell.
+
+![image](Pictures/HaskellDotOrg.pdf)
+
+[HaskellDotOrg]
+
+Haskell on the web {#haskell-on-the-web .unnumbered}
+------------------
+
+There are now many resources on Haskell and functional programming to be
+found on the wbe. This text itself has a home page at
+
+`www.haskellcraft.com`
+
+which lists all the links given here. The Haskell home page, Figure
+[HaskellDotOrg], is at
+
+`http://www.haskell.org/`
+
+and that should be your first stop for everything to do with Haskell. As
+you can see from the figure, the home page has links to learning
+resources, to documentation about libraries and packages, and to the
+wider Haskell community.
+
+The Haskell community includes online forums (IRC, mailing lists), news
+(Reddit), blogging (Planet Haskell) and help (Stack Overflow). The
+Haskell Communities and Activities reports provide a biannual snapshot
+of what’s going on with Haskell: the most recent edition is 77
+(two-column, A4) pages long, and contains a wealth of detail on who is
+doing what with Haskell. Subscribers to Planet Haskell or the mailing
+lists also receive Haskell Weekly News, which summarises Haskell-related
+software releases, blog entries and other news.
+
+The Haskell language was named in honour of Haskell Brooks Curry. A
+short biography and photograph of Curry can be found at
+
+`http://www-history.mcs.st-and.ac.uk/Biographies/Curry.html`
+
+Other functional programming languages {#other-functional-programming-languages .unnumbered}
+--------------------------------------
+
+Haskell is a lazy, strongly typed functional programming language;
+another is Miranda @mira [@miraCraft]. In this text laziness is only
+examined explicitly in Chapter [lazy], and up to that point it looks at
+aspects of functional programming which are broadly shared with Standard
+ML , the best known and most widely used strict and strongly typed
+functional language, for which provides an introduction. The latest
+member of the ML family of languages, is F\# @Fsharp, which is
+distributed by Microsoft as a part of Visual Studio 2010. Since is
+possible to model lazy evaluation within a strict language, and Haskell
+provides facilities to make evaluation strict, the Haskell and ML
+schools of programming are very close indeed.
+
+A different style of functional programming, ‘point-free programming’,
+eschews variables as much as possible: this was introduced in . is a
+text that emphasizes the benefits of this style in supporting program
+transformation and also advocates a ‘relational’ style of programming
+which extends the functional.
+
+LISP is the oldest established functional language, but it differs from
+Haskell and SML in not being strongly typed. An excellent tutorial
+introduction to programming in the Scheme dialect of LISP is given in .
+*Land of Lisp* @LandOfLisp is a book, website and music video[^1]
+introducing Lisp by developing a series of games.
+
+Erlang is a concurrent, fault-tolerant, distributed language, based on a
+functional programming core. Erlang @progErlang [@erlangProg] was
+developed within Ericsson, and as well as its use in telecoms
+applications, has applications in the financial sector, and to
+high-availability distributed systems in general.
+
+Two surveys of applications of functional programming languages in
+large-scale projects are and , and there is also up-to-date information
+about this at the Haskell home page.
+
+Over the last two decades, powerful techniques of implementation of
+especially lazy functional languages have been developed. The twin texts
+@pj [@pj-lester] describe the foundations of these in lucid detail.
+
+Where is functional programming going? {#where-is-functional-programming-going .unnumbered}
+--------------------------------------
+
+The material in this text is an introduction to modern functional
+programming in a typed, lazy, language. As the field develops, new
+techniques and approaches are continually being developed; a good place
+to start in learning about these is by looking at the proceedings of a
+series of summer schools in Advanced Functional Programming @advancedFP
+[@advancedFP2; @advancedFP3; @advancedFP4; @advancedFP5; @advancedFP6].
+
+Research in functional programming is reported in the <span>*Journal of
+Functional Programming*</span>
+
+`http://journals.cambridge.org/jfp`
+
+and at the annual International Conference in Functional Programming,
+
+`http://www.icfpconference.org/`
+
+Each year there is a one-day symposium devoted to research in Haskell,
+
+`www.haskell.org/haskell-symposium/`
+
+and the proceedings of this symposium (formerly workshop) will give you
+a view of the direction in which Haskell is going. The symposium is
+co-located with ICFP, as is the meeting of CUFP, `cufp.org`, which
+represents Commercial Users of Functional Programming.
+
+To see the ways in which functional languages are being used in
+education, the proceedings of a meeting on Functional Languages in
+Education appear in , and these have been followed up with a series of
+occasional workshops co-located with ICFP.
+
+It is difficult to predict future directions in a field like computing.
+In the previous edition of this book (written 1998–9) I predicted three
+things:
+
+-   functional languages will come to be used as parts of larger
+    systems;
+
+-   type systems for languages like Haskell will become more powerful
+    and esoteric, and
+
+-   tool support, for instance giving feedback on the behaviour of lazy
+    programs, will come to maturity.
+
+Not a bad set of predictions. The first is certainly true, with Haskell
+inter-operating effectively with a range of other languages through its
+foreign function interface. GCH continues to be a laboratory for type
+system research, with recent advances in type-level programming taking
+it ever closer to dependently-typed languages such as Agda,
+
+`http://wiki.portal.chalmers.se/agda/`
+
+Tool support for Haskell has also come of age, with many tools
+integrated into GHC, and it becoming easier for others to integrate
+their work through the definition of an API for the internals of GHC.
+What I had not predicted was the growth in the Haskell developer
+community: fuelled particularly by Hackage and Cabal, making it easy to
+share and to work collaboratively, there are now close to three thousand
+projects on Hackage, giving the developer community a critical mass
+which was entirely lacking a decade ago.[^2]
+
+What of the next few years? The big challenge for systems developers is
+the rise of multicore chips: chips with thousands of processors are on
+the roadmap, and so the question arises of how best to program them, or
+indeed how to program them at all! Functional languages, because of
+their lack of side-effects, and clean models for concurrency, make them
+ideal candidates for the next generation of general purpose languages
+for multicore. The next few years will be fascinating, and of course,
+unpredictable, but it will be a surprise if functional languages are not
+playing a much more important role in robust software development in ten
+years time, with Haskell central to this achievement.
+
+[^1]: …simple but refined, guaranteed to blow your mind …
+
+[^2]: It was also a surprise that Microsoft started to deploy a
+    functional language as a part of their main language suite in Visual
+    Studio: a friend mailed me and said that his first thought it was an
+    ‘April fool’ message, even though it came in June!

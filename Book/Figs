@@ -1,0 +1,70 @@
+1.1 Calculating a rotation     11
+1.2 Viewing \texttt  {Pictures} in a web browser     19
+1.3 ASCII-art pictures     20
+1.4 Reflection in vertical and horizontal mirrors     23
+1.5 Coverage of testing, property-based testing and proof     24
+2.1 An example script, \texttt  {FirstScript.hs}.     28
+2.2 A GHCi session in Mac OS X     29
+2.3 A WinGHCi session in Windows XP     30
+2.4 Principal GHCi commands     32
+2.5 A GHCi session     34
+2.6 A view of the \texttt  {Pictures} module.     36
+3.1 The general form for function definitions with guards.     50
+3.2 Floating-point operations and functions.     57
+6.1 Some polymorphic list operations from \texttt  {Prelude.hs}.     129
+6.2 Some monomorphic list operations from the \texttt  {Prelude}.     130
+6.3 The Haskell infrastructure     131
+6.4 The HackageDB description of the \texttt  {agum} package     135
+6.5 Haddock documentation for the \texttt  {agum} package     136
+6.6 Hoogle in action     137
+6.7 `Ragged' picture     144
+6.8 ``Padded' picture     145
+6.9 An example \texttt  {Image}.     148
+6.10 The geometrical view of \texttt  {flipV} and \texttt  {rotate}.     149
+6.11 Superimposing two \texttt  {Images}.     150
+6.12 A supermarket bill     151
+6.13 Bills with `multibuy' discounts.     155
+9.1 Reversing the list \texttt  {xs++ys}     215
+11.1 Function composition     242
+11.2 Plumbing \texttt  {f} and \texttt  {g} together.     248
+13.1 The Haskell 2010 classes     315
+14.1 An example of a tree of integers.     340
+14.2 Two trees.     342
+14.3 Rearranging additions     346
+14.4 Joining together functions.     352
+14.5 Error-handling functions.     357
+14.6 Movable objects (1).     364
+14.7 Movable objects (2).     365
+14.8 Named movable objects.     366
+15.1 The file \texttt  {Types.hs}.     384
+15.2 Module directives for Huffman tree formation.     388
+15.3 The module \texttt  {MakeCode.hs}.     388
+15.4 The \texttt  {Main} module of the Huffman coding system.     393
+15.5 The modules of the Huffman coding system.     394
+16.1 The \texttt  {Store} abstract data type.     398
+16.2 A two-list queue in action.     405
+16.3 Insertion into a search tree     416
+16.4 Operations over search trees.     417
+16.5 Deletion from a search tree     418
+16.6 Operations over the set abstract data type, part 1.     423
+16.7 Operations over the set abstract data type, part 2.     424
+16.8 Functions over the type of relations, \texttt  {Relation a}.     429
+17.1 The major parsing functions.     460
+17.2 The Sieve of Eratosthenes.     469
+17.3 A generator and a transformer.     474
+17.4 Linking processes together.     475
+17.5 A process to compute the running sums of a list.     475
+18.1 Replacing the elements of a tree with natural numbers.     507
+19.1 Languages in the Glasgow Haskell Compiler     514
+19.2 Stand-alone and embedded DSLs     515
+19.3 Shallow and deep embeddings     518
+19.4 Positioned images     527
+19.5 Generating values of type \texttt  {Info}     529
+19.6 Generating `sized' expressions     530
+20.1 Counting the number of nodes of trees.     540
+20.2 Computing the sum \texttt  {n+...+m}     553
+20.3 Performance of \texttt  { sumI 1 1000000}     554
+20.4 Performance of \texttt  { sumIS 1 1000000}     555
+20.5 Calculating \texttt  {fibP 3}.     557
+20.6 Three algorithms for the maximum common subsequence.     559
+21.1 The Haskell home page, \texttt  {www.haskell.org}     566

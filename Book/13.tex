@@ -1,0 +1,2055 @@
+%\documentclass{book}\usepackage{sjtfonts}\usepackage{includegraphics}\usepackage{alltt}\usepackage{latexsym}
+%\usepackage{array}
+%\begin{document}\input{defs0}\input{miradefs}\setcounter{chapter}{11}\setcounter{page}{201}
+
+\chapter{Overloading, type classes and type checking}
+\chapstart
+\label{typeClasses}\label{types}
+\label{classes}
+\index{classes|(}
+\index{type classes|see{classes}}
+
+In looking at Haskell so far we have seen two kinds of function which
+work over more than one type.
+A polymorphic function such as \texttt{length} has a \emph{single}
+definition which works over all its types. On the other hand, 
+\textbf{overloaded}\index{function!overloaded|see{overloading}}\index{overloading}
+functions like equality, \texttt{+} and \texttt{show} can be used at a
+variety of types, but with different definitions at the different
+types. 
+
+The chapter starts with a discussion of the benefits of overloading, before looking at 
+\textbf{type classes}, which are collections of types; what the
+members of a class have in common is the fact that certain functions are
+defined over the type. For instance, the members of the equality type
+class, \texttt{Eq}, are those types which carry an equality function,
+\texttt{==}. Type classes are thus the mechanism by which overloaded
+functions can be given types in Haskell.
+
+We shall see how to define type classes and types which belong to these
+classes: the \textbf{instances} of the class. 
+Haskell's prelude and libraries contain a number of classes and
+instances, particularly for numeric types -- we survey these, referring
+readers to the Haskell report \cite{haskell2010} for a full exposition.
+
+
+We then look at how type inference and type checking work in Haskell, first looking at types without type variables -- monomorphic definitions -- and then at polymorphic, overloaded definitions, and see how they are given types, illustrated by a series of examples.
+
+\section{Why overloading?}
+\index{overloading!reason for}
+\label{whyOver}
+
+This section looks at the reason for including overloading in Haskell;
+we do this by looking at a scenario.
+
+Suppose that Haskell did not have overloading, and that we wanted to
+check whether a particular element is a member of a list of type
+\texttt{Bool}. We would define a function like
+\begin{alltt}\minx{elemBool}
+elemBool :: Bool -> [Bool] -> Bool
+elemBool x [] = False
+elemBool x (y:ys)
+  = (x \subscr{==}{Bool} y) || elemBool x ys
+\end{alltt}
+where we have written \texttt{\subscr{==}{Bool}} for the equality 
+function over \texttt{Bool}. 
+
+Suppose now that we want to check whether
+an integer is a member of an integer list, then we need to define a
+\textit{new}
+function 
+\begin{alltt}\minx{elemInt}
+elemInt :: Int -> [Int] -> Bool
+\end{alltt}
+which differs from \texttt{elemBool} only in using \texttt{\subscr{==}{Int}}
+instead of \texttt{\subscr{==}{Bool}}. Each time we want to check
+membership of a list of a different type we will have to define yet
+another -- very similar -- function. 
+One way out of this problem is to make the equality function a parameter
+of a general function 
+\begin{alltt}
+elemGen :: (a -> a -> Bool) -> a -> [a] -> Bool
+\end{alltt} but this gives too much
+generality, because it can be used with {\em any\/} parameter of type
+\texttt{a -> a -> Bool} rather than just an equality function. More importantly, using this definition the parameter has to be passed in explicitly each time the
+function \texttt{elemGen} is used, like this
+\begin{alltt}
+elemGen (\subscr{==}{Bool})
+\end{alltt}
+making programs less easy to read.\footnote{In fact, the implementation of classes works like this, passing in a \emph{dictionary} argument containing the appropriate equality function at each point that \texttt{elem} is used, after it has been transformed into  \texttt{elemGen}.}
+The alternative is to define a function which uses the overloaded
+equality,
+\begin{alltt}
+elem :: a -> [a] -> Bool
+\end{alltt}
+where the type \texttt{a} \emph{has to be restricted to those types \texttt{a} which have
+an equality}. The advantages of this approach are
+\begin{itemize}
+\item{\bf Reuse}\hskip 1em The definition of \texttt{elem} can be used over all types
+with equality.
+\item{\bf Readability}\hskip 1em It is much easier to read \texttt{==} than
+\texttt{\subscr{==}{Int}} and so on. This argument holds particularly for numeric operators, where
+it is more than tiresome to have to write \texttt{\subscr{+}{Int}},
+\texttt{\subscr{*}{Float}} and so on.
+\end{itemize}
+What this discussion shows is that a mechanism is needed to give a type
+to functions like \texttt{elem}: that is precisely the purpose of type
+classes.
+
+\section{Introducing classes}
+\index{classes}
+
+The \texttt{elem} function appears to have the type
+\begin{alltt}
+elem :: a -> [a] -> Bool
+\end{alltt}
+\emph{but} \texttt{elem} \emph{only has this type for types} \texttt{a} \emph{which have an equality
+function}. How is this to be expressed?
+We need some way of saying whether we have an equality
+function over a given type. We call the collection of types over which a
+function is defined a \textbf{type class} or simply a \textbf{class}. For instance, 
+the set of types over which \texttt{==} is
+defined is the \textbf{equality class}, \texttt{Eq}.
+\minx{Eq}
+
+\subsection*{Defining the equality class, \texttt{Eq}} 
+\index{equality}
+
+How do we define a class, such as \texttt{Eq}? 
+We say what is needed for a type 
+\texttt{a} to be in a class. In this case we need a function \texttt{==} defined
+over \texttt{a}, of type \texttt{a->a->Bool}. 
+\begin{alltt}\minx{class}
+class Eq a where
+  (==) :: a -> a -> Bool
+\end{alltt}
+In general we will specify an \textbf{interface} or  \textbf{signature} which has to be implemented for a type to belong to the class.
+
+Members of a type class are called its
+\textbf{instances}, and a type is made into an instance by giving an implementation of the interface for that type. This is called an instance declaration.
+Built-in instances of \texttt{Eq}\index{instance!of class}\index{classes!instance}
+include the base types
+\texttt{Int}, \texttt{Float}, \texttt{Bool}, \texttt{Char}. Other instances are given by
+tuples and lists
+built from types which are themselves instances of \texttt{Eq}; examples include
+the types \texttt{(Int,Bool)} and \texttt{[[Char]]}. 
+
+Not all types will necessarily
+carry an equality; we may choose not to define one, for reasons of information
+hiding, or there may be no natural way of defining an equality on a particular
+type. 
+
+For example, function
+types like \texttt{Integer -> Integer} are not instances of
+\texttt{Eq}, since there is no way that we can write a program which will decide
+whether two functions over \texttt{Integer} have the same behaviour, that is have the same values at every possible input.
+
+
+\beware{`Instances' in Haskell}{
+It is unfortunate that the term {\em instance\/} is used in two
+\index{instance!different meanings in Haskell}
+different ways in Haskell. We talked in Section \ref{poly}
+of a type \texttt{\subscr{t}{1}}
+being an instance of a
+{\em type\/} \texttt{\subscr{t}{2}}, when we can substitute for a type
+variable in \texttt{\subscr{t}{2}} to give \texttt{\subscr{t}{1}}. Here we have
+talked about a type being an instance of a {\em class}. It should be clear which one we mean from the context of a discussion, but it's helpful to bear this `overloading' of terminology in mind.}
+
+\subsection*{Functions that use equality}
+
+Many of the functions which we have defined so far use equality
+over particular types. The function 
+\begin{alltt}\minx{allEqual}
+allEqual :: Int -> Int -> Int -> Bool
+allEqual m n p = (m==n) \&\& (n==p)
+\end{alltt}
+decides whether three integers are equal. If we examine the definition
+itself, it contains nothing which is specific to integers; the only constraint
+it makes is that \texttt{m}, \texttt{n} and \texttt{p} are compared for equality. Their
+type can be \texttt{a} \emph{for any \texttt{a} in the type class} \texttt{Eq}. This
+gives \texttt{allEqual} a most general type thus:
+\begin{alltt}\index{\symbol{61}\symbol{62}@\texttt{\symbol{61}\symbol{62}}}
+allEqual :: Eq a => a -> a -> a -> Bool
+allEqual m n p = (m==n) \&\& (n==p)
+\end{alltt}
+The part before the \texttt{=>} is called the \textbf{context}. We can read the type
+\index{context}
+as saying that 
+\begin{quote}
+\texttt{allEqual} has type
+\texttt{a -> a -> a -> Bool} for all types \texttt{a} in the class \texttt{Eq} (that is,  all types \texttt{a} for which \texttt{==} is defined)
+\end{quote}
+This means that \texttt{allEqual} can be used at many types, including these
+\begin{alltt}
+allEqual :: Char -> Char -> Char -> Bool
+allEqual :: (Int,Bool) -> (Int,Bool) -> (Int,Bool) -> Bool
+\end{alltt}
+since both \texttt{Char} and \texttt{(Int,Bool)} belong to \texttt{Eq}.
+
+What happens if we break this constraint by trying
+to compare three functions for equality? If we define
+\index{errors!and classes}
+\begin{alltt}
+suc :: Integer -> Integer
+suc = (+1)
+\end{alltt}
+and try to evaluate
+\begin{alltt}
+allEqual suc suc suc 
+\end{alltt}
+in GHCi we get the message\index{type error!instance error}
+\begin{alltt}
+    No instance for (Eq (Integer -> Integer))
+      arising from a use of `allEqual' at <interactive>:1:0-19
+    Possible fix:
+      add an instance declaration for (Eq (Integer -> Integer))
+    In the expression: allEqual suc suc suc
+    In the definition of `it': it = allEqual suc suc suc
+\end{alltt}
+which conveys the fact that \texttt{(Integer -> Integer)} is not in the \texttt{Eq} class, and suggests that the way to fix the problem is to add an instance declaration for that type. 
+
+\subsection*{More equality examples}
+
+The \texttt{elem} example in Section \ref{whyOver} will have the type
+\begin{alltt}
+elem :: Eq a => a -> [a] -> Bool
+\end{alltt}
+and so it will be usable at the types
+\begin{alltt}
+Bool -> [Bool] -> Bool
+Int  -> [Int]  -> Bool
+\end{alltt}
+and so on. Many of the functions we have defined already use equality in an
+overloaded way. We can
+use GHCi to deduce the most general type of a function, such as
+the
+\texttt{books} function from the library database of Section \ref{library},
+by commenting out its type declaration in the script, thus
+\begin{alltt}
+-- books :: Database -> Person -> [Book]\minx{books}
+\end{alltt}
+and then by typing\index{type@\texttt{:type}}
+\begin{alltt}
+:type books
+\end{alltt}
+to the prompt. The result we get in that case is
+\begin{alltt}
+books :: Eq a => [ (a,b) ] -> a -> [b]\minx{books}
+\end{alltt}
+which is perhaps a surprise at first. This is less so if we rewrite the
+definition with \texttt{books} renamed \texttt{lookupFirst},
+because it looks up all the pairs with a particular first part, and returns
+their corresponding second parts. Here it is with its variables renamed
+as well
+\begin{alltt}\minx{lookupFirst}
+lookupFirst :: Eq a => [ (a,b) ] -> a -> [b]
+\bl
+lookupFirst ws x 
+  = [ z | (y,z) <- ws , y==x ]
+\end{alltt}
+Clearly from this definition there is nothing specific about books or
+people
+and so it is polymorphic, if we can compare objects in the first halves of the
+pairs for equality. This condition gives rise to the context \texttt{Eq a}.
+Finally from Section \ref{library}, as we saw for \texttt{books},
+\begin{alltt}
+borrowed    :: Eq b => [ (a,b) ] -> b -> Bool\minx{borrowed}
+numBorrowed :: Eq a => [ (a,b) ] -> a -> Int\minx{numBorrowed}
+\end{alltt}
+
+\begin{summary}
+In this section we have introduced the idea of a class, which is a collection
+of types, its instances, with the property that certain functions described in an interface are
+defined over the type. One way we can think of a class is as an \textbf{adjective}: 
+any particular type is or is not in the class, just as the 
+\index{classes!as adjective}
+weather at any particular moment might or might not be sunny.
+
+We saw how equality could be seen as being defined over all the types in the
+class \texttt{Eq}. This allows many of the functions defined so
+far to be given polymorphic type, allowing them to be used over any type in
+the class \texttt{Eq}. In the following sections we explain how classes and
+instances are defined in general, and explore the consequences of classes for
+programming in Haskell.
+\end{summary}
+
+\begin{exercises}
+
+\item
+How would you define the `not equal'
+operation, \texttt{/=}, from equality, \texttt{==}? What is the type of
+\texttt{/=}?
+
+\item
+Define the function \texttt{numEqual} which takes a list of items, \texttt{xs} say,
+and an item, \texttt{x} say, and returns the number of times \texttt{x} occurs in
+\texttt{xs}. What is the type of your function? How could you use \texttt{numEqual}
+to define \texttt{member}?
+
+\item
+Define functions
+\begin{alltt}
+oneLookupFirst  :: Eq a => [ (a,b) ] -> a -> b
+oneLookupSecond :: Eq b => [ (a,b) ] -> b -> a
+\end{alltt}
+\texttt{oneLookupFirst} takes a list of pairs and an item, and returns the second
+part of the first pair whose first part equals the item. You
+should explain what your function does if there is no such pair. 
+\texttt{oneLookupSecond} returns the first pair with the roles of first and second
+reversed.
+\end{exercises}
+
+\section{Signatures and instances}
+\label{sigInsts}
+
+In the last section we saw that the operation of equality, \texttt{==}, 
+is overloaded. This allows \texttt{==} to be used over a variety of types, and
+also
+allows for functions using \texttt{==}
+to be defined over all instances of the class of types \texttt{Eq}.
+This section explains the mechanics of how classes are introduced, and then
+how instances of them may be declared. This allows us to
+program with classes that we define ourselves, rather than simply using the
+built-in classes of Haskell.
+
+
+\subsection*{Declaring a class}
+
+As we saw earlier, a class is introduced by a declaration like:
+\begin{alltt}
+class Info a where\minx{class}\minx{Info}
+  examples :: [a]
+  size     :: a -> Int
+\end{alltt}
+The declaration introduces the name of the class, \texttt{Info}, and this is
+followed by an \textbf{interface} or signature, that is a list of identifiers and their types. To be in the \texttt{Info} class the type
+\index{signature}\index{interface}
+\texttt{a} must carry the two bindings in the
+\minx{Info}
+signature:
+\begin{titemize}
+\item the \texttt{examples} list, which is a list of objects of type \texttt{a}, which we can think of as giving a list of representative examples from the type, and,
+\item the \texttt{size} function, which returns a measure of the size of the
+argument, as an integer.
+\end{titemize}
+The general form of a class definition will be:
+\begin{alltt}\index{classes!general form of definition}
+class Name ty where
+  ... signature involving the type variable ty ...
+\end{alltt}
+Now, how are types made instances of such a class?
+
+\subsection*{Defining the instances of a class}
+
+A type is made a member or \textbf{instance} of a class by defining
+the interface functions for the type. For example,
+\begin{alltt}
+instance Eq Bool where\minx{instance}\index{classes!instance}\minx{Eq}
+  True  == True  = True
+  False == False = True
+  _     == _     = False
+\end{alltt}
+describes how \texttt{Bool} is an instance of the equality class. The
+declarations that numeric types like \texttt{Int} and \texttt{Float} are in the
+equality class (and indeed other built-in classes) involve the appropriate
+primitive
+equality functions supplied by the implementation. 
+
+Although we have called the class \texttt{Eq} the equality class, there is
+no requirement that the \texttt{==} function we define has any of the usual
+properties of equality apart from having the same type as equality. It is up
+to the user to ensure that he or she makes sensible definitions, and documents
+them adequately.
+
+Going back to our \texttt{Info} example, we might say
+\begin{alltt}
+instance Info Char where\minx{Info}
+  examples = ['a','A','z','Z','0','9']
+  size _   = 1
+\end{alltt}
+This gives a list of six typical characters and states that each character is of size one. We can also make \texttt{Bool} and \texttt{Int} instances of \texttt{Info}, like this:
+\begin{alltt}
+instance Info Bool where
+  examples = [True,False]
+  size _   = 1
+  
+instance Info Int where
+  examples = [-100..100]
+  size _   = 1  
+\end{alltt}
+In the \texttt{examples} for \texttt{Bool} we can list all the elements, for integers we choose a range of ``small'' numbers; as for characters, we say each object is of size one. Finally we can look at the \texttt{data} type of \texttt{Shape}s, and declare an instance for them:
+\begin{alltt}
+instance Info Shape where
+  examples = [ Circle 3.0, Rectangle 45.9 87.6 ]
+  size     = round . area
+\end{alltt}
+Here we just list a couple of typical shapes, and use the \texttt{area}, rounded to an integer, as an indication of size
+
+\subsubsection*{Instances and contexts}
+
+Suppose that the type \texttt{a} is in the \texttt{Info} classs: this means that
+we can estimate the size of a value in
+\texttt{a}, and we have a list of examples of type \texttt{a}. Using this function and list we are able to define a \texttt{size} function for \texttt{[a]} and a list of examples of type \texttt{[a]} like thisto define those
+functions over \texttt{[a]}, so we can declare the following instance
+\begin{alltt}\index{context}
+instance Info a => Info [a] where ....
+\end{alltt}
+in which the\index{classes!context}
+\textbf{context} \texttt{Info a} appears, making clear that we are only providing information about lists of objects for which we already have information about the individual members.
+
+\begin{figure}[t]\index{errors!type error messages}
+\beware{Type error messages}{
+We first saw the example of a type error message mentioning `instances' in Section \ref{errors} where the application \texttt{4 double} gave rise to the error message
+\begin{alltt}
+\ \ \ \ No instance for (Num ((Integer -> Integer) -> t))
+
+\ \ \ \ \ \ arising from the literal `4' at <interactive>:1:0-7
+    ...
+\end{alltt}
+instead of the simple message ``attempt to apply a number to a function''.
+
+\medskip
+The problem is that we \emph{could} have overloaded the numbers to have this sort of behaviour, but common sense suggest that we haven't; it's difficult, though, to get error messages to reflect common sense, because it it inconsistent and context-dependent. At least, though, we can now understand what is being said in the error message, even if the appropriate course of action is quite different \ldots\ .
+}
+\end{figure}
+
+We can complete the
+definition like this
+\begin{alltt}\label{visiDec}
+instance Info a => Info [a] where
+  examples = [ [] ] ++ 
+             [ [x] | x<-examples ] ++ 
+             [ [x,y] | x<-examples , y<-examples ]
+  size     = foldr (+) 1 . map size  
+\end{alltt}
+Out list of examples is made up by the empty list, together with all the one and two element lists that can be built up from the \texttt{examples} of type \texttt{a}. So, in this definition we see overloading in action: on the left hand side of the \texttt{examples} is used at type \texttt{[a]}, while on the right hand side the three occurrences are all at type \texttt{a}.
+
+To estimate the size of a list of \texttt{a} we
+take the size of each element (\texttt{map size}), and add one to the total of
+these sizes using \texttt{foldr (+) 1}. Again, on the 
+right-hand side of this
+definition we use \texttt{size} over the type \texttt{a}; this
+shows that we need the context which says that \texttt{a} is in the \texttt{Info}
+class.
+
+\subsubsection*{Limitations}\index{classes!limitations}
+
+Instances in Haskell are \emph{global}, so that once you have declared an instance for a type, that instance is the one that you will have to use with that type: in particular it isn't possible to make instances \emph{local} to a module or set of modules. If you still want to do this, the mechanism to use would be to define a `wrapped' type, like
+\begin{alltt}
+data WInt = Wrap Int
+\end{alltt}
+and to declare the instances you want for this type of integers.
+
+There are also some limitations to what can be declared as an instance, in other
+words on what can appear after the \texttt{=>} (if any) in an instance
+declaration. This must either be a base type like \texttt{Int}, or consist of a
+type constructor like \texttt{[...]}, \texttt{(...,...)} or \texttt{Shape} applied to
+distinct type variables.
+
+We will {\em not\/} be able, for example, to declare
+\texttt{(Float,Float)} as an instance; nor can we use named types (introduced by
+a \texttt{type} definition). More details of the mechanism can be found in the
+Haskell 2010 report \cite{haskell2010}.
+
+\beware{Haskell 2010 \emph{vs.}\ GHC Haskell}{\index{Haskell 2010!and GHC Haskell}
+In fact, GHC implements a more flexible mechanism for type classes and instances, and choosing this option within GHC or GHCi using the flag \texttt{-XFlexibleInstances} allows us to move away from Haskell 2010. This can be achieved by putting this as the first line in a Haskell file, preceding the \texttt{module} declaration:
+\begin{alltt}
+\{-\# OPTIONS\_GHC -XFlexibleInstances \#-\}
+\end{alltt}
+
+The problem with doing this is that your program becomes reliant on GHC rather than Haskell 2010, which is supported by a number of compilers, and also runs the risk of depending on a feature which might change. Sufficiently many Haskell programmers are prepared to take little risks like this that it is difficult to find a project of any size which is fully Haskell 2010 compliant.
+}
+
+
+
+\subsection*{Default definitions}
+
+\index{classes!default definitions}
+To return to our example of equality, the Haskell equality class is in fact
+defined by
+\begin{alltt}
+class Eq a where
+  (==), (/=) :: a -> a -> Bool
+  x /= y     = not (x==y)
+  x == y     = not (x/=y)
+\end{alltt}
+To the equality operation is added inequality, \texttt{/=}. As well as this,
+there are \textbf{default} definitions of \texttt{/=} from \texttt{==} and of \texttt{==} from
+\texttt{/=}. These definitions have
+two purposes; they give a definition over all equality types, but as
+defaults
+they can \textbf{overridden} by an \texttt{instance} declaration. 
+
+At any
+instance a definition of at least one of \texttt{==} and
+\texttt{/=} needs to be supplied for there to be a proper definition of (in)equality, but a
+definition of either is sufficient to give both, by means of the
+defaults.
+
+It is also possible to define both of the operations in an instance
+delaration , so that if we wanted to
+define a different version of \texttt{/=} over \texttt{Bool}, we could add to our
+instance declaration for \texttt{Bool} the line
+\begin{alltt}
+  x /= y     = ... our definition ...
+\end{alltt}
+In our \texttt{Info} example you will probably have noticed that for many of the base types we simply said that the \texttt{size} of all the objects was one; we can add this as a default to the definition of \texttt{Info} like this:
+\begin{alltt}\minx{Info}
+class Info a where
+  examples :: [a]
+  size     :: a -> Int
+  size _   = 1
+\end{alltt}
+and then the declarations for \texttt{Int}, \texttt{Char} and \texttt{Bool} become  
+\begin{alltt}
+instance Info Int where
+  examples = [-100..100]
+
+instance Info Char where
+  examples = ['a','A','z','Z','0','9']
+
+instance Info Bool where
+  examples = [True,False]
+\end{alltt}
+
+\beware{Default or top-level?}{\index{instance!default}
+If we want to \emph{stop} a default being overridden, we should remove
+the operation from the class, and instead give its
+definition at the
+top level and not in the signature. In the case of the operation \texttt{/=} in
+\texttt{Eq} we would give the top-level definition
+\begin{alltt}
+x /= y       = not (x == y)
+\end{alltt}
+which has the type 
+\begin{alltt}
+(/=) :: Eq a => a -> a -> Bool
+\end{alltt}
+and will be effective over all types which carry the \texttt{==} operation.
+
+\medskip
+There are some situations when it is better to give
+default definitions, which can be overridden, rather than top-level
+definitions, which cannot. Over the numerical types, for instance, an
+implementation may well supply all the operations as hardware instructions,
+which will be much more efficient than the default definitions.
+}
+
+
+\subsection*{Derived classes}
+
+\index{classes!derived}
+Functions and instances can depend upon types being in classes; this is also
+true of classes. The simplest example in Haskell is the class of ordered
+types,
+\texttt{Ord}. To be ordered, a type must carry the operations \texttt{>}, \texttt{>=}
+and so on, as well as the equality operations. We say
+\begin{alltt}
+class Eq a => Ord a where\minx{Ord}
+  (<), (<=), (>), (>=) :: a -> a -> Bool
+  max, min             :: a -> a -> a
+  compare              :: a -> a -> Ordering
+\end{alltt}
+For a type \texttt{a} to be
+in the class \texttt{Ord}, we must supply over
+\texttt{a} definitions of the operations of
+\texttt{Eq} 
+as well as the ones in the signature of \texttt{Ord}. Given a definition of 
+\texttt{<} we can supply default definitions of the remaining operations of 
+\texttt{Ord}.
+For instance,
+\begin{alltt}
+x <= y     = (x < y || x == y)
+x >  y     =  y < x
+\end{alltt}
+We will explain the type \texttt{Ordering} and the function \texttt{compare}
+in Section \ref{haskellClasses}.
+
+A simple example of a function defined over types in the class \texttt{Ord} is the
+insertion sort function \texttt{iSort} of Chapter \ref{defFunLists}. Its most general type is
+\begin{alltt}
+iSort :: Ord a => [a] -> [a]\minx{iSort}
+\end{alltt}
+Indeed, any sorting function (which sorts using the ordering given by 
+\texttt{<=}) would be expected to have this type.
+
+From a different point of view, we can see the class \texttt{Ord} as 
+\textbf{inheriting} the operations of \texttt{Eq}; inheritance is one of the central\index{inheritance}
+\index{object-oriented}
+ideas of object-oriented programming.
+
+\subsection*{Multiple constraints}
+
+\index{context!multiple}
+In the contexts we have seen so far, we have a single constraint on a type,
+such as \texttt{Eq a}. There is no reason why we should not have multiple
+constraints on types. This section introduces the notation we use, and some
+examples where it is needed.
+
+Suppose we wish to sort a list and then show the results as a string. We can
+write
+\begin{alltt}
+vSort = show . iSort 
+\end{alltt}
+To sort the elements, we need the list to consist of elements from an ordered
+type, as we saw above.
+To convert the results to a \texttt{String} we need \texttt{[a]} to be in the \texttt{Show} class (which we discuss in detail in the next section). To do this it is sufficient for each  element of type 
+\texttt{a} to be printable, and so the type of \texttt{vSort} is 
+\begin{alltt}
+vSort :: (Ord a,Show a) => [a] -> String
+\end{alltt}
+showing that \texttt{a} must be in both the classes \texttt{Ord} and \texttt{Show}.
+Such types include \texttt{Bool}, \texttt{[Char]} and so on.
+
+In a similar way, suppose we are to use \texttt{lookupFirst}, and then make the
+results visible. We write
+\begin{alltt}
+vLookupFirst xs x = show (lookupFirst xs x)
+\end{alltt}
+We have twin constraints again on our list type \texttt{[(a,b)]}. We need to be
+able to compare the first halves of the pairs, so \texttt{Eq a} is required. We
+also want to turn the second halves into strings, so needing \texttt{Show b}.
+This gives the type
+\begin{alltt}
+vLookupFirst :: (Eq a,Show b) => [(a,b)] -> a -> String
+\end{alltt}
+Multiple constraints can occur in an instance declaration, such as
+\begin{alltt}\index{equality!on pairs}
+instance (Eq a,Eq b) => Eq (a,b) where
+  (x,y) == (z,w)  =  x==z \&\& y==w
+\end{alltt}
+which shows that a pair of types in \texttt{Eq} again belongs to
+\texttt{Eq}. Multiple constraints can 
+also occur in the definition of a class,
+\begin{alltt}
+class (Ord a,Show a) => OrdShow a
+\end{alltt}
+In such a declaration, the class inherits the operations of both \texttt{Ord}
+and \texttt{Show}.
+
+In this particular
+case, the class declaration contains an empty signature. To be
+in \texttt{OrdShow}, the type \texttt{a} must simply be in the classes \texttt{Ord} and
+\texttt{Show}. We could then modify the type of \texttt{vSort} to say
+\begin{alltt}
+vSort :: OrdShow a => [a] -> String
+\end{alltt}
+The situation when a class is built on top of two or more classes is called
+\textbf{multiple inheritance}; this has consequences for programming
+\index{inheritance!multiple}
+style, explored in Section \ref{oop}.
+
+
+\subsection*{\texttt{infoCheck}: a QuickCheck clone}
+\label{infoCheck}\index{infoCheck@\texttt{infoCheck}|(}
+\index{QuickCheck!\texttt{infoCheck} clone}
+
+We can define a stripped-down version of QuickCheck for ourselves, using the \texttt{examples} that the \texttt{Info} type class provides. Suppose we have these examples for type \texttt{a}: how do we check that a \texttt{property} of type \texttt{a -> Bool}? We want to check that the \texttt{property} holds for all the examples, so we apply it to all of them, using \texttt{map} and then take their conjunction, using \texttt{and}:
+\begin{alltt}
+infoCheck :: (Info a) => (a -> Bool) -> Bool
+
+infoCheck property = and (map property examples)\hfill(infoCheck.1)  
+\end{alltt}
+We could do a similar thing for a two argument property, defining
+\begin{alltt}
+infoCheck2 :: (Info a, Info b) => (b -> a -> Bool) -> Bool
+
+infoCheck2 property = 
+    and (map (infoCheck.property) examples) \hfill(infoCheck.2)  
+\end{alltt}
+Note that \texttt{infoCheck2} uses \texttt{infoCheck} in its definition. Similarly we can define \texttt{infoCheck3} and so on. We could stop here, but we can do better, using overloading to define a single \texttt{infoCheck} function, just as there is a single \texttt{quickCheck} function.
+
+To do this we define another type class, and say that a type is \texttt{Checkable} if it's something that can be checked by applying it to the \texttt{examples} given in an \texttt{Info} type:
+\begin{alltt}
+class Checkable b where
+ infoCheck :: (Info a) => (a -> b) -> Bool
+\end{alltt}
+What instances can we define? Well, the definition of \texttt{(infoCheck.1)} is the same as an instance declaration for \texttt{Bool}:
+\begin{alltt}
+instance Checkable Bool where
+  infoCheck property = and (map property examples)  
+\end{alltt}
+The definition \texttt{(infoCheck.2)} gives us a way of making checkable functions with an additional argument,
+\begin{alltt}
+instance (Info a, Checkable b) => Checkable (a -> b) where
+  infoCheck property = and (map (infoCheck.property) examples) 
+\end{alltt}
+Taking these together, we have \texttt{infoCheck} defined over all these types:
+\begin{alltt}
+Bool -> Bool
+Shape -> Bool
+Int -> Shape -> Bool
+Bool -> Int -> Shape -> Bool
+\end{alltt}
+In short, we can apply \texttt{infoCheck} to any type where the argument types are in the \texttt{Info} class, and where the result is a \texttt{Bool}, just as in the original definition of the \texttt{quickCheck} function.
+
+\index{infoCheck@\texttt{infoCheck}|)}
+
+
+
+\begin{summary}
+This section has explained the basic details of the class mechanism in
+Haskell. We have seen that a class definition specifies a signature, and that
+in defining an instance of a class we must provide definitions of each of the
+operations of the signature.
+These definitions override any default
+definitions which are given in the class declaration. Contexts were seen to
+contain one or more constraints on the type variables which appear in
+polymorphic types, instance declarations and class declarations.
+\end{summary}
+
+\begin{exercises}
+
+
+
+\item
+How would you make \texttt{Move}, playing cards (as defined in Section \ref{cardGames}), and triple types,
+\texttt{(a,b,c)}, into \texttt{Info} types?
+
+\item {[Harder]}
+Moving beyond Haskell 2010 to use the \texttt{-XFlexibleInstances} for GHCi, declare instances of \texttt{Info} for \texttt{Int -> Bool} and \texttt{Int -> Int}.
+
+\item
+Give an instance of \texttt{Info} for the \texttt{Float} type, and using this re-define the instance of \texttt{Info} for the \texttt{Shape} type.
+
+
+\item
+What is the type of the function
+\begin{alltt}
+compare x y    = size x <= size y ?
+\end{alltt}
+
+\item
+Complete the default definitions for the class \texttt{Ord}.
+
+\item
+Complete the following instance declarations:
+\begin{alltt}
+instance (Ord a, Ord b) => Ord (a,b) where ...
+instance Ord b => Ord [b] where ...
+\end{alltt}
+where pairs and lists should be ordered \textbf{lexicographically}, like the words in a
+dictionary.
+\end{exercises}
+
+
+
+\section{A tour of the built-in Haskell classes}
+\label{haskellClasses}
+
+Haskell contains a number of built-in classes, which we briefly introduce in
+this section. Many of the classes are numeric, and are built to deal with
+overloading of the numerical operations over integers, floating-point reals,
+complex numbers and rationals (that is integer fractions like $\frac{22}{7}$).
+Rather than give complete details of the numeric types, we give an exposition
+of their major features. Full details of the classes are given in the Haskell 2010 report \cite{haskell2010}, and their dependencies are illustrated in Figure \ref{ClassesDiagram}, taken from the Haskell 2010 report.
+
+\subsection*{Equality: \texttt{Eq}}
+
+Equality was described above; to recap, we define it by
+\begin{alltt}
+class Eq a where\minx{Eq}
+  (==), (/=) :: a -> a -> Bool  
+  x /= y   =  not (x==y)
+  x == y   =  not (x/=y)
+\end{alltt}
+
+\subsection*{Ordering: \texttt{Ord}}
+
+Similarly, we build the ordered class on \texttt{Eq}:
+\begin{alltt}
+class (Eq a) => Ord a where\minx{Ord}
+  compare              :: a -> a -> Ordering
+  (<), (<=), (>=), (>) :: a -> a -> Bool
+  max, min             :: a -> a -> a
+\end{alltt}
+The \texttt{data} type \texttt{Ordering} contains three values
+\texttt{LT},\minx{Ordering}\minx{compare}
+\texttt{EQ} and \texttt{GT}, which represent the three possible
+outcomes from comparing two elements in the ordering, and is defined thus:
+\begin{alltt}
+data Ordering = LT | EQ | GT
+\end{alltt} 
+The advantage of
+using \texttt{compare} is that a single function application decides the exact
+relationship between
+two inputs,
+whereas when using the ordering operators -- which return Boolean results --
+two comparisons might well be necessary. Indeed, we see this in the
+default definition of \texttt{compare} from \texttt{==} and \texttt{<=},
+where two tests are needed to reach the results \texttt{LT} and
+\texttt{GT}.
+\begin{alltt}
+  compare x y
+    | x == y      = EQ
+    | x <= y      = LT
+    | otherwise   = GT
+\end{alltt}
+The defaults also contain definitions of the ordering operators from \texttt{compare}:
+\begin{alltt}
+  x <= y          = compare x y /= GT
+  x <  y          = compare x y == LT
+  x >= y          = compare x y /= LT
+  x >  y          = compare x y == GT
+\end{alltt}
+There are default definitions for all the operations of \texttt{Ord},
+but we need to supply an implementation of either 
+\texttt{compare} or \texttt{<=} in order to give an instance of \texttt{Ord}.
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=3.5in]{Pictures/classes.pdf}
+\end{center}
+\caption{The Haskell 2010 classes}
+\label{ClassesDiagram}\index{Haskell 2010!classes diagram}\index{classes!diagram for Haskell 2010}
+\end{figure}
+
+
+
+Finally we have default definitions for the maximum and minimum
+operations,
+\begin{alltt}\minx{max}\minx{min}
+  max x y 
+    | x <= y      = y
+    | otherwise   = x
+  min x y 
+    | x <= y      = x
+    | otherwise   = y
+\end{alltt}
+Most Haskell types belong to these equality and ordering classes: among the exceptions
+are function types, and some of the abstract data types we meet below in
+Chapter \ref{adt}.
+
+\subsection*{Enumeration: \texttt{Enum}}
+
+It is useful to generate lists like \texttt{[2,4,6,8]} using the enumeration
+expression
+\begin{alltt}
+[2,4 ..\ 8]
+\end{alltt}
+but enumerations can be built over other types as well: characters, floating-point numbers, and so on. The class definition is 
+\begin{alltt}
+class (Ord a) => Enum a where\minx{Enum}\minx{toEnum}\minx{fromEnum}
+  succ, pred       :: a -> a
+  toEnum           :: Int -> a
+  fromEnum         :: a -> Int
+  enumFrom         :: a -> [a]              -- [n ..\ ]
+  enumFromThen     :: a -> a -> [a]         -- [n,m ..\ ]
+  enumFromTo       :: a -> a -> [a]         -- [n ..\ m]
+  enumFromThenTo   :: a -> a -> a -> [a]    -- [n,n' ..\ m]
+\end{alltt}
+where \texttt{enumFromTo} and \texttt{enumFromThenTo} have default definitions,
+which we leave as exercises for the reader. 
+
+The signature of the class also contains operations \texttt{fromEnum} and
+\texttt{toEnum} which convert
+between the type and \texttt{Int}. Finally, the class contains \texttt{succ} and \texttt{pred} which step through the enumeration upwards and downwards: when \texttt{succ} is called at the greatest element, an error is returned. 
+
+Confusingly, the Haskell report
+states that `these functions [\texttt{toEnum} and \texttt{fromEnum}] are 
+not meaningful for all instances of
+\texttt{Enum}', and using these operations over floating-point values or 
+full precision integers will result in a run-time error.
+
+Full instances of the class include \texttt{Int}, \texttt{Char},
+\texttt{Bool} and other finite types like \texttt{Ordering}. 
+
+\subsection*{Bounded types: \texttt{Bounded}}\minx{Bounded}
+\minx{minBound}\minx{maxBound}
+The \texttt{Bounded} class is specified by the declaration
+\begin{alltt}
+class Bounded a where
+  minBound, maxBound :: a
+\end{alltt}
+and the two values give the minimum and maximum values in these types.
+The types \texttt{Int}, \texttt{Char}, \texttt{Bool}, \texttt{Ordering}
+belong to this class. Types that are in both \texttt{Bounded} and \texttt{Enum} obey some extra constraints that are explained in detail in the Haskell 2010 report \cite{haskell2010}.
+
+\subsection*{Turning values to strings: \texttt{Show}}\index{show@\texttt{show}}
+
+The standard prelude defines the class
+\texttt{Show}, 
+which contains types whose values can be written (or `shown') as strings. 
+\begin{alltt}
+type ShowS = String -> String
+
+class Show a where
+  showsPrec :: Int -> a -> ShowS
+  show      :: a -> String
+  showList  :: [a] -> ShowS
+\end{alltt}
+The function \texttt{showsPrec} supports flexible and efficient conversion of large data values, but in an
+introductory context, the function
+\begin{alltt}
+show :: a -> String
+\end{alltt}
+which converts a value into a string is all that is needed. The class contains default definitions of
+\texttt{showsPrec} from \texttt{show} and vice versa. Further details about how to exploit the subtleties of
+\texttt{showsPrec} can be found in
+\citeN{gentle98}.
+
+Most types belong to the class \texttt{Show}, but absent are function types and \texttt{IO}. For other types, example instance declarations might be
+\begin{alltt}
+instance Show Bool where
+   show True  = "True"
+   show False = "False"
+
+instance (Show a, Show b) => Show (a,b) where
+   show (x,y) = "(" ++ show x ++ "," ++ show y ++ ")"
+\end{alltt}
+In fact we discuss how some function types might be shown in Section \ref{qcGens}.
+
+
+\subsection*{Turning strings to values: \texttt{Read}}
+
+The class \texttt{Read}\minx{Read}
+contains types whose values can be read from
+strings. To use the class it is enough to know about the function
+\begin{alltt}
+read :: (Read a) => String -> a\minx{Read}\minx{read}
+\end{alltt}
+The result of a
+\texttt{read} may not be properly defined: there needs to be exactly one object
+of the required type in the input string (which may optionally also contain
+whitespace or nested
+comments); in any other case the \texttt{read} will fail with an error. More
+details of how strings are \textbf{parsed} in this way can be found in Section
+\ref{parsing}.
+
+It is also important to see that
+in many cases the type of the result of the \texttt{read} has to be
+specified, since it could potentially be of any type in the class \texttt{Read}.
+For instance, we can write
+\begin{alltt}
+(read " 1 ") :: Int
+\end{alltt}
+which indicates
+that in this case we require the result of the \texttt{read} to be
+an \texttt{Int}. Without this type declaration we get this error on evaluating \texttt{(read " 1 ")}:
+\begin{alltt}
+Ambiguous type variable `a' in the constraint:
+  `Read a' arising from a use of `read' at <interactive>:1:0-8
+Probable fix: add a type signature that fixes these type variable(s)
+\end{alltt}
+The class \texttt{Read} complements \texttt{Show}, since strings produced
+by \texttt{show} are usually readable by \texttt{read}. Many types can be read, but
+exclusions include function types.
+
+\subsection*{The Haskell numeric types and classes}
+
+\index{type!numeric types|(}\index{classes!numeric|(}\minx{Int}\minx{Float}
+One of the purposes of the Haskell
+design was to build a functional programming language
+which had a strong type system -- in which any type errors in definitions and
+expressions are found before evaluation -- yet which contains a rich set of
+numeric types, as befits a language suitable to substantial `real world' tasks.
+Among Haskell's numeric types are 
+\begin{titemize} 
+\item The fixed precision integers, \texttt{Int}, and the full precision
+integers, \texttt{Integer}, which represent {\em all\/} integers faithfully.
+\item The floating-point numbers, \texttt{Float}, and the double-precision
+floating-point numbers, \texttt{Double}.
+\item Rational numbers, that is fractions, represented as ratios of integers;
+built-in is the type \texttt{Rational} of \texttt{Integer} fractions.
+\item Complex numbers, which can be built over other types such as 
+\texttt{Float}.
+\end{titemize}
+The design also required that the usual operations like \texttt{+} and \texttt{/}
+and literals such as \texttt{23} and \texttt{57.4} would be overloaded. For
+instance, \texttt{Int} and \texttt{Integer} will carry identical
+operations\footnote{Apart from (de)coding of {\smtt Char}, \texttt{take}, \texttt{drop}
+and so forth.} and have
+identical literals, as indeed will \texttt{Float} and \texttt{Double}; a guide to
+the operations over integers and floats was given in Sections \ref{ints} and
+\ref{float}. This
+overloading can lead to situations  where the type of an expression is
+undetermined; in such a case we can give an explicit type to an expression,
+thus:
+\begin{alltt}
+(2+3)::Int
+\end{alltt}
+The Haskell report \cite{haskell2010}, Section 4.3.4, discusses a mechanism by which
+a \emph{default} type can be given to numeric expressions.\label{ambiguity} These default directives mean that whole numbers are taken to be \texttt{Integer} and others to be \texttt{Double} in the absence of any other type information. This can be seen in action in this snapshot of GHCi:
+\begin{alltt}
+\textsl{Prelude>} let myadd = (+)
+\textsl{Prelude>} :type myadd
+\textsl{myadd :: Integer -> Integer -> Integer}
+\end{alltt}
+Overloading of numeric functions is achieved by defining a collection of classes. 
+Full details of
+these can be found in the Haskell report \cite{haskell2010}, and in the standard
+prelude, \texttt{Prelude.hs}\minx{Prelude.hs}; a
+brief introduction follows here.
+
+The base class to which all numeric types belong is \texttt{Num}\minx{Num}, which
+has the signature\index{numbers!\texttt{Num}}\minx{-}
+\begin{alltt}\minx{+}\minx{*}\minx{Eq}\minx{Show}
+class (Eq a, Show a) => Num a where
+  (+), (-), (*)  :: a -> a -> a
+  negate         :: a -> a\minx{negate}
+  abs, signum    :: a -> a\minx{abs}\minx{signum}
+  fromInteger    :: Integer -> a\minx{fromInteger}
+
+  x - y           = x + negate y
+\end{alltt}
+This signature has the effect that all numeric types carry 
+equality and \texttt{show} functions, together
+with addition, subtraction, multiplication and related operations. It is
+also possible to convert an \texttt{Int} or and \texttt{Integer} into a
+value of any numeric type.
+
+Integer literals are of any numeric type, so that, for
+example\index{numbers!integer literals}\index{overloaded
+literals!integer}
+\begin{alltt}
+2 :: Num a => a
+\end{alltt}
+The integer types belong to the class \texttt{Integral}\minx{Integral}
+among whose signature functions are\index{numbers!\texttt{Integral}}
+\begin{alltt}\minx{quot}\minx{rem}\minx{div}\minx{mod}
+quot, rem :: a -> a -> a
+div, mod  :: a -> a -> a
+\end{alltt}
+which give two variants of integer division, \texttt{`quot`} truncating
+towards zero, and \texttt{`div`} truncating below.
+
+Numbers with fractional parts have a substantially richer class structure. 
+Literals of this kind belong to every type in the \texttt{Fractional}
+class,
+\begin{alltt}\minx{Fractional}\index{numbers!\texttt{Fractional}}
+2.3 :: Fractional a => a 
+\end{alltt}
+which extends \texttt{Num} with fractional division and reciprocal,
+\begin{alltt}\minx{/}\minx{recip}
+class (Num a) => Fractional a where
+  (/)          :: a -> a -> a
+  recip        :: a -> a
+  fromRational :: Rational -> a
+
+  recip x       = 1 / x
+\end{alltt}
+The floating-point numbers in \texttt{Float}\minx{Float} and \texttt{Double}\minx{Double} 
+belong to the class
+\texttt{Floating}, which carries the `mathematical' functions. A part of
+its signature follows, \index{floating-point
+operators}\index{numbers!floating-point}
+\begin{alltt}\minx{Floating}
+class (Fractional a) => Floating a where
+  pi                  :: a\minx{pi}
+  exp, log, sqrt      :: a -> a\minx{exp}\minx{log}\minx{sqrt}
+  (**), logBase       :: a -> a -> a\minx{**}\minx{logBase}
+  sin, cos, tan       :: a -> a\minx{sin}\minx{cos}\minx{tan}
+   ....
+\end{alltt}
+and the full signature is to be found in \texttt{Prelude.hs}. Further
+details of this and 
+the complex and rational types can be found in the prelude, libraries and the
+Haskell documentation.
+\index{classes!numeric|)}
+\index{type!numeric types|)}
+
+
+\subsection*{Derived instances}\index{instance!derived}
+
+When a new \texttt{data} type is introduced, it comes with facilities for pattern matching but no other pre-defined functions. On the other hand, it's possible to come up with standard definitions of equality, ordering, \texttt{show} and \texttt{read} functions for these types, and this \textbf{deriving} mechanism is the bit of `Haskell magic' which we mentioned in Sections \ref{EnumTypes} and \ref{introAlg} when we introduced \texttt{data} type definitions. If we make a definition like
+\begin{alltt}\minx{People}
+data People = Person Name Age
+              deriving (Eq,Show)
+\end{alltt}
+then definitions of \texttt{==} and \texttt{show} which ``do the obvious thing'' are synthesised for this type. This could be done for all the standard classes, but we could  also choose to define instances of other standard classes for ourselves, so that we might read name, age pairs from a comma separated variable (CSV) file, rather than using the standard definition of \texttt{read}, which would expect input of the form
+\begin{alltt}
+Person "name" age
+\end{alltt}
+
+\beware{\texttt{Functor} and \texttt{Monad}}{
+We talk about the \texttt{Functor} and \texttt{Monad} classes in Chapter \ref{actions}.
+}
+
+
+\begin{exercises}
+ 
+
+\item
+Investigate the Haskell definition of `\texttt{<}' on the types \texttt{Bool} and
+\texttt{(\tone,\ttwo,\ldots,\subscr{t}{k})}.
+
+\item
+Define a function
+\begin{alltt}
+showBoolFun :: (Bool -> Bool) -> String
+\end{alltt}
+which displays a Boolean function as a table. Generalize this to
+\begin{alltt}
+showBoolFunGen :: (a -> String) -> (Bool -> a) -> String
+\end{alltt}
+whose first argument is a
+function to show elements of \texttt{a}. This argument is used in giving a table
+of the results of the function. How would you extend your answer to deal
+with multiple-argument Boolean functions?
+
+\item
+Using your answer to the previous question, or otherwise, describe how
+you would make \texttt{Bool -> Bool} an instance of the class
+\texttt{Show}. (Note, however, that this will {\em not\/} be legitimate Haskell 2010,
+since \texttt{Bool -> Bool} is not of the right form for an instance
+declaration; you \emph{can} achieve this using the GHC option \texttt{-XFlexibleInstances}.)
+
+\item
+How can you write a general instance for \texttt{Show} for function types: you could do this by showing a ``sample'' of the values from the function, that is showing how a sample of inputs are sent to the corresponding outputs.
+
+\item
+Some types are not enumerated in the sense that they can be listed from smallest to largest: a good example is the \texttt{Move} type from the Rock - Paper - Scissors game. Define a type class to which the \texttt{Move} type can belong, and give an instance for \texttt{Move}. What other types can you think of giving an instance for: give some examples and their instances, too.
+
+\item
+Define a \texttt{data} type \texttt{Roman} like this
+\begin{alltt}
+data Roman = Roman Integer
+\end{alltt}
+and define instances of \texttt{Show} and \texttt{Num} for this type. The \texttt{show} function should display numbers in the form of Roman numerals, so that
+\begin{alltt}
+show (Roman 99) = "IC"
+show (Roman 1327) = "MCCCXXVII"
+\end{alltt}
+and so forth. The instance of \texttt{Num} should obey
+\begin{alltt}
+(Roman n) + (Roman m) \step{} Roman (n+m)
+\end{alltt}
+
+\item {[Harder]}
+For the \texttt{data} type \texttt{Roman} define an instances of the \texttt{Read} class, which is the inverse of the \texttt{show} function in the previous question.
+
+
+
+\end{exercises}
+
+
+
+\beware{Type classes and object-oriented programming}{
+\label{advClasses}
+\index{classes!and OO programming}
+This note discusses the relationship between Haskell type classes and the
+classes of object-oriented programming; it can be omitted on first reading.
+
+\medskip
+The type system of Haskell can be seen as giving monomorphic types to 
+functions. Polymorphic types like
+\begin{alltt}
+show :: Show a => a -> String
+\end{alltt}
+which involve type classes can be seen as shorthand for 
+collections of typings, such as
+\begin{alltt}
+show :: Bool -> String
+show :: Char -> String
+\end{alltt}
+for each type \texttt{Bool}, \texttt{Char}, \ldots\ belonging to the
+class.
+
+In Haskell a class is a collection of types. Other languages such as 
+\texttt{C++} make a type and a class the same thing. Under that approach, 
+introducing the class of visible
+objects would effectively give us a type\footnote{In \texttt{C++} teminology
+this would be an abstract base class, with \texttt{Bool} etc. inheriting 
+and being forced to implement the
+operations of that class.} \texttt{ShowType}. This class would be
+characterized by having the function
+\begin{alltt}\minx{ShowType}
+show :: ShowType -> String
+\end{alltt}
+in its interface. The class 
+\texttt{ShowType}
+would have \texttt{Bool} and \texttt{Char} among its sub-classes (or sub-types).
+This would allow us
+to write values like
+\begin{alltt}
+[True,'N',False] :: [ShowType]
+\end{alltt}
+Moreover, to convert such a list to a \texttt{String} we could write
+\begin{alltt}
+concat . map show :: [ShowType] -> String
+\end{alltt}
+At different items of the list we use {\em different\/} versions of the 
+\texttt{show} function; on the first we use the \texttt{Bool} function, on the second
+the \texttt{Char} function and so forth. This so-called \textbf{dynamic binding} is
+a powerful feature of many object-oriented languages, including \texttt{C++},
+but it is not a feature of
+Haskell 98; an extension which would allow dynamic binding is
+described in \citeN{extTypes}.
+
+\medskip
+Returning to our example, what is the type of \texttt{concat .\ map show} in Haskell? 
+It is not hard to see that it is
+\begin{alltt}
+Show a => [a] -> [Char]
+\end{alltt}
+so that it can be applied to elements of \texttt{[Bool]}, \texttt{[Char]} and so on,
+but not to hetero\-geneous lists like \texttt{[True,'N',False]} which are
+not legitimately typed in Haskell.
+
+\medskip
+Java allows users to define interfaces, which consist of a signature.
+A part of a class definition can say which interfaces the class
+implements. This is very like the way in which Haskell types are made
+instances of type classes, except that in Haskell it is not necessary to
+make the instance declaration a part of the type definition itself. This
+has the effect of allowing {\em post hoc\/} extensions to the operations
+supported by a type, in a way which is not possible for a class in Java.}
+
+\index{classes|)}
+
+
+\section{Type checking and type inference: an overview}
+\index{type checking|(}
+
+Now that we have covered classes, we can see that every value in Haskell has a defined type, 
+which might be monomorphic, polymorphic, or involve one or more type class 
+constraints in a context. For example,
+\begin{alltt}
+'w'   :: Char
+flip  :: (a -> b -> c) -> (b -> a -> c)
+elem  :: Eq a => a -> [a] -> Bool
+\end{alltt}
+Strong typing means that we can \textbf{check} whether or
+not expressions we
+wish to
+evaluate or definitions we wish to use obey the typing rules of the
+language without any evaluation taking place. The benefit of this is
+obvious: we can catch a whole lot of errors before we run a program.
+
+
+
+\subsection*{Type declarations or type inference?}\index{type declaration!why to write them}
+
+Haskell types can be \emph{inferred} from expressions and definitions, and so it is possible never to write a type declaration. For example, we can write a definition like this
+\begin{alltt}\minx{prodFun}
+prodFun f g = \bs{}x -> (f x, g x)
+\end{alltt}
+either in a module or directly in GHCi, and then ask for its type in CHGi like this:
+\begin{alltt}
+\textsl{*TypeError>} :type prodFun
+\textsl{prodFun :: (t -> t1) -> (t -> t2) -> t -> (t1,t2)}
+\end{alltt}
+Because of this facility, some Haskellers never write a type declaration, but others, including the author, always do: why?
+\begin{itemize}
+\item
+The type of an object is the \emph{most important single piece of documentation} for the object, since it tells us how it can be used -- what arguments need to be passed to it, and what type the result has -- without us having to understand precisely how it is implemented.
+\item
+We can use a type declaration to \emph{give a more specific type to a definition}. This was the mechanism underlying the first part of the book, which turned polymorphic functions into monomorphic versions. To be clear, if we define \texttt{prodFun} like this
+\begin{alltt}
+prodFun :: (Int -> Bool) -> (Int -> Char) -> Int -> (Bool,Char)
+prodFun f g = \bs{}x -> (f x, g x)
+\end{alltt}
+then it will have this more specific type. It is not difficult to recover the most general type for the definition: just comment out the type declaration.
+\item
+In writing a type declaration we are saying \emph{what type we think a function has}. We may have not got this right, and the function is properly typed, but has a different type. For instance, typing
+\begin{alltt}
+fun :: Int -> Bool -> Int
+
+fun True 0 = 0
+fun True n = n-1
+fun _ n    = n\end{alltt}
+gives rise to this error in GHCi:
+\begin{alltt}
+    Couldn't match expected type `Int' against inferred type `Bool'
+    In the pattern: True
+    In the definition of `fun': fun True 0 = 0
+\end{alltt}
+In a case like this it is useful to \emph{know} that we were wrong, and then we can either correct the type declaration, or modify the function so that it has the type we wanted. Here the problem is fixed by swapping the types of the two arguments.
+\end{itemize}
+There is one case where we \emph{do} need to use type declarations or annotations: this is in resolving ambiguity due to overloading (we talked briefly about this earlier, in Section \ref{ambiguity}, page \pageref{ambiguity}).
+
+\subsection*{Types and libraries}
+
+
+\noindent
+Types are also useful in locating functions in a library. Suppose we want to define
+a function to remove the duplicate elements from a list, transforming
+\texttt{[2,3,2,1,3,4]} to \texttt{[2,3,1,4]}, for instance. Such a
+function will have type
+\begin{alltt}
+(Eq a) => [a] -> [a]
+\end{alltt}
+A Hoogle search of the standard prelude and libraries reveals just one function of this type, namely
+\texttt{nub},\minx{nub} which does exactly what we want. Plainly in practice
+there might be multiple matches (or missed matches because of the choice of
+parameter order) but nonetheless the types provide a valuable
+way into the Haskell library.
+
+\subsection*{Overview}
+
+In the remainder this chapter we give an informal overview of the way in which types
+are checked. We start by looking at how type checking works in a
+monomorphic framework, in which every properly typed expression has a
+single type.
+Building on this, we then look at the polymorphic case, and see that it
+can be understood by looking at the 
+\textbf{constraints}\index{constraint}\index{type checking!constraints} put on the type
+of an expression by the way that the expression is constructed. Crucial to this is the
+notion of \textbf{unification}, through which constraints are combined.
+We conclude the chapter by looking
+at the \textbf{contexts} which contain information about the class membership of 
+type variables, and which thus manage \textbf{overloading}.
+
+\section{Monomorphic type checking}
+\label{monoCheck}
+\index{type checking!monomorphic|(}
+
+
+In this section we look at how type checking works in a monomorphic
+setting, without polymorphism or overloading. The main focus here is
+type-checking function applications.
+The simplified
+picture we see here prepares us for Haskell type checking in 
+general, which
+is examined in the section after this. 
+
+We look first at the way that we type-check expressions, and then look at how definitions 
+are type-checked.
+
+\subsection*{Expressions}
+
+In general, an expression is either a literal, a variable or a constant or it 
+is built up by applying a function to some
+arguments, which are themselves expressions. 
+
+The case of function applications includes
+rather more than we might at first expect. For example, we can see list
+expressions like \texttt{[True,False]} as the result of applying the
+constructor function, `\texttt{:}', thus: \texttt{True:[False]}.
+Also, operators and the \texttt{if} \ldots \texttt{then} \ldots \texttt{else}
+\index{if@{\texttt{if}\ldots\texttt{then}\ldots\texttt{else}}}\index{operator!type
+checking}
+construct act in exactly the same way as functions, albeit with a different
+syntax.
+
+The rule for type checking a function application is set out in the
+following
+diagram, where we see that a function of type \texttt{s -> t} must be applied 
+to an argument of
+type \texttt{s}.
+A properly typed application results in an expression of type
+\texttt{t}.
+\begin{center}
+\includegraphics[width=3in]{Pictures/FunctionApp.pdf}
+\end{center}
+We now look at two examples. First we take \texttt{(not False) \&\& True},
+a correctly typed expression of type
+\texttt{Bool},
+\begin{center}
+\includegraphics[width=3in]{Pictures/BoolTypeCheck1.pdf}
+\end{center}
+The application of \texttt{not}\minx{not} to \texttt{False} results in an expression of
+type \texttt{Bool}. The second argument to \texttt{\&\&} is also a
+\texttt{Bool}, so the application of \texttt{\&\&} is correctly
+typed, and gives a result of type \texttt{Bool}.
+
+If we modify the example to \texttt{(not 'c') \&\& True}, we now see a type error, since a character
+argument, \texttt{'c'}, is presented to an operator 
+expecting\index{type error!in application} a
+\texttt{Bool} argument, \texttt{not}.
+\begin{center}
+\includegraphics[width=3in]{Pictures/BoolTypeCheck2.pdf}
+\end{center}
+The GHCi error message for this indicates the cause of the problem:
+\begin{alltt}
+    Couldn't match expected type `Bool' against inferred type `Char'
+    In the first argument of `not', namely 'c'
+    In the first argument of `(&&)', namely `(not 'c')'
+    In the expression: (not 'c') && True
+\end{alltt}
+
+\subsection*{Function definitions}
+
+In type-checking a monomorphic function definition such as 
+\begin{alltt}
+f :: \smsubscr{t}{1} -> \smsubscr{t}{2} -> \ldots  -> \smsubscr{t}{k} -> t\hfill(fdef)
+
+f \smsubscr{p}{1} \smsubscr{p}{2} \ldots \smsubscr{p}{k}
+  | \smsubscr{g}{1}     = \smsubscr{e}{1}
+  | \smsubscr{g}{2}     = \smsubscr{e}{2}
+  \ldots
+  | \smsubscr{g}{l}     = \smsubscr{e}{l}
+\end{alltt}
+\label{fdef}
+we need to check three
+things.
+\begin{itemize}
+\item Each of the guards \smsubscr{g}{i} must be of type \texttt{Bool}.
+\item The value \smsubscr{e}{i} returned in each clause must be of type \texttt{t}.
+\item The pattern \smsubscr{p}{j} must be consistent with type
+of that argument, namely \smsubscr{t}{j}. 
+\end{itemize}
+A pattern is \textbf{consistent}\index{pattern!consistent with type} with a type if it will match (some) elements of
+the type. We now look at the various cases.
+A variable is consistent with
+any type; a literal is consistent with its type. A pattern \texttt{(p:q)} is consistent with the type
+\texttt{[t]} if \texttt{p} is consistent with \texttt{t} and
+\texttt{q} is consistent with \texttt{[t]}. For example, \texttt{(0:xs)} is consistent with
+the type \texttt{[Int]}, and \texttt{(x:xs)} is consistent with any type
+of lists.
+The other cases of the
+definition are similar. 
+
+This concludes our discussion of type checking in the monomorphic case;
+we turn to polymorphism next.
+
+
+\begin{exerciseone}
+\item
+Predict the type errors you would obtain by defining the following functions
+\begin{alltt}
+f n     = 37+n
+f True  = 34
+
+g 0 = 37
+g n = True
+
+h x 
+  | x>0         = True
+  | otherwise   = 37
+
+k x = 34
+k 0 = 35
+\end{alltt}
+Check your answers by typing each definition into a Haskell script, and
+loading the script into GHCi. Remember that you can use \texttt{:type}
+to give the type of an expression.
+\index{type checking!monomorphic|)}
+\end{exerciseone}
+
+\section{Polymorphic type checking}
+\label{polyTypeCheck}
+\index{type checking!polymorphic|(}
+\index{polymorphism!type checking|(}
+
+In a monomorphic situation, an expression is either well typed, and has
+a single type, or is not well typed and has none. In a polymorphic
+language like Haskell, the situation is more complicated, since a
+polymorphic object is precisely one which has many types. 
+
+In this section we first re-examine what is meant by polymorphism,
+before explaining type checking by means of \textbf{constraint satisfaction}.
+Central to this is the notion of \textbf{unification}, by which we find
+the types simultaneously satisfying two type constraints.
+
+
+\subsection*{Polymorphism}
+
+We are familiar with functions like
+\begin{alltt}
+length :: [a] -> Int\hfill(length)
+\end{alltt}
+whose types are polymorphic, but how should we understand the type
+variable \texttt{a} in this type? We can see \texttt{(length)} as
+shorthand for saying that \texttt{length} has a \textbf{set} of types,
+\begin{alltt}
+[Int] -> Int
+[(Bool,Char)] -> Int
+ ...
+\end{alltt}
+in fact containing all the types \texttt{[t] -> Int} where \texttt{t} is
+a \textbf{monotype},\index{monotype} that is a type not containing type variables.
+
+When we apply \texttt{length} we need to determine at which of these types
+\texttt{length}
+is being used. For example, when we write
+\begin{alltt}
+length ['c','d']
+\end{alltt}
+we can see that \texttt{length}
+is being applied to a list of \texttt{Char}, and so we are using
+\texttt{length} at type \texttt{[Char] -> Int}.
+
+\subsection*{Constraints}
+\index{constraint!in type checking|(}
+\index{type checking!constraints|(}
+
+How can we explain what is going on here in general? We can see
+different parts of an expression as putting different
+\textbf{constraints}
+on its type. Under this interpretation, type checking becomes a matter
+of working out whether we can find types which meet the constraints.
+We have seen some informal examples of this when we discussed the types
+of \texttt{map} and \texttt{filter} in Section \ref{hofs}. We consider
+some further examples now.
+
+\subsubsection*{Example 1}
+Consider the definition
+\begin{alltt}
+f (x,y) = (x , ['a' .. y])
+\end{alltt}
+The argument of \texttt{f} is a pair, and we consider separately what
+constraints there are on the types of \texttt{x} and \texttt{y}. 
+\texttt{x} is completely unconstrained, as it is
+returned as the first half of a pair. On the other hand, \texttt{y} is
+used
+within the expression \texttt{['a' ..\ y]}, which denotes a range within
+an enumerated type, starting at the character \texttt{'a'}. This forces
+\texttt{y} to have the type \texttt{Char}, and gives the type for
+\texttt{f}:
+\begin{alltt}
+f :: (a,Char) -> (a,[Char])
+\end{alltt}
+
+\subsubsection*{Example 2}
+Now we examine the definition
+\begin{alltt}
+g (m,zs) = m + length zs
+\end{alltt}
+What constraints are placed on the types of \texttt{m} and \texttt{zs} in
+this definition? 
+We can see that \texttt{m} is added to something, so \texttt{m} must
+have a numeric type -- which one it is remains to be seen. The other
+argument of the addition is \texttt{length zs}, which tells us two
+things. 
+\begin{center}
+\includegraphics[width=3in]{Pictures/TypeCheckEx2.pdf}
+\end{center}
+First, we see that \texttt{zs} will have to be of type
+\texttt{[b]}, and also that the result is an \texttt{Int}.
+This forces \texttt{+} to be used at \texttt{Int}, and so forces
+\texttt{m} to have type \texttt{Int}, giving the result
+\begin{alltt}
+g :: (Int,[b]) -> Int
+\end{alltt}
+
+\subsubsection*{Example 3}
+\index{function composition}
+We now consider the composition of the last two examples,
+\begin{alltt}
+h = g . f
+\end{alltt}
+In a composition \texttt{g .\ f}, the output of \texttt{f} becomes
+the input of \texttt{g},
+\begin{center}
+\includegraphics[width=4in]{Pictures/TypeCheckEx3.pdf}
+\end{center}
+Here we should recall the meaning of types which involve type variables;
+we can see them as shorthand for sets of types. The output of \texttt{f}
+is described by \texttt{(a,[Char])}, and the input of \texttt{g} by
+\texttt{(Int,[b])}. We therefore have to look for types which meet
+both these descriptions. We will now look at this general topic,
+returning to the example in the course of this dicussion.
+
+
+
+\subsection*{Unification}
+\index{unification|(}
+
+How are we to describe the types which meet the two descriptions
+\texttt{(a,[Char])} and \texttt{(Int,[b])}?
+\begin{center}
+\includegraphics[width=3in]{Pictures/Unification.pdf}
+\end{center}
+As sets of types, we look for the intersection of the sets
+given by \texttt{(a,[Char])} and \texttt{(Int,[b])}. How can we work
+out a description of this intersection? Before we do this, we revise and
+introduce some terminology. 
+
+Recall that an \textbf{instance} of a
+type is given by replacing a type variable or variables by type
+expressions. A type expression is a common instance of two type
+expressions if it is an instance of each expression. The most general
+common instance of two expressions is a common instance \texttt{mgci}
+with the property that every other common instance is an instance of
+\texttt{mgci}.
+
+Now we can describe the intersection of the sets given by two type expressions.
+It is called the 
+\textbf{unification} of the two, which is the \textbf{most general common
+instance} of the two type expressions.
+
+\subsubsection*{Example 3 (continued)}
+In this example, we have
+\begin{center}
+\includegraphics[width=2.5in]{Pictures/Unification2.pdf}
+\end{center}
+with a single type resulting. This means that the type \texttt{a} has to be \texttt{Int} and so the type of the function \texttt{h = g.f} is 
+\begin{alltt}
+h :: (Int,Char) -> Int
+\end{alltt}
+This concludes the discussion of example 3.
+%\stoprule
+\subsubsection*{Unification, revisited}
+
+
+\noindent Unification need not result in a monotype. In the example of unifying
+the types \texttt{(a,[a])} and \texttt{([b],c)},
+\begin{center}
+\includegraphics[width=2.5in]{Pictures/Unification3.pdf}
+\end{center}
+the result is the type \texttt{([b],[[b]])}. This is because the expression \texttt{(a,[a])}
+constrains the type to have in its second component a list of elements of the first
+component type, while the expression \texttt{([b],c)} constrains its first
+component to be a list. Thus satisfying the two gives the type
+\texttt{([b],[[b]])}. 
+
+In the last example, note that there are many common instances of the
+two type expressions, including \texttt{([Bool],[[Bool]])} and
+\texttt{([[c]],[[[c]]])}, but neither of these examples is the unifier,
+since \texttt{([b],[[b]])} is not an instance of either of them. On the
+other hand, they are each instances of \texttt{([b],[[b]])}, as it is
+the most general common instance, and so the unifier of the two type
+expressions.
+
+Not every pair of types can be unified: consider the case of 
+\texttt{[Int] -> [Int]} and \hbox{\texttt{a -> [a]}}.
+\begin{center}
+\includegraphics[width=3in]{Pictures/Unification4.pdf}
+\end{center}
+ Unifying the argument types requires
+\texttt{a} to become \texttt{[Int]}, while unifying the result types
+requires \texttt{a} to become \texttt{Int}; clearly these constraints
+are inconsistent, and so the unification fails.
+\index{unification|)}
+
+\subsection*{Type-checking expressions}
+
+As we saw in Section \ref{monoCheck}, function application is central to
+expression formation. This means that type checking also hinges on
+function applications. 
+
+\subsubsection*{Type-checking polymorphic function application}
+\index{type checking!polymorphic function application}
+\begin{center}
+\includegraphics[width=3.5in]{Pictures/PolymorphicFunctionApp.pdf}
+\end{center}
+In applying a function \texttt{f ::\ s -> t} to
+an argument \texttt{e ::\ u} we do not require that \texttt{s} and
+\texttt{u} are equal, but instead that they are unifiable to a type \texttt{s'}, say, giving
+\texttt{e ::\ s'} and \texttt{f ::\ s' -> t'}; the result in that case
+is of type \texttt{t'.} 
+
+\subsubsection*{Example 4}
+
+As an example, consider the application
+\texttt{map Circle} where \texttt{Circle} is one of the constructor functions for the \texttt{Shape} type.
+\begin{alltt}
+map :: (a -> b) -> [a] -> [b]
+Circle :: Float -> Shape
+\end{alltt}
+Unifying \texttt{a -> b} and \texttt{Float -> Shape}
+results in \texttt{a} becoming \texttt{Float} and \texttt{b} becoming
+\texttt{Shape}; this gives
+\begin{alltt}
+map :: (Float -> Shape) -> [Float] -> [Shape]
+\end{alltt}
+and so
+\begin{alltt}
+map Circle :: [Float] -> [Shape]
+\end{alltt}
+As in the monomorphic case, we can use this discussion of typing and function application
+in explaining type checking all aspects of
+expressions. We now look at another example, before examining a more
+technical aspect of type checking.
+
+\subsubsection*{Example 5, \texttt{foldr} revisited}
+\index{foldr@\texttt{foldr}!type of} 
+In Section
+\ref{foldPrimRec} we introduced the \texttt{foldr} function
+\begin{alltt}
+foldr f s []     = s\hfill(foldr.1)\index{foldr@\texttt{foldr}}
+foldr f s (x:xs) = f x (foldr f s xs)\hfill(foldr.2)
+\end{alltt}
+which could be used to fold an operator into a list, as in
+\begin{alltt}
+foldr (+) 0 [2,3,1] = 2+(3+(1+0))
+\end{alltt}
+so that it appears as if \texttt{foldr} has the type given by
+\begin{alltt}
+foldr :: (a -> a -> a) -> a -> [a] -> a
+\end{alltt}
+In fact, the most general type of \texttt{foldr} is more general
+than this. Suppose that the starting value has type \texttt{b}
+and the elements of the list are of type \texttt{a}
+\begin{alltt}
+foldr :: (... -> ... -> ...) -> b -> [a] -> ...
+\end{alltt}
+Then we can picture the definition thus:
+\begin{center}
+\includegraphics[width=4in]{Pictures/FoldrDef.pdf}
+\end{center}
+\texttt{s} is the result of the first equation, and so the result type of the
+\texttt{foldr} function itself will be \texttt{b}, the type of \texttt{s}
+\begin{alltt}
+foldr :: (... -> ... -> ...) -> b -> [a] -> b
+\end{alltt}
+In the second equation, \texttt{f} is applied to \texttt{x} as first
+argument, giving
+\begin{alltt}
+foldr :: (a -> ... -> ...) -> b -> [a] -> b
+\end{alltt}
+The second argument of \texttt{f} is the result of a \texttt{foldr}, and
+so of type \texttt{b},
+\begin{alltt}
+foldr :: (a -> b -> ...) -> b -> [a] -> b
+\end{alltt}
+Finally, the result of the second equation is an application of
+\texttt{f}; this result must have the same result type as the
+\texttt{foldr} itself, \texttt{b}.
+\begin{alltt}
+foldr :: (a -> b -> b) -> b -> [a] -> b
+\end{alltt}
+With this insight about the type of \texttt{foldr} we were able to see that 
+\texttt{foldr} could be used to define another whole cohort of list
+functions, such as an insertion sort,
+\begin{alltt}\minx{iSort}
+iSort :: Ord a => [a] -> [a]
+iSort = foldr ins []
+\end{alltt}
+in which \texttt{ins} has the type \texttt{Ord a => a -> [a] -> [a]}.
+\vspace{10pt}
+
+\subsection*{Polymorphic definitions and variables}
+\index{type checking!polymorphic definitions}
+
+Here we examine a more technical aspect of how type checking works over
+polymorphic definitions; it may be omitted on first reading.
+
+Functions and constants can be used at different types in the same
+expression. A simple instance is
+\begin{alltt}
+expr = length ([]++[True]) + length ([]++[2,3,4]) \hfill (expr)
+\end{alltt}
+The first occurrence of \texttt{[]} is at \texttt{[Bool]}, whilst the second is at
+\texttt{[Integer]}. This is completely legitimate, and is one of the advantages of
+a polymorphic definition.
+Now suppose that we replace the \texttt{[]} by a variable, and define
+\begin{alltt}
+funny xs = length (xs++[True]) + length (xs++[2,3,4]) \hfill (funny)
+\end{alltt}
+The variable \texttt{xs} is forced to have type \texttt{[Bool]} {\em and\/} type
+\texttt{[Integer]}; it is forced to be polymorphic, in other words. This is
+not allowed in Haskell, as there is no way of expressing the type of 
+\texttt{funny}. It might be thought that
+\begin{alltt}
+funny :: [a] -> Int
+\end{alltt}
+was a correct type, but this would mean that \texttt{funny} would have all
+the instance types
+\begin{alltt}
+funny :: [Int] -> Int
+funny :: [[Char]] -> Int
+  ...
+\end{alltt}
+which it clearly does not. We conclude that constants and variables are
+treated differently: constants may very well appear at different
+incompatible types in the same expression, variables cannot. 
+
+What is the significance of disallowing the definition \texttt{(funny)} but
+allowing the definition \texttt{(expr)}? Taking \texttt{(expr)} first, we have a polymorphic
+definition of the form
+\texttt{[] ::\ [a]}
+and an expression in which 
+\texttt{[]} occurs twice; the first occurrence is at \texttt{[Bool]}, the second at 
+\texttt{[Integer]}. To allow these independent uses to occur, we
+type-check each use
+of a polymorphic definition with different type variables, so
+that a constraint on one use does not affect any of the others.
+
+On the other hand, how is the definition of \texttt{(funny)} disallowed? When we
+type check the use of a variable we will not treat each instance as
+being of an independent type. Suppose we begin with no constraint on \texttt{xs},
+so \texttt{xs::t}, say. The first occurrence of \texttt{xs} forces
+\texttt{xs::[Bool]}, the second requires \texttt{xs::[Integer]}; these
+two constraints cannot be satisfied simultaneously, and thus the
+definition \texttt{(funny)} fails to type check.
+
+The crucial point to remember from this example is that the
+definition of a function can't force any of
+its arguments to be polymorphic. 
+
+\subsection*{Function definitions}
+\index{type checking!function definitions}
+
+In type checking a function definition like \texttt{(fdef)} on page \pageref{fdef} above we have
+to obey rules similar to the monomorphic case.
+\begin{itemize}
+\item Each of the guards \smsubscr{g}{i} must be of type \texttt{Bool}.
+\item The value \smsubscr{e}{i} returned in each clause must have a type \smsubscr{s}{i} 
+which is at least as general as \texttt{t}; that is, \smsubscr{s}{i} must have
+\texttt{t} as an instance.
+\item The pattern \smsubscr{p}{j} must be \textbf{consistent} with type
+of that argument, namely \smsubscr{t}{j}. 
+\end{itemize}
+We take up a final aspect of type checking -- the impact of type classes
+-- in the next section.
+
+\begin{exercises}
+
+\item
+Do the following pairs of types -- listed vertically -- unify? If so, give a most general
+unifier for them; if not, explain why they fail to unify.
+\begin{alltt}
+(Int -> b)  \hspace*{2cm} (Int,a,a)
+(a -> Bool) \hspace*{2cm} (a,a,[Bool])
+\end{alltt}
+
+\item
+Show that we can unify \texttt{(a,[a])} with
+\texttt{(b,c)} to give \texttt{(Bool,[Bool])}. 
+
+\item
+Can the function
+\begin{alltt}
+f :: (a,[a]) -> b
+\end{alltt}
+be applied to the arguments \texttt{(2,[3])}, \texttt{(2,[])} and \texttt{(2,[True])};
+if so, what are the types of the results?
+Explain your answers.
+
+\item
+Repeat the previous question for the function
+\begin{alltt}
+f :: (a,[a]) -> a
+\end{alltt}
+Explain your answers.
+
+\item
+Give the type of \texttt{f [] []} if \texttt{f} has type
+\begin{alltt}
+f :: [a] -> [b] -> a -> b
+\end{alltt}
+What is the type of the function \texttt{h} given by the definition
+\begin{alltt}
+h x = f x x ?
+\end{alltt}
+
+\item
+How can you use the Haskell system to check whether two type expressions are
+unifiable, and if so what is their unification? Hint: you can make dummy definitions
+in Haskell in which the defined value, \texttt{zircon}
+say, is equated with itself:
+\begin{alltt}
+zircon = zircon
+\end{alltt}
+Values defined like this can be declared to have any type you wish.
+
+\item
+{[Harder]} Recalling the definitions of \texttt{curry} and
+\texttt{uncurry} from Section \ref{curry}, what are the types of
+\begin{alltt}
+curry id
+uncurry id
+curry (curry id)
+uncurry (uncurry id)
+uncurry curry
+\end{alltt}
+Explain why the following expressions do not type-check:
+\begin{alltt}
+curry uncurry
+curry curry
+\end{alltt} 
+
+\item
+{[Harder]} Give an {\em algorithm\/} which decides whether two
+type expressions are unifiable. If they are, your algorithm
+should return a most general unifying substitution; if not, it
+should give some explanation of why the unification fails.
+\index{type checking!polymorphic|)}
+\index{constraint!in type checking|)}
+\index{type checking!constraints|)}
+\index{polymorphism!type checking|)}
+\end{exercises}
+
+\section{Type checking and classes}
+\label{typeCheckClasses}
+\index{type checking!and classes|(}
+\index{classes!type checking|(}
+
+Classes in Haskell restrict the use of some functions, such as \texttt{==}, to
+types in the class over which they are defined, in this case \texttt{Eq}. These
+restrictions are apparent in the \textbf{contexts}\index{context} which appear in some types.
+For instance, if we define
+\begin{alltt}
+member []     y = False\minx{member}
+member (x:xs) y = (x==y) || member xs y
+\end{alltt}
+its type will be
+\begin{alltt}
+Eq a => [a] -> a -> Bool\index{context}
+\end{alltt} 
+because \texttt{x} and \texttt{y} of type \texttt{a} are compared for
+equality in the definition, thus forcing the type 
+\texttt{a} to belong to
+the equality class \texttt{Eq}.
+
+This section explores the way in which type checking takes place when overloading
+is involved; the material is presented informally, by means of an
+example. 
+
+Suppose we are to apply the function \texttt{member} to an expression \texttt{e},
+whose type is 
+\begin{alltt}
+Ord b => [[b]]
+\end{alltt}
+Informally, \texttt{e} is a list of lists of objects, which belong to
+a type which carries an
+ordering. In the absence of the contexts we would unify the type
+expressions, giving
+\begin{alltt}
+member :: [[b]] -> [b] -> Bool \hspace*{2cm} e :: [[b]]
+\end{alltt}
+and so giving the application \texttt{member e}
+the type \texttt{[b] -> Bool}. We do the same here,
+but we also apply the unification to the contexts, producing the context
+\begin{alltt}
+(Eq [b] , Ord b)\hfill(ctx.1)\minx{Eq}\minx{Ord}
+\end{alltt}
+Now, we check and simplify the context.
+\index{context!simplifying}
+\begin{titemize}
+\item The requirements in a context can only apply to type variables, so we need to eliminate
+requirements like \texttt{Eq [b]}. The only way these can be eliminated is to use
+the \texttt{instance} declarations. In this case the built-in instance
+declaration
+\begin{alltt}
+instance Eq a => Eq [a] where ....
+\end{alltt}
+allows us to replace the requirement \texttt{Eq [b]} with \texttt{Eq b} in \texttt{(ctx.1)},
+giving the new context
+\begin{alltt}
+(Eq b , Ord b)\hfill(ctx.2)
+\end{alltt}
+We repeat this process until no more instances apply.
+\itempar
+If we fail to reduce all the requirements to ones involving a type
+variable, the application fails, and an error message would be generated. This
+happens if we apply \texttt{member} to \texttt{[id]}; 
+\begin{alltt}
+    No instance for (Eq (a -> a))
+      arising from a use of `member' at <interactive>:1:0-10
+    Possible fix: add an instance declaration for (Eq (a -> a))
+    In the expression: member [id]
+    In the definition of `it': it = member [id]
+\end{alltt}
+since \texttt{id} is a function, whose type is not it the class \texttt{Eq}.
+\index{type checking!instance error}
+
+\item We then simplify the context using the \texttt{class} definitions. In our
+example we have both \texttt{Eq b} and \texttt{Ord b}, but recall that
+\minx{class}
+\begin{alltt}
+class Eq a => Ord a where ...
+\end{alltt}
+so that any instance of \texttt{Ord} is automatically an instance of \texttt{Eq};
+this means that we can simplify \texttt{(ctx.2)} to
+\begin{alltt}
+Ord b
+\end{alltt}
+This is repeated until no further simplifications result.
+\end{titemize}
+For our example, we thus have the type
+\begin{alltt}
+member e :: Ord b => [b] -> Bool
+\end{alltt}
+This three-stage
+process of unification, checking (with instances) and simplification is
+the general pattern for type checking with contexts in Haskell. 
+
+Finally, we should explain how contexts are introduced into the types of the
+language. They originate in types for the functions in class declarations, so
+that, in the example of the \texttt{Info} class from earlier in the chapter, we have
+\begin{alltt}
+examples :: Info a => [a]\minx{Info}
+size     :: Info a => a -> Int
+\end{alltt}
+The type checking of
+functions which use these overloaded functions will propagate
+and combine the contexts as we have seen above.
+
+We have seen informally how the Haskell type system accommodates type
+checking for the overloaded names which belong to type classes. A more
+thorough overview of the technical aspects of this, including a
+discussion of the `monomorphism restriction' which needs to be placed on
+certain polymorphic bindings, is to be found in the Haskell 2010
+report \cite{haskell2010}.
+
+\index{type checking!and classes|)}
+\index{classes!type checking|)}
+
+\begin{exercises}
+
+\item
+Give the type of each of the individual conditional
+equations which follow, and discuss the
+type of the function which together they define.
+\begin{alltt}
+merge (x:xs) (y:ys) 
+  | x<y         = x : merge xs (y:ys)
+  | x==y        = x : merge xs ys
+  | otherwise   = y : merge (x:xs) ys
+merge (x:xs) []    = (x:xs)
+merge []    (y:ys) = (y:ys)
+merge []    []     = []
+\end{alltt}
+
+\item
+Define a polymorphic sorting function, and show how its type is derived from
+the type of the ordering relation
+\begin{alltt}
+compare :: Ord a => a -> a -> Ordering
+\end{alltt}
+
+\item
+Investigate the types of the following numerical functions; you will
+find that the types refer to some of the built-in numeric classes.
+\begin{alltt}
+mult x y = x*y
+divide x = x `div` 2
+share x  = x / 2.0
+\end{alltt}
+Recall that these can be given more restrictive types, such as
+\begin{alltt}
+divide :: Int -> Int
+\end{alltt}
+by explicitly asserting their types as above.
+\end{exercises}
+
+\index{type checking|)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{summary}
+This chapter has shown how names such as \texttt{read} and \texttt{show} and
+operators like \texttt{+} can be overloaded to have different definitions at
+different types. The mechanism which enables this is the system of Haskell
+classes. A \texttt{class} definition contains a signature which contains
+the names and types of operations which must be supplied if a type is to
+be a member of the class. For a particular type, the function definitions are
+contained in an \texttt{instance} declaration.
+
+In giving the type of a function, or introducing a class or an instance, we can
+supply a context, which constrains the type variables occurring. Examples
+include
+\begin{alltt}
+member :: Eq a => [a] -> a -> Bool\minx{Eq}
+instance  Eq a => Eq [a] where ....
+class     Eq a => Ord a  where ....\minx{Ord}
+\end{alltt}
+In the examples, it can be seen that \texttt{member} can only be used over types
+in the class \texttt{Eq}. Lists of \texttt{a} can be given an equality, provided
+that \texttt{a} itself can; types in the class \texttt{Ord} must already be in the
+class \texttt{Eq}. 
+After giving examples of the various mechanisms, we looked at the classes in
+the standard preludes of Haskell. 
+
+We concluded the chapter with a discussion of how type checking of expressions and definitions is performed in
+Haskell, initially in the monomorphic case, and then in full generality with polymorphic and overloaded functions. In that case we saw type checking as
+a process of extracting and consolidating constraints which come from the 
+unification of type expressions which contain type variables. 
+\end{summary}
+
+
+%\end{document}

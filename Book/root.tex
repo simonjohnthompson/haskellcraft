@@ -1,0 +1,251 @@
+\documentclass{book}
+\usepackage[pdftex]{graphicx}
+\usepackage{alltt}
+\usepackage{latexsym}
+\usepackage{array}
+\usepackage{chicago}
+\usepackage{multicol}
+\usepackage{makeidx}
+\usepackage{wrapfig}
+%\usepackage{color}
+
+% slightly different fonts: 28/7/2010
+\usepackage{fourier} % math & rm
+\usepackage[scaled=0.875]{helvet} % ss
+\renewcommand{\ttdefault}{cmtt} %tt
+
+
+\usepackage[pdftex]{graphics,color} % 
+\usepackage{eso-pic} % Required for Draft (\AddToShipoutPicture) 
+%\AddToShipoutPicture{\resizebox{0.9\pdfpagewidth}{0.9\pdfpageheight}{\rotatebox{60}{\color[gray]{0.90}\hspace*{5mm}\textsc{Draft}}}}
+
+%\usepackage{hyperref}
+\makeatletter
+\def\graybullet{{\enskip$\bullet$\enskip}}
+\renewcommand\maketitle{%	
+  \null%
+  \vspace*{0\p@}%
+   {\noindent%
+  \thispagestyle{empty}
+  {\vbox{\parindent \z@ \raggedright \normalfont
+    \interlinepenalty\@M
+   {\Large\sffamily\bfseries\@title\raggedright}\par\nobreak\vfill
+  }}}
+  \vfill\clearpage
+\thispagestyle{empty}
+\input{halftitle}
+\clearpage
+\thispagestyle{empty}
+{%  \let \footnote \thanks
+  \vspace*{0\p@}%
+   \parindent \z@%
+  \vbox{\parindent \z@ \raggedright \normalfont
+    \interlinepenalty\@M
+    \par\nobreak
+    {\leftskip=-36pt\hrulefill\par}
+  \vspace*{24\p@}%
+    {\Huge\sffamily\bfseries\@title\par\nobreak}\par
+  \vspace*{36\p@}%
+    {\Large\sffamily\color{blue} Third edition}\par
+  \vspace*{24\p@}%
+   {\leftskip=-36pt\hrulefill\par}\par
+   }\par
+    \vskip 5.5pc%
+    {\large\sffamily
+      \lineskip .5em%
+%      \begin{tabular}[t]{@{}l@{}}%
+        \sffamily\bfseries\large\@author%\\[12pt]
+%        \@address
+%      \end{tabular}
+    }%
+  \vfill%
+%  \begin{tabular*}{\textwidth}{@{}l@{}}
+    {\includegraphics[width=27pt]{AW-Logo.pdf}}\\[2pt]
+    \sffamily\normalsize\bfseries{Addison-Wesley}\\[2pt]
+    \sffamily\small Harlow, England{\graybullet}Reading, Massachusetts{\graybullet}Menlo Park,
+    California{\graybullet}New York\\
+    \sffamily\small Don Mills,
+    \sffamily\small
+Ontario{\graybullet}Amsterdam{\graybullet}Bonn{\graybullet}Sydney{\graybullet}Singapore\\
+    \sffamily\small Tokyo{\graybullet}Madrid{\graybullet}San
+    Juan{\graybullet}Milan{\graybullet}Mexico
+    City{\graybullet}Seoul{\graybullet}Taipei
+%  \end{tabular*}
+  \setcounter{footnote}{0}%
+  \global\let\thanks\relax
+  \global\let\maketitle\relax
+  \global\let\@thanks\@empty
+  \global\let\@author\@empty
+  \global\let\@date\@empty
+  \global\let\@title\@empty
+  \global\let\title\relax
+  \global\let\author\relax
+  \global\let\date\relax
+  \global\let\and\relax
+}}
+\newenvironment{summary}{\section*{Summary}}
+                         {}
+\newcommand\runinghead{\@setfontsize\runinghead{9.8pt}{12}}
+\newtheorem{example}{Example}
+
+\newcommand\subexample{\@startsection{subexample}{4}{\z@}%
+                                    {12\p@ \@plus1ex \@minus.2ex}%
+                                    {-1em}%
+                                    {\normalsize\sffamily\bfseries}}
+\newcommand\subsubexample{\@startsection{subsubexample}{4}{\z@}%
+                                    {-12\p@ \@plus1ex \@minus.2ex}%
+                                     {6\p@ \@plus .2ex}%
+                                    {\normalsize\sffamily\bfseries}}
+\def\itempar{\hfill\break\hbox{\hskip 1em}}
+
+\newtheorem{exercise}{Exercise}[chapter]
+\newenvironment{exercises}
+               {\if@nobreak
+                   \everypar{}%
+                \else
+                   \addpenalty\@secpenalty\addvspace\@tempskipa
+                \fi
+                 \bigbreak\noindent{\bf Exercises}
+                 \setlength\leftmargini  {2.8em}%
+                 \itemsep 6pt\parsep 0pt
+%                \addcontentsline{toc}{section}{\protect\numberline{}Exercises}
+                 \renewcommand\labelenumi{{\sffamily\bfseries \theenumi}}
+                 \renewcommand{\theenumi}{\protect\refstepcounter{exercise}\theexercise}
+                 \begin{enumerate}
+                }
+               {\end{enumerate}\renewcommand\labelenumi{{\bf
+\theenumi.}}\renewcommand{\theenumi}{\rm\arabic{enumi}}}
+
+\newenvironment{exerciseone}
+               {\if@nobreak
+                   \everypar{}%
+                \else
+                   \addpenalty\@secpenalty\addvspace\@tempskipa
+                \fi
+                 \bigbreak\noindent{\bf Exercises}
+                 \setlength\leftmargini  {2.8em}%
+                 \itemsep 6pt\parsep 0pt
+%                \addcontentsline{toc}{section}{\protect\numberline{}Exercises}
+                 \renewcommand\labelenumi{{\sffamily\bfseries \theenumi}}
+                 \renewcommand{\theenumi}{\protect\refstepcounter{exercise}\theexercise}
+                 \begin{enumerate}
+                }
+               {\end{enumerate}\renewcommand\labelenumi{{\bf
+\theenumi.}}\renewcommand{\theenumi}{\rm\arabic{enumi}}}
+\def\enumerate{%
+  \ifnum \@enumdepth >\thr@@\@toodeep\else
+    \advance\@enumdepth\@ne
+    \edef\@enumctr{enum\romannumeral\the\@enumdepth}%
+      \expandafter
+      \list
+        \csname label\@enumctr\endcsname
+        {\usecounter\@enumctr\def\makelabel##1{\hss\llap{##1}}}%
+  \fi}
+\def\itemize{%
+  \ifnum \@itemdepth >\thr@@\@toodeep\else
+    \advance\@itemdepth\@ne
+    \edef\@itemitem{labelitem\romannumeral\the\@itemdepth}%
+    \expandafter
+    \list
+      \csname\@itemitem\endcsname
+      {\def\makelabel##1{\hss\llap{##1}}}%
+  \fi}
+\setlength\leftmarginii  {1em}
+\newtheorem{definition}{definition}[chapter]
+\renewenvironment{example}{\subsection*{Example}}{\medbreak}
+\makeatother
+
+%\nofiles
+\setcounter{tocdepth}{1}
+\makeindex
+\newcommand{\smsubscr}[2]{\texttt{#1}\raisebox{-1.5mm}{\scriptsize\texttt{#2}}}
+
+% Definitions 28/7/2010
+\newenvironment{3e}{\color{blue}}{}
+\newcommand{\new}{\begin{3e}}
+\newcommand{\old}{\end{3e}}
+\newcommand{\todo}[1]{\marginpar{\textcolor{magenta}{#1}}}
+\newcommand{\note}[1]{\textcolor{magenta}{#1}}
+\newcommand{\spade}{\ensuremath{\spadesuit}}
+\newcommand{\heart}{\ensuremath{\heartsuit}}
+\newcommand{\dia}{\ensuremath{\diamondsuit}}
+\newcommand{\club}{\ensuremath{\clubsuit}}
+\newcommand{\uppp}[1]{\ensuremath{{}^{\mbox{\footnotesize\texttt #1}}}}
+
+\renewcommand{\topfraction}{0.99}
+
+
+
+%\renewcommand{\familydefault}{ppl}
+%\usepackage{palatino}
+
+
+\begin{document}
+\title{Haskell\\The Craft of Functional Programming}
+\author{Simon Thompson}
+\maketitle
+%\dominitoc
+%\psdraft
+\input{defs0}
+\input{miradefs}
+
+\bibliographystyle{chicago}
+
+\include{titlepage}
+
+%\newpage
+%\thispagestyle{empty}
+
+%\vspace*{7cm}
+%\noindent
+%{\large\em To Alice\\ and Rory}
+%\pagebreak
+
+
+\renewcommand{\thepage}{\roman{page}}
+\tableofcontents
+%\addtocounter{mtc}{1}
+\include{0}
+
+\newpage
+\renewcommand{\thepage}{\arabic{page}}
+\setcounter{page}{1}
+
+
+\include{1}
+\include{2}
+\include{3}
+\include{4}
+\include{5}
+\include{6}
+\include{7}
+\include{8}
+\include{9}
+\include{10}
+\include{11}
+\include{12}
+\include{13}
+\include{14}
+\include{15}
+\include{16}
+\include{17}
+\include{18}
+\include{19}
+\include{20}
+\include{21}
+\appendix
+\include{appendix1}
+\include{glossary}
+\include{opsTable}
+%\include{understanding}
+\include{otherHs}
+\include{errors}
+\include{projects}
+
+\bibliography{big}
+
+%\newcommand{\smsubscr}[2]{\texttt{#1}\raisebox{-1.5mm}{\scriptsize\texttt{#2}}}
+
+\printindex
+
+\end{document}

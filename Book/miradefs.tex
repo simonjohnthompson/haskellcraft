@@ -1,0 +1,110 @@
+%		miradefs.tex 		    June 1994
+
+% opening and closing a quoted Miranda section
+
+\newcommand{\mira}{\noindent\hrulefill\nopagebreak\so}
+\newcommand{\arim}{\nopagebreak\st\hrulefill\\}
+
+% backslash in the Miranda environment
+% Only feasible approach is to use \verb+\+
+% in line!
+
+%\newcommand{\bs}{$\mi\backslash\!\!$}
+%\newcommand{\lbs}{\mbox{\verb+\+}}
+
+% ignoring part of the input
+
+\newcommand{\ignore}[1]{}
+
+% a blank line in a Miranda section
+
+\newcommand{\bl}{\mbox{\ }}
+
+% Signalling a diffculty.
+
+\definecolor{light-gray}{gray}{0.95}
+
+\newcommand{\beware}[2]
+ {\medskip\noindent\colorbox{light-gray}{\parbox{\textwidth}
+ {\mbox{\large\textbf{#1}} \medskip\noindent\\ #2}\medskip\noindent}}
+
+% Subscripting in Miranda text
+\newcommand{\subscr}[2]{\mbox{${\mbox{\texttt{#1}}}_{\mbox{\texttt{#2}}}$}}
+
+%\newcommand{\subscr}[2]{\mbox{${\mbox{\mi #1}}_{\mbox{\smtt #2}}$}}
+\newcommand{\aone}{\subscr{a}{1}}
+\newcommand{\atwo}{\subscr{a}{2}}
+\newcommand{\ak}{\subscr{a}{k}}
+
+\newcommand{\aoneone}{\subscr{a}{1,1}}
+
+\newcommand{\eone}{\subscr{e}{1}}
+\newcommand{\etwo}{\subscr{e}{2}}
+\newcommand{\ei}{\subscr{e}{i}}
+\newcommand{\er}{\subscr{e}{r}}
+
+\newcommand{\fone}{\subscr{f}{1}}
+\newcommand{\fl}{\subscr{f}{l}}
+
+\newcommand{\gone}{\subscr{g}{1}}
+\newcommand{\gtwo}{\subscr{g}{2}}
+\newcommand{\gi}{\subscr{g}{i}}
+\newcommand{\gr}{\subscr{g}{r}}
+
+\newcommand{\hone}{\subscr{h}{1}}
+\newcommand{\hl}{\subscr{h}{l}}
+
+\newcommand{\pone}{\subscr{p}{1}}
+\newcommand{\ptwo}{\subscr{p}{2}}
+\newcommand{\pk}{\subscr{p}{k}}
+
+\newcommand{\qone}{\subscr{q}{1}}
+\newcommand{\qtwo}{\subscr{q}{2}}
+\newcommand{\qk}{\subscr{q}{k}}
+
+\newcommand{\rone}{\subscr{r}{1}}
+\newcommand{\rtwo}{\subscr{r}{2}}
+
+\newcommand{\tone}{\subscr{t}{1}}
+\newcommand{\ttwo}{\subscr{t}{2}}
+\newcommand{\tn}{\subscr{t}{n}}
+
+\newcommand{\vone}{\subscr{v}{1}}
+\newcommand{\vtwo}{\subscr{v}{2}}
+\newcommand{\vn}{\subscr{v}{n}}
+
+% for regular expressions
+
+\newcommand{\stone}{\subscr{st}{1}}
+\newcommand{\sttwo}{\subscr{st}{2}}
+\newcommand{\stn}{\subscr{st}{n}}
+\newcommand{\rthree}{\subscr{r}{3}}
+
+\newcommand{\eps}{$\varepsilon$}
+\newcommand{\trans}[1]{\stackrel{\mbox{\tt #1}}{\longrightarrow}}
+
+
+
+% superscript in Miranda text
+
+\newcommand{\superscr}[2]{\mbox{${\mbox{\mi #1}}^{\mbox{\smtt #2}}$}}
+
+% Not equals in Miranda text
+
+\newcommand{\noteq}{\makebox[0pt][l]{=}/}
+\newcommand{\overslash}{\makebox[0pt][l]{/}}
+
+% Definitions in complexity chapter
+
+\newfont{\oldSym}{cmsy10}
+\newcommand{\Th}{\boldmath$\oldSym\Theta$}
+\newcommand{\pow}[1]{\^{}#1}
+\newcommand{\leqq}{$\leq$}
+\newcommand{\geqq}{$\geq$}
+\newcommand{\lll}{$\ll$}
+\newcommand{\eqq}{$\equiv$}
+\newcommand{\ltwo}{\subscr{log}{2}}
+
+% Indexing
+
+\newcommand{\minx}[1]{\index{#1@{\ttfamily{}#1}}}

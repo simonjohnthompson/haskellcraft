@@ -1,0 +1,641 @@
+%\documentclass{book}\usepackage{sjtfonts}\usepackage{includegraphics}\usepackage{alltt}\usepackage{latexsym}
+%\begin{document}\input{defs0}\input{miradefs}
+
+
+\chapter{Getting started with Haskell and GHCi}
+\label{getStart}
+\chapstart
+
+
+Chapter \ref{intro} introduced the foundations of functional programming in Haskell. 
+We are now ready to use GHCi to do some practical programming, and we introduce it here.
+
+
+In beginning to program we will also learn the basics of the Haskell module 
+system, under which programs can be written in multiple, interdependent files, 
+and which can use the  
+`built-in' functions in the prelude and libraries. 
+
+Our programming
+examples will concentrate on using the \texttt{Picture} example
+introduced in Chapter \ref{intro} as well as some simple numerical
+examples. 
+In support of this we will look at how to get hold of the programs and
+other background materials for the book, as well as how to obtain and install GHCi as a part of the Haskell Platform.
+
+We conclude by briefly surveying the kinds of error message that can
+result from typing something incorrect into GHCi. 
+
+\begin{figure}[t]
+\begin{alltt}\minx{FirstScript.hs}
+\input{FirstScript.hs}
+\end{alltt}
+\vspace*{-12pt}
+\caption{An example script, \texttt{FirstScript.hs}.}
+\label{FirstScript}
+\end{figure}
+
+\section[A first Haskell program]{A first Haskell program}
+\markright{A first Haskell program}
+ 
+We begin the chapter by giving a first Haskell program or
+\textbf{script}\index{script}, which consists of the numerical examples from
+Chapter \ref{intro}. This is the file
+\texttt{FirstScript.hs}, shown in Figure \ref{FirstScript}. Haskell scripts  are stored in files with the \textbf{extension}\index{extension}
+`\texttt{.hs}'.\index{hs@\texttt{.hs}}
+
+
+
+
+
+As well as definitions, a script will contain comments. 
+A \textbf{comment}\index{comment} in a script
+is a piece of information of value to a human reader rather than to a computer.
+It might contain an informal explanation of how a function works,
+how it should or should not be used, the overall design philosophy of a library and so on.
+ Everything in a program file is
+interpreted as
+program text, {\em except\/} where it is explicitly indicated that it is a
+comment. 
+
+Comments are indicated in two ways. The symbol
+`\texttt{-{}-}'\minx{--} begins a comment\index{comment!symbol} which occupies the part of the
+line to the right of the symbol. Comments can also be enclosed by the 
+symbols `\texttt{\{-}'\minx{\{-} and `\texttt{-\}}'\minx{-\}}. These comments can be of
+arbitrary length, spanning more than one line, as well as enclosing other comments; 
+they are therefore
+called \textbf{nested comments}\index{comment!nested}.
+
+\section{Using Haskell in practice}
+\index{GHCi|(}
+
+The Glasgow Haskell Compiler (GHC)\index{Glasgow Haskell Compiler|see{GHC}}\index{GHC} is an industrial-strength compiler for Haskell. \textbf{GHC interactive (GHCi)} is an interactive interpreter based on GHC, which supports program development by allowing programmers to evaluate Haskell expressions interactively as they develop programs.
+
+\begin{wrapfigure}[8]{l}{0pt}
+%\begin{figure}[h]
+\
+\includegraphics{Pictures/Platform.png}
+%\end{figure}
+\end{wrapfigure}
+\noindent
+GHC and GHCi are available stand alone, but they also come as part of the \textbf{Haskell Platform}\index{Haskell Platform}. In addition to GHC and GHCi, this contains a selection of standard libraries and tools for Haskell. Included in the tools is \texttt{cabal},\index{Cabal} a package for distributing Haskell code and libraries, and which we use for distributing the code for the book; we come back to  \texttt{cabal} in Chapter \ref{progLists}.
+\index{downloading support materials} The platform also includes tools for interfacing with programs written in other languages, as well as \texttt{haddock} for documentation generation.
+
+\medskip
+\noindent
+The libraries included with the Haskell Platform give comprehensive support for practical programming in Haskell. The 
+home page for the platform is here:\index{Haskell Platform!homepage}
+\begin{center}\texttt{
+http://hackage.haskell.org/platform/}
+\end{center}
+and full details of the libraries in the platform are found at\index{Haskell Platform!libraries in}
+\begin{center}\texttt{
+http://hackage.haskell.org/platform/contents.html}
+\end{center}
+Further
+information about downloading and installing the Haskell Platform may be found in Appendix \ref{OtherHS}; we discuss how to find out more about the functions and libraries in the Haskell Platform in Chapter \ref{progLists}.
+
+
+\begin{figure}[t] 
+\begin{center}
+\includegraphics[width=12cm]{Pictures/GHCi-MacOSX.png}
+\end{center} 
+\caption{A GHCi session in Mac OS X}
+\label{GHCiSessionMac}
+\end{figure}
+
+\begin{figure}[t] 
+\begin{center}
+\includegraphics[width=12cm]{Pictures/WinGHCi-screenshot.png}
+\end{center} 
+\caption{A WinGHCi session in Windows XP}
+\label{WinGHCiSession}
+\end{figure}
+
+
+\section{Using GHCi}
+
+
+In this text we describe the terminal-style interface to GHCi, illustrated in Figure
+\ref{GHCiSessionMac},
+because this is common to Windows, Mac OS X and Linux. Once they have understood
+how GHCi itself works, experienced
+PC users should have little difficulty in using the WinGHCi system, shown in Figure \ref{WinGHCiSession}, which gives a
+Windows-style interface to the GHCi commands.
+
+\subsection*{GHCi documentation}
+\index{GHCi!documentation}
+
+On Mac OS X documentation for GHCi and other systems is found at
+\begin{center}\index{GHCi!documentation}
+\texttt{file:///usr/share/doc/ghc/html/index.html}
+\end{center} 
+Linux systems differ: for example, in Ubuntu 9.10 the path to the Haskell documentation is:
+\begin{center}\index{GHCi!documentation}
+\texttt{/usr/share/doc/ghc6-doc}
+\end{center} 
+Links to the documentation are found in the Haskell Platform program group\index{Haskell Platform!program group on Windows} on Windows systems.
+
+
+\subsection*{Starting GHCi}
+
+To start GCHi on OS X and Linux, type \texttt{ghci}\minx{ghci}
+to the prompt; to launch GHCi using a particular file, type
+\texttt{ghci} followed by the name of the file in question, as in
+\begin{alltt}\minx{ghci}
+ghci Chapter2
+\end{alltt} 
+On a Windows
+system, GHCi is launched by choosing it from the appropriate place
+on the Start menu; if you have the standard installation of the Haskell Platform it will be in the Haskell Platform program group. Double clicking a Haskell file will open that file in GHCi.\index{GHCi!launch}\footnote{This assumes that the appropriate
+registry entries have been made; we work here with the standard installation of
+GHCi as discussed in Appendix \ref{OtherHS}.}
+
+Haskell scripts carry the extension \texttt{.hs}; only such files can be loaded, and their extensions
+can be omitted when they are loaded either when GHCi is launched or by a
+\texttt{:load}\index{load@\texttt{:load}} command within GHCi.
+
+
+
+\subsection*{Evaluating expressions in GHCi}
+\index{GHCi!expression evaluation}
+
+As we said in Section \ref{exprEval}, GHCi will evaluate
+expressions typed at the prompt. We see in Figure \ref{GHCiSessionMac} the
+evaluation of \texttt{double (square 29)} to \texttt{1682}, like this
+\begin{alltt}
+\textsl{*Chapter2>} double (square 29)
+\textsl{1682}
+\textsl{*Chapter2>}
+\end{alltt}
+where we have indicated the machine output by using a slanted font; user input appears
+in unslanted form. The \textbf{prompt}\index{prompt} here, \texttt{\textsl{*Chapter2>}}, will be explained in
+Section \ref{introModules} below.\minx{*Chapter2>}
+As can be seen from the examples, we can evaluate expressions which use
+the definitions in the current script. In this case it is \texttt{Chapter2.hs}.
+
+One of the advantages of the GHCi interface is that it is easy to
+experiment with functions, trying different evaluations simply by typing
+the expressions at the keyboard. If we want to evaluate a complex
+expression, we could add it to the program, as in
+definition
+\begin{alltt}
+cube :: Integer -> Integer
+cube n = n*n*n
+\end{alltt}
+but we can also input these definitions directly into GHCi by prefacing them with the keyword \texttt{let}, as seen in Figure \ref{GHCiSessionMac}. Of course, this definition will be lost when we close GHCi, so if we want to keep a record of it, then we should add it to a Haskell module as well.
+
+\newlength{\colwidth}
+\setlength{\colwidth}{\textwidth}
+\addtolength{\colwidth}{-1.9in}
+
+\begin{figure}[t]
+\begin{tabular*}{\textwidth}{p{1.2in}p{0.3in}p{\colwidth}}
+\multicolumn{2}{c}{\textbf{Command (abbrev.)}} & \multicolumn{1}{c}{\textbf{Action}} \\ \  \\
+\texttt{:load Parrot}\index{load@\texttt{:load}} & \texttt{:l} & Load the Haskell module \texttt{Parrot.hs}; the file extension \texttt{.hs} can be omitted.\\
+\texttt{:reload}\index{reload@\texttt{:reload}} & \texttt{:r} & Repeat the last \texttt{:load} command.\\
+\texttt{:type exp}\index{type@\texttt{:type}} & \texttt{:t} & Give the type of the expression \texttt{exp}; e.g. typing
+\texttt{:type size+2}\ \ gives\ \ \texttt{size+2 ::\ Integer}.\\
+\texttt{:info name} \index{info@\texttt{:info}}& \texttt{:i} & Give information about the thing called
+\texttt{name}.\\
+\texttt{:browse Name} \index{browse@\texttt{:browse}}& & Give information about the definitions in the module
+\texttt{Name}, if it is loaded.\\
+\texttt{:quit}\index{quit@\texttt{:quit}} & \texttt{:q} & Quit the system.\\
+\texttt{:help}\minx{:?}\index{GHCi!help} & \texttt{:h,:?} & Give a complete list of the GHCi commands.\\
+\texttt{:!\ command} & & Escape to perform a Unix or DOS \texttt{command}.\\
+\texttt{:edit First.hs} \index{edit@\texttt{:edit}}& \texttt{:e} & Edit the file
+\texttt{First.hs} in the default editor. Note that the file 
+extension \texttt{.hs} is
+needed in this case. See the following section for more information on editing.\\
+\texttt{:set editor vi} \index{set@\texttt{:set}}& \texttt{:s} & Set the \texttt{editor} to be \texttt{vi}.\\
+\ensuremath{\uparrow}, \ensuremath{\downarrow} &  & Move up (\ensuremath{\uparrow}) and down (\ensuremath{\downarrow}) the command history.\\
+\ensuremath{\rightarrow\!\!\mid} &  & Name and command completion: complete module or file names, or GHCi commands.\\
+\texttt{let s = exp}\minx{let} & & Give \texttt{s} the value of \texttt{exp} within this GHCi session.
+\end{tabular*}\index{GHCi!commands!shortened form} 
+\caption{Principal GHCi commands}
+\label{commands}
+\end{figure}
+
+\subsection*{GHCi commands}
+\index{GHCi!commands}
+
+GHCi commands begin with a colon, `\texttt{:}'.\minx{:} A summary of the
+main commands is given in Figure \ref{commands}.
+When a GHCi command can be abbreviated to their initial letter this is shown in the table in Figure \ref{commands}.
+Outline information about other commands is given by the \texttt{:help} command, and comprehensive details can be
+found in the
+on-line GHCi documentation discussed above.
+
+\subsection*{Editing scripts}
+\index{GHCi!editing}
+
+GHCi can be connected to a default text editor, so that GHCi commands such
+as \texttt{:edit} use this editor. This may well be
+determined by your local set-up (e.g. in the \texttt{EDITOR} variable),\minx{EDITOR} or can be set using the \texttt{:set} command in GHCi. 
+
+Using the GHCi \texttt{:edit} command causes the editor to be invoked on
+the appropriate file. When the editor is quit, the updated file is
+loaded automatically. However, it can be more convenient to keep the editor running in
+a separate window and to reload the file by:
+\begin{itemize}
+\item writing the updated file from the editor (without quitting it),
+and then
+\item reloading the file in GHCi using \texttt{:reload} or \texttt{:reload filename}.
+\end{itemize}
+In this way the editor is still open on the file should it need further
+modification.
+
+Alternatively some editors allow GHCi to be called from within the editor, as a part of the Haskell mode for the editor. A popular Haskell editor is emacs, with variants such as Aquamacs for Mac OS X.\index{emacs, Haskell mode for}\index{Aquamacs|see{emacs}} These editors will provide facilities such as syntax highlighting, and embedded evaluation. In Haskell mode for emacs, \texttt{\^\-C \^\-B} opens GHCi and \texttt{\^\-C \^\-L} (re)loads the current module in GHCi.
+
+
+
+\subsection*{A first GHCi session}
+\index{GHCi!first session}
+Let's get started with GHCi by doing some introductory exercises.
+
+\subsubsection*{Task 1}
+Load the file \texttt{FirstScript.hs} into GHCi, and evaluate 
+the following expressions
+\begin{alltt}
+square size
+square
+double (square 2)
+it
+square (double 2)
+let d = double 2
+square d
+23 - double (3+1)
+23 - double 3+1
+it + 34
+13 `div` 5
+13 `mod` 5
+\end{alltt}
+On the basis of this can you work out the purpose of \texttt{it}\minx{it} and \texttt{let}\minx{let}?
+
+\medskip
+\noindent
+\subsubsection*{Task 2}
+Use the GHCi command \texttt{:type} to tell you the type of each of these, 
+apart from \texttt{it}.
+
+\medskip
+\noindent
+\subsubsection*{Task 3}
+What is the effect of typing each of the following?
+\begin{alltt}
+double 2 3
+double square
+2 double
+\end{alltt}
+Try to give an explanation of the results that you obtain.
+
+\medskip
+\noindent
+\subsubsection*{Task 4}
+Edit the file \texttt{FirstScript.hs} to include
+definitions of functions from integers to integers which behave
+as follows.
+\begin{itemize}
+\item The function should double its input and square the result of
+that.
+\item The function should square its input and double the result of
+that.
+\end{itemize}
+Your solution should include declarations of the types of the
+functions.
+
+\begin{figure}[t]
+\beware{\texttt{let} in GHCi}{\minx{let}
+It is possible to make \emph{temporary} definitions in GHCi using \texttt{let} like this:
+\begin{alltt}
+let s = 23
+\end{alltt}
+and once you have done this you can use \texttt{s} in any expressions you evaluate. You can define any Haskell value this way, too.
+
+\medskip
+Beware! These definitions are lost if you redefine \texttt{s} or when you leave GHCi, so it often best  to put definitions into a file, so that they are saved and you can edit them subsequently.}
+\end{figure}
+
+\index{GHCi|)}
+
+\section{The standard prelude and the Haskell libraries}
+\label{prelLibs}
+
+We saw in Chapter \ref{intro} that Haskell has various built-in types, such as 
+integers and
+lists and functions over those types, including the arithmetic functions and the list 
+functions \texttt{map} and \texttt{++}. Definitions of these are
+contained in a file, the \textbf{standard prelude}\index{standard prelude|see{\texttt{Prelude.hs}}},
+\texttt{Prelude.hs}\minx{Prelude.hs}. When Haskell is used, the default is to load the
+standard prelude, and this can be seen by trying the GHCi command 
+\begin{alltt}
+:browse Prelude
+\end{alltt}
+which will list the types of all the functions in the \texttt{Prelude.hs} module.
+
+As Haskell has developed over the last decade, the prelude has also grown. In
+order to make the prelude smaller, and to free up some of the names used
+in it, many of the definitions have been moved into 
+\textbf{standard libraries},\index{standard libraries} which can be included when they are
+needed. We shall say more about these libraries as we discuss particular parts of
+the language. 
+
+As well as the standard libraries, the Haskell Platform includes
+various contributed libraries which support concurrency, functional
+animations and so forth. Again, we will mention these as we go along.
+Other libraries are available using the Cabal installation system: see Chapter \ref{progLists} for details. 
+In order to use the libraries we need to know something about Haskell
+modules, which we turn to now.
+
+\section{Modules}
+\label{introModules}
+\index{modules!introduction|(}
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=4in]{Pictures/GHCiLibPrel.pdf}
+\end{center} \index{GHCi!a GHCi session}
+\caption{A GHCi session}
+\label{GHCiSession}
+\end{figure}
+
+
+A typical piece of computer software will contain thousands of lines of
+program text. To make this manageable, we need to split it into smaller
+components,  which we call modules. 
+
+A \textbf{module}\index{modules} has a name
+and will
+contain a collection of Haskell definitions. To introduce a module called \texttt{Ant}
+we begin the program text in the file thus:
+\begin{alltt}\minx{Ant}\minx{module}
+module Ant where
+   ...
+\end{alltt}
+A module may also
+\textbf{import}\minx{import} definitions from other modules. The module \texttt{Bee}
+will import the definitions in \texttt{Ant} by including an \texttt{import} statement,
+thus:
+\begin{alltt}\minx{Bee}
+
+module Bee where
+import Ant
+   ...
+\end{alltt}
+The import statement means that we can use all the definitions in
+\texttt{Ant} when making definitions in \texttt{Bee}.
+In dealing with modules in this text
+we adopt
+the conventions that
+\begin{itemize}
+\item there is exactly one module per file;
+\item the file \texttt{Blah.hs} contains the module
+\texttt{Blah}.
+\end{itemize}
+The module mechanism supports the libraries we discussed in
+Section \ref{prelLibs}, but we can also use it to include code written by 
+ourselves or someone else. 
+
+The module mechanism allows us to control how definitions are imported
+and also which definitions are made available or \textbf{exported}\minx{export} by a
+module for use by other modules. We look at this in more depth in Chapter \ref{codes}, where we
+also ask how modules are best used to support the design of software
+systems.
+
+In the light of what we have seen so far, Figure \ref{GHCiSession} illustrates a GHCi session.
+like this:
+The current module will have access to the standard prelude, and to
+those modules which it \texttt{imports}; these might include modules
+from the standard libraries, which are found in the same directory as the
+standard prelude\index{standard libraries!location of}. The user interacts with GHCi, providing
+expressions to evaluate and other commands and receiving the results of
+the evaluations.
+
+The next section revisits the picture example of Chapter
+\ref{intro}, which is used to give a practical illustration of modules.
+\index{modules!introduction|)}
+
+\begin{figure}[p]
+\begin{alltt}\minx{Picture}
+\input{Pictures.tex}
+\end{alltt}
+\caption{A view of the \texttt{Pictures} module.}
+\label{pictScript}
+\vspace*{-12pt}
+\end{figure}
+
+\section{A second example: pictures}\label{picModuleEx}
+\index{pictures}
+\markright{A second example: \runinghead pictures}
+
+The running example in Chapter \ref{intro} was of pictures, and we saw there that there are two implementations of these functions, one in \texttt{Pictures.hs} giving an `ASCII art' version, and the other in \texttt{PicturesSVG.hs} rendering pictures in a web browser.\minx{PicturesSVG}
+\begin{itemize}\label{ShowBrowser}
+\item
+To use \texttt{PicturesSVG.hs}, open GHCi on this module like this:
+\begin{alltt}\minx{ghci}
+ghci PicturesSVG.hs
+\end{alltt}
+and in your web browser of choice\footnote{Both Firefox and Google Chrome work with SVG on all platforms; Safari on Mac OS X works apart from \texttt{invertColour}. Internet Explorer 8 doesn't support SVG, but IE9 is predicted to.} open the file \texttt{refresh.html} in the same directory.\index{SVG!display in browser}
+
+\noindent
+To show a picture in the browser, evaluate it using \texttt{render} as in 
+\begin{alltt}
+render (horse `beside` (flipV horse))
+\end{alltt}
+This will give a browser display as shown in Figure \ref{svgpix}, page \pageref{svgpix}. The image in the browser will update automatically; if you would prefer to do this manually, use the file \texttt{showPic.html} instead.
+
+\item
+To use the `ASCII art' version, run
+\begin{alltt}
+ghci Pictures.hs
+\end{alltt}
+To show a picture in the terminal you need to use the function
+\begin{alltt}\minx{printPicture}
+printPicture :: Picture -> IO ()
+\end{alltt}
+which is used to display a \texttt{Picture} on the screen. The type
+\texttt{IO} is a part of the Haskell mechanism for input/output
+(I/O).\index{I/O}
+We examine this mechanism in detail in Chapter \ref{io}; for
+the present it is enough to know that if \texttt{horse} is the name of the
+picture used in the earlier examples, then the effect of the function application
+\texttt{\ printPicture horse\ } 
+is the display
+\begin{center}
+{\footnotesize
+\newlength{\blah}
+\settowidth{\blah}{\texttt{............}}
+\begin{minipage}{\blah}
+\begin{alltt} 
+.......##... 
+.....##..#..
+...##.....#.
+..#.......#.
+..#...#...#.
+..#...###.#.
+.#....#..##.
+..#...#.....
+...#...#....
+....#..#....
+.....#.#....
+......##....
+\end{alltt}
+\end{minipage}
+}
+\end{center}
+first seen in Chapter \ref{intro}. Any \texttt{Picture} can be printed
+in a similar way. 
+The \texttt{Pictures} module is shown in Figure \ref{pictScript}.
+\end{itemize}
+In the remainder of this section we present a series of practical
+exercises designed to use either of the modules
+\texttt{Pictures.hs} and \texttt{PicturesSVG.hs}.
+
+\begin{exercises}
+
+\item Define a module \texttt{UsePictures} which imports
+\texttt{Pictures} (or \texttt{PicturesSVG}) and contains definitions of \texttt{blackHorse} and \texttt{rotateHorse} which can use the definitions
+imported from the pictures module.
+
+\medskip
+\noindent
+In the remaining questions you are expected to add other definitions to
+your module \texttt{UsePictures}.
+
+\item How could you make the picture
+\begin{center}
+\includegraphics[width=1in]{Pictures/twoByTwo.pdf}
+\end{center}
+Try to find two different ways of getting the result. It may help to work
+with pieces of white and black paper.
+
+Using your answer to the first part of this question, how would you
+define a chess (or checkers) board, which is an $8\times8$ board of alternating squares? 
+
+\item 
+Three variants of the last picture which involve the `horse' pictures
+are
+\begin{center}
+\includegraphics[width=4in]{Pictures/chessHorse.pdf}
+\end{center}
+How would you produce these three?
+
+\item
+Give another variant of the `horse' pictures in the previous question,
+and show how it could be created. Note: a nice variant is 
+\begin{center}
+\includegraphics[width=1in]{Pictures/chessReflect.pdf}
+\end{center}
+\end{exercises}
+
+\section{Errors and error messages}\label{errors}
+\index{errors|(}
+
+No system can guarantee that what you type is sensible, and GHCi is no
+exception. If something is
+wrong, either in an expression to be evaluated or in a script,
+you will receive an \textbf{error message}\index{errors!error message}. Try typing
+\begin{alltt}
+2+(3+4
+\end{alltt}
+to the GHCi prompt. The error here is\index{errors!syntax}\index{syntax error}
+in the \textbf{syntax}\index{syntax}, and is like a sentence in English
+which does not have the correct grammatical structure, such as `Fishcake our
+camel'. 
+
+The expression
+has too few parentheses: after the `\texttt{4}', a closing parenthesis is expected, to match with the
+opening parenthesis before `\texttt{3}'. The error message says that something is wrong, but in fact it's not to do with indentation, but rather the lack of a closing parenthesis:
+\begin{alltt}
+<interactive>:1:6: parse error (possibly incorrect indentation)
+\end{alltt}
+In a similar way typing \texttt{2+(3+4))} results in the message
+\begin{alltt}
+<interactive>:1:7: parse error on input `)'
+\end{alltt}
+which this time says that (one of) the closing parentheses causes a problem. Now try typing the following expression. 
+\begin{alltt}
+double square
+\end{alltt}
+This gives a \textbf{type} error, since \texttt{double} is applied to the
+function \texttt{square}, rather than an integer:
+\index{type error}\index{errors!type}
+\begin{alltt}
+    Couldn't match expected type `Integer'
+           against inferred type `Integer -> Integer'
+    In the first argument of `double', namely `square'
+    In the expression: double square
+    In the definition of `it': it = double square
+\end{alltt}
+The message indicates
+that something of type \texttt{Integer} was expected,
+but something of type \texttt{Integer -> Integer}
+was present instead. That's correct: \texttt{double} expects something of type {\mi
+Integer} as
+its argument, but
+\texttt{square} of type \texttt{Integer -> Integer} is found in the place of an integer.
+
+When you get an error message like the one above you need to look
+at how the \textbf{term},
+in this case \texttt{square} of type \texttt{Integer -> Integer}, does not match the
+\textbf{context} in 
+which it is used: the context is given in the second line (\texttt{double square})
+and the type required by the context, \texttt{Integer}, is given in the last line.
+
+Type errors do not always give rise to
+such well-structured error messages. Typing
+either \texttt{4 double} or \texttt{4 5} will give rise to 
+a message like
+
+\begin{alltt}
+    No instance for (Num ((Integer -> Integer) -> t))
+      arising from the literal `4' at <interactive>:1:0-7
+    Possible fix:
+      add an instance declaration for (Num ((Integer -> Integer) -> t))
+    In the expression: 4 double
+    In the definition of `it': it = 4 double
+\end{alltt}
+We will explore the technical details behind these messages in a later
+chapter; for now it is sufficient to read these as `Type Error!'. One thing we can focis on, though, is the place that it says the error occurs: suppose that this was inside a larger program, it would still indicate the appearance of \texttt{4 double} as giving rise to the problem. So, \emph{always take note of where an error is said to occur.}
+
+The last kind of error we will see are \textbf{program errors}. Try the
+expression
+\index{errors!program}\index{program error}
+
+\begin{alltt} 
+4 `div` (3*2-6)
+\end{alltt}
+We cannot divide by zero (what would the result be?) and so we get the message
+
+\begin{alltt}
+*** Exception: divide by zero
+\end{alltt}
+indicating that a division of \texttt{4} by \texttt{0} has occurred.
+More details about the error messages produced by GHCi
+can
+be found in Appendix \ref{hugsErrors}.
+\index{errors|)}
+
+
+
+\begin{summary}
+The main aim of this chapter is practical, to acquaint the reader with the 
+GHCi implementation of Haskell. We have seen how to write simple Haskell
+programs, to load them into GHCi and then to evaluate expressions which use
+the definitions in the module.
+
+Larger Haskell programs are structured into modules, which can be
+imported into other modules. Modules support the Haskell library
+mechanism and we illustrate modules in the case study of \texttt{Pictures}
+introduced in Chapter \ref{intro}.
+
+We concluded the chapter with an overview of the possible syntax, type 
+and program errors in expressions or scripts submitted to GHCi. 
+
+The first two chapters have laid down the theoretical and practical
+foundations for the rest of the book, which explores the many aspects of
+functional programming using Haskell and GCHi.
+\end{summary}
+%\end{document} 
+
+

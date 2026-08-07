@@ -1,0 +1,40 @@
+From 6042c95a963d4ca0909d02d6964db67130df168a Mon Sep 17 00:00:00 2001
+From: Reed Mullanix <reedmullanix@gmail.com>
+Date: Tue, 7 Jan 2025 10:53:05 -0500
+Subject: [PATCH 2/3] fix: add build-depends to performance executables
+
+This fixes some "Could not load module 'Prelude'" errors encountered
+when running `cabal build`.
+---
+ Craft3e.cabal | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/Craft3e.cabal b/Craft3e.cabal
+index 03c2386..e42e207 100644
+--- a/Craft3e.cabal
++++ b/Craft3e.cabal
+@@ -120,12 +120,21 @@ library
+ executable performanceI
+   main-is:     PerformanceI.hs
+   hs-source-dirs: ./Chapter20
++  build-depends:
++    base >= 4 && < 5,
++    Craft3e
+ 
+ executable performanceIA
+   main-is:     PerformanceIA.hs
+   hs-source-dirs: ./Chapter20
++  build-depends:
++    base >= 4 && < 5,
++    Craft3e
+ 
+ executable performanceIS
+   main-is:     PerformanceIS.hs
+   hs-source-dirs: ./Chapter20
++  build-depends:
++    base >= 4 && < 5,
++    Craft3e
+ 
+-- 
+2.39.1
+

@@ -1,0 +1,59 @@
+%\documentclass{book}\usepackage{sjtfonts}\usepackage{includegraphics}\usepackage{alltt}\usepackage{latexsym}
+%\usepackage{array}
+%\begin{document}\input{defs0}\input{miradefs}\setcounter{chapter}{19}\setcounter{page}{415}
+
+
+%\minitocoptionfalse
+\chapter{Haskell practicalities}
+\label{OtherHS}
+\index{Haskell!implementations}
+\index{Haskell Platform}
+
+It's not difficult to get going using Haskell, and most of the relevant information is easily accessible from the \texttt{haskell.org} page. This appendix points you in the right direction.
+
+\subsection*{Implementations}
+
+Implementations of Haskell have been built at various sites around the world.
+This text uses GHCi, an interactive front-end to the Glasgow Haskell Compiler (GHC). GHCi provides much of the functionality of the Hugs interpreter, which was developed in a joint
+effort by staff at the Universities of Nottingham in the UK\ and Yale in
+the USA. The first compilers for Haskell were developed at the University of Glasgow, UK, and
+Chalmers Technical University, G\"{o}teborg, Sweden. More recent developments have taken place elsewhere, including at York and Utrecht. An up-to-date list of implementations and their status can be found at
+\begin{alltt}
+http://www.haskell.org/haskellwiki/Implementations
+\end{alltt}
+In this book we have used the \textbf{Haskell Platform} as our foundation. This is documented at 
+\begin{alltt}
+http://hackage.haskell.org/platform/
+\end{alltt}
+from where it can also be downloaded. Installation instructions for Windows, Mac OS X and Linux are listed on the relevant downloads page.
+
+\subsection*{Getting the Craft3e code}
+
+The modules for this text are available as a package on Hackage: full details on how to download are available at the homepage for the book:
+\begin{alltt}
+www.haskellcraft.com
+\end{alltt}
+
+\subsection*{Using GHCi}\index{GHCi!documentation}
+
+An overview of the main commands of GHCi can be found in Figure \ref{commands}, page \pageref{commands}, and full details of other aspects of GHCi are in the online documentation for GHC.
+
+\subsection*{Editors for Haskell}\index{editors for Haskell}
+
+While there is no preferred editor for Haskell, emacs is probably the best loved and most used. To tune emacs to work with Haskell, it's good to use the Haskell mode, which is documented extensively at
+\begin{alltt}
+http://www.haskell.org/haskellwiki/Haskell_mode_for_Emacs
+\end{alltt}
+Not everyone gets on with emacs, and vim is an alternative for many, with its mode available from
+\begin{alltt}
+http://projects.haskell.org/haskellmode-vim/
+\end{alltt}
+Other editors include Yi, a text editor written in Haskell and extensible in Haskell. 
+\begin{alltt}
+http://www.haskell.org/haskellwiki/Yi
+\end{alltt}
+and an overview of all those available is at 
+\begin{alltt}
+http://www.haskell.org/haskellwiki/Editors
+\end{alltt}
+ 

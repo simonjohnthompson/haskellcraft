@@ -1,0 +1,5 @@
+cabal configure
+cabal sdist
+cabal upload dist/xxx.tar.g
+
+To publish the candidate, use 'cabal upload --publish

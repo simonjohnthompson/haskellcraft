@@ -1,0 +1,1274 @@
+%\documentclass{book}\usepackage{sjtfonts}\usepackage{includegraphics}\usepackage{alltt}\usepackage{latexsym}
+%\usepackage{array}
+%\begin{document}\input{defs0}\input{miradefs}\setcounter{chapter}{17}\setcounter{page}{363}
+
+\chapter{Programming with monads}
+\chapstart
+\label{actions}
+\index{actions|(}
+\index{I/O|(}
+
+
+This chapter looks again at I/O in Haskell, particularly focussing on the \texttt{do} notation which we use to write I/O programs. We'll see that we can write all sorts of different programs using \texttt{do} notation, including programs that manipulate state, that non-deterministically return more than one result, as well as programs that may fail, or raise exceptions. 
+
+Underlying each of these is a \textbf{monad}. A monad provides the infrastructure for sequencing and naming used in the \texttt{do} notation, and we will show instances of the \texttt{Monad} class for lists, the \texttt{Maybe} type, a parsing monad and more.
+
+As well as looking at these definitions, we will program a number of examples, showing how a monadic style, using \texttt{do}, makes programs more readable and flexible.
+Each instance of a monad gives a `little language' for writing programs, and we'll come back to look at this in detail in the next chapter.
+
+
+\section{I/O programming}\index{interactive programs}
+
+We first looked at I/O programming in Haskell using the \texttt{IO} types in Chapter \ref{io}. Something of type \texttt{IO t} is a \emph{program} which will perform I/O and return a value of type \texttt{t}. Among the I/O primitives of Haskell are
+\begin{alltt}
+putStr :: String -> IO ()
+getLine :: IO String
+\end{alltt}
+The effect of running \texttt{putStr str} is to output the string \texttt{str} and then to terminate; it will return the value \texttt{()} which is (the only value) of type \texttt{()}.\minx{()} The effect of executing \texttt{getLine} is to get a line of input, and to return that line as its result.
+
+Programs are built using the \texttt{do} notation to \emph{sequence statements} of type \texttt{IO t}. A program to read a line then output a message is given by
+\begin{alltt}
+readWrite :: IO ()
+
+readWrite =
+    do
+      getLine
+      putStrLn "one line read"
+\end{alltt}
+where the two statements are sequenced one after the other. It is also possible to \emph{name} the results of statements for use in the program, so that we can name the line read, and output it, like this:
+\begin{alltt}
+readEcho :: IO ()
+
+readEcho =
+    do
+      line <-getLine
+      putStrLn ("line read: " ++ line)
+\end{alltt}
+In this program \texttt{line <- getLine} names the result of the \texttt{getLine} and so it can be echoed in the next statement.
+
+\subsection*{Adding a sequence of integers}
+
+Now suppose we want to write an interactive program to sum integers
+supplied one per line until zero is input. We will write an I/O program
+\begin{alltt}\minx{sumInts}
+sumInts :: Integer -> IO Integer
+\end{alltt}
+which is passed a starting value for the sum, and which returns the sum from there; so, to sum from scratch we call \texttt{sumInts 0}. This gives the program
+\begin{alltt}
+sumInts s
+  = do n <- getInt
+       if n==0 
+          then return s
+          else sumInts (s+n)
+\end{alltt}
+In writing the program there are two cases: we first read an integer value, using the \texttt{getInt} function defined in Chapter \ref{io}. If
+we read zero then the result must be the sum so far, \texttt{s}; if not, we get the result by calling \texttt{sumInts} again, with the parameter set to \texttt{(s+n)}.
+
+
+
+The program is written in the style we saw in Chapter \ref{io}: the function is \emph{tail-recursive} -- being called as the last statement in the program -- and the \emph{loop data} is used to carry the ``sum so far'': here \texttt{s} and \texttt{s+n}. 
+
+
+
+It is interesting with compare the definition of \texttt{sumInts} with the recursion in
+\begin{alltt}\minx{sumAcc}
+sumAcc s [] = s
+sumAcc s (n:ns) 
+  = if n==0
+       then s
+       else sumAcc (s+n) ns
+\end{alltt}
+Here we use the first variable to \texttt{sumAcc} as an \emph{accumulator} where the ``result so far'' can be held. 
+
+We can also put the \texttt{sumInts} program inside a `wrapper' which explains its
+purpose and prints the sum at the end.
+\begin{alltt}\minx{sumInteract}
+sumInteract :: IO ()
+sumInteract
+  = do putStrLn "Enter integers one per line"
+       putStrLn "These will be summed until zero is entered"
+       sum <- sumInts 0
+       putStr "The sum is "
+       print sum
+\end{alltt}
+
+
+\begin{exercises}
+
+\item
+Compare the definition of \texttt{sumInts} above with this definition:
+\begin{alltt}
+sumInts :: IO Integer
+sumInts
+  = do n <- getInt
+       if n==0 
+          then return 0
+          else (do m <- sumInts
+                   return (n+m))
+\end{alltt}
+Which will have the better performance, do you think? Wny?
+
+\item
+Give a definition of the function
+\begin{alltt}
+fmap :: (a -> b) -> IO a -> IO b
+\end{alltt}
+the effect of which is to transform an interaction by applying the function to its
+result. You should define it using the \texttt{do} construct.
+
+\item
+Define the function
+\begin{alltt}
+repeat ::  IO Bool -> IO () -> IO ()
+\end{alltt}
+so that \texttt{repeat test oper} has the effect of repeating \texttt{oper} until
+the condition \texttt{test} is \texttt{True}.
+
+\item
+Define the higher-order function \texttt{while} in which the condition and the operation
+work over values of type \texttt{a}. Its type should be
+\begin{alltt}
+whileG :: (a -> IO Bool) -> (a -> IO a) -> (a -> IO a)
+\end{alltt}
+
+\item 
+Using the function \texttt{whileG} or otherwise, define an interaction which
+reads a number, \texttt{n} say, and then reads a further \texttt{n} numbers and
+finally returns their average.
+
+\item
+Modify your answer to the previous question so that if the end of file is
+reached before \texttt{n} numbers have been read, a message to that effect is
+printed.
+
+\item
+Define a function
+\begin{alltt}
+accumulate :: [IO a] -> IO [a]
+\end{alltt}
+which performs a sequence of interactions and accumulates their result in a
+list. Also give a definition of the function
+\begin{alltt}
+sequence :: [IO a] -> IO ()
+\end{alltt}
+which performs the interactions in turn, but discards their results. Finally,
+show how you would sequence a series, passing values from one to the next:
+\begin{alltt}
+seqList :: [a -> IO a] -> a -> IO a
+\end{alltt}
+What will be the result on an empty list?
+\end{exercises}
+
+\section{Further I/O}
+\label{furtherIO}
+
+In this section we survey further features of Haskell I/O, defined in the \texttt{System.IO} module.
+
+\subsection*{Interaction at the terminal}\index{interactive programs}
+
+We have seen that we can read from the terminal -- the `standard input' -- and write to
+the screen -- the `standard output'. Terminal input can be configured to work in different ways, depending on the way that the input is \texttt{buffered}. 
+
+The default is that input is unbuffered, and so each character is available to the I/O program immediately it is typed; a disadvantage of this mode is that it is impossible to use \texttt{Ctrl-D} to signal ``end of file'' in the interactive input. Setting to line buffering, where input is assembled into lines before being available to the I/O program, remedies this problem. To set the buffering modes we use \texttt{hSetBuffering} as in this example:
+\begin{alltt}\minx{copyInteract}
+copyInteract :: IO ()
+
+copyInteract = 
+    do
+      hSetBuffering stdin LineBuffering
+      copyEOF
+      hSetBuffering stdin NoBuffering
+\end{alltt}
+where we can see that the buffering mode can be changed within an I/O program. The \texttt{copyEOF} program itself is given by 
+\begin{alltt}\minx{copyEOF}
+copyEOF :: IO ()
+
+copyEOF = 
+    do 
+      eof <- isEOF
+      if eof  
+        then return () 
+        else do line <- getLine 
+                putStrLn line
+                copyEOF
+\end{alltt}
+where \texttt{isEOF ::\ IO Bool} is an I/O program to determine whether or not the end of standard input has been reached. 
+
+Give this a try within GHCi: you will find that you can use \texttt{Ctrl-D} to terminate your input if you run \texttt{copyInteract}; if on the other hand you run \texttt{copyEOF} directly, you will need to interrupt the program using \texttt{Ctrl-C}.
+
+\subsection*{File I/O}
+\index{I/O!files}
+As well as reading and writing to a terminal, the Haskell I/O model also provides for reading from and
+writing and appending to files, by means of the functions
+\begin{alltt}\minx{readFile}\minx{writeFile}\minx{appendFile}
+readFile   :: FilePath -> IO String
+writeFile  :: FilePath -> String -> IO ()
+appendFile :: FilePath -> String -> IO ()
+\end{alltt} 
+where
+\begin{alltt}\minx{FilePath}
+type FilePath = String
+\end{alltt}                                                                               
+and files are specified by the text strings appropriate to the
+implementation in question.
+
+\subsection*{Errors}
+\index{I/O!errors}
+
+I/O programs can raise errors, which belong to the system-dependent
+\texttt{data} type \texttt{IOError}. The function
+\begin{alltt}\minx{ioError}
+ioError :: IOError -> IO a
+\end{alltt}
+builds an I/O action which fails giving the appropriate error, and the program
+\begin{alltt}\minx{catch}
+catch :: IO a -> (IOError -> IO a) -> IO a
+\end{alltt}
+will catch an error raised by the first argument and
+handle it using the second argument, which gives a handler -- that is an
+action of type \texttt{IO a} -- for each possible \texttt{IOError}.
+
+\subsection*{Input and output as lazy lists}
+\index{I/O!as lazy lists}
+
+An alternative view of I/O programs, popular in earlier lazy functional 
+programming languages, was to see the input and output as
+\texttt{Strings}, that is as lists of characters. Under that model an
+I/O program is a function
+\begin{alltt}
+listIOprog :: String -> String
+\end{alltt}
+This obviously makes sense in a `batch' program, where all the input is
+read before any output is produced, but in fact it also works for
+interactive programs where input and output are interleaved, if the
+language is \textbf{lazy}. This is because in a lazy language we can
+begin to print the result of a computation -- the output of the
+interactive program here -- before the argument -- the interactive input --
+is fully evaluated. As an example, repeatedly to reverse lines of input
+under this model one can write
+\begin{alltt}
+listIOprog  = unlines . map reverse . lines
+\end{alltt}
+The drawback of this approach is in scaling it up. It is often difficult
+to predict in advance the way in which the input and output are
+interleaved: often output comes after it is expected, and sometimes even
+before; the \texttt{IO} approach in Haskell avoids such problems.
+Nevertheless, support for this style is available, using
+\begin{alltt}\minx{getContents}
+getContents :: IO String
+\end{alltt}
+a primitive to get the contents of the standard input, and which is used
+in this function, also defined in \texttt{System.IO}\minx{System.IO}
+\begin{alltt}\minx{interact}
+interact :: (String -> String) -> IO ()
+interact f = do s <- getContents
+                putStr (f s)
+\end{alltt}
+Try out the program \texttt{interact listIOprog} in GHCi to see for yourself that the input and output lines are interleaved one-by-one just as you would expect.
+
+\subsection*{Generating random numbers}\index{random numbers}
+
+We introduced the \texttt{randomStrategy} in Chapter \ref{io}, but pointed out there that it should properly be programmed using a monad, since it is a function which returns different values on different calls. We generate a random integer less than \texttt{n} based on the current time, which is accessible within the \texttt{IO} monad:
+\begin{alltt}\minx{randomInt}
+randomInt :: Integer -> IO Integer
+randomInt n = 
+    do
+      time <- getCurrentTime
+      return ( (`rem` n) $ read $ take 6 $ 
+                         formatTime defaultTimeLocale "%q" time)
+      
+randInt :: Integer -> Integer
+randInt = unsafePerformIO . randomInt 
+      
+sRandom :: Strategy
+sRandom _ = convertToMove (randInt 3)
+\end{alltt}
+Here we use the \texttt{unsafePerformIO} function to extract the result from the \texttt{IO} monad. As its name suggests this is (potentially) unsafe, and should be used with care; some would go further, and say that it should never be used.
+
+If we want to avoid \texttt{unsafePerformIO} we need to look again at the design of our case study. In Chapter \ref{io} defined strategies to belong to the type 
+\begin{alltt}\minx{Strategy}
+type Strategy = [Move] -> Move
+\end{alltt}
+if we want to include monadic functions, then we should redefine them to be monadic, like this
+\begin{alltt}
+type StrategyM = [Move] -> IO Move
+\end{alltt}
+We leave the reimplementation of the case study to use monadic strategies as an exercise for the reader.
+
+\subsection*{The \texttt{System.IO} library}
+\minx{System.IO}
+
+There is much more to the  \texttt{System.IO} library than we are able to cover here; see the system documentation for more details.
+
+\begin{exercises}
+
+\item
+Write a file-handling version of the program
+\texttt{sumInts}, which reads the integer sequence from a file.
+
+\item
+Write a lazy-list version of the program \texttt{sumInts}, which you can then run using \texttt{interact}.
+
+\item{[Harder]}
+Write a lazy-list version of the calculator program.
+
+\item{[Harder]}
+Reimplement the Rock - Paper - Scissors case study to use the monadic strategies in \texttt{StrategyM}.
+
+\end{exercises}
+
+\section{The calculator}
+\label{interactiveCalc}
+\index{calculator|(}
+
+The ingredients of the calculator are contained in three places in the text.
+\begin{titemize}
+\item In Section \ref{recTypes} we saw the introduction of the algebraic type of
+expressions, \texttt{Expr}, which we subsequently revised in Section
+\ref{parsing}, giving
+\begin{alltt}
+data Expr = Lit Integer | Var Var | Op Ops Expr Expr\minx{Expr}
+data Ops  = Add | Sub | Mul | Div | Mod\minx{Ops}
+type Var  = Char
+\end{alltt}
+We revise the evaluation of expressions after discussing the store below. 
+\item In Chapter \ref{adt} we introduced the abstract type
+\texttt{Store}\minx{Store}, which we use to model the values of the variables
+currently held. The signature of the abstract data type is
+\begin{alltt}
+initial :: Store 
+value   :: Store -> Var -> Integer
+update  :: Store -> Var -> Integer -> Store
+\end{alltt}
+\item In Section \ref{parsing} we looked at how to parse expressions and
+commands, 
+\begin{alltt}\minx{Command}
+data Command = Eval Expr | Assign Var Expr | Null
+\end{alltt}
+and defined the ingredients of the function
+\begin{alltt}
+commLine :: String -> Command\minx{commLine}
+\end{alltt}
+which is used to parse each line of input into a \texttt{Command}. For instance,
+\begin{alltt}
+commLine "(3+x)"   = (Eval (Op Add (Lit 3) (Var 'x')))
+commLine "x:(3+x)" = (Assign 'x' (Op Add (Lit 3) (Var 'x')))
+commLine "something unparsable" = Null
+\end{alltt} 
+\end{titemize}
+Expressions are evaluated by
+\begin{alltt}
+eval :: Expr -> Store -> Integer\minx{eval}
+
+eval (Lit n) st = n
+eval (Var v) st = value st v
+eval (Op op e1 e2) st
+  = opValue op v1 v2
+    where
+    v1 = eval e1 st
+    v2 = eval e2 st
+\end{alltt}
+where the \texttt{opValue} function  of type \texttt{Ops->Integer->Integer->Integer}
+interprets each operator, such as \texttt{Add}, as the corresponding function,
+like \texttt{(+)}. 
+
+What is the effect of a command? An expression should return the value
+of the expression in the current store; an assignment will change the
+store, and a null command will do nothing. We therefore define a
+function which returns both a value and a store,
+\begin{alltt}
+command :: Command -> Store -> (Integer,Store)\minx{command}
+
+command Null st     = (0 , st)
+command (Eval e) st = (eval e st , st)
+command (Assign v e) st 
+  = (val , newSt)
+    where
+    val   = eval e st
+    newSt = update st v val
+\end{alltt}
+A single step of the calculator will take a starting \texttt{Store}, and
+read an input line, evaluate the command in the line, print some output
+and finally return an updated \texttt{Store},
+\begin{alltt}\minx{calcStep}
+calcStep :: Store -> IO Store
+
+calcStep st
+  = do line <- getLine
+       let comm        = commLine line\hfill(1)
+       let (val,newSt) = command comm st\hfill(2)
+       print val
+       return newSt
+\end{alltt}
+In lines \texttt{(1)} and \texttt{(2)}
+of the definition of \texttt{calcStep} we see an example of the use
+of \texttt{let} within a \texttt{do} expression. Line
+\texttt{(1)},
+\begin{alltt}\minx{let}
+let comm        = commLine line
+\end{alltt}
+gives \texttt{comm} the value of parsing the \texttt{line}, and this is
+subsequently used in \texttt{(2)},
+\begin{alltt}
+let (val,newSt) = command comm st
+\end{alltt}
+which simultaneously gives \texttt{val} and \texttt{newSt} the value of
+the expression read and the new state. In the lines that
+follow the \texttt{let}s, the value \texttt{val} is printed and the new state \texttt{newSt} is returned as the
+overall result of the interaction. 
+A sequence of calculator steps is given by
+\begin{alltt}\minx{calcSteps}
+calcSteps :: Store -> IO ()
+
+calcSteps st =
+    do
+      eof <- isEOF
+      if eof
+         then return ()
+         else do newSt <- calcStep st
+                 calcSteps newSt
+\end{alltt}
+The main I/O program for the calculator is given by starting off
+\texttt{calcSteps} with the \texttt{initial} store, operating in modified buffering mode
+\begin{alltt}\minx{mainCalc}
+mainCalc :: IO ()
+mainCalc = 
+    do
+      hSetBuffering stdin LineBuffering
+      calcSteps initial
+      hSetBuffering stdin NoBuffering
+\end{alltt}
+In the exercises various extensions and modifications of the calculator
+program are discussed.
+
+
+\begin{exercises}
+
+\item
+How would you add initial and final messages to the output of the calculator?
+
+\item
+Discuss how you would have to modify the system to allow variables to have
+arbitrarily long names, consisting of letters and numbers, starting with a
+letter.
+
+\item
+How would you extend the calculator to deal with decimal floating-point numbers
+as well as
+integers?
+
+\item
+Discuss how you would modify the calculator so that it could read input
+commands split over more than one line. You will need to decide how this
+sort of split is signalled by the user -- maybe by \texttt{\bs{}} at the end of the line --
+and how to modify the interaction program to accommodate this.
+Alternatively, you might let the user do this without signalling; can
+you modify the program to do that?
+
+\item
+How would you modify the parser so that `white space' is permitted in
+the input commands, as in the example
+\begin{alltt}
+"    x : (2\bs{t}+3)     "
+\end{alltt}
+which parses to the \texttt{Command}
+\begin{alltt}
+(Assign 'x' (Op Add (Lit 2) (Lit 3)))
+\end{alltt}
+\index{calculator|)}
+\end{exercises}
+
+
+
+\section{The \texttt{do} notation revisited}
+\index{do@\texttt{do} notation}
+
+We have seen that the type \texttt{IO a} comes with various functions,
+including
+\begin{alltt}
+return  :: a -> IO a
+putStr  :: String -> IO ()
+getLine :: IO String
+\end{alltt}
+but also items of the \texttt{IO a} type can be sequenced using the
+\texttt{do} construct. In this section we look `under the bonnet' to see
+how the \texttt{do} works, as this will lead to us seeing \texttt{IO} as
+just one example of a general phenomenon. 
+
+The key to understanding the \texttt{do} is the operation \texttt{(>>=)}, 
+which is often pronounced `{\bf bind}', which sequences two operations,
+one after the other, binding the result of the first and making it available as a parameter to the second. 
+\begin{alltt}
+(>>=) :: IO a -> (a -> IO b) -> IO b\index{\symbol{62}\symbol{62}\symbol{61}@\texttt{\symbol{62}\symbol{62}\symbol{61}}}
+\end{alltt}
+What is the effect of this operation? It combines an \texttt{IO a}
+\begin{center}
+\includegraphics[height=1.2cm]{Pictures/Monad1.pdf}
+\end{center}
+with a \textbf{function}
+taking the result of this (of type \texttt{a}) into an \texttt{IO b}, that is 
+an object of type \texttt{a -> IO b},
+\begin{center}
+\includegraphics[height=1.2cm]{Pictures/Monad2.pdf}
+\end{center}
+We can join them together, passing the result of the first as an argument to
+the second, thus:
+\begin{center}
+\includegraphics[height=1.2cm]{Pictures/Monad3.pdf}
+\end{center}
+The result of putting them together is something which does some I/O before
+returning a value of type \texttt{b}:
+\begin{center}
+\includegraphics[height=1.2cm]{Pictures/Monad4.pdf}
+\end{center}
+in other words, an object of type \texttt{IO b}. 
+
+How does this relate to
+the \texttt{do} notation? The bind operation, \texttt{(>>=)}, is one of the simplest possible things we can define using \texttt{do}:
+\begin{alltt}
+m >>= f =
+    do
+      res <- m
+      f res
+\end{alltt}
+First what we do is execute \texttt{m}, which is to type \texttt{IO a}, and name its result \texttt{res}; we then pass that to the function \texttt{f}, giving \texttt{f res} ,which is of type \texttt{IO b}.
+
+In fact we can translate \emph{every} use of \texttt{do} into calls to \texttt{(>>=)}; \texttt{do} is just \emph{syntactic sugar} to make writing IO programs more readable.
+Let's look at a particular example; consider what happens in the program
+\begin{alltt}\minx{addOneInt}
+addOneInt :: IO ()
+addOneInt 
+  = do line <- getLine
+       putStrLn (show (1 + read line :: Int))       
+\end{alltt}
+The value returned by \texttt{getLine} is called \texttt{line} and then
+used in the subsequent interaction. Using \texttt{(>>=)} we have to
+sequence the interaction with a function expecting an argument of type
+\texttt{String}, so we write
+\begin{alltt}
+addOneInt 
+  = getLine >>= \bs{line} ->
+    putStrLn (show (1 + read line :: Int))       
+\end{alltt}
+where recall that \texttt{\bs{x} -> e} is the function which takes the
+parameter \texttt{x} to result \texttt{e}, so here the parameter is
+called \texttt{line}, and used just as above. More complex examples
+are translated in a similar way. 
+
+As you can see from this simple example, using \texttt{(>>=)} makes programs more difficult to read and understand: the \texttt{do} notation highlights the essential features of I/O programming:
+\begin{titemize}
+\item sequencing operations, and,
+\item binding the results of statements for use later on in the program.
+\end{titemize}
+and gives a readable and comprehensible way of writing these programs within Haskell.
+
+We'll continue to use the
+\texttt{do} notation, but will keep in mind that it essentially boils down to the existence of a
+function \texttt{(>>=)} which does the work of sequencing I/O programs, and binding their results for future use.
+
+\begin{exerciseone}
+\item
+Repeat some of the earlier examples and exercises using the \texttt{>>=}
+operator instead of a \texttt{do} expression.
+\index{I/O|)}
+\end{exerciseone}
+
+\section{Monads: languages for functional programming}
+\label{monadFP}
+\index{monad|(}
+
+
+The \texttt{do} notation allows us to write \emph{programs} which perform I/O while calculating results; as we discussed in the last section, all we need to support the \texttt{do} notation is to have the `bind' function and `return' functions:
+\begin{alltt}\minx{return}\index{\symbol{62}\symbol{62}\symbol{61}@\texttt{\symbol{62}\symbol{62}\symbol{61}}}
+(>>=) :: IO a -> (a -> IO b) -> IO b
+return :: a -> IO a
+\end{alltt} 
+The \texttt{IO} types give one kind of program which we can describe with the \texttt{do} notation, but there are other kinds of program we might want to write in a similar way, such as
+\begin{titemize}
+\item
+programs that are \emph{non-deterministic}: we can think of these as programs which return a collection of results, as a list, say;
+\item
+programs that might \emph{fail} to give any answer at all;
+\item
+programs that work by manipulating a \emph{state}: that is programs that have variables in the sense of imperative languages like Java and C;
+\item
+programs that raise \emph{exceptions}, and can have those exceptions handled within the program.
+\end{titemize}
+Well, we \emph{can} do this, so long as the types have the analogue of the bind and return functions. In other words, we need to implement functions in a particular kind of \emph{interface}, and we know from Chapter \ref{classes} that this is given in Haskell by the \texttt{Monad} class, like this:
+\begin{alltt}\minx{Monad}
+class Monad m where
+  (>>=)  :: m a -> (a -> m b) -> m b
+  return :: a -> m a
+\end{alltt}
+Once we have an instance of this class we can use the \texttt{do} notation over the type. 
+
+Let's look at the example of programs that might fail, second in the list of examples above. We looked at these in Section \ref{progErrs} where we saw that the \texttt{Maybe} type was a good model for values including a potential failure:
+\begin{alltt}\minx{Maybe}\index{monad!\texttt{Maybe}}
+data Maybe a = Nothing | Just a
+\end{alltt}
+and we developed a number of functions which worked with \texttt{Maybe} types to transmit errors through the code. Alternatively we can use the \texttt{do} notation, because we have this \texttt{instance} for \texttt{Monad}:
+\begin{alltt}
+instance Monad Maybe where
+  (Just x) >>= k  =  k x
+  Nothing  >>= k  =  Nothing
+  return x        =  Just x
+\end{alltt}
+so that we get this behaviour using \texttt{do}:
+\begin{alltt}
+\textsl{Prelude>} do \{ x <- Just 1; y <- Just 2; return (x+y) \}
+\textsl{Just 3}
+\textsl{Prelude>} do \{ x <- Just 1; y <- Nothing; return (x+y) \}
+\textsl{Nothing}
+\textsl{Prelude>} do \{ x <- Nothing; y <- Just 2; return (x+y) \}
+\textsl{Nothing}
+\end{alltt}
+where we are using the braces `\{', `\}' and explicit separator `:' to put the statements in the \texttt{do} program on a single line, as first introduced in Chapter \ref{writingProgs}. In a similar way, lists form a monad:
+\begin{alltt}\index{monad!list}
+instance Monad [] where
+  xs >>= f  = concat (map f xs)
+  return x  = [x]
+\end{alltt} 
+and we can use \texttt{do} notation over lists, like this:
+\begin{alltt}
+\textsl{Prelude>} do \{ x <- [1,2]; y <- [3,4]; return (x+y) \}
+\textsl{[4,5,5,6]}
+\end{alltt}
+From this example we can see that lists model \emph{non-deterministic} computation: each of \texttt{x} and \texttt{y} have two possible values, and that gives four possibilities for \texttt{(x+y)}. The definition of \texttt{(>>=)} over lists reflects this: \texttt{f} is applied to all the possibilities in \texttt{xs} and the results are concatenated together.
+
+In the next section we fill in some of the formalities about monads, but this latter section can be skipped on first reading, if you wish. We then look at some more examples of monads.
+
+\beware{Why `monad'?}{\index{monad!terminology}
+Why is this type class called `monad'? The name originates in category theory, which was used by Eugenio Moggi to build mathematical models of different kinds of computations. However, that doesn't mean that you need to learn category theory to use them, any more than you need to understand the intricacies of modern microprocessors to use your computer! Understanding that the \texttt{do} notation gives sequencing and binding (or naming) is all you need to understand to get started.}
+
+\subsection*{Monads, formally}
+\index{monad!definition}\minx{>>}\minx{fail}
+
+\index{\symbol{62}\symbol{62}\symbol{61}@\texttt{\symbol{62}\symbol{62}\symbol{61}}}
+\minx{return}
+A monad is a family of types \texttt{m a}, based on a polymorphic type
+constructor \texttt{m}, with functions \texttt{return}, \texttt{(>>=)},
+\texttt{(>>)}, and \texttt{fail}:
+\begin{alltt}
+class Monad m where
+  (>>=)  :: m a -> (a -> m b) -> m b
+  return :: a -> m a
+  (>>)   :: m a -> m b -> m b
+  fail   :: String -> m a
+\end{alltt}
+This is an example of a \textbf{class}, whose instances are
+\textbf{type constructors} -- that is functions which build types from
+types -- rather than types. Examples of type constructors are `list',
+written \texttt{[]} in Haskell, 
+and \texttt{IO} as we have seen already.
+
+The definition of \texttt{Monad} also contains default declarations for \texttt{>>} and \texttt{fail}:
+\begin{alltt}
+m >> k = m >>= \bs{}\_ -> k 
+fail s = error s
+\end{alltt}
+From this definition it can be seen that \texttt{>>} acts like \texttt{>>=}, except that the value
+returned by the first argument is discarded rather than being passed to the second argument.
+
+In order properly to be a monad, the functions \texttt{return} and \texttt{(>>=)}
+and the value \texttt{zero}
+should have some simple properties. Informally we can state the requirements
+as follows.
+\begin{itemize}
+\item
+The operation \texttt{return x} should simply return the value
+\texttt{x}, without any additional computational effect, such as input
+or output in the case of the \texttt{IO} monad.
+\item
+The sequencing given by \texttt{>>=} should be irrelevant of the way
+that expressions are bracketed.
+\item
+The value \texttt{fail} \texttt{s} corresponds to a computation which
+\textbf{fails}, giving the error message \texttt{s}. \index{monad!failure in (\texttt{fail})}
+\end{itemize}
+The laws are much clearer when stated in terms of a derived operator,
+\texttt{>@>}.
+\index{\symbol{62}\symbol{64}\symbol{62}@\texttt{\symbol{62}\symbol{64}\symbol{62}}}
+\begin{alltt}
+(>@>) :: Monad m => (a -> m b) ->
+                    (b -> m c) ->
+                    (a -> m c)
+
+f >@> g = \bs{x} -> (f x) >>= g
+\end{alltt} 
+This operator generalizes function composition\footnote{In category theory, this
+operation is called \textbf{Kleisli composition}\index{Kleisli composition}.} \index{function composition}
+in that it composes
+objects 
+\begin{center}
+\includegraphics[height=1.2cm]{Pictures/Monad5.pdf}
+\end{center}
+to give
+\begin{center}
+\includegraphics[height=1.2cm]{Pictures/Monad6.pdf}
+\end{center}
+Note also that \texttt{return} is of this shape, as its type is
+\texttt{a -> m a}. 
+
+Now we can state formally the rules that the operations of
+a monad should satisfy. \index{monad!properties}
+First,
+\texttt{return} is an \textbf{identity}\index{identity} for the operator \texttt{>@>}:
+\begin{alltt}
+return >@> f = f\hfill(M1)
+f >@> return = f\hfill(M2)
+\end{alltt}
+and the operator \texttt{>@>} should be \textbf{associative}:\index{associativity}
+\begin{alltt}
+(f >@> g) >@> h = f >@> (g >@> h)\hfill (M3)
+\end{alltt}
+The derived sequencing operator, \texttt{>>}\minx{>>}, is also associative.
+
+Of course, there is no way that we can make the requirements \texttt{(M1)}--\texttt{(M3)} 
+a part of
+the Haskell definition of \texttt{Monad}. 
+We can also restate the rules in terms of
+\texttt{do}, since, as we saw earlier,
+\begin{alltt}
+m >>= f  =  do \{ x <- m; f x \}
+\end{alltt}
+The first two rules become
+\begin{alltt}
+do \{ y <- return x; f y \} =  f x
+do \{ x <- m; return x \}   =  m
+\end{alltt}
+and the third is implicit in the fact that the \texttt{do}
+construct is associative.
+
+
+\subsection*{Some more examples}
+\index{monad!examples}
+
+Now we have seen the definition of what it means to be a monad, we look at some more examples of monads in Haskell.
+
+
+
+\subsubsection*{The parsing monad}
+\index{parsing!monad}
+\index{monad!parsing}
+
+
+A more substantial example is given by parsing, where we can show that
+\texttt{Parse a} is a monad. To make a formal declaration of this we
+need to wrap it in a \texttt{newtype} constructor, \texttt{MP},
+which clutters the definition a bit.
+\begin{alltt}
+newtype MP a b = MP \{ mp :: (Parse a b) \}
+
+instance Monad (MP a) where
+  return x = MP (succeed x)
+  fail s   = MP none
+  (MP pr) >>= f 
+    = MP (\bs{st} -> concat [ mp (f x) rest | (x,rest) <- pr st ])
+\end{alltt}
+The crux of the definition of \texttt{(>>=)} is like that of
+\texttt{(>*>)} -- a parse is done by one parser, \texttt{pr}, and the remains of the
+input are passed to a second parser \texttt{f}, here dependent on the result of the
+first parse, and so a result of the first parse, \texttt{x}, is passed
+to \texttt{f} to give a second parser, which is applied to the remaining
+input, \texttt{rest}.
+
+How does the monadic approach to parsing look in practice? Let's go back to the calculator example, and in particular the definition of \texttt{opExpParse} in Section \ref{parsing}, page \pageref{opExpParse}. If we redefine it monadically, we get
+\begin{alltt}
+opExpParseM :: MP Char Expr
+opExpParseM =
+    do
+      tokenM '('
+      e1 <- parseExprM 
+      bop <- spotM isOp
+      e2 <- parseExprM
+      tokenM ')'
+      return (Op (charToOp bop) e1 e2)
+\end{alltt}
+where \texttt{tokenM} is the monadic equivalent of \texttt{token}, and so forth. How do the definitions differ? It is mainly in the handling of the results: in the earlier treatment we built the results into a nested tuple, gathering a result for each step whether or not we needed it, and then passed the tuple to a function, via \texttt{build}. The approach here has the advantage that
+\begin{titemize}
+\item
+we only name the results of the sub-parses that we need, and
+\item
+we can build the final result directly, using these names, rather than having to use a function to re-jig the tuple into the value we want.
+\end{titemize} 
+The disadvantage of the non-monadic approach is reminiscent of the discussion of `point-free' programming on page \pageref{pointfree}: under both we combine functions, when the judicious use of names (of variables, of intermediate results) make the program substantially easier to read, write and understand.
+
+\subsubsection*{The identity monad}
+\index{monad!identity}
+
+The identity monad, which takes a type to itself, is the simplest
+example of a monad, with the definitions
+\begin{alltt}
+x >>= f = f x 
+return = id
+\end{alltt}
+In order for this to be a legal Haskell definition we need to define the identity type constructor, and, within Haskell 2010, any instance declaration needs to be for a \texttt{data} type, \texttt{newtype} or primitive type. So, we define, as in \texttt{Control.Monad.Identity},   
+\begin{alltt}
+newtype Identity a = Identity { identity :: a }
+\end{alltt}
+where the constructor \texttt{Identity} `wraps' the value up, and the field name, \texttt{identity} is used to `unwrap' them.. Now we can define the instance itself,
+\begin{alltt} 
+instance Monad Identity where
+    (Identity x) >>= f = f x          --  x >>= f = f x 
+    return a           = Identity a   --  return = id 
+\end{alltt}
+We can then run things in this monad, if we give a \texttt{Show} instance for \texttt{Identity}
+\begin{alltt}
+instance Show a => Show (Identity a) where
+    show (Identity x) = show x
+\end{alltt}
+as in this example, which also shows how we can give multi-line input to GHCi interactively.
+\begin{alltt}
+\textsl{*UseMonads>} :\{
+\textsl{*UseMonads}| do \{ x <- return 'c' :: Identity Char;
+\textsl{*UseMonads}|      y <- return 'd';
+\textsl{*UseMonads}|      return [x,y] \}
+\textsl{*UseMonads}| :\}
+\textsl{"cd"}
+\end{alltt}
+Computationally, this monad represents the trivial state in which no
+actions are performed, and values are returned immediately.
+
+
+
+
+\subsubsection*{The state monad}
+\index{monad!state}
+
+Later in this chapter we will give an example of a \textbf{state} monad, 
+\texttt{State a b}. An operation of this type can change the state (of type 
+\texttt{a}) before returning
+a value of type \texttt{b}.
+
+
+
+
+
+\subsection*{Some standard functions and the \texttt{Functor} class}
+
+There is a set of standard functions over monads, defined in \texttt{Control.Monad}; we just look at two of these here. Their types should be
+familiar from the list case
+\begin{alltt}\minx{fmap}\minx{join}
+fmap :: Monad m => (a -> b) -> m a -> m b
+join :: Monad m => m (m a) -> m a
+\end{alltt}
+and their definitions are
+\begin{alltt}
+fmap f m 
+  = do x <- m 
+       return (f x)
+join m  
+  = do x <- m
+       x
+\end{alltt}
+Over lists these functions are called \texttt{map} and \texttt{concat};
+many of the properties of \texttt{map} and \texttt{concat} over lists lift to these
+functions. For instance, we can show using properties \texttt{(M1)} to \texttt{(M3)}
+that for all \texttt{f} and \texttt{g}
+\begin{alltt}
+fmap (f.g) = fmap f . fmap g\hfill(M4)
+\end{alltt}
+In fact, \texttt{fmap} is defined over a wider set of types that monads, and it is the function that characterises the \texttt{Functor}\minx{Functor} class:
+\begin{alltt}
+class Functor f where
+  fmap :: (a -> b) -> f a -> f b
+\end{alltt}
+Example instances of \texttt{Functor} which are not monads include \texttt{(a,a)}, \texttt{([a],[a])} and \texttt{Tree a} (from the next section).
+
+\begin{exercises}
+
+\item
+Show that sets and binary trees
+can be given a monad structure, as can the type:
+\begin{alltt}
+data Error a = OK a | Error String
+\end{alltt}
+
+\item
+For the monads \texttt{Id} , \texttt{[]} and \texttt{Maybe} prove the rules 
+\texttt{(M1)} to \texttt{(M3)}. Also show that
+these rules hold for your implementations in the
+previous exercise.
+
+\item
+Prove the property \texttt{(M4)} using the laws \texttt{(M1)} to \texttt{(M3)}.
+
+\item 
+Prove the following properties using the monad laws:
+\begin{alltt}
+join . return = join . fmap return
+join . return = id
+\end{alltt}
+
+\item
+Can you define a different monad structure over lists from that given above?
+Check that your definition has properties \texttt{(M1)} to \texttt{(M3)}.
+
+\item
+Write down the definitions of \texttt{map} and \texttt{join} over lists
+using list comprehensions. Compare them with the definitions of
+\texttt{fmap} and \texttt{join} given in the \texttt{do} notation in this section.
+
+\item
+Re-implement the parser for the calculator using the \texttt{do}
+construct (based on \texttt{>>=}) 
+rather than \texttt{(>*>)} and \texttt{build}. Contrast the two
+approaches.
+
+\item
+Show that the type functions \texttt{(a,a)}, \texttt{([a],[a])} and \texttt{Tree a} are instances of \texttt{Functor}.
+
+\end{exercises}
+
+\section{Example: monadic computation over trees}
+\index{monad!trees}
+\label{monadicTrees}
+
+We now illustrate how computations over the type of 
+\begin{alltt}
+data Tree a = Nil | Node a (Tree a) (Tree a)\minx{Tree}
+\end{alltt}
+can be given a monadic structure. We first look at a simple example, and then
+we look at a rather more realistic one. 
+
+We see that with a monadic approach the top-level
+structure of the two solutions 
+is exactly the same. This structure guides the way that we build the
+implementation of the second example, as we shall see.
+
+The moral of these examples is
+that monads provide an important structuring mechanism for program
+construction, as they encourage a \textbf{separation of concerns}. The
+top-level structure of the computation is given in terms of a
+monad whose specific properties are only touched upon. Within the monad itself
+is the appropriate computational behaviour to, for example, 
+maintain a state or to perform some
+IO (or both); the particular sequencing operation of the monad will
+ensure that values are passed between the parts of the program in an
+appropriate way.
+
+This separation of concerns comes into its own when changes are required
+in the details of the computation: it is usually possible to change the monad
+implementing a computation with at most minimal changes required at the
+top level. This is in stark contrast to a non-monadic computation in
+which data representations are visible: a wholesale restructuring is
+often required in such a situation.
+
+\subsection*{Summing a tree of integers}
+
+Suppose we are asked to give the sum of a tree of integers,
+\begin{alltt}
+sTree :: Tree Integer -> Integer
+\end{alltt}
+A direct recursive solution is
+\begin{alltt}\minx{sTree}
+sTree Nil            = 0
+sTree (Node n t1 t2) = n + sTree t1 + sTree t2
+\end{alltt}
+In writing this we give no explicit sequence to the calculation of the sum: we
+could calculate \texttt{sTree t1} and \texttt{sTree t2} one after the other, or
+indeed in parallel. How might a monadic solution proceed?
+\begin{alltt}
+sumTree :: Tree Integer -> St Integer\minx{sumTree}
+\end{alltt}
+where \texttt{St} is a monad which we have yet to define. In the \texttt{Nil} case,
+\begin{alltt}
+sumTree Nil = return 0
+\end{alltt}
+while in the case of a \texttt{Node} we calculate the parts in a given order:
+\begin{alltt}
+sumTree (Node n t1 t2)\hfill(sumTree)\label{sumTree}
+  = do num <- return n
+       s1  <- sumTree t1
+       s2  <- sumTree t2
+       return (num + s1 + s2)
+\end{alltt}
+How is the definition structured? We put the operations in sequence, using
+\texttt{do}. First we \texttt{return} the value \texttt{n}, giving it the 
+name \texttt{num}. Next we calculate \texttt{sumTree t1} and \texttt{sumTree t2}, naming 
+their results \texttt{s1} and \texttt{s2}. Finally we \texttt{return} the result, which
+is the sum \texttt{num+s1+s2}. 
+
+Now, since all we are doing here is calculating values and not trying to do
+any I/O or other side-effecting operation, we make the monad 
+\texttt{St} the {\em identity\/} monad \texttt{Identity} which we mentioned
+earlier, so we have
+\begin{alltt}
+sumTree :: Tree Integer -> Identity Integer
+\end{alltt}
+There is a similarity between the definition \texttt{(sumTree)} and an
+imperative program, bearing in mind that \texttt{do} performs a sequencing and
+\texttt{j <- ...} gives (or assigns) a value to \texttt{j}. In an imperative
+setting, we might well write 
+\begin{alltt}
+num := n ;
+s1  := sumTree t1 ;
+s2  := sumTree t2 ;
+return (num + s1 + s2) ;
+\end{alltt}
+where `\texttt{num :=}' corresponds to the `\texttt{<-}' and \texttt{do} puts a 
+sequence of commands one after the other, as does the semi-colon. Remember, though, that this is a \emph{single-assignment} language, so that \texttt{num}, \texttt{s1} and so on are names not variables!
+\index{monad!and imperative programming}
+\index{imperative programming!and monads}
+
+To give a function of type \texttt{Tree Integer -> Integer} we compose with the
+\texttt{identity} function to give
+\begin{alltt}
+identity . sumTree
+\end{alltt}
+where
+\begin{alltt}
+identity :: Identity a -> a
+identity (Identity x) = x
+\end{alltt}
+takes the wrapper off an element \texttt{Identity x} to give the element
+\texttt{x}.
+In the next section we tackle a more complex problem, but see the same monadic
+structure repeated.
+
+\subsection*{Using a state monad in a tree calculation}
+\index{monad!state}
+
+Building on the experience of the last section in defining \texttt{sumTree} we
+tackle here a rather more tricky problem. We want to write a function
+\begin{alltt}
+numTree :: Eq a => Tree a -> Tree Integer
+\end{alltt}
+so that given an arbitrary tree we transform it to a tree of integers in which
+the original elements are replaced by natural numbers, starting from \texttt{0}.
+An example is given in Figure \ref{treeTrans}.
+The same element has to be replaced by the same number at every occurrence,
+and when we meet an as-yet-unvisited element we have to find a `new' number to
+match it with.
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[height=6cm]{Pictures/TreeBefore.pdf}\hspace*{1cm}
+\includegraphics[height=6cm]{Pictures/TreeAfter.pdf}
+\end{center}
+\caption{Replacing the elements of a tree with natural numbers.}
+\label{treeTrans}
+\end{figure}
+
+\subsubsection*{Describing the calculation}
+
+
+How does our definition appear? We give the function a type,
+\begin{alltt}\minx{numberTree}
+numberTree :: Eq a => Tree a -> State a (Tree Integer)
+\end{alltt}
+in which the monad \texttt{State a} will have to carry about enough information
+to allow us to replace the elements in the correct way. The structure of the
+program then is
+\begin{alltt}
+numberTree Nil = return Nil
+
+numberTree (Node x t1 t2)\hfill(numberTree)
+  = do num <- numberNode x
+       nt1 <- numberTree t1
+       nt2 <- numberTree t2
+       return (Node num nt1 nt2)
+\end{alltt}
+The structure here is exactly the same as that of \texttt{(sumTree)} on
+page \pageref{sumTree}; we perform
+the operations on the components \texttt{x}, \texttt{t1} and \texttt{t2} (for the
+subtrees we use recursion) and then combine them in the result 
+\texttt{(Node num nt1 nt2)}.
+
+What else do we have to define to give the result? We need to identify the
+monad \texttt{State a} and to define the function which replaces an individual
+\minx{State}
+entry, 
+\begin{alltt}
+numberNode :: Eq a => a -> State a Integer
+\end{alltt}
+We now have to think about the implementation of the monad. We have called it
+\texttt{State} since it keeps a record of the state, that is of which values are
+associated with which numbers. This we do in a table:
+\begin{alltt}\minx{Table}
+type Table a = [a]
+\end{alltt}
+where the table \texttt{[True,False]} indicates that \texttt{True} is associated
+with \texttt{0} and \texttt{False} with \texttt{1}.
+
+\subsubsection*{The \texttt{State} monad}
+
+What then is the state monad? It consists of functions
+\begin{alltt}\minx{State}
+data State a b = State (Table a -> (Table a , b))
+\end{alltt}
+which, after we strip off the constructor \texttt{State},
+we can think of as taking the state {\em before\/} doing the operation
+to the state {\em after\/} the operation, together with its result. In other
+words, we return a value of type \texttt{b}, but perhaps we change the value of
+the state of type \texttt{Table a} as a side-effect.
+
+Next we have to define the two monad operations.
+\begin{alltt}
+instance Monad (State a) where
+\end{alltt}
+To \texttt{return} a value, we leave the state
+unchanged.
+\begin{alltt}\minx{return}
+  return x = State (\bs{t}ab -> (tab,x))
+\end{alltt}
+How do we sequence the operations?
+The intended effect here is to do \texttt{st}, pass its result to \texttt{f}
+and then do the resulting operation.
+
+In more detail, to perform \texttt{st}, we pass it the table \texttt{tab}; the output of this is a
+new state, \texttt{newTab}, and a value \texttt{y}. This \texttt{y} is passed to 
+\texttt{f}, giving an object of type \texttt{State~a~b}; this is then performed starting
+with the {\em new\/} state \texttt{newTab}. 
+\begin{alltt}\index{\symbol{62}\symbol{62}\symbol{61}@\texttt{\symbol{62}\symbol{62}\symbol{61}}}
+  (State st) >>= f 
+    = State (\bs{t}ab -> let 
+                     (newTab,y)    = st tab
+                     (State trans) = f y 
+                     in
+                     trans newTab)
+\end{alltt}
+Here we can see that the operations are
+indeed done in sequence, leading from one state value to the next.
+
+\subsubsection*{Completing the definition}
+
+
+This has given us the monad; all that remains is to define the function 
+\texttt{numberNode}. Our definition is
+\begin{alltt}\minx{numberNode}
+numberNode :: Eq a => a -> State a Integer
+numberNode x = State (nNode x)
+
+nNode :: Eq a => a -> (Table a -> (Table a , Integer))
+nNode x table
+  | elem x table        = (table      , lookup x table)
+  | otherwise           = (table++[x] , integerLength table)
+    where
+    integerLength = toInteger.length
+\end{alltt}
+If \texttt{x} is an element of \texttt{table}, we return its position in the table,
+given by \texttt{lookup}; if it is not, we add it to the end of the table, and
+return its position, which is the length of the table. The definition
+of 
+\begin{alltt}
+lookup :: Eq a => a -> Table a -> Integer
+\end{alltt}
+is standard, and we leave it as an exercise for the reader.
+
+\subsubsection*{Running the program}
+
+Standing back, we can see that we have completed our definition of the
+function
+\begin{alltt}
+numberTree :: Eq a => Tree a -> State a (Tree Integer)
+\end{alltt}
+but one ingredient of the solution is still needed. If we form
+\begin{alltt}
+numberTree exampleTree
+\end{alltt}
+for some \texttt{exampleTree} of the tree type, we have an object in 
+\begin{alltt}
+State a (Tree Integer)
+\end{alltt}
+In order to \emph{extract} the result of running the program, we have to write a function
+\begin{alltt}
+runST :: State a b -> b
+\end{alltt}
+This has to perform the calculation, starting with some initial table, and
+return the resulting value of type \texttt{b}. The definition is
+\begin{alltt}
+runST :: State a b -> b
+runST (State st) = snd (st [])
+\end{alltt}
+where we see that \texttt{st} is applied to the initial state \texttt{[]}. The result
+of this is a pair, from which we select the second part, of type \texttt{b}.
+Now we can define our function
+\begin{alltt}
+numTree :: Eq a => Tree a -> Tree Integer
+numTree = runST . numberTree
+\end{alltt}
+which has the effect we require.
+
+\subsubsection*{Discussion}
+
+
+To conclude, we have shown how a complex calculation over a tree, 
+\texttt{(numberTree)}, can be structured in exactly the same way as a simple one, 
+\texttt{(sumTree)}. In the case of a tree type the advantage is tangible, but for more
+complex types a monadic structure becomes almost essential if we are to follow
+a computation with complicated side-effects. 
+
+To see how much the monadic approach has tidied up the computation, it's interesting to see what the computation would look like if we passed the state around explicitly. Each function would need to take a `before' state as part of its input, and return an `after' state as part of its result. We'd then have to thread state values through the functions so that state is updated as we compute. With the monadic approach, all the explicit threading is in the definition of \texttt{(>>=)} and the rest is given by the \texttt{do} notation.
+
+\beware{The \texttt{Control.Monad.State} module}{\minx{Control.Monad.State}
+What we have presented here gives the essential idea behind the state monad in Haskell. The monad contained in \texttt{Control.Monad.State} is more complicated than the version presented here; our simplified version still gives the essential idea of a monad which threads state through a calculation.
+}
+
+\subsection*{Taking it further}\index{monad!further reading}
+
+What we have presented here just scratches the surface of monadic programming in Haskell. We have covered the basic monads, but not looked how multiple monads -- such as state and exceptions -- can be combined into a single monad: this is done using \emph{monad transformers}, for which a number of libraries are available.
+
+We have also not looked in any detail at monadic approaches to \emph{parsing}, beyond showing how our earlier, non-monadic, parser combinators could support a monadic view too. Most of the available Haskell parsing libraries -- which extend the basic approach in both expressivity and efficiency -- are monadic.
+
+There are extensions to the \texttt{Monad} interface: many monads, including lists and the \texttt{Maybe} monad, have a natural notion of a sum and zero: this gives the \texttt{MonadPlus} interface. At the same time, there are various weakenings of the notion of monad, including applicative functors and arrows, each with their own advantages and disadvantages.
+
+There is no shortage of online tutorials on monads and these other features, and other texts cover them in more detail too. A standout among these is Peyton Jones' tutorial \cite{awkwardSquad} on the `awkward squad' of monads that support IO, exceptions and other computational effects.
+
+
+
+
+
+
+
+\index{monad|)}
+
+\begin{exercises}
+
+\item
+Give a non-monadic definition of \texttt{numTree}, threading the state through the computation explicitly; compare your solution with the monadic version given here.
+
+\item 
+Show how to look up the position of an element in a list
+\begin{alltt}
+lookup :: Eq a => a -> Table a -> Int
+\end{alltt}
+You might find it useful to define a function
+\begin{alltt}
+look :: Eq a => a -> Table a -> Int -> Int
+\end{alltt}
+where the extra integer parameter carries the current `offset' into the list.
+
+\item
+Show how you can use a \texttt{State}-style monad in a computation to replace
+each element in a tree by a random integer, generated using the techniques of
+Section \ref{infLists}.
+
+\item
+We can use monads to extend the case study of the calculator in a variety of
+ways. Consider how you would
+\begin{titemize}
+\item add exceptions or messages to be given on an attempt to divide by zero;
+\item count the number of steps taken in a calculation; and
+\item combine the two.
+\end{titemize}
+
+\end{exercises}
+
+
+
+\begin{summary}%
+\index{design!monads and}%
+\index{monad!advantages of monads}%
+
+In this chapter we have seen how the \texttt{do} notation, which we first saw used for I/O programming, can be used to support a whole lot of different kinds of program: non-deterministic, stateful, parsing and so on. The mechanism which underlies the \texttt{do} notation is the \texttt{Monad} class, which embodies the functionality needed to sequence sub-programs, and to name their results for use later on in the program.
+
+Like any abstract data type interface, the advantage of programming against the interface is that it is possible to modify the underlying implementation without changing the higher-level program. We saw this in action in the final section of the chapter, where two very different computations over a tree had the same top-level structure, described in a monad.
+
+We will come back to monads in the next chapter, where we look at how Haskell is a host for `little languages' that describe how to compute in a particular application area.
+
+\index{actions|)}
+
+\end{summary}
+
+%\end{document}

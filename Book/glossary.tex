@@ -1,0 +1,628 @@
+%\documentclass{book}\usepackage{sjtfonts}\usepackage{includegraphics}\usepackage{alltt}\usepackage{latexsym}
+%\usepackage{array}\usepackage{multicol}
+%\begin{document}\input{defs0}\input{miradefs}\appendix
+
+
+\newcommand{\gitem}[1]{\medskip\noindent{\bf #1\ \ \ }
+                       %\raggedright
+                       }
+
+\newcommand{\upp}[1]{\ensuremath{{}^{\mbox{\footnotesize\texttt #1}}}}
+
+%\minitocoptionfalse
+\chapter{Glossary}
+
+We include this glossary to give a quick reference to the most
+widely used terminology in the book. Words appearing in \textbf{bold} in the
+descriptions have their own entries. Further references and examples are
+to be found by consulting the index.
+\normalfont\normalsize
+\hspace*{12pt} 
+
+
+\begin{multicols}{2}
+
+{\raggedright
+
+\gitem{Abstract type}\index{abstract data type}
+An abstract type definition consists of the type name, the \textbf{signature} of
+the type, and the implementation equations for the names in the
+signature.
+
+\gitem{Algebraic type}\index{algebraic type}
+An algebraic type definition states what are the \textbf{constructors} of the
+type. For instance, the declaration
+\begin{alltt}
+data Tree = Leaf Int | 
+            Node Tree Tree
+\end{alltt}
+says that the two constructors of the \texttt{Tree} type are
+\texttt{Leaf} and \texttt{Node}, and that their types are, respectively,
+\begin{alltt}
+Leaf :: Int->Tree
+Node :: Tree->Tree->Tree
+\end{alltt}
+
+\gitem{Application}\index{function application}
+This means giving values to (some of) the arguments
+of a function. If an \texttt{n}-argument function is given fewer than \texttt{n}
+arguments, this is called a \textbf{partial application}.
+Application is written using \textbf{juxtaposition}.
+
+\gitem{Argument}\index{argument}
+A \textbf{function} takes one or more arguments into an \textbf{output}. Arguments
+are also known as \textbf{inputs} and \textbf{parameters}.
+
+\gitem{Associativity}\index{associativity}
+The way in which an expression involving two applications of an operator is
+interpreted. If \texttt{x\#y\#z} is interpreted as \texttt{(x\#y)\#z} then
+\texttt{\#} is left associative, if as \texttt{x\#(y\#z)} it is right associative;
+if both bracketings give the same result then \texttt{\#} is called associative.
+
+\gitem{Base types}\index{type!base}
+The types of numbers, including
+\texttt{Int} and \texttt{Float}, \textbf{Booleans}, \texttt{Bool}, and \textbf{characters},
+\texttt{Char}.
+
+\gitem{Binding power}\index{operator!binding power of}
+The `stickiness' of an operator, expressed as an integer; the higher the
+number the stickier the operator. For example, \texttt{2+3*4} is interpreted as
+\texttt{2+(3*4)} as `\texttt{*}' has higher binding power -- binds more tightly 
+-- than `\texttt{+}'.
+
+\gitem{Booleans}\index{Booleans}
+The type containing the two `truth values' \texttt{True} and \texttt{False}.
+
+\gitem{Calculation}\index{calculation}
+A calculation is a line-by-line \textbf{evaluation} of a Haskell \textbf{expression}
+on paper. Calculations use the \textbf{definitions} which are contained in a
+\textbf{script} as well as the built-in definitions.
+
+\gitem{Cancellation}\index{type checking!rule of cancellation}
+The rule for finding the type of a partial application.
+
+\gitem{Character}\index{characters}
+A single letter, such as \texttt{'s'} or \texttt{'\bs{t}'}, the tab character.
+They form the \texttt{Char} type.
+
+\gitem{Class}\index{classes}
+A collection of types. A class is defined by specifying a \textbf{signature};
+a type is made an \textbf{instance} of the class by supplying an
+implementation of the definitions of the signature over the type.
+
+\gitem{Clause}\index{clause}
+A clause is one of the alternatives making up a \textbf{conditional 
+equation}. A clause consists of a \textbf{guard} followed by an \textbf{expression}. 
+When evaluating a function application, the first clause whose
+guard evaluates to \texttt{True} is chosen.
+
+\gitem{Combinator}
+Another name for a \textbf{function}.
+
+\gitem{Comment}\index{comment}
+Part of a \textbf{script} which plays no computational role; it is there for the
+reader to read and observe. Comments are specified in two ways: the part of
+the line to the right is made a comment by the symbol \texttt{--}; a comment of
+arbitrary length is enclosed by \texttt{\{-} and \texttt{-\}}.
+
+\gitem{Complexity}\index{complexity}
+A measurement of the time or space behaviour of a function.
+
+\gitem{Composition}\index{function composition}
+The combination of two functions by passing the \textbf{output} of one to the
+\textbf{input} of the other.
+
+\gitem{Concatenate}\index{concatenate}
+To put together a number of lists into a single list.
+
+\gitem{Conditional equation}\index{conditional equation}
+A conditional equation consists of a left-hand side followed by a number of
+\textbf{clauses}. Each clause consists of a \textbf{guard} followed by an expression
+which is to be equated with the left-hand side of the \textbf{equation} if that
+particular clause is chosen during evaluation. The clause chosen is the first
+whose guard evaluates to \texttt{True}.
+
+
+\gitem{Conformal pattern match}\index{pattern matching!conformal}
+An equation in which a pattern appears on the left-hand side of an equation,
+as in
+\begin{alltt}
+(x,y) = ....
+\end{alltt}
+
+\gitem{Constructor}\index{constructor}
+An \textbf{algebraic type} is specified by its constructors, which are the
+functions which build elements of the algebraic type. 
+\itempar
+In the example in the
+entry for algebraic types, elements of the type are constructed using 
+\texttt{Leaf} and \texttt{Node}; the elements are \texttt{Leaf n} where \texttt{n::Int} and
+\texttt{Node s t} where \texttt{s} and \texttt{t} are trees.
+
+\gitem{Context}\index{context}
+The hypotheses which appear before \texttt{=>} in type and class declarations. A
+context \texttt{M a} means that the type \texttt{a} must belong to the class \texttt{M}
+for the function or class definition to apply. For instance, to apply a
+function of type
+\begin{alltt}
+Eq a => [a] -> a -> Bool
+\end{alltt}
+to a list and object, these must come from types over which equality is
+defined.
+
+\gitem{Curried function} \index{currying}
+A function of at least two arguments which takes its arguments one at a time, so
+having
+the type
+\begin{alltt}
+t1 -> t2 -> ... -> t
+\end{alltt}
+in contrast to the {\em uncurried\/} version
+\begin{alltt}
+(t1,t2,...) -> t
+\end{alltt}
+The name is in honour of Haskell B.\ Curry, after whom the Haskell language is
+also named.
+
+\gitem{Declaration}\index{declaration}
+A \textbf{definition} can be accompanied by a statement of the \textbf{type} of
+the object defined; these are often called type declarations.  
+
+\gitem{Default}\index{default}
+A default holds in the absence of any other definition. Used in \texttt{class}
+definitions to give  definitions of some of the operations in
+terms of others; an example is the definition of \texttt{/=} in
+the \texttt{Eq} class.
+
+\gitem{Definition}\index{definition}
+A definition associates a \textbf{value} or a \textbf{type} with a \textbf{name}.
+
+\gitem{Design}\index{design}
+In writing a system, the effort expended {\em before\/} implementation is
+started.
+
+\gitem{Derived class instance}\index{instance!derived}
+An instance of a standard class which is derived by the system, rather than
+put in explicitly by the programmer. 
+
+\gitem{Enumerated type}\index{enumerated type}
+An \textbf{algebraic type} with each constructor having no arguments.
+
+\gitem{Equation}\index{equation}\index{equation!conditional}
+A \textbf{definition} in Haskell consists of a number of equations. On the left-hand side of the equation is a \textbf{name} applied to zero or more 
+\textbf{patterns}; on the right-hand side is a value. In many
+cases the equation is \textbf{conditional} and has two or more
+\textbf{clauses}. Where the meaning is clear we shall sometimes
+take `equation' as shorthand for `equation or conditional
+equation'.
+
+\gitem{Evaluation}\index{evaluation}
+Every \textbf{expression} in Haskell has a value; evaluation is the process of
+finding that value. A \textbf{calculation} evaluates an expression, as does
+an interactive
+Haskell system when that expression is typed to the prompt.
+
+\gitem{Export}\index{export}
+The process of defining which definitions will be visible when a module is
+\textbf{imported} by another.
+
+\gitem{Expression}\index{expression}
+An expression is formed by applying a \textbf{function} or \textbf{operator} to its
+arguments; these arguments can be \textbf{literal} values, or expressions
+themselves. A simple numerical expression is 
+\begin{alltt}
+(2+8)-10
+\end{alltt}
+in which the
+operator `\texttt{-}' is applied to two arguments.
+
+\gitem{Extensionality}\index{extensionality principle}
+The principle of proof which says that two functions are equal if they give
+equal results for every input.
+
+\gitem{Filter}\index{filter}
+To pick out those elements of a list which have a particular property,
+represented by a \textbf{Boolean}-valued function.
+
+\gitem{Floating-point number}\index{numbers!floating point}
+A number which is given in decimal (e.g.\ {\mi456.23}) or exponent (e.g.\
+\texttt{4.5623e+2}) form; these numbers form the type \texttt{Float}.
+
+\gitem{Fold}\index{folding}
+To combine the elements of a list using a binary \textbf{operation}.
+
+\gitem{Forward composition}\index{forward composition}
+Used for the operator `\texttt{>.>}' with the definition
+\begin{alltt}
+f >.> g = g . f
+\end{alltt}
+\texttt{f >.> g} can be read `\texttt{f} then \texttt{g}'.
+
+\gitem{Function}\index{function}
+A function is an object which returns a \textbf{value}, called the 
+\textbf{output} or \textbf{result} when it is applied to its \textbf{inputs}. The
+inputs are also known as its \textbf{parameters} or \textbf{arguments}. 
+ 
+\noindent
+Examples
+include the square root function, whose input and output are numbers, and the
+function which returns the borrowers (output) of a book (input) in a database
+(input).
+
+\gitem{Function types}
+The type of a \textbf{function} is a function type, so that, for instance, the
+function which checks whether its integer
+argument is even has type \texttt{Int->Bool}.
+This is the type of functions with \textbf{input} type \texttt{Int} and 
+\textbf{output} type \texttt{Bool}.
+
+\gitem{Generalization}\index{generalization}
+Replacing an object by something of which the original object is an instance.
+\itempar
+This might be the replacement of a function by a polymorphic function
+from which the original is obtained by passing the appropriate parameter, or
+replacing a logical formula by one which implies the original.
+
+\gitem{Guard}\index{guard}
+The \textbf{Boolean} expression appearing to the right of `\texttt{|}' and to the left
+of `\texttt{=}' in a 
+\textbf{clause} of a \textbf{conditional equation} in a Haskell
+\textbf{definition}.
+
+\gitem{Higher-order function}\index{higher-order function}
+A \textbf{function} is higher-order if either one of its \textbf{arguments} or
+its \textbf{result}, or both, are functions.
+
+\gitem{Identifier} \index{identifier}
+Another word for \textbf{name}.
+
+\gitem{Implementation}
+The particular \textbf{definitions} which make a design concrete; for an 
+\textbf{abstract data type}, the definitions of the objects named in the 
+\textbf{signature}.
+
+\gitem{Import}\minx{import}
+The process of including the \textbf{exported} definitions of one module in
+another.
+
+\gitem{Induction}\index{induction}
+The name for a collection of methods of proof, by which statements of the
+form `for all \texttt{x} \ldots' are proved.
+
+\gitem{Infix}\index{function!infix}
+An \textbf{operation} which appears between its \textbf{arguments}. Infix functions
+are called \textbf{operators}.
+
+\gitem{Inheritance}\index{inheritance}
+One \textbf{class} inherits the operations of another if the first class is in
+the \textbf{context} of the definition of the second. For instance, of the
+standard classes, \texttt{Ord} inherits (in)equality from \texttt{Eq}.
+
+\gitem{Input}\index{input}
+A \textbf{function} takes one or more inputs into an \textbf{output}. Inputs
+are also known as \textbf{arguments} and \textbf{parameters}. The `square'
+function takes a single numerical input, for instance.
+
+\gitem{Instance}\index{instance}\index{instance!of variable}
+\index{instance!of class}
+The term `instance' is used in two different ways in Haskell.
+\itempar
+An instance of a \textbf{type}
+is a type which is given by \textbf{substituting} a type expression for a
+type \textbf{variable}. For example, \texttt{[(Bool,b)]} is an instance of 
+\texttt{[a]}, given by substituting the type
+\texttt{(Bool,b)} for the variable \texttt{a}.
+\itempar
+An instance of a \textbf{class}, such as \texttt{Eq (a,b)},
+is given by declaring how the function(s) of the class, in this case \texttt{==},
+are defined over the given type (here \texttt{(a,b)}). Here we would say
+\begin{alltt}
+(x,y) == (z,w)
+  = (x==z) \&\& (y==w)
+\end{alltt}
+
+\gitem{Integers}\index{numbers!integers}
+The positive and negative whole numbers. In Haskell the type \texttt{Int}
+represents the integers in a fixed size, while the type \texttt{Integer}
+represents them 
+exactly, so that evaluating \texttt{2} to the power \texttt{1000} will give a
+result consisting of some three hundred digits.
+
+\gitem{Interactive program}
+A program which reads from and writes to the terminal; reading and writing
+will be {\em interleaved}, in general.
+
+\gitem{Interface}\index{interface}
+The common information which is shared between two program modules.
+
+\gitem{Juxtaposition}\index{juxtaposition}
+Putting one thing next to another; this is the way in which function
+application is written down in Haskell.
+
+\gitem{Lambda expression}\index{lambda expression}
+An \textbf{expression} which denotes a \textbf{function}. After a `\texttt{\bs{}}' we
+list the arguments of the function, then an `\texttt{->}' and then the result.
+For instance, to add a number to the length of a list we could write
+\begin{alltt}
+\bs{xs} n -> length xs + n
+\end{alltt}
+The term `lambda' is used since `\texttt{\bs{}}' is close to the Greek letter
+`$\lambda$', or lambda, which is used in a similar way in Church's
+lambda calculus.
+
+\gitem{Lazy evaluation}\index{lazy evaluation}
+The sort of expression \textbf{evaluation} in Haskell. In a function
+application only those arguments whose values are {\em needed\/} will be
+evaluated, and moreover, only the parts of structures which are needed
+will be examined.
+
+\gitem{Linear complexity}\index{complexity!linear}
+Order \texttt{1}, \texttt{O(n\upp{1})}, behaviour.
+
+\gitem{Lists}\index{lists}
+A list consists of a collection of elements of a particular type, given in
+some order, potentially containing a particular item more than once.
+The list \texttt{[2,1,3,2]} is of type \texttt{[Int]}, for example.
+
+\gitem{Literal}\index{literal}
+Something that is `literally' a value: it needs no \textbf{evaluation}. Examples
+include \texttt{34}, \texttt{[23]} and \texttt{"string"}.
+
+\gitem{Local definitions}\index{local definitions}
+The definitions appearing in a \texttt{where} clause or a \texttt{let} expression.
+Their \textbf{scope} is
+the equation or expression to which the clause or \texttt{let} is attached.
+
+\gitem{Map}\index{mapping} To apply an operation to every element of a list.
+
+\gitem{Mathematical induction}\index{mathematical induction}
+A method of proof for statements of the form `for all natural numbers 
+\texttt{n}, the statement \texttt{P(n)} holds'. 
+\itempar
+The proof is in two parts: the
+base case, at zero, and the induction step, at which \texttt{P(n)} is proved
+on the assumption that \texttt{P(n-1)} holds.
+
+\gitem{Memoization}\index{memoization}
+Keeping the value of a sub-computation (in a list, say)
+so that it can be reused
+rather than recomputed, when it is needed.
+
+\gitem{Module}\index{modules}
+Another name for a \textbf{script}; used particularly when more than one script
+is used to build a program.
+
+\gitem{Monad}\index{monad}
+A monad consists of a type with (at least) two functions, \texttt{return} and
+\texttt{>>=}. Informally, a monad can be seen as performing some sorts of action
+before returning an object. The two monad functions
+respectively return a value without any action, and sequence two
+monadic operations.
+
+\gitem{Monomorphic} \index{type!monomorphic}
+A type is \textbf{monomorphic} if it is not \textbf{polymorphic}.
+
+\gitem{Most general type}\index{type!most general}
+The most general type of an expression is the type \texttt{t} with the property
+that every other type for the expression is an \textbf{instance} of \texttt{t}.
+
+\gitem{Mutual recursion}\index{recursion!mutual}
+Two definitions, each of which depends upon the other.
+
+\gitem{Name}\index{name}
+A \textbf{definition} associates a name or \textbf{identifier} with a value. Names
+of \textbf{classes}, \textbf{constructors} and \textbf{types}
+must begin with capital letters; names of 
+\textbf{values}, \textbf{variables} and \textbf{type variables}
+begin with small letters. After the first letter, any
+letter, digit, `\texttt{'}' or `\texttt{\_}' can be used.
+
+\gitem{Natural numbers}\index{numbers!natural numbers}
+The non-negative whole numbers: \texttt{0}, \texttt{1}, \texttt{2}, \ldots\ .
+
+\gitem{Offside rule}\index{offside rule}
+The way in which the end of a part of a definition is expressed using the
+{\em layout\/} of a \textbf{script}, rather than an explicit symbol for the end.
+
+\gitem{Operation}
+Another name for \textbf{function}.
+
+\gitem{Operator}\index{operator}
+A \textbf{function} which is written in infix form, between its \textbf{arguments}.
+The function \texttt{f} is made infix thus: \texttt{`f`}. 
+
+\gitem{Operator section}\index{operator sections}
+A partially applied operator.
+
+\gitem{Output}\index{output}
+When a \textbf{function} is applied to one or more \textbf{inputs}, the resulting
+value is called the output, or \textbf{result}. Applying the `square' function
+to \texttt{(-2)} gives the output \texttt{4}, for example.
+
+\gitem{Overloading}\index{overloading}
+The use of the same \textbf{name} to mean two (or more) different things, at
+different types. The equality operation, \texttt{==},  is an example. Overloading
+is
+supported in Haskell by the \textbf{class} mechanism.
+
+\gitem{Parameter}\index{parameter}
+A \textbf{function} takes one or more parameters into an \textbf{output}. Parameters
+are also known as \textbf{arguments} and \textbf{inputs}, and applying a function
+to its inputs is sometimes known as `passing its parameters'. 
+
+\gitem{Parsing}\index{parsing}
+Revealing the structure of a sentence in a formal language.
+
+\gitem{Partial application}\index{partial application}
+A \textbf{function} of type \texttt{\tone->\ttwo->\ldots->\tn->t} can
+be applied to \texttt{n} arguments, or less. In the latter case, the
+\textbf{application} is partial, since the result can itself be passed further
+parameters.
+
+\gitem{Pattern}\index{pattern}
+A pattern is either a \textbf{variable}, a \textbf{literal}, a \textbf{wild card}
+or the application of a \textbf{constructor}
+to other patterns. 
+\itempar
+The term `pattern' is also used as short for a `pattern of
+computation' such as `applying an operation to every member of
+a list', a pattern which in Haskell is realised by the
+\texttt{map} function.
+
+\gitem{Polymorphism} \index{polymorphism}
+A type is polymorphic if it contains type \textbf{variables}; such a type will
+have many \textbf{instances}.
+
+\gitem{Prefix}\index{function!prefix}
+An \textbf{operation} which appears before its \textbf{arguments}.
+
+\gitem{Primitive recursion}\index{primitive recursion}
+Over the natural numbers, defining the values of a function outright at zero,
+and at \texttt{n} greater than zero using the value at \texttt{n-1}. 
+
+\noindent
+Over an \textbf{algebraic type}
+defining the function by cases over the constructors; recursion is permitted
+at arguments to a constructor which are of the type in question.
+
+\gitem{Proof}\index{proof}
+A logical argument which leads us to accept a logical statement as being
+valid.
+
+\gitem{Pure programming language}\index{functional programming!pure}
+A functional programming
+language is pure if it does not allow \textbf{side-effects}.
+
+\gitem{Quadratic complexity}\index{complexity!quadratic}
+Order two, \texttt{O(n\upp{2})}, behaviour.
+
+\gitem{Recursion}\index{recursion}
+Using the name of a value or type in its own \textbf{definition}.
+
+\gitem{Result}\index{result}
+When a \textbf{function} is applied to one or more \textbf{inputs}, the resulting
+value is called the result, or \textbf{output}.
+
+\gitem{Scope}\index{scope}
+The area of a program in which a \textbf{definition} or definitions are
+applicable. 
+
+\noindent
+In Haskell the scope of top-level definitions is by default the
+whole \textbf{script} in which they appear; it may be extended by importing the
+module into another.
+More limited scopes are given by \textbf{local
+definitions}.
+
+\gitem{Script}\index{script}
+A script is a file containing \textbf{definitions}, \textbf{declarations} and
+module statements.
+
+\gitem{Set}\index{sets}
+A collection of objects for which the order of elements and the number of
+occurrences of each element are irrelevant.
+
+\gitem{Side-effect}\index{side-effect}
+In a language like Pascal, evaluating an expression can cause other things to
+happen besides a value being computed. These might be I/O operations, or
+changes in values stored. In Haskell this does not happen, but a \textbf{monad}
+can be used to give a similar effect, without compromising the simple model of
+evaluation underlying the language. Examples are \texttt{IO} and \texttt{State}.
+
+\gitem{Signature}\index{signature}
+A sequence of type \textbf{declarations}. These declarations state what are the
+types of the operations (or functions) over an \textbf{abstract type} or a 
+\textbf{class} which can be
+used to manipulate elements of that type.
+
+\gitem{Stream}\index{stream}
+A stream is a channel upon which items arrive in sequence; in Haskell we can
+think of \textbf{lazy} lists in this way, so it becomes a synonym for lazy list.
+
+\gitem{String}\index{strings}
+The type \texttt{String} is a \textbf{synonym} for lists of characters, \texttt{[Char]}.
+
+\gitem{Structural induction}\index{structural induction}
+A method of proof for statements of the form `for all
+finite lists 
+\texttt{xs}, the statement \texttt{P(xs)} holds of \texttt{xs}'. The proof is in two parts: the
+base case, at \texttt{[]}, and the induction step, at which \texttt{P(y:ys)} is proved
+on the assumption that \texttt{P(ys)} holds. 
+
+\noindent
+Also used of the related principle
+for any algebraic type.
+
+\gitem{Substitution}\index{substitution}
+The replacement of a \textbf{variable} by an \textbf{expression}. For example, 
+\texttt{(9+12)} is given by substituting \texttt{12} for \texttt{n} in \texttt{(9+n)}.
+Types can also be substituted for type variables; see the entry for 
+\textbf{instance}.
+
+\gitem{Synonym}\index{type synonym}
+Naming a type is called a type synonym. The keyword \texttt{type} is used for
+synonyms.
+
+\gitem{Syntax}\index{syntax}
+The description of the properly formed programs (or sentences) of a language.
+
+\gitem{Transformation}\index{program transformation}
+Turning one program into another program which computes identical results,
+but with different behaviour in other respects such as time or space
+efficiency.
+
+\gitem{Tuples}\index{tuples}
+A tuple type is built up from a number of component types. Elements of the
+type consist of tuples of elements of the component types, so that
+\begin{alltt}
+(2,True,3) :: (Int,Bool,Int)
+\end{alltt}
+for instance.
+
+\gitem{Type}\index{type}
+A collection of values. Types can be built from the \textbf{base} types
+using \textbf{tuple}, \textbf{list} and \textbf{function types}. New types can be
+defined using the \textbf{algebraic} and \textbf{abstract} type mechanisms, and
+types can be named using the type \textbf{synonym} mechanism.
+
+\gitem{Type variable}\index{type variable}
+A \textbf{variable}
+which appears in a \textbf{polymorphic type}. An \textbf{identifier} beginning with a
+small letter can be used as a type variable; in this text we use the
+letters at the
+start of the alphabet,
+\texttt{a}, \texttt{b}, \texttt{c} and so on.
+
+\gitem{Undefinedness}\index{undefinedness}
+The result of an expression whose evaluation continues forever, rather than
+giving a {\em defined\/} result.
+
+\gitem{Unification}\index{unification}
+The process of finding a common \textbf{instance} of two (type) expressions
+containing (type) variables.
+
+\gitem{Value}\index{value}
+A value is a member of some \textbf{type}; the value of an \textbf{expression} is the
+result of \textbf{evaluating} the expression.
+
+\gitem{Variable}\index{variable}
+A variable stands for an {\em arbitrary\/} value, or in the case of type
+variables, an arbitrary type. Variables and type variables
+have the same syntax as \textbf{names}.
+
+\gitem{Verification}
+Proving that a function or functions have particular logical properties.
+
+\gitem{Where clause}\minx{where}
+Definitions \textbf{local} to a (conditional) \textbf{equation}.
+
+\gitem{Wild card}\index{pattern!wild card}
+The name for the pattern `\texttt{\_}', which is matched by any value of the
+appropriate type.
+
+} % end raggedright
+
+\end{multicols}
+
+
+%\end{document}

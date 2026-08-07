@@ -1,0 +1,407 @@
+%\documentclass{book}\usepackage{sjtfonts}\usepackage{includegraphics}\usepackage{alltt}\usepackage{latexsym}
+%\usepackage{array}
+%\begin{document}\input{defs0}\input{miradefs}\setcounter{chapter}{-1}\setcounter{page}{1}
+
+
+\chapter*{Preface}
+\markboth{Preface}{Preface}
+\addcontentsline{toc}{chapter}{Preface}
+\chapstart
+\label{preface}
+
+Computer technology changes with frightening speed; 
+the fundamentals, however, remain remarkably static. The architecture of
+the standard computer is hardly changed from the machines which were built half a
+century ago, even though their size and power are incomparably
+different from those of today. 
+
+In programming, modern ideas like object-orientation have
+taken decades to move from the research environment into the commercial mainstream.
+In this light, a functional language like Haskell is a relative
+youngster, but one with a growing influence to play, particular as we move to multicore chips as the norm in all kinds of computing device.
+So, why is it a good idea to learn a functional programming language like Haskell?
+\begin{itemize}
+\item 
+Functional languages are used to build secure, error-free, systems that are used in practice by thousands of people every day. For example, the \emph{Xmonad} window manager for linux systems (\texttt{xmonad.org}) is written entirely in Haskell, and the \emph{Cryptol} language (\texttt{www.cryptol.net}), used to design cryptographic systems in C and VHDL, is itself implemented using Haskell.
+\item
+Functional languages are general purpose programming languages, but also provide the ideal toolkit for building \emph{Domain Specific Languages (DSLs)} which give users in a particular application area -- such as hardware design or financial modelling -- a language particularly suited to their needs.
+\item
+Functional languages provide a \emph{laboratory} in which the crucial ideas of
+modern programming are presented in the clearest possible way. This
+accounts for their widespread use in teaching computing science and
+also for their influence on the design of other languages. A case in
+point is the design the generics in Java, which are directly
+modelled on polymorphism in Haskell.
+\item
+Functional languages help you \emph{think about programming} in a different way from Java, C\#, C++ and so forth: even if you are never going to write any large programs in Haskell, what you have learned will make you a better Java, C\# or C++ programmer, because you can see a bigger space of possibilities for writing your code.
+\item
+Finally, it may well be that you will find yourself \emph{working with a functional language} after all, even if it is not Haskell. Microsoft now provide the F\# functional language as a standard part of their Visual Studio suite, and this is in increasing use in a number of sectors, particularly finance. Erlang, the concurrent functional language, is used to provide scalable infrastructure for many web-based systems, including Facebook chat and other services from Amazon and Yahoo! 
+\end{itemize}
+This book provides a tutorial introduction to functional programming
+in Haskell. The remainder of the preface begins with a brief explanation of 
+functional programming, Haskell and GHCi, and continues by describing the intended audience for the book. To give a sense of how the book differs from others in the area we then summarise its distinctive points before giving a chapter-by-chapter summary of its contents. We then summarise how this edition differs from earlier ones, look at how the book can be read, and conclude by presenting a summary of the case studies it contains.
+
+
+
+\section*{What is functional programming?}
+
+Functional programming offers a high-level view of programming, giving
+its users a variety of features which help them to build elegant yet
+powerful and general libraries of functions. Central to functional
+programming is the idea of a function, which computes
+a result that depends on the values of its inputs.
+
+An example of the power and generality of the language is the
+\texttt{map} function, which is used to transform every element of a
+list of objects in a specified way. For example, \texttt{map} can be used to 
+double all the numbers in a sequence of numbers or to invert the colours
+in each picture appearing in a list of pictures.
+
+The elegance of functional programming is a consequence of the way that functions
+are defined: an equation is used to say what the value of a function is
+on an arbitrary input. A simple illustration is the function
+\texttt{addDouble} which adds two integers and doubles their sum. Its
+definition is
+\begin{alltt}
+addDouble x y = 2*(x+y)
+\end{alltt}
+where \texttt{x} and \texttt{y} are the inputs and \texttt{2*(x+y)} is
+the result.
+
+The model of functional programming is simple and clean:
+to work out the value of an expression like 
+\begin{alltt}
+3 + addDouble 4 5
+\end{alltt}
+the equations which define the functions
+involved in the expression are used, so
+\begin{alltt}
+3 + addDouble 4 5
+\step{}3 + 2*(4+5)
+\step{}3 + 2*9
+\step{}3 + 18
+\step{}21
+\end{alltt}
+This is how a computer would work out the value of the expression, but it is also possible
+to do exactly the same calculation
+using pencil and paper, making transparent the implementation
+mechanism.
+
+It is also possible to
+discuss how the programs behave in general. In the case of
+\texttt{addDouble}
+we can use the fact that \texttt{x+y} and \texttt{y+x} are equal for all
+numbers \texttt{x} and \texttt{y}
+to conclude that \texttt{addDouble x y}
+and \texttt{addDouble y x} are equal for all \texttt{x}
+and \texttt{y}. A \emph{property} like this can be tested against random data, or indeed we can formally \emph{prove} something like this from the definition of \texttt{addDouble}. Random testing and proof for properties like this are much more practical for Haskell than for
+traditional imperative and object-oriented (OO) languages.
+
+\section*{Haskell and GHCi}
+
+This text uses the programming language Haskell, which has freely available 
+compilers and interpreters for most types of computer system. Here we use the GHCi  interpreter which provides an ideal
+platform for the learner, with its fast compile cycle, simple interface
+and free availability for Windows, Unix and Macintosh systems. 
+
+Haskell began life in the late 1980s as an intended standard language for lazy
+functional programming, and since then it has gone through various
+changes and modifications. This text is written in Haskell 2010, which is the latest standard for the language at the time of writing. The standard for Haskell is under yearly review, but it is likely that the parts of the language discussed here will be stable in future versions of the standard..
+
+While the book covers most aspects of Haskell 2010, it is primarily a
+programming text rather than a language manual. Details of the language
+and its libraries as well as a wealth of other material about Haskell are
+available from the Haskell home page, \texttt{www.haskell.org}.
+
+
+\section*{Who should read this book?}
+
+This text is intended as an introduction to functional programming for computer 
+science and other students, principally at university level. It can be used by 
+beginners to computer science, or more experienced students who are learning 
+functional programming for the first time; either group will find the material to be new and challenging.
+
+The book can also be used for self-study by programmers, software engineers and 
+others interested in gaining a grounding in functional programming.
+
+The text is intended to be self-contained, but some elementary knowledge of commands, 
+files and so on is needed to use any of the implementations of Haskell. Some logical 
+notation is introduced in the text; this is explained as it appears. In
+Chapter \ref{behaviour}
+it would help to have an understanding of the graphs of the \texttt{log}, 
+\texttt{\superscr{n}{2}} and \texttt{\superscr{2}{n}} functions.
+
+\section*{What is distinctive about the book?}
+
+Introductory programming texts will always have a lot in common, but each has its distinct ethos. These are the key aspects of \emph{Haskell: The Craft of Functional Programming:}
+\begin{itemize}
+\item
+Haskell has a
+substantial library of built-in functions, particularly over lists, and
+we exploit this, encouraging readers to use these functions
+before seeing the details of their definitions. This allows readers
+to progress more quickly, and also accords with practice: most real
+programs are built using substantial libraries of pre-existing code, and it is 
+therefore valuable
+experience to work in this way
+from the start. 
+\item
+From the start we introduce property-based testing with QuickCheck. This has shown itself to be a lightweight yet effective way of improving program quality, and examples throughout the book illustrate just that. 
+\item
+The text gives a thorough treatment of reasoning about functional
+programs, beginning with reasoning about list-manipulating functions.
+These are chosen in preference to functions over the natural numbers for
+two reasons: the results one can prove for lists seem substantially more
+realistic, and also the structural induction principle for lists seems
+to be more acceptable to students. From the start, property-based testing and proof are compared and contrasted.
+\item
+The \texttt{Picture} case study is introduced in Chapter \ref{intro} and
+revisited throughout the text; this means that readers see different
+ways of programming the same function, and so get a chance to reflect on
+and compare different designs. The same interface for pictures is also implemented using browser-based graphics for realistic presentation.
+\item
+There is an emphasis on Haskell as a practical programming language, with an
+early introduction of modules, and the 
+\texttt{do} notation for I/O. Other monadic programs are deferred to later in the book. 
+\item
+Types play a prominent role in the text. Every function or object
+defined has its type
+introduced at the same time as its definition. Not only does this
+provide a check that the definition has the type that its author
+intended, but also we view types as the single most important piece of
+documentation for a definition, since a function's type describes precisely how
+the function is to be used.
+\item
+A number of case studies are introduced in stages through the book: the
+picture example noted above, the game of Rock - Paper - Scissors, an interactive calculator program, regular expression processing, a coding
+and decoding system based on Huffman codes and a small queue simulation 
+package. These are used to introduce various new ideas and also to show
+how existing techniques work together. There's an overview of what each case study covers on page \pageref{CaseStudies}.
+\item
+A particular emphasis is laid on using Haskell for embedded domain-specific languages, with a chapter discussing this and giving a number of examples of monadic and combinator-based DSLs.
+\item 
+Support materials on Haskell, including a substantial number of Web
+links, are included in the concluding chapter. Various appendices
+contain other backup information
+including details of the availability of implementations, common GHCi
+errors and a comparison between functional, imperative and OO
+programming. 
+\item
+Other support materials appear at 
+\texttt{www.haskellcraft.com}
+\end{itemize}
+
+\section*{Outline}
+
+The introduction in Chapter \ref{intro} covers the basic concepts of
+functional programming: functions and types, expressions and evaluation,
+definitions, proof and property-based testing with QuickCheck. Some of the more advanced ideas, such as 
+higher-order functions and polymorphism, are previewed here from the
+perspective of the example of pictures built from characters. A second implementation of pictures illustrates a discussion about domain-specific languages, which are the subject of Chapter \ref{dsls}. The picture examples is one of the running examples in the book, which we revisit a number of times to illustrate new concepts as they are introduced.
+
+Chapter \ref{getStart} looks at the practicalities of GHCi, the interactive version of the Glasgow Haskell Compiler. GHCi comes as a part of the Haskell platform, which is also introduced here. After looking at the basics of the module system, the standard prelude and the Haskell libraries, we look at a  first exercise using an SVG implementation of the \texttt{Picture} type. These
+two chapters together cover the foundation on which to build a course on
+functional programming in Haskell.
+
+Information on how to build simple programs over numbers, characters, strings and
+Booleans is contained in Chapter \ref{BasicTypes}. The basic lessons are backed up with
+exercises, as is the case for all chapters from here on. With this basis, Chapter \ref{writingProgs} 
+steps back and examines the various strategies which can be used to
+define functions, such as auxiliary functions, local definitions and recursion. This chapter also introduces the simplest \texttt{data} types in the form of enumerated types. These types are used in the first discussion of the Rock - Paper - Scissors game which is another case study which we return to later in the book.
+
+Structured data, in the form of tuples, lists and algebraic types come in Chapter \ref{tupleList}. Algebraic types are used to represent products and sums, so giving records and variant records in other terminology.
+After introducing the idea of lists, programming over lists is performed
+using two resources: the list comprehension, which effectively gives the
+power of \texttt{map} and \texttt{filter}; and the first-order prelude and library
+functions. 
+
+Nearly all the list prelude functions are polymorphic, and so
+polymorphism is introduced at the start of Chapter \ref{progLists}, which also examines the list functions in the standard prelude, and then uses them in various extended
+examples, and only in Chapter \ref{defFunLists} is primitive recursion over lists introduced, and a text
+processing case study provides a more substantial case study of how recursion is used in defining list functions.
+
+Chapter \ref{io} shows how simple terminal IO is handled in Haskell: to do this the \texttt{do} notation for writing programs of type \texttt{(IO a)} is introduced as an extension of Haskell's syntax, with the explanation of what underlies it being postponed to Chapter \ref{actions}, where monads are covered. An interactive version of the Rock - Paper - Scissors game is used to illustrate IO in practice.
+
+Chapter \ref{reasoningProgs} introduces reasoning about list-manipulating programs, on the
+basis of a number of introductory sections giving the appropriate logical background.
+Guiding principles about how to build inductive proofs are presented,
+together with a more advanced section on building successful proofs from
+failed attempts. The chapter also describes the links between property-based testing and proof.
+
+Higher-order functions are introduced in Chapters \ref{patternsGen} and \ref{gen2}. First
+functional arguments are examined, and it is shown that functional
+arguments allow the implementation of many of the `patterns' of
+computation identified over lists at the start of the chapter. Chapter
+\ref{gen2} covers functions as data, defined both as lambda-expressions and
+by partial application. These ideas are illustrated in Chapter \ref{developingHOPs} by revisiting a number of running examples, including pictures and the RPS game, as well as introducing new case studies of regular expression processing and index creation.
+
+Type classes allow functions to be overloaded to mean different things
+at different types; Chapter \ref{classes} covers this topic as well as surveying
+the various classes built into Haskell, and exploring the way in which types are 
+checked in Haskell. In general, type checking is a matter of resolving the various constraints put upon the
+possible type of the function by its definition.
+
+Algebraic types like trees are the subject of Chapter \ref{algTypes}, which covers
+all aspects of algebraic types
+from design and proof to their interaction with type classes, as well as
+introducing
+numerous examples of algebraic types in practice. 
+These examples are consolidated in Chapter \ref{codes},
+which contains the case study of coding and decoding of information
+using a Huffman-style code. The foundations of the approach are
+outlined before the implementation of the case study. Modules are used
+to break the design into manageable parts, and the more advanced
+features of the Haskell module system are introduced at this point.
+
+An abstract data type (ADT) provides access to an implementation through a
+restricted set of functions. Chapter \ref{adt} explores the ADT mechanism of
+Haskell and gives numerous examples of how it is used to implement
+queues, sets, relations and so forth, as well as giving the basics of
+a simulation case study.
+
+Chapter \ref{lazy} introduces lazy 
+evaluation in Haskell which allows programmers a distinctive style
+incorporating backtracking and infinite data structures.  As an
+example of backtracking there is a parsing case study, and infinite
+lists are used to give `process style' programs as well as a 
+random-number generator.
+
+Haskell programs can perform input and output by means of the \texttt{IO}
+types, first introduced in Chapter \ref{io}. Chapter \ref{actions} revises this, and illustrates some larger-scale examples, including an
+interactive front-end to the calculator. The foundations of the
+\texttt{do} notation lie in monads, which can also be used to do 
+action-based programming of a number of different flavours, some of
+which are examined in the second half of the chapter.
+
+Domain--specific languages are one area where Haskell has been used very effectively. Chapter \ref{dsls} explains what is a DSL, how a DSL can be embedded in a language like Haskell, and the distinction between shallow and deep embeddings. Example DSLs build on earlier examples, as well as introducing new ones such as the generator language for QuickCheck, which neatly illustrates a monadic DSL.
+
+The text continues with an examination in Chapter \ref{behaviour} of program
+behaviour, by which we mean the time taken for a program to compute its
+result, and the space used in that calculation. It also explains the basics of how to measure the run-time behaviour of Haskell programs. Chapter \ref{conclusion} concludes 
+by surveying various applications and extensions of Haskell as
+well as looking at further directions for study. These are backed up
+with web and other references.
+
+The appendices cover various background topics. The first examines links
+with functional and OO programming, and the second gives a glossary of
+commonly used terms in functional programming. The others include a summary
+of Haskell operators and GHCi errors, together with details of the various implementations of Haskell. The final appendix contains suggestions for larger-scale Haskell projects. 
+
+The Haskell code for all the examples in the book, as well as other
+background materials, can be downloaded as explained on \texttt{www.haskellcraft.com}.
+
+
+\section*{What has changed from the second edition?}
+
+The third edition has seen changes throughout. Material, particularly by way of new examples, has been added to every chapter, and the order of presentation has changed in response to feedback on the previous edition. In detail the changes are these:
+\begin{itemize}
+\item
+\emph{QuickCheck} is used throughout to test Haskell functions. Properties are developed right from the start, and QuickCheck is used to verify them -- or indeed to show that properties can be erroneous too. HUnit is also introduced, but is used less intensively.
+
+\item
+QuickCheck is presented as complementary to \emph{proof}, which has always been included in the book: QuickCheck can provide strong evidence for a property holding, while proof can establish its validity. Some custom generators are supplied in the code base for the book so that programmers can test their code before the details of how generators are defined are discussed in Chapter \ref{dsls}.
+
+\item
+A number of \emph{new examples} have been included, some in a single place and others running through a number of chapters. These include the Rock - Paper - Scissors (RPS) game, card games in general, an SVG rendering of Pictures and regular expression. There is a particular emphasis on using \emph{functions as data}: they appear as strategies in RPS and as recognisers for regular expressions.
+
+\item
+One area where Haskell has been particularly successful is in providing the substrate for developing embedded \emph{domain-specific languages} (DSLs) and Chapter \ref{dsls} is devoted to this. It begins by explaining the reasons for developing DSLs, and then examines the difference between shallow and deep embeddings, looking at the examples of pictures and regular expressions. It concludes with a discussion of \emph{monadic} DSLs, exemplified by naming in a pictures DSL and by the generators of QuickCheck.
+
+\item
+The text has been \emph{reordered} so that some material comes earlier than it did previously.\footnote{It is intriguing that requests to move material forward outnumber those to delay it by a factor of more than ten to one: perhaps the ideal book introduces all its material in the first chapter, and uses the remaining twenty to discuss and expand on it?} Material on \texttt{data} types comes substantially earlier, with enumerated types coming into Section \ref{EnumTypes} and non-recursive types into Section \ref{introAlg}. Programming for IO interactions is introduced in Chapter \ref{io} to support the Rock - Paper - Scissors example: this treatment simply presents the \texttt{do} notation as the way that IO is programmed, and delays an explanation of the underlying mechanism to Chapter \ref{actions}. Finally, local definitions first come into Section \ref{localDefs}. 
+
+\item 
+The second edition used Hugs as its preferred implementation; in this edition we have moved to using \emph{GHCi}, which comes as a part of the Haskell Platform. As well as introducing GHCi, we have added detailed discussions of how to leverage the best from Haskell libraries and packages through using Hackage, Cabal, Hoogle and Hayoo!
+
+\item
+A \emph{realistic} implementation of pictures -- using the SVG / HTML5 capabilities of modern web browsers -- has been added to the `ASCII art' implementation of the second edition. 
+
+\item
+The discussions in Chapter \ref{behaviour} on \emph{performance} have been supplemented with material on how to measure the performance of real programs in GHC.
+
+\item
+A collection of \emph{project suggestions} has been added as an appendix. Further support materials are available at the homepage \texttt{www.haskellcraft.com}, and solutions to exercises are available to bona fide instructors by application to the publishers.
+\end{itemize}
+
+\section*{What changed from the first edition to the second?}
+
+These changes were reported in detail in the preface to the second edition, but in summary the changes were these.
+\begin{itemize}
+\item
+The approach to defining functions over lists. To avoid the situation in which students try to define each new function over lists by recursion, we first introduced list comprehensions and list library functions, only introducing recursion after that. The jury is out over whether it effected the change it was meant to.
+\item
+The introduction of the \texttt{Pictures} case study as a running theme, giving visual feedback on programs, and also showing the role of higher-order, polymorphic functions in general-purpose Haskell list processing. An example I still like, but seen by some as  making Haskell look lame.
+\item
+The edition was Haskell 98 compliant, and in particular used standard names for standard functions. It also contained an introduction to the Hugs interpreter, which was the implementation of choice for the book
+\item
+Using the \texttt{do} notation , rather than the functional notation of \texttt{>{}>=} and \texttt{return}, for I/O programs and monadic programs in general.
+\item
+A more thorough treatment of Haskell typing and the mechanics of type checking in practice.
+\item 
+The addition of some material on a problem-solving approach to getting started with programming, loosely based on Poly\'{a}'s work.
+\end{itemize}
+
+
+\section*{How to read this book}
+
+This introduction to functional programming in Haskell 
+is designed to be read from start to finish. New material comes in though the book, and is illustrated as it is introduced by a mixture of new examples and running case studies. 
+Some parts of the text stand apart from the general flow, and can safely be omitted to build a shorter course:
+\begin{description}
+\item[Program proof]
+The book emphasises program proof, in a thread starting with Chapter \ref{reasoningProgs}, and followed up in Sections \ref{verifGen}, \ref{proofAlgTypes}, \ref{adtCommentary} and \ref{lazyProof}.
+\item[Program performance] 
+Similarly, Chapter \ref{behaviour} gives a self-contained
+treatment of program time and space behaviour.
+\end{description}
+The case studies in the book are designed to illustrate particular points and constructs  as well as to give examples of larger programs than single function definitions.
+\begin{description}\label{CaseStudies}
+\item[Pictures]
+This is used to show the utility of lists in modelling, as well as the value of the higher-order and polymorphic functions over lists, such as \texttt{zipWith}, \texttt{map} and \texttt{(++)}. Pictures are also used to illustrate shallow and deep embeddings of domain-specific languages in Chapter \ref{dsls}, with a variant of `named' pictures giving an example of a monadic DSL.
+\item[Rock - Paper - Scissors]
+In this example, we see \texttt{Move} as a first example of an enumerated type in Section \ref{EnumTypes}, and strategies as an example of `functions as data' in Section \ref{strategiesRPS}. It also provides an example of an IO interaction later in that chapter.
+\item[Calculator]
+The calculator example begins in Section \ref{recTypes} with the \texttt{Expr} type, a recursive algebraic data type describing numerical expressions. 
+ Chapter \ref{adt} introduces the abstract type of 
+\texttt{Store} used to model the values of the variables. In  Section \ref{parsing} we see how to parse text into numerical expressions and finally in Section \ref{interactiveCalc} we give an interactive read-evaluate-print loop for calculation.
+\item[Library database]
+When this is introduced in Section \ref{library} it shows how to build programs over lists using list comprehensions, without using explicit recursion.
+\item[Supermarket billing]
+This example comes in Section \ref{superBill} and again illustrates the utility of the list library functions independently of explicit recursive definitions.
+\item[Text processing]
+In text processing, Section \ref{textProc}, we present an example where explicit recursion over lists is necessary, in contrast to the previous two.
+\item[Regular expressions]
+Regular expressions are first introduced as an example of `functions as data', and then discussed again in Chapter \ref{dsls} when a deep embedding is developed to contrast with the earlier treatment, a shallow embedding.
+\item[Huffman codes]
+Chapter \ref{codes} is devoted to this multi-module application. The principal purpose of this is to show a larger example of programming in practice.
+\item[Other examples]
+Other examples of simulation, relations and graphs are used to illustrate lazy evaluation in Chapter \ref{lazy}.
+\end{description} 
+
+
+
+\section*{Acknowledgements}
+
+A book can only be improved by feedback, and I am very grateful to everyone who has contributed help and comments. Particular thanks are due to Thomas Schilling, whose advice on using cabal and hackage, as well as on the wider Haskell landscape, was absolutely invaluable. Eerke Boiten kindly proofread material on card games, and Olaf Chitil had a host of practical suggestions from his recent teaching experience. They and other colleagues from Kent and the USA contributed to lively discussions on what it means to be a DSL in Haskell, and the role of monads in DSLs. 
+
+Colleagues at Erlang Solutions in London were kind enough to provide an audience for the  `Haskell Evening Class' where some of this material was used; their questions and discussions helped to sharpen the presentation in many places.
+
+Rufus Curnow of Addison-Wesley
+has supported this third edition from
+its inception almost to delivery; thanks very much to him for his hard work and patience, and also to Simon Lake who took over the task in the final stages. The anonymous referees were focussed and constructive in their advice, both on my suggested changes and their own.
+
+This book would not exist without all the efforts of those in the Haskell community, supporting first-class systems like GHC, and the burgeoning number of open source packages and applications that make Haskell such a pleasure to use: thanks very much to all of you!
+
+Much appreciated sabbatical leave from the University of Kent has provided me with the time to work on this new edition; without this I am sure it would have taken many more years for the book to come to light.
+
+Finally I thank my family for their support, understanding and encouragement while I was writing this: I dedicate the book to them.
+
+
+{\raggedleft
+\bigskip
+\noindent
+{\em Simon Thompson\\
+Canterbury, December 2010\\}
+}
+
+%\end{document}

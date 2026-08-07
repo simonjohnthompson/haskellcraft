@@ -1,0 +1,26 @@
+From aa54467eb3afffb24858c0170530ffcbc2e3e3bd Mon Sep 17 00:00:00 2001
+From: Reed Mullanix <reedmullanix@gmail.com>
+Date: Tue, 7 Jan 2025 10:40:50 -0500
+Subject: [PATCH 1/3] fix: bump cabal version to 1.8
+
+This is required to use version operators
+---
+ Craft3e.cabal | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Craft3e.cabal b/Craft3e.cabal
+index d499803..03c2386 100644
+--- a/Craft3e.cabal
++++ b/Craft3e.cabal
+@@ -11,7 +11,7 @@ stability: stable
+ homepage: http://www.haskellcraft.com/
+ synopsis: Code for Haskell: the Craft of Functional Programming, 3rd ed.
+ category: Education
+-cabal-version: >= 1.6
++cabal-version: >= 1.8
+ build-type: Simple
+ description:
+   .
+-- 
+2.39.1
+

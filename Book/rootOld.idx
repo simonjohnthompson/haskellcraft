@@ -1,0 +1,2046 @@
+\indexentry{functional programming}{1}
+\indexentry{functional pictures}{1}
+\indexentry{program}{2}
+\indexentry{programming language}{2}
+\indexentry{software}{2}
+\indexentry{hardware}{2}
+\indexentry{programming language!high-level}{2}
+\indexentry{implementation}{2}
+\indexentry{functional programming}{2}
+\indexentry{programming paradigm}{2}
+\indexentry{modelling}{2}
+\indexentry{function}{3}
+\indexentry{function!box diagram}{3}
+\indexentry{output}{3}
+\indexentry{input}{3}
+\indexentry{result}{3}
+\indexentry{argument}{3}
+\indexentry{parameter}{3}
+\indexentry{application|see{function application}}{3}
+\indexentry{function application}{3}
+\indexentry{+@{\ttfamily  {}+}}{3}
+\indexentry{case studies!pictures|see{pictures}}{4}
+\indexentry{pictures|(}{4}
+\indexentry{flipV@{\ttfamily  {}flipV}}{4}
+\indexentry{invertColour@{\ttfamily  {}invertColour}}{4}
+\indexentry{scale@{\ttfamily  {}scale}}{4}
+\indexentry{above@{\ttfamily  {}above}}{4}
+\indexentry{beside@{\ttfamily  {}beside}}{5}
+\indexentry{type}{5}
+\indexentry{flipV@{\ttfamily  {}flipV}}{5}
+\indexentry{scale@{\ttfamily  {}scale}}{5}
+\indexentry{type}{5}
+\indexentry{+@{\ttfamily  {}+}}{5}
+\indexentry{Int@{\ttfamily  {}Int}}{5}
+\indexentry{Integer@{\ttfamily  {}Integer}}{5}
+\indexentry{scale@{\ttfamily  {}scale}}{6}
+\indexentry{Picture@{\ttfamily  {}Picture}}{6}
+\indexentry{above@{\ttfamily  {}above}}{6}
+\indexentry{above@{\ttfamily  {}above}}{6}
+\indexentry{operation}{6}
+\indexentry{pictures|)}{7}
+\indexentry{Haskell}{7}
+\indexentry{Curry, Haskell B.}{7}
+\indexentry{lambda calculus}{7}
+\indexentry{Web site!for Haskell}{7}
+\indexentry{haskell.org}{7}
+\indexentry{GHCi}{7}
+\indexentry{interpreter}{7}
+\indexentry{compiler}{7}
+\indexentry{evaluation}{8}
+\indexentry{expression}{8}
+\indexentry{value}{8}
+\indexentry{-@{\ttfamily  {}-}}{8}
+\indexentry{*@{\ttfamily  {}*}}{8}
+\indexentry{pictures}{8}
+\indexentry{horse@{\ttfamily  {}horse}}{8}
+\indexentry{flipV@{\ttfamily  {}flipV}}{8}
+\indexentry{function application}{8}
+\indexentry{invertColour@{\ttfamily  {}invertColour}}{8}
+\indexentry{functional programming}{9}
+\indexentry{definition}{9}
+\indexentry{definition}{9}
+\indexentry{name}{9}
+\indexentry{identifier}{9}
+\indexentry{=@{\ttfamily  {}=}}{9}
+\indexentry{Integer@{\ttfamily  {}Integer}}{10}
+\indexentry{::@{\ttfamily  {}::}}{10}
+\indexentry{name!value}{10}
+\indexentry{name!type}{10}
+\indexentry{Picture@{\ttfamily  {}Picture}}{10}
+\indexentry{blackHorse@{\ttfamily  {}blackHorse}}{10}
+\indexentry{rotateHorse@{\ttfamily  {}rotateHorse}}{10}
+\indexentry{definition!function}{11}
+\indexentry{function!definition}{11}
+\indexentry{square@{\ttfamily  {}square}}{11}
+\indexentry{horse@{\ttfamily  {}horse}}{11}
+\indexentry{pictures!horse}{11}
+\indexentry{equation}{12}
+\indexentry{unknown}{12}
+\indexentry{variable}{12}
+\indexentry{function definition!general case!single equation}{12}
+\indexentry{formal parameter}{12}
+\indexentry{parameter!formal}{12}
+\indexentry{actual parameter}{12}
+\indexentry{parameter!actual}{12}
+\indexentry{declaration}{12}
+\indexentry{type declaration!for function}{12}
+\indexentry{rotate@{\ttfamily  {}rotate}}{13}
+\indexentry{.@{\ttfamily  {}.}}{13}
+\indexentry{function composition}{13}
+\indexentry{composition|see{function composition}}{13}
+\indexentry{operator}{14}
+\indexentry{type!importance of types}{14}
+\indexentry{constraint}{14}
+\indexentry{type!constraint}{14}
+\indexentry{type checking}{14}
+\indexentry{type error}{14}
+\indexentry{abstraction!type}{15}
+\indexentry{type!abstract}{15}
+\indexentry{Picture@{\ttfamily  {}Picture}}{15}
+\indexentry{rotate@{\ttfamily  {}rotate}}{15}
+\indexentry{use}{15}
+\indexentry{calculation}{15}
+\indexentry{evaluation}{15}
+\indexentry{evaluation!step-by-step}{15}
+\indexentry{calculation}{15}
+\indexentry{programming paradigms!comparison}{16}
+\indexentry{side-effect}{17}
+\indexentry{domain-specific languages|(}{17}
+\indexentry{domain-specific languages|)}{18}
+\indexentry{pictures|(}{18}
+\indexentry{characters}{20}
+\indexentry{Char@{\ttfamily  {}Char}}{20}
+\indexentry{horse@{\ttfamily  {}horse}}{21}
+\indexentry{lists}{21}
+\indexentry{flipH@{\ttfamily  {}flipH}}{21}
+\indexentry{reverse@{\ttfamily  {}reverse}}{21}
+\indexentry{flipV@{\ttfamily  {}flipV}}{21}
+\indexentry{map@\texttt{map}}{21}
+\indexentry{polymorphism}{21}
+\indexentry{first-class citizens, functions}{21}
+\indexentry{function!first-class citizens}{21}
+\indexentry{++@{\ttfamily  {}++}}{22}
+\indexentry{above@{\ttfamily  {}above}}{22}
+\indexentry{beside@{\ttfamily  {}beside}}{22}
+\indexentry{zipWith@\texttt{zipWith}}{22}
+\indexentry{pictures|)}{22}
+\indexentry{proof|(}{22}
+\indexentry{operator!as function}{22}
+\indexentry{Pythagoras's theorem}{25}
+\indexentry{proof}{25}
+\indexentry{proof!and safety-critical situations}{26}
+\indexentry{transformation}{26}
+\indexentry{proof|)}{26}
+\indexentry{function}{26}
+\indexentry{type}{26}
+\indexentry{script}{27}
+\indexentry{extension}{27}
+\indexentry{hs@\texttt{.hs}}{27}
+\indexentry{comment}{27}
+\indexentry{--@{\ttfamily  {}--}}{27}
+\indexentry{comment!symbol}{27}
+\indexentry{\{-@{\ttfamily  {}\{-}}{27}
+\indexentry{-\}@{\ttfamily  {}-\}}}{27}
+\indexentry{comment!nested}{27}
+\indexentry{FirstScript.hs@{\ttfamily  {}FirstScript.hs}}{28}
+\indexentry{GHCi|(}{28}
+\indexentry{Glasgow Haskell Compiler}{28}
+\indexentry{GHC}{28}
+\indexentry{downloading support materials}{28}
+\indexentry{GHCi! documentation}{29}
+\indexentry{GHCi!documentation}{30}
+\indexentry{GHCi!documentation}{30}
+\indexentry{ghci@{\ttfamily  {}ghci}}{30}
+\indexentry{ghci@{\ttfamily  {}ghci}}{30}
+\indexentry{GHCi!launch}{30}
+\indexentry{load@\texttt{:load}}{31}
+\indexentry{GHCi!expression evaluation}{31}
+\indexentry{prompt}{31}
+\indexentry{*Chapter2>@{\ttfamily  {}*Chapter2>}}{31}
+\indexentry{GHCi!commands}{31}
+\indexentry{:@{\ttfamily  {}:}}{31}
+\indexentry{GHCi!editing}{31}
+\indexentry{load@\texttt{:load}}{32}
+\indexentry{reload@\texttt{:reload}}{32}
+\indexentry{type@\texttt{:type}}{32}
+\indexentry{info@\texttt{:info}}{32}
+\indexentry{browse@\texttt{:browse}}{32}
+\indexentry{quit@\texttt{:quit}}{32}
+\indexentry{:?@{\ttfamily  {}:?}}{32}
+\indexentry{GHCi!help}{32}
+\indexentry{edit@\texttt{:edit}}{32}
+\indexentry{GHCi!commands!shortened form}{32}
+\indexentry{GHCi!first session}{32}
+\indexentry{it@{\ttfamily  {}it}}{33}
+\indexentry{let!in GHCi@{\ttfamily  {}let!in GHCi}}{33}
+\indexentry{GHCi|)}{33}
+\indexentry{standard prelude|see{\texttt{Prelude.hs}}}{33}
+\indexentry{Prelude.hs@{\ttfamily  {}Prelude.hs}}{33}
+\indexentry{standard libraries}{34}
+\indexentry{modules!introduction|(}{34}
+\indexentry{modules}{35}
+\indexentry{Ant@{\ttfamily  {}Ant}}{35}
+\indexentry{module@{\ttfamily  {}module}}{35}
+\indexentry{import@{\ttfamily  {}import}}{35}
+\indexentry{Bee@{\ttfamily  {}Bee}}{35}
+\indexentry{export@{\ttfamily  {}export}}{35}
+\indexentry{standard libraries!location of}{35}
+\indexentry{modules!introduction|)}{35}
+\indexentry{Pictures}{35}
+\indexentry{Pictures@{\ttfamily  {}Pictures}}{36}
+\indexentry{printPicture@{\ttfamily  {}printPicture}}{37}
+\indexentry{I/O}{37}
+\indexentry{errors|(}{39}
+\indexentry{errors!error message}{39}
+\indexentry{errors!syntax}{39}
+\indexentry{syntax error}{39}
+\indexentry{syntax}{39}
+\indexentry{type error}{39}
+\indexentry{errors!type}{39}
+\indexentry{errors!program}{40}
+\indexentry{program error}{40}
+\indexentry{errors|)}{40}
+\indexentry{numbers!floating point}{41}
+\indexentry{Float@{\ttfamily  {}Float}}{41}
+\indexentry{True@{\ttfamily  {}True}}{41}
+\indexentry{False@{\ttfamily  {}False}}{41}
+\indexentry{Boolean}{41}
+\indexentry{Boole, George}{41}
+\indexentry{Bool@{\ttfamily  {}Bool}}{41}
+\indexentry{guard}{41}
+\indexentry{Char@{\ttfamily  {}Char}}{41}
+\indexentry{String@{\ttfamily  {}String}}{41}
+\indexentry{Booleans|(}{41}
+\indexentry{Bool@{\ttfamily  {}Bool}}{41}
+\indexentry{True@{\ttfamily  {}True}}{41}
+\indexentry{False@{\ttfamily  {}False}}{41}
+\indexentry{\&\&@{\ttfamily  {}\&\&}}{42}
+\indexentry{"|"|@{\ttfamily  {}"|"|}}{42}
+\indexentry{not@{\ttfamily  {}not}}{42}
+\indexentry{truth table}{42}
+\indexentry{inclusive or}{42}
+\indexentry{exclusive or}{42}
+\indexentry{exOr@{\ttfamily  {}exOr}}{42}
+\indexentry{function!box diagram}{42}
+\indexentry{==@{\ttfamily  {}==}}{42}
+\indexentry{/=@{\ttfamily  {}/=}}{42}
+\indexentry{literal}{43}
+\indexentry{value!literal}{43}
+\indexentry{myNot@{\ttfamily  {}myNot}}{43}
+\indexentry{pattern matching}{43}
+\indexentry{Booleans|)}{45}
+\indexentry{numbers!integers|(}{45}
+\indexentry{Int@{\ttfamily  {}Int}}{45}
+\indexentry{Integer@{\ttfamily  {}Integer}}{45}
+\indexentry{+@{\ttfamily  {}+}}{45}
+\indexentry{*@{\ttfamily  {}*}}{45}
+\indexentry{\^{}@{\ttfamily  {}\^{}}}{45}
+\indexentry{-@{\ttfamily  {}-}}{45}
+\indexentry{div@{\ttfamily  {}div}}{45}
+\indexentry{mod@{\ttfamily  {}mod}}{45}
+\indexentry{abs@{\ttfamily  {}abs}}{45}
+\indexentry{negate@{\ttfamily  {}negate}}{45}
+\indexentry{backquote (\texttt{`})}{45}
+\indexentry{function!infix version of}{45}
+\indexentry{infix version of a function}{45}
+\indexentry{numbers!natural numbers}{45}
+\indexentry{order}{45}
+\indexentry{equality}{45}
+\indexentry{>@{\ttfamily  {}>}}{45}
+\indexentry{>=@{\ttfamily  {}>=}}{45}
+\indexentry{==@{\ttfamily  {}==}}{45}
+\indexentry{/=@{\ttfamily  {}/=}}{45}
+\indexentry{<=@{\ttfamily  {}<=}}{45}
+\indexentry{<@{\ttfamily  {}<}}{45}
+\indexentry{pitfalls!negative literals}{46}
+\indexentry{threeEqual@{\ttfamily  {}threeEqual}}{46}
+\indexentry{numbers!integers|)}{47}
+\indexentry{overloading}{47}
+\indexentry{name!overloading of}{47}
+\indexentry{Integer@{\ttfamily  {}Integer}}{48}
+\indexentry{guard|(}{48}
+\indexentry{Boolean!guard|see{guard}}{48}
+\indexentry{max@{\ttfamily  {}max}}{49}
+\indexentry{otherwise@{\ttfamily  {}otherwise}}{49}
+\indexentry{maxThree@{\ttfamily  {}maxThree}}{49}
+\indexentry{function definition!general form}{49}
+\indexentry{calculation!guards}{49}
+\indexentry{conditional expression}{51}
+\indexentry{Boolean!conditional expression}{51}
+\indexentry{if@{\texttt{if}\ldots\texttt{then}\ldots\texttt{else}}}{51}
+\indexentry{guard|)}{52}
+\indexentry{characters|(}{52}
+\indexentry{Char@{\ttfamily  {}Char}}{52}
+\indexentry{characters!tab}{52}
+\indexentry{characters!end-of-file}{52}
+\indexentry{Char@{\ttfamily  {}Char}}{52}
+\indexentry{prelude, redefining functions in}{53}
+\indexentry{function definition!redefining prelude functions}{53}
+\indexentry{import@{\ttfamily  {}import}}{53}
+\indexentry{hiding@{\ttfamily  {}hiding}}{53}
+\indexentry{characters!literal}{53}
+\indexentry{characters!ASCII coding}{53}
+\indexentry{characters!Unicode}{53}
+\indexentry{Unicode}{53}
+\indexentry{fromEnum@{\ttfamily  {}fromEnum}}{53}
+\indexentry{toEnum@{\ttfamily  {}toEnum}}{53}
+\indexentry{toUpper@{\ttfamily  {}toUpper}}{54}
+\indexentry{isDigit@{\ttfamily  {}isDigit}}{54}
+\indexentry{Char.hs@{\ttfamily  {}Char.hs}}{54}
+\indexentry{pitfalls!\texttt  {Char} and \texttt  {String}}{55}
+\indexentry{putStr@{\ttfamily  {}putStr}}{55}
+\indexentry{++@{\ttfamily  {}++}}{55}
+\indexentry{show@\texttt{show}}{55}
+\indexentry{read@{\ttfamily  {}read}}{55}
+\indexentry{characters|)}{56}
+\indexentry{numbers!floating point|(}{56}
+\indexentry{Float@{\ttfamily  {}Float}}{56}
+\indexentry{Double@{\ttfamily  {}Double}}{56}
+\indexentry{Double@{\ttfamily  {}Double}}{56}
+\indexentry{+@{\ttfamily  {}+}}{57}
+\indexentry{-@{\ttfamily  {}-}}{57}
+\indexentry{*@{\ttfamily  {}*}}{57}
+\indexentry{/@{\ttfamily  {}/}}{57}
+\indexentry{\^{}@{\ttfamily  {}\^{}}}{57}
+\indexentry{fromInteger@{\ttfamily  {}fromInteger}}{57}
+\indexentry{fromIntegral@{\ttfamily  {}fromIntegral}}{57}
+\indexentry{signum@{\ttfamily  {}signum}}{57}
+\indexentry{sqrt@{\ttfamily  {}sqrt}}{57}
+\indexentry{operator!floating point}{57}
+\indexentry{floating point operators}{57}
+\indexentry{numbers!scientific notation}{57}
+\indexentry{pitfalls!numeric conversions}{58}
+\indexentry{numbers!conversion between types}{58}
+\indexentry{fromIntegral@{\ttfamily  {}fromIntegral}}{58}
+\indexentry{overloading!literals}{58}
+\indexentry{literal!overloaded}{58}
+\indexentry{quadratic equation}{59}
+\indexentry{numbers!floating point|)}{60}
+\indexentry{syntax|(}{60}
+\indexentry{layout}{60}
+\indexentry{offside rule}{61}
+\indexentry{;@{\ttfamily  {};}}{61}
+\indexentry{layout!recommended}{61}
+\indexentry{conditional equation}{61}
+\indexentry{clause}{61}
+\indexentry{conventions!types specified}{61}
+\indexentry{pitfalls!\texttt  {;} in error message}{62}
+\indexentry{errors!offside rule}{62}
+\indexentry{guard}{62}
+\indexentry{name}{62}
+\indexentry{identifier}{62}
+\indexentry{constructor}{62}
+\indexentry{reserved words}{63}
+\indexentry{as@{\ttfamily  {}as}}{63}
+\indexentry{qualified@{\ttfamily  {}qualified}}{63}
+\indexentry{hiding@{\ttfamily  {}hiding}}{63}
+\indexentry{conventions!capitalizing internal words}{63}
+\indexentry{characters!Unicode}{63}
+\indexentry{operator|(}{63}
+\indexentry{operator!infix}{63}
+\indexentry{operator!associativity of}{64}
+\indexentry{associativity}{64}
+\indexentry{associativity!left/right}{64}
+\indexentry{operator!binding power of}{64}
+\indexentry{fixity}{64}
+\indexentry{binding power}{64}
+\indexentry{function application}{65}
+\indexentry{pitfalls!function application}{65}
+\indexentry{function!binary}{65}
+\indexentry{operator!definitions of}{65}
+\indexentry{\&\&\&@{\ttfamily  {}\&\&\&}}{65}
+\indexentry{operator|)}{65}
+\indexentry{syntax|)}{65}
+\indexentry{design!where do I start?|(}{67}
+\indexentry{design}{67}
+\indexentry{design!types}{68}
+\indexentry{middleNumber@{\ttfamily  {}middleNumber}}{68}
+\indexentry{maxThree@{\ttfamily  {}maxThree}}{69}
+\indexentry{divide and conquer}{70}
+\indexentry{design!divide and conquer}{70}
+\indexentry{design!what if?}{70}
+\indexentry{design!top-down}{70}
+\indexentry{design!iterative}{70}
+\indexentry{middleNumber@{\ttfamily  {}middleNumber}}{70}
+\indexentry{between@{\ttfamily  {}between}}{71}
+\indexentry{howManyEqual@{\ttfamily  {}howManyEqual}}{72}
+\indexentry{design!where do I start?|)}{72}
+\indexentry{let@{\ttfamily  {}let}}{75}
+\indexentry{;@{\ttfamily  {};}}{75}
+\indexentry{calculation}{75}
+\indexentry{sumSquares@{\ttfamily  {}sumSquares}}{75}
+\indexentry{offside rule}{76}
+\indexentry{layout!recommended}{76}
+\indexentry{function definition!layout|see{layout}}{76}
+\indexentry{function definition!general form}{76}
+\indexentry{type declaration}{76}
+\indexentry{conventions!local type declarations}{76}
+\indexentry{scope}{76}
+\indexentry{maxsq@{\ttfamily  {}maxsq}}{77}
+\indexentry{scope!nested}{77}
+\indexentry{recursion|(}{81}
+\indexentry{factorial|(}{81}
+\indexentry{recursion!justification|(}{81}
+\indexentry{fac@{\ttfamily  {}fac}}{82}
+\indexentry{calculation!and recursion}{83}
+\indexentry{recursion!and calculation}{83}
+\indexentry{recursion!base case}{83}
+\indexentry{recursion!recursion step}{83}
+\indexentry{recursion!bottom-up}{83}
+\indexentry{recursion!top-down}{84}
+\indexentry{recursion!primitive}{84}
+\indexentry{primitive recursion}{84}
+\indexentry{factorial|)}{84}
+\indexentry{recursion!justification|)}{84}
+\indexentry{undefinedness}{84}
+\indexentry{value!undefined}{84}
+\indexentry{value!error}{84}
+\indexentry{error@{\ttfamily  {}error}}{84}
+\indexentry{primitive recursion!template}{85}
+\indexentry{primitive recursion!examples on numbers}{85}
+\indexentry{power2@{\ttfamily  {}power2}}{85}
+\indexentry{sumFacs@{\ttfamily  {}sumFacs}}{86}
+\indexentry{sumFacs@{\ttfamily  {}sumFacs}}{86}
+\indexentry{sumFun@{\ttfamily  {}sumFun}}{86}
+\indexentry{regions@{\ttfamily  {}regions}}{87}
+\indexentry{general recursion|(}{90}
+\indexentry{recursion!general|(}{90}
+\indexentry{Fibonacci numbers}{91}
+\indexentry{termination}{92}
+\indexentry{recursion|)}{92}
+\indexentry{general recursion|)}{92}
+\indexentry{recursion!general|)}{92}
+\indexentry{testing|(}{93}
+\indexentry{specification}{93}
+\indexentry{testing!black box}{93}
+\indexentry{testing!white box}{93}
+\indexentry{maxThree@{\ttfamily  {}maxThree}}{93}
+\indexentry{testing!black-box}{93}
+\indexentry{testing!testing groups}{93}
+\indexentry{testing!special cases}{93}
+\indexentry{mysteryMax@{\ttfamily  {}mysteryMax}}{94}
+\indexentry{testing!white box}{95}
+\indexentry{testing|)}{97}
+\indexentry{tuples!and lists}{99}
+\indexentry{type@{\ttfamily  {}type}}{100}
+\indexentry{ShopItem@{\ttfamily  {}ShopItem}}{100}
+\indexentry{[]@{\ttfamily  {}[]}}{100}
+\indexentry{type@{\ttfamily  {}type}}{100}
+\indexentry{Basket@{\ttfamily  {}Basket}}{100}
+\indexentry{type-checking}{101}
+\indexentry{type@{\ttfamily  {}type}}{101}
+\indexentry{String@{\ttfamily  {}String}}{101}
+\indexentry{String@{\ttfamily  {}String}}{101}
+\indexentry{type@{\ttfamily  {}type}}{101}
+\indexentry{tuples|(}{101}
+\indexentry{minAndMax@{\ttfamily  {}minAndMax}}{102}
+\indexentry{pattern matching}{102}
+\indexentry{pattern}{102}
+\indexentry{addPair@{\ttfamily  {}addPair}}{103}
+\indexentry{pattern!nested}{103}
+\indexentry{selector}{103}
+\indexentry{function!selector}{103}
+\indexentry{fst@{\ttfamily  {}fst}}{103}
+\indexentry{snd@{\ttfamily  {}snd}}{103}
+\indexentry{addPair@{\ttfamily  {}addPair}}{103}
+\indexentry{Fibonacci numbers}{103}
+\indexentry{fibStep@{\ttfamily  {}fibStep}}{104}
+\indexentry{fibPair@{\ttfamily  {}fibPair}}{104}
+\indexentry{fastFib@{\ttfamily  {}fastFib}}{104}
+\indexentry{.@{\ttfamily  {}.}}{104}
+\indexentry{pitfalls!paired arguments}{104}
+\indexentry{fibStep@{\ttfamily  {}fibStep}}{104}
+\indexentry{fibTwoStep@{\ttfamily  {}fibTwoStep}}{104}
+\indexentry{type error}{104}
+\indexentry{tuples|)}{105}
+\indexentry{data@{\ttfamily  {}data}}{105}
+\indexentry{constructor}{105}
+\indexentry{enumerated type}{105}
+\indexentry{Move@{\ttfamily  {}Move}}{105}
+\indexentry{product type}{106}
+\indexentry{Jemima, Electric Aunt}{106}
+\indexentry{Jemima, Electric Aunt}{106}
+\indexentry{Electric Aunt Jemima|see{Jemima, Electric Aunt}}{106}
+\indexentry{constructor!binary}{106}
+\indexentry{constructor!nullary}{106}
+\indexentry{algebraic type!compared with tuple}{107}
+\indexentry{tuples!compared with algebraic type}{107}
+\indexentry{constructor!unary}{107}
+\indexentry{algebraic type!alternatives}{107}
+\indexentry{Circle@{\ttfamily  {}Circle}}{107}
+\indexentry{Rectangle@{\ttfamily  {}Rectangle}}{107}
+\indexentry{Shape@{\ttfamily  {}Shape}}{107}
+\indexentry{algebraic type!pattern matching}{108}
+\indexentry{pattern matching!algebraic type}{108}
+\indexentry{algebraic type!general form}{108}
+\indexentry{type@\texttt  {type} and \texttt  {data}}{109}
+\indexentry{algebraic type!recursive|see{recursive type}}{109}
+\indexentry{lists|(}{111}
+\indexentry{lists!approach taken}{111}
+\indexentry{Picture@{\ttfamily  {}Picture}}{111}
+\indexentry{Prelude.hs@{\ttfamily  {}Prelude.hs}}{111}
+\indexentry{List.hs@{\ttfamily  {}List.hs}}{111}
+\indexentry{String@{\ttfamily  {}String}}{111}
+\indexentry{[]@{\ttfamily  {}[]}}{112}
+\indexentry{sets}{112}
+\indexentry{..@{\ttfamily  {}..}}{112}
+\indexentry{strings|(}{113}
+\indexentry{String@{\ttfamily  {}String}}{113}
+\indexentry{Data.String@{\ttfamily  {}Data.String}}{113}
+\indexentry{show@\texttt{show}}{113}
+\indexentry{read@{\ttfamily  {}read}}{113}
+\indexentry{strings|)}{113}
+\indexentry{evaluation!interrupt}{113}
+\indexentry{Ctrl-C@{\ttfamily  {}Ctrl-C}}{113}
+\indexentry{list comprehensions|(}{113}
+\indexentry{<-@{\ttfamily  {}<-}}{114}
+\indexentry{list comprehensions!generator}{114}
+\indexentry{<-@{\ttfamily  {}<-}}{114}
+\indexentry{list comprehensions!test}{114}
+\indexentry{addPairs@{\ttfamily  {}addPairs}}{115}
+\indexentry{digits@{\ttfamily  {}digits}}{116}
+\indexentry{list comprehensions|)}{118}
+\indexentry{examples!library database|(}{119}
+\indexentry{Person@{\ttfamily  {}Person}}{119}
+\indexentry{Book@{\ttfamily  {}Book}}{119}
+\indexentry{Database@{\ttfamily  {}Database}}{119}
+\indexentry{books@{\ttfamily  {}books}}{120}
+\indexentry{borrowers@{\ttfamily  {}borrowers}}{120}
+\indexentry{borrowed@{\ttfamily  {}borrowed}}{120}
+\indexentry{numBorrowed@{\ttfamily  {}numBorrowed}}{120}
+\indexentry{makeLoan@{\ttfamily  {}makeLoan}}{120}
+\indexentry{returnLoan@{\ttfamily  {}returnLoan}}{120}
+\indexentry{books@{\ttfamily  {}books}}{120}
+\indexentry{books@{\ttfamily  {}books}}{120}
+\indexentry{list comprehensions!library database}{120}
+\indexentry{pitfalls!list comprehensions}{121}
+\indexentry{list comprehensions!pitfalls}{121}
+\indexentry{books@{\ttfamily  {}books}}{121}
+\indexentry{books@{\ttfamily  {}books}}{121}
+\indexentry{makeLoan@{\ttfamily  {}makeLoan}}{121}
+\indexentry{++@{\ttfamily  {}++}}{121}
+\indexentry{returnLoan@{\ttfamily  {}returnLoan}}{121}
+\indexentry{testing!library database}{122}
+\indexentry{it@{\ttfamily  {}it}}{122}
+\indexentry{length@{\ttfamily  {}length}}{123}
+\indexentry{examples!library database|)}{124}
+\indexentry{lists|)}{124}
+\indexentry{polymorphism|(}{125}
+\indexentry{genericity}{125}
+\indexentry{length@{\ttfamily  {}length}}{125}
+\indexentry{type variable}{126}
+\indexentry{variable!type}{126}
+\indexentry{conventions!type variable names}{126}
+\indexentry{instance}{126}
+\indexentry{type!instance}{126}
+\indexentry{type!most general}{126}
+\indexentry{++@{\ttfamily  {}++}}{126}
+\indexentry{zip@{\ttfamily  {}zip}}{126}
+\indexentry{unzip@{\ttfamily  {}unzip}}{126}
+\indexentry{function!definition of polymorphic}{127}
+\indexentry{polymorphism!function definition}{127}
+\indexentry{id@{\ttfamily  {}id}}{127}
+\indexentry{constraint}{127}
+\indexentry{type!constraint}{127}
+\indexentry{fst@{\ttfamily  {}fst}}{127}
+\indexentry{type@\texttt{:type}}{127}
+\indexentry{polymorphism!and overloading}{127}
+\indexentry{overloading!and polymorphism}{127}
+\indexentry{polymorphism|)}{128}
+\indexentry{lists!prelude functions|(}{128}
+\indexentry{length@{\ttfamily  {}length}}{128}
+\indexentry{:@{\ttfamily  {}:}}{129}
+\indexentry{++@{\ttfamily  {}++}}{129}
+\indexentry{"!"!@{\ttfamily  {}"!"!}}{129}
+\indexentry{concat@{\ttfamily  {}concat}}{129}
+\indexentry{length@{\ttfamily  {}length}}{129}
+\indexentry{head@{\ttfamily  {}head}}{129}
+\indexentry{last@{\ttfamily  {}last}}{129}
+\indexentry{tail@{\ttfamily  {}tail}}{129}
+\indexentry{init@{\ttfamily  {}init}}{129}
+\indexentry{replicate@{\ttfamily  {}replicate}}{129}
+\indexentry{take@{\ttfamily  {}take}}{129}
+\indexentry{drop@{\ttfamily  {}drop}}{129}
+\indexentry{splitAt@{\ttfamily  {}splitAt}}{129}
+\indexentry{reverse@{\ttfamily  {}reverse}}{129}
+\indexentry{zip@{\ttfamily  {}zip}}{129}
+\indexentry{unzip@{\ttfamily  {}unzip}}{129}
+\indexentry{Peccary, Greggery}{129}
+\indexentry{Greggery Peccary|see{Peccary, Greggery}}{129}
+\indexentry{sum@{\ttfamily  {}sum}}{130}
+\indexentry{product@{\ttfamily  {}product}}{130}
+\indexentry{and@{\ttfamily  {}and}}{130}
+\indexentry{or@{\ttfamily  {}or}}{130}
+\indexentry{type!importance of types}{130}
+\indexentry{Data.List@{\ttfamily  {}Data.List}}{130}
+\indexentry{lists!prelude functions|)}{130}
+\indexentry{pictures|(}{138}
+\indexentry{Picture@{\ttfamily  {}Picture}}{138}
+\indexentry{flipH@{\ttfamily  {}flipH}}{138}
+\indexentry{above@{\ttfamily  {}above}}{138}
+\indexentry{list comprehensions}{138}
+\indexentry{flipV@{\ttfamily  {}flipV}}{138}
+\indexentry{zip@{\ttfamily  {}zip}}{139}
+\indexentry{beside@{\ttfamily  {}beside}}{139}
+\indexentry{invertChar@{\ttfamily  {}invertChar}}{139}
+\indexentry{invertLine@{\ttfamily  {}invertLine}}{139}
+\indexentry{invertColour@{\ttfamily  {}invertColour}}{139}
+\indexentry{superimpose@{\ttfamily  {}superimpose}}{142}
+\indexentry{printPicture@{\ttfamily  {}printPicture}}{142}
+\indexentry{rotate90@{\ttfamily  {}rotate90}}{142}
+\indexentry{scale@{\ttfamily  {}scale}}{143}
+\indexentry{pictures!alternative representation of}{146}
+\indexentry{positioned pictures|(}{148}
+\indexentry{pictures!positioned|(}{148}
+\indexentry{Position@{\ttfamily  {}Position}}{148}
+\indexentry{Image@{\ttfamily  {}Image}}{148}
+\indexentry{reference point}{148}
+\indexentry{makeImage@{\ttfamily  {}makeImage}}{149}
+\indexentry{changePosition@{\ttfamily  {}changePosition}}{149}
+\indexentry{moveImage@{\ttfamily  {}moveImage}}{149}
+\indexentry{Haskell Stores@\verb+Haskell Stores+}{151}
+\indexentry{pictures|)}{151}
+\indexentry{positioned pictures|)}{151}
+\indexentry{pictures!positioned|)}{151}
+\indexentry{examples!supermarket billing|(}{151}
+\indexentry{database}{152}
+\indexentry{Database@{\ttfamily  {}Database}}{152}
+\indexentry{makeBill@{\ttfamily  {}makeBill}}{152}
+\indexentry{formatBill@{\ttfamily  {}formatBill}}{152}
+\indexentry{produceBill@{\ttfamily  {}produceBill}}{152}
+\indexentry{definition!constant!reason for}{152}
+\indexentry{formatBill@{\ttfamily  {}formatBill}}{154}
+\indexentry{makeBill@{\ttfamily  {}makeBill}}{155}
+\indexentry{examples!supermarket billing|)}{156}
+\indexentry{lists!defining functions|(}{161}
+\indexentry{design!list functions|(}{161}
+\indexentry{pattern matching|(}{161}
+\indexentry{pattern matching!sequentiality}{161}
+\indexentry{\_@{\ttfamily  {}\_}}{162}
+\indexentry{wildcard}{162}
+\indexentry{pattern matching!wildcard}{162}
+\indexentry{pattern matching!literals}{162}
+\indexentry{pattern matching!variables}{162}
+\indexentry{pattern matching!sequentiality of}{162}
+\indexentry{[]@{\ttfamily  {}[]}}{163}
+\indexentry{:@{\ttfamily  {}:}}{163}
+\indexentry{lists!head}{163}
+\indexentry{lists!tail}{163}
+\indexentry{constructor}{163}
+\indexentry{lists!constructor}{163}
+\indexentry{cons}{163}
+\indexentry{xs@{\ttfamily  {}xs}}{164}
+\indexentry{ys@{\ttfamily  {}ys}}{164}
+\indexentry{conventions!list variables}{164}
+\indexentry{pattern matching!constructors}{164}
+\indexentry{constructor!pattern matching}{164}
+\indexentry{pattern matching!in expressions}{165}
+\indexentry{case@{\ttfamily  {}case}}{165}
+\indexentry{firstDigit@{\ttfamily  {}firstDigit}}{165}
+\indexentry{->@{\ttfamily  {}->}}{165}
+\indexentry{pattern matching|)}{165}
+\indexentry{primitive recursion!list|(}{166}
+\indexentry{sum@{\ttfamily  {}sum}}{166}
+\indexentry{design!where do I start?|(}{167}
+\indexentry{primitive recursion!finding definitions|(}{167}
+\indexentry{concat@{\ttfamily  {}concat}}{168}
+\indexentry{++@{\ttfamily  {}++}}{168}
+\indexentry{elem@{\ttfamily  {}elem}}{169}
+\indexentry{pitfalls!repeated variables in patterns}{169}
+\indexentry{pattern matching!repeated variables}{169}
+\indexentry{doubleAll@{\ttfamily  {}doubleAll}}{169}
+\indexentry{selectEven@{\ttfamily  {}selectEven}}{170}
+\indexentry{sorting}{170}
+\indexentry{sorting!insertion}{170}
+\indexentry{iSort@{\ttfamily  {}iSort}}{171}
+\indexentry{design!top-down}{171}
+\indexentry{ins@{\ttfamily  {}ins}}{171}
+\indexentry{ins@{\ttfamily  {}ins}}{171}
+\indexentry{calculation}{171}
+\indexentry{design!list functions|)}{172}
+\indexentry{primitive recursion!list|)}{172}
+\indexentry{design!where do I start?|)}{172}
+\indexentry{primitive recursion!finding definitions|)}{172}
+\indexentry{order!lexicographic}{173}
+\indexentry{general recursion!over lists|(}{173}
+\indexentry{zip@{\ttfamily  {}zip}}{173}
+\indexentry{pattern matching!sequentiality of}{174}
+\indexentry{take@{\ttfamily  {}take}}{174}
+\indexentry{error@{\ttfamily  {}error}}{174}
+\indexentry{sorting!quicksort}{175}
+\indexentry{quicksort}{175}
+\indexentry{examples!text processing|(}{176}
+\indexentry{text processing}{176}
+\indexentry{text processing!filling}{176}
+\indexentry{text processing!justification}{177}
+\indexentry{design!bottom up}{177}
+\indexentry{text processing!splitting into words}{177}
+\indexentry{whitespace@{\ttfamily  {}whitespace}}{177}
+\indexentry{getWord@{\ttfamily  {}getWord}}{178}
+\indexentry{dropWord@{\ttfamily  {}dropWord}}{178}
+\indexentry{dropSpace@{\ttfamily  {}dropSpace}}{178}
+\indexentry{Word@{\ttfamily  {}Word}}{178}
+\indexentry{splitWords@{\ttfamily  {}splitWords}}{179}
+\indexentry{getLine@{\ttfamily  {}getLine}}{179}
+\indexentry{dropLine@{\ttfamily  {}dropLine}}{180}
+\indexentry{splitLines@{\ttfamily  {}splitLines}}{180}
+\indexentry{fill@{\ttfamily  {}fill}}{180}
+\indexentry{joinLines@{\ttfamily  {}joinLines}}{180}
+\indexentry{examples!text processing|)}{180}
+\indexentry{lists!defining functions|)}{182}
+\indexentry{general recursion!over lists|)}{182}
+\indexentry{I/O!history}{187}
+\indexentry{I/O!basics|(}{188}
+\indexentry{input/output|see{I/O}}{188}
+\indexentry{IO|see{I/O}}{188}
+\indexentry{IO@{\ttfamily  {}IO}}{189}
+\indexentry{action, I/O}{189}
+\indexentry{I/O!imperative programs}{189}
+\indexentry{I/O!input}{189}
+\indexentry{getLine@{\ttfamily  {}getLine}}{189}
+\indexentry{getLine@{\ttfamily  {}getLine}}{189}
+\indexentry{getChar@{\ttfamily  {}getChar}}{189}
+\indexentry{type!one element}{189}
+\indexentry{()@{\ttfamily  {}()}}{189}
+\indexentry{Main@{\ttfamily  {}Main}}{189}
+\indexentry{main@{\ttfamily  {}main}}{189}
+\indexentry{I/O!output}{190}
+\indexentry{putStr@{\ttfamily  {}putStr}}{190}
+\indexentry{helloWorld@{\ttfamily  {}helloWorld}}{190}
+\indexentry{putStrLn@{\ttfamily  {}putStrLn}}{190}
+\indexentry{Show@{\ttfamily  {}Show}}{190}
+\indexentry{print@{\ttfamily  {}print}}{190}
+\indexentry{I/O!returning a value}{190}
+\indexentry{return@{\ttfamily  {}return}}{190}
+\indexentry{I/O!running a program}{191}
+\indexentry{main@{\ttfamily  {}main}}{191}
+\indexentry{I/O!basics|)}{191}
+\indexentry{sequencing|see{\texttt{do}}}{191}
+\indexentry{do@\texttt{do} notation}{191}
+\indexentry{I/O!\texttt{do} notation|(}{191}
+\indexentry{putStrLn@{\ttfamily  {}putStrLn}}{191}
+\indexentry{I/O!capturing values read}{192}
+\indexentry{<-@{\ttfamily  {}<-}}{193}
+\indexentry{getNput@{\ttfamily  {}getNput}}{193}
+\indexentry{assignment!and \texttt{<-}}{193}
+\indexentry{assignment!single}{193}
+\indexentry{I/O!local definitions}{193}
+\indexentry{do@\texttt{do} notation!local definitions}{193}
+\indexentry{let@{\ttfamily  {}let}}{193}
+\indexentry{read@{\ttfamily  {}read}}{194}
+\indexentry{getInt@{\ttfamily  {}getInt}}{194}
+\indexentry{I/O!\texttt{do} notation|)}{194}
+\indexentry{I/O!loops and recursion}{195}
+\indexentry{reasoning|see{proof}}{203}
+\indexentry{proof|(}{203}
+\indexentry{length@{\ttfamily  {}length}}{204}
+\indexentry{function definition!as description}{205}
+\indexentry{symbolic evaluation}{205}
+\indexentry{evaluation!symbolic}{205}
+\indexentry{proof!and testing}{205}
+\indexentry{testing!and proof}{205}
+\indexentry{mysteryMax@{\ttfamily  {}mysteryMax}}{205}
+\indexentry{debugging}{206}
+\indexentry{finiteness}{207}
+\indexentry{definedness}{207}
+\indexentry{evaluation!definedness of}{207}
+\indexentry{termination}{207}
+\indexentry{finiteness}{208}
+\indexentry{lists!infinite}{208}
+\indexentry{lists!partially defined}{208}
+\indexentry{assumptions}{208}
+\indexentry{\imp@{\imp}}{209}
+\indexentry{implication@implication (\(\Rightarrow\))}{209}
+\indexentry{free variable}{209}
+\indexentry{variable!free}{209}
+\indexentry{universal quantifier}{209}
+\indexentry{quantifier, universal}{209}
+\indexentry{all@\all{}}{209}
+\indexentry{induction|(}{209}
+\indexentry{structural induction}{209}
+\indexentry{structural induction!for lists}{209}
+\indexentry{induction!for lists}{209}
+\indexentry{induction!base case}{209}
+\indexentry{induction!induction step}{210}
+\indexentry{induction!induction hypothesis}{210}
+\indexentry{induction!justification of}{210}
+\indexentry{doubleAll@{\ttfamily  {}doubleAll}}{210}
+\indexentry{sum@{\ttfamily  {}sum}}{211}
+\indexentry{base@\texttt{(base)}}{211}
+\indexentry{ind@\texttt{(ind)}}{211}
+\indexentry{hyp@\texttt{(hyp)}}{211}
+\indexentry{\blackbox@{\rule{8pt}{8pt}}}{212}
+\indexentry{induction!finding proofs}{212}
+\indexentry{length@{\ttfamily  {}length}}{213}
+\indexentry{++@{\ttfamily  {}++}}{213}
+\indexentry{induction!choice of induction variable}{213}
+\indexentry{reverse@{\ttfamily  {}reverse}}{214}
+\indexentry{++@{\ttfamily  {}++}}{214}
+\indexentry{identity}{215}
+\indexentry{unzip@{\ttfamily  {}unzip}}{217}
+\indexentry{induction|)}{218}
+\indexentry{induction!generalizing the goal}{218}
+\indexentry{shunt@{\ttfamily  {}shunt}}{218}
+\indexentry{rev@{\ttfamily  {}rev}}{218}
+\indexentry{\forall@$\forall$}{219}
+\indexentry{proof|)}{221}
+\indexentry{pattern of computation}{223}
+\indexentry{pattern of computation!over lists|(}{224}
+\indexentry{mapping}{224}
+\indexentry{doubleAll@{\ttfamily  {}doubleAll}}{224}
+\indexentry{filter}{224}
+\indexentry{digits@{\ttfamily  {}digits}}{224}
+\indexentry{folding}{225}
+\indexentry{sum@{\ttfamily  {}sum}}{225}
+\indexentry{concat@{\ttfamily  {}concat}}{225}
+\indexentry{++@{\ttfamily  {}++}}{225}
+\indexentry{getWord@{\ttfamily  {}getWord}}{225}
+\indexentry{list comprehensions}{225}
+\indexentry{invertColour@{\ttfamily  {}invertColour}}{225}
+\indexentry{folding!and primitive recursion}{225}
+\indexentry{primitive recursion!and folding}{225}
+\indexentry{sorting!insertion}{225}
+\indexentry{iSort@{\ttfamily  {}iSort}}{226}
+\indexentry{function!prefix}{226}
+\indexentry{function!infix}{226}
+\indexentry{splitLines@{\ttfamily  {}splitLines}}{226}
+\indexentry{pattern of computation!over lists|)}{226}
+\indexentry{function!higher-order}{226}
+\indexentry{higher-order function}{226}
+\indexentry{doubleAll@{\ttfamily  {}doubleAll}}{226}
+\indexentry{map@\texttt{map}}{227}
+\indexentry{convertChrs@{\ttfamily  {}convertChrs}}{227}
+\indexentry{flipV@{\ttfamily  {}flipV}}{227}
+\indexentry{map@\texttt{map}!type of}{228}
+\indexentry{properties as functions}{228}
+\indexentry{function!representing properties}{228}
+\indexentry{isDigit@{\ttfamily  {}isDigit}}{228}
+\indexentry{property}{228}
+\indexentry{isEven@{\ttfamily  {}isEven}}{228}
+\indexentry{isSorted@{\ttfamily  {}isSorted}}{228}
+\indexentry{conventions!names of properties}{228}
+\indexentry{filter@\texttt{filter}}{228}
+\indexentry{digits@{\ttfamily  {}digits}}{229}
+\indexentry{filter@\texttt{filter}!type of}{229}
+\indexentry{zipWith@\texttt{zipWith}}{229}
+\indexentry{Frank}{229}
+\indexentry{beside@{\ttfamily  {}beside}}{230}
+\indexentry{zipWith@\texttt{zipWith}!type of}{230}
+\indexentry{folding!and primitive recursion|(}{232}
+\indexentry{primitive recursion!and folding|(}{232}
+\indexentry{folding}{232}
+\indexentry{foldr1@\texttt{foldr1}}{232}
+\indexentry{foldr@\texttt{foldr}}{232}
+\indexentry{foldr1@\texttt{foldr1}}{232}
+\indexentry{foldr1@\texttt{foldr1}!type of}{232}
+\indexentry{foldr@\texttt{foldr}}{233}
+\indexentry{foldr@\texttt{foldr}}{233}
+\indexentry{foldr@\texttt{foldr}!type of}{233}
+\indexentry{concat@{\ttfamily  {}concat}}{233}
+\indexentry{and@{\ttfamily  {}and}}{233}
+\indexentry{foldr@\texttt{foldr}}{233}
+\indexentry{foldr@\texttt{foldr}!type of}{234}
+\indexentry{rev@{\ttfamily  {}rev}}{234}
+\indexentry{rev@{\ttfamily  {}rev}}{234}
+\indexentry{snoc@{\ttfamily  {}snoc}}{234}
+\indexentry{iSort@{\ttfamily  {}iSort}}{234}
+\indexentry{foldr@\texttt{foldr}}{234}
+\indexentry{Peccary, Greggery}{235}
+\indexentry{folding!and primitive recursion|)}{236}
+\indexentry{primitive recursion!and folding|)}{236}
+\indexentry{generalization|(}{236}
+\indexentry{text processing!splitting into words}{236}
+\indexentry{take@{\ttfamily  {}take}}{236}
+\indexentry{drop@{\ttfamily  {}drop}}{236}
+\indexentry{getWord@{\ttfamily  {}getWord}}{237}
+\indexentry{getUntil@{\ttfamily  {}getUntil}}{237}
+\indexentry{takeWhile@{\ttfamily  {}takeWhile}}{237}
+\indexentry{dropWhile@{\ttfamily  {}dropWhile}}{237}
+\indexentry{generalization|)}{237}
+\indexentry{higher-order function}{241}
+\indexentry{function composition|(}{242}
+\indexentry{rotate@{\ttfamily  {}rotate}}{242}
+\indexentry{function composition!type of}{243}
+\indexentry{forward composition}{243}
+\indexentry{function composition!forward}{243}
+\indexentry{\symbol{62}\symbol{46}\symbol{62}@\texttt{\symbol{62}\symbol{46}\symbol{62}}}{244}
+\indexentry{rotate@{\ttfamily  {}rotate}}{244}
+\indexentry{function composition|)}{244}
+\indexentry{->@{\ttfamily  {}->}}{247}
+\indexentry{addNum@{\ttfamily  {}addNum}}{247}
+\indexentry{comp2@{\ttfamily  {}comp2}}{247}
+\indexentry{function!anonymous}{247}
+\indexentry{plumbing}{248}
+\indexentry{partial application|(}{249}
+\indexentry{function application!partial|see{partial application}}{249}
+\indexentry{multiply@{\ttfamily  {}multiply}}{249}
+\indexentry{doubleAll@{\ttfamily  {}doubleAll}}{250}
+\indexentry{addNum@{\ttfamily  {}addNum}}{250}
+\indexentry{elem@{\ttfamily  {}elem}}{251}
+\indexentry{member@{\ttfamily  {}member}}{251}
+\indexentry{operator sections}{251}
+\indexentry{specialization}{252}
+\indexentry{flipV@{\ttfamily  {}flipV}}{252}
+\indexentry{beside@{\ttfamily  {}beside}}{252}
+\indexentry{dropSpace@{\ttfamily  {}dropSpace}}{253}
+\indexentry{dropWord@{\ttfamily  {}dropWord}}{253}
+\indexentry{getWord@{\ttfamily  {}getWord}}{253}
+\indexentry{Curry, Haskell B.}{253}
+\indexentry{partial application|)}{253}
+\indexentry{function!number of arguments}{253}
+\indexentry{partial application}{253}
+\indexentry{function application!syntax}{254}
+\indexentry{syntax!of application}{254}
+\indexentry{->@{\ttfamily  {}->}}{254}
+\indexentry{multiply@{\ttfamily  {}multiply}}{254}
+\indexentry{partial application!type of}{254}
+\indexentry{type checking!rule of cancellation}{254}
+\indexentry{function!curried|see{currying}}{256}
+\indexentry{currying|(}{256}
+\indexentry{multiply@{\ttfamily  {}multiply}}{256}
+\indexentry{uncurrying}{256}
+\indexentry{multiplyUC@{\ttfamily  {}multiplyUC}}{256}
+\indexentry{currying!reasons for}{256}
+\indexentry{partial application!and currying}{256}
+\indexentry{curry@{\ttfamily  {}curry}}{256}
+\indexentry{uncurry@{\ttfamily  {}uncurry}}{257}
+\indexentry{function!inverse}{257}
+\indexentry{currying|)}{258}
+\indexentry{rotate@{\ttfamily  {}rotate}}{258}
+\indexentry{rotate@{\ttfamily  {}rotate}}{258}
+\indexentry{twice@{\ttfamily  {}twice}}{259}
+\indexentry{iter@{\ttfamily  {}iter}}{259}
+\indexentry{flip@{\ttfamily  {}flip}}{260}
+\indexentry{doubleAll@{\ttfamily  {}doubleAll}}{261}
+\indexentry{getEvens@{\ttfamily  {}getEvens}}{261}
+\indexentry{getWord@{\ttfamily  {}getWord}}{262}
+\indexentry{getWord@{\ttfamily  {}getWord}}{262}
+\indexentry{proof!higher-order functions|(}{263}
+\indexentry{higher-order function!proofs}{263}
+\indexentry{proof!function level}{264}
+\indexentry{iter@{\ttfamily  {}iter}}{264}
+\indexentry{twice@{\ttfamily  {}twice}}{264}
+\indexentry{extensionality principle}{264}
+\indexentry{intensionality}{264}
+\indexentry{function composition!associative}{264}
+\indexentry{function!inverse}{265}
+\indexentry{idempotence}{265}
+\indexentry{proof!higher-level}{265}
+\indexentry{doubleAll@{\ttfamily  {}doubleAll}}{265}
+\indexentry{map@\texttt{map}}{265}
+\indexentry{map@\texttt{map}}{265}
+\indexentry{sum@{\ttfamily  {}sum}}{265}
+\indexentry{foldr@\texttt{foldr}}{265}
+\indexentry{foldr@\texttt{foldr}}{266}
+\indexentry{function composition}{266}
+\indexentry{map@\texttt{map}}{266}
+\indexentry{structural induction}{266}
+\indexentry{map@\texttt{map}}{267}
+\indexentry{filter@\texttt{filter}}{267}
+\indexentry{program transformation}{267}
+\indexentry{structural induction}{268}
+\indexentry{proof!by cases}{269}
+\indexentry{map@\texttt{map}}{269}
+\indexentry{reverse@{\ttfamily  {}reverse}}{269}
+\indexentry{pictures}{269}
+\indexentry{flipH@{\ttfamily  {}flipH}}{269}
+\indexentry{flipV@{\ttfamily  {}flipV}}{269}
+\indexentry{proof!higher-order functions|)}{271}
+\indexentry{proof!libraries of theorems}{271}
+\indexentry{program development|(}{275}
+\indexentry{pictures|(}{275}
+\indexentry{flipH@{\ttfamily  {}flipH}}{276}
+\indexentry{flipV@{\ttfamily  {}flipV}}{276}
+\indexentry{above@{\ttfamily  {}above}}{276}
+\indexentry{beside@{\ttfamily  {}beside}}{276}
+\indexentry{invertColour@{\ttfamily  {}invertColour}}{276}
+\indexentry{invertChar@{\ttfamily  {}invertChar}}{276}
+\indexentry{combineChar@{\ttfamily  {}combineChar}}{276}
+\indexentry{superimpose@{\ttfamily  {}superimpose}}{277}
+\indexentry{printPicture@{\ttfamily  {}printPicture}}{277}
+\indexentry{pictures|)}{278}
+\indexentry{examples!document index|(}{287}
+\indexentry{design!index example}{288}
+\indexentry{makeIndex@{\ttfamily  {}makeIndex}}{288}
+\indexentry{design!data-directed}{288}
+\indexentry{function composition}{288}
+\indexentry{design!function composition}{288}
+\indexentry{lines@{\ttfamily  {}lines}}{289}
+\indexentry{zip@{\ttfamily  {}zip}}{289}
+\indexentry{numLines@{\ttfamily  {}numLines}}{289}
+\indexentry{numWords@{\ttfamily  {}numWords}}{290}
+\indexentry{allNumWords@{\ttfamily  {}allNumWords}}{290}
+\indexentry{orderPair@{\ttfamily  {}orderPair}}{290}
+\indexentry{sorting!quicksort}{290}
+\indexentry{sortLs@{\ttfamily  {}sortLs}}{291}
+\indexentry{sortLs@{\ttfamily  {}sortLs}}{291}
+\indexentry{amalgamate@{\ttfamily  {}amalgamate}}{291}
+\indexentry{pipeline}{292}
+\indexentry{function composition!as pipeline}{292}
+\indexentry{examples!document index|)}{294}
+\indexentry{program development!in practice|(}{294}
+\indexentry{generalization}{294}
+\indexentry{..@{\ttfamily  {}..}}{294}
+\indexentry{getLine@{\ttfamily  {}getLine}}{295}
+\indexentry{simplification}{295}
+\indexentry{palindrome}{295}
+\indexentry{palCheck@{\ttfamily  {}palCheck}}{295}
+\indexentry{design!choices in}{295}
+\indexentry{subseq@{\ttfamily  {}subseq}}{296}
+\indexentry{frontseq@{\ttfamily  {}frontseq}}{296}
+\indexentry{program development!in practice|)}{297}
+\indexentry{understanding programs}{297}
+\indexentry{mapWhile@{\ttfamily  {}mapWhile}}{297}
+\indexentry{type declaration}{297}
+\indexentry{calculation}{298}
+\indexentry{proof}{298}
+\indexentry{behaviour}{299}
+\indexentry{program development|)}{299}
+\indexentry{classes|(}{301}
+\indexentry{type classes|see{classes}}{301}
+\indexentry{function!overloaded|see{overloading}}{301}
+\indexentry{overloading}{301}
+\indexentry{overloading!reason for}{301}
+\indexentry{elemBool@{\ttfamily  {}elemBool}}{301}
+\indexentry{elemInt@{\ttfamily  {}elemInt}}{302}
+\indexentry{classes}{302}
+\indexentry{Eq@{\ttfamily  {}Eq}}{303}
+\indexentry{equality}{303}
+\indexentry{class@{\ttfamily  {}class}}{303}
+\indexentry{instance!of class}{303}
+\indexentry{classes!instance}{303}
+\indexentry{instance!different uses in Haskell}{303}
+\indexentry{allEqual@{\ttfamily  {}allEqual}}{303}
+\indexentry{\symbol{61}\symbol{62}@\texttt{\symbol{61}\symbol{62}}}{304}
+\indexentry{context}{304}
+\indexentry{errors!and classes}{304}
+\indexentry{type error!instance error}{304}
+\indexentry{books@{\ttfamily  {}books}}{305}
+\indexentry{type@\texttt{:type}}{305}
+\indexentry{books@{\ttfamily  {}books}}{305}
+\indexentry{lookupFirst@{\ttfamily  {}lookupFirst}}{305}
+\indexentry{borrowed@{\ttfamily  {}borrowed}}{305}
+\indexentry{numBorrowed@{\ttfamily  {}numBorrowed}}{305}
+\indexentry{classes!as adjective}{305}
+\indexentry{class@{\ttfamily  {}class}}{306}
+\indexentry{Info@{\ttfamily  {}Info}}{306}
+\indexentry{signature}{306}
+\indexentry{interface}{306}
+\indexentry{Info@{\ttfamily  {}Info}}{306}
+\indexentry{classes!general form of definition}{306}
+\indexentry{instance@{\ttfamily  {}instance}}{307}
+\indexentry{classes!instance}{307}
+\indexentry{Eq@{\ttfamily  {}Eq}}{307}
+\indexentry{Info@{\ttfamily  {}Info}}{307}
+\indexentry{context}{307}
+\indexentry{classes!context}{308}
+\indexentry{classes!default definitions}{309}
+\indexentry{classes!derived}{310}
+\indexentry{Ord@{\ttfamily  {}Ord}}{310}
+\indexentry{iSort@{\ttfamily  {}iSort}}{311}
+\indexentry{inheritance}{311}
+\indexentry{object-oriented}{311}
+\indexentry{context!multiple}{311}
+\indexentry{equality!on pairs}{311}
+\indexentry{inheritance!multiple}{312}
+\indexentry{Eq@{\ttfamily  {}Eq}}{314}
+\indexentry{Ord@{\ttfamily  {}Ord}}{314}
+\indexentry{Ordering@{\ttfamily  {}Ordering}}{314}
+\indexentry{compare@{\ttfamily  {}compare}}{314}
+\indexentry{max@{\ttfamily  {}max}}{315}
+\indexentry{min@{\ttfamily  {}min}}{315}
+\indexentry{Enum@{\ttfamily  {}Enum}}{316}
+\indexentry{toEnum@{\ttfamily  {}toEnum}}{316}
+\indexentry{fromEnum@{\ttfamily  {}fromEnum}}{316}
+\indexentry{Bounded@{\ttfamily  {}Bounded}}{316}
+\indexentry{minBound@{\ttfamily  {}minBound}}{316}
+\indexentry{maxBound@{\ttfamily  {}maxBound}}{316}
+\indexentry{show@\texttt{show}}{316}
+\indexentry{Read@{\ttfamily  {}Read}}{317}
+\indexentry{Read@{\ttfamily  {}Read}}{317}
+\indexentry{read@{\ttfamily  {}read}}{317}
+\indexentry{type!numeric types|(}{318}
+\indexentry{classes!numeric|(}{318}
+\indexentry{Int@{\ttfamily  {}Int}}{318}
+\indexentry{Float@{\ttfamily  {}Float}}{318}
+\indexentry{Prelude.hs@{\ttfamily  {}Prelude.hs}}{318}
+\indexentry{Num@{\ttfamily  {}Num}}{318}
+\indexentry{numbers!\texttt{Num}}{318}
+\indexentry{-@{\ttfamily  {}-}}{318}
+\indexentry{+@{\ttfamily  {}+}}{318}
+\indexentry{*@{\ttfamily  {}*}}{318}
+\indexentry{Eq@{\ttfamily  {}Eq}}{318}
+\indexentry{Show@{\ttfamily  {}Show}}{318}
+\indexentry{negate@{\ttfamily  {}negate}}{318}
+\indexentry{abs@{\ttfamily  {}abs}}{318}
+\indexentry{signum@{\ttfamily  {}signum}}{318}
+\indexentry{fromInteger@{\ttfamily  {}fromInteger}}{318}
+\indexentry{numbers!integer literals}{319}
+\indexentry{overloaded literals!integer}{319}
+\indexentry{Integral@{\ttfamily  {}Integral}}{319}
+\indexentry{numbers!\texttt{Integral}}{319}
+\indexentry{quot@{\ttfamily  {}quot}}{319}
+\indexentry{rem@{\ttfamily  {}rem}}{319}
+\indexentry{div@{\ttfamily  {}div}}{319}
+\indexentry{mod@{\ttfamily  {}mod}}{319}
+\indexentry{Fractional@{\ttfamily  {}Fractional}}{319}
+\indexentry{numbers!\texttt{Fractional}}{319}
+\indexentry{/@{\ttfamily  {}/}}{319}
+\indexentry{recip@{\ttfamily  {}recip}}{319}
+\indexentry{Float@{\ttfamily  {}Float}}{319}
+\indexentry{Double@{\ttfamily  {}Double}}{319}
+\indexentry{floating-point operators}{319}
+\indexentry{numbers!floating-point}{319}
+\indexentry{Floating@{\ttfamily  {}Floating}}{319}
+\indexentry{pi@{\ttfamily  {}pi}}{319}
+\indexentry{exp@{\ttfamily  {}exp}}{319}
+\indexentry{log@{\ttfamily  {}log}}{319}
+\indexentry{sqrt@{\ttfamily  {}sqrt}}{319}
+\indexentry{**@{\ttfamily  {}**}}{319}
+\indexentry{logBase@{\ttfamily  {}logBase}}{319}
+\indexentry{sin@{\ttfamily  {}sin}}{319}
+\indexentry{cos@{\ttfamily  {}cos}}{319}
+\indexentry{tan@{\ttfamily  {}tan}}{319}
+\indexentry{classes!numeric|)}{319}
+\indexentry{type!numeric types|)}{319}
+\indexentry{classes!and types}{322}
+\indexentry{ShowType@{\ttfamily  {}ShowType}}{322}
+\indexentry{classes|)}{322}
+\indexentry{type checking|(}{323}
+\indexentry{nub@{\ttfamily  {}nub}}{324}
+\indexentry{constraint}{324}
+\indexentry{type checking!constraints}{324}
+\indexentry{type checking!monomorphic|(}{325}
+\indexentry{if@{\texttt{if}\ldots\texttt{then}\ldots\texttt{else}}}{325}
+\indexentry{operator!type checking}{325}
+\indexentry{not@{\ttfamily  {}not}}{326}
+\indexentry{type error!in application}{326}
+\indexentry{pattern!consistent with type}{326}
+\indexentry{type checking!monomorphic|)}{327}
+\indexentry{type checking!polymorphic|(}{327}
+\indexentry{polymorphism!type checking|(}{327}
+\indexentry{monotype}{328}
+\indexentry{constraint!in type checking|(}{328}
+\indexentry{type checking!constraints|(}{328}
+\indexentry{function composition}{329}
+\indexentry{unification|(}{329}
+\indexentry{unification|)}{331}
+\indexentry{type checking!polymorphic function application}{331}
+\indexentry{foldr@\texttt{foldr}!type of}{332}
+\indexentry{foldr@\texttt{foldr}}{332}
+\indexentry{iSort@{\ttfamily  {}iSort}}{333}
+\indexentry{type checking!polymorphic definitions}{333}
+\indexentry{type checking!function definitions}{334}
+\indexentry{type checking!polymorphic|)}{335}
+\indexentry{constraint!in type checking|)}{335}
+\indexentry{type checking!constraints|)}{335}
+\indexentry{polymorphism!type checking|)}{335}
+\indexentry{type checking!and classes|(}{336}
+\indexentry{classes!type checking|(}{336}
+\indexentry{member@{\ttfamily  {}member}}{336}
+\indexentry{context}{336}
+\indexentry{Eq@{\ttfamily  {}Eq}}{336}
+\indexentry{Ord@{\ttfamily  {}Ord}}{336}
+\indexentry{context!simplifying}{336}
+\indexentry{type checking!instance error}{337}
+\indexentry{class@{\ttfamily  {}class}}{337}
+\indexentry{Info@{\ttfamily  {}Info}}{337}
+\indexentry{type checking!and classes|)}{337}
+\indexentry{classes!type checking|)}{337}
+\indexentry{type checking|)}{338}
+\indexentry{Eq@{\ttfamily  {}Eq}}{338}
+\indexentry{Ord@{\ttfamily  {}Ord}}{338}
+\indexentry{algebraic type|(}{339}
+\indexentry{algebraic type!recursive|see{recursive type}}{339}
+\indexentry{NTree@{\ttfamily  {}NTree}}{339}
+\indexentry{data@{\ttfamily  {}data}}{340}
+\indexentry{constructor}{340}
+\indexentry{Season@{\ttfamily  {}Season}}{341}
+\indexentry{People@{\ttfamily  {}People}}{341}
+\indexentry{Season@{\ttfamily  {}Season}}{341}
+\indexentry{examples!library database}{341}
+\indexentry{recursive type|(}{342}
+\indexentry{Lit@{\ttfamily  {}Lit}}{342}
+\indexentry{Add@{\ttfamily  {}Add}}{342}
+\indexentry{Sub@{\ttfamily  {}Sub}}{342}
+\indexentry{Expr@{\ttfamily  {}Expr}}{342}
+\indexentry{NTree@{\ttfamily  {}NTree}}{342}
+\indexentry{expression type|see{\texttt{Expr}}}{343}
+\indexentry{calculator|(}{343}
+\indexentry{Expr@{\ttfamily  {}Expr}}{343}
+\indexentry{primitive recursion}{343}
+\indexentry{eval@{\ttfamily  {}eval}}{343}
+\indexentry{primitive recursion!base case}{343}
+\indexentry{primitive recursion!recursive case}{343}
+\indexentry{show@\texttt{show}!\texttt{Expr}}{344}
+\indexentry{calculator|)}{344}
+\indexentry{tree!numeric}{344}
+\indexentry{NTree@{\ttfamily  {}NTree}}{344}
+\indexentry{primitive recursion}{344}
+\indexentry{sumTree@{\ttfamily  {}sumTree}}{344}
+\indexentry{depth@{\ttfamily  {}depth}}{344}
+\indexentry{occurs@{\ttfamily  {}occurs}}{345}
+\indexentry{associativity}{345}
+\indexentry{Expr@{\ttfamily  {}Expr}}{345}
+\indexentry{assoc@{\ttfamily  {}assoc}}{346}
+\indexentry{pattern matching}{346}
+\indexentry{termination}{346}
+\indexentry{constructor!infix}{347}
+\indexentry{recursion!mutual}{347}
+\indexentry{recursive type!mutually recursive}{347}
+\indexentry{calculator|(}{348}
+\indexentry{Expr@{\ttfamily  {}Expr}}{348}
+\indexentry{Ops@{\ttfamily  {}Ops}}{348}
+\indexentry{Expr@{\ttfamily  {}Expr}}{349}
+\indexentry{BExp@{\ttfamily  {}BExp}}{349}
+\indexentry{eval@{\ttfamily  {}eval}}{350}
+\indexentry{bEval@{\ttfamily  {}bEval}}{350}
+\indexentry{recursive type|)}{350}
+\indexentry{calculator|)}{350}
+\indexentry{algebraic type!polymorphic|(}{350}
+\indexentry{Pairs@{\ttfamily  {}Pairs}}{350}
+\indexentry{equalPair@{\ttfamily  {}equalPair}}{350}
+\indexentry{lists!algebraic type of}{350}
+\indexentry{tree!binary}{351}
+\indexentry{binary tree|see{tree}}{351}
+\indexentry{Nil@{\ttfamily  {}Nil}}{351}
+\indexentry{Node@{\ttfamily  {}Node}}{351}
+\indexentry{Tree@{\ttfamily  {}Tree}}{351}
+\indexentry{depth@{\ttfamily  {}depth}}{351}
+\indexentry{collapse@{\ttfamily  {}collapse}}{351}
+\indexentry{mapTree@{\ttfamily  {}mapTree}}{351}
+\indexentry{union type}{352}
+\indexentry{sum type}{352}
+\indexentry{Left@{\ttfamily  {}Left}}{352}
+\indexentry{Right@{\ttfamily  {}Right}}{352}
+\indexentry{Either@{\ttfamily  {}Either}}{352}
+\indexentry{isLeft@{\ttfamily  {}isLeft}}{352}
+\indexentry{either@{\ttfamily  {}either}}{353}
+\indexentry{applyLeft@{\ttfamily  {}applyLeft}}{353}
+\indexentry{algebraic type!polymorphic|)}{353}
+\indexentry{GTree@{\ttfamily  {}GTree}}{353}
+\indexentry{error handling|(}{354}
+\indexentry{error@{\ttfamily  {}error}}{354}
+\indexentry{dummy values at errors}{354}
+\indexentry{tail@{\ttfamily  {}tail}}{355}
+\indexentry{tl@{\ttfamily  {}tl}}{355}
+\indexentry{hd@{\ttfamily  {}hd}}{355}
+\indexentry{error handling!error type}{355}
+\indexentry{Maybe@{\ttfamily  {}Maybe}}{355}
+\indexentry{Nothing@{\ttfamily  {}Nothing}}{355}
+\indexentry{Just@{\ttfamily  {}Just}}{355}
+\indexentry{Maybe@{\ttfamily  {}Maybe}}{355}
+\indexentry{errDiv@{\ttfamily  {}errDiv}}{356}
+\indexentry{mapMaybe@{\ttfamily  {}mapMaybe}}{356}
+\indexentry{error handling!error transmission}{356}
+\indexentry{error handling!error trapping}{356}
+\indexentry{maybe@{\ttfamily  {}maybe}}{356}
+\indexentry{mapMaybe@{\ttfamily  {}mapMaybe}}{356}
+\indexentry{maybe@{\ttfamily  {}maybe}}{356}
+\indexentry{design!error handling}{357}
+\indexentry{squashMaybe@{\ttfamily  {}squashMaybe}}{358}
+\indexentry{composeMaybe@{\ttfamily  {}composeMaybe}}{358}
+\indexentry{Err@{\ttfamily  {}Err}}{358}
+\indexentry{error handling|)}{358}
+\indexentry{design!and algebraic types|(}{358}
+\indexentry{examples!edit distance|(}{358}
+\indexentry{Edit@{\ttfamily  {}Edit}}{359}
+\indexentry{constructor}{359}
+\indexentry{deriving@{\ttfamily  {}deriving}}{360}
+\indexentry{examples!edit distance|)}{360}
+\indexentry{case studies!simulation|see{simulation}}{360}
+\indexentry{simulation|(}{360}
+\indexentry{Inmess@{\ttfamily  {}Inmess}}{360}
+\indexentry{Outmess@{\ttfamily  {}Outmess}}{360}
+\indexentry{simulation|)}{361}
+\indexentry{examples!edit distance|(}{361}
+\indexentry{transform@{\ttfamily  {}transform}}{361}
+\indexentry{best@{\ttfamily  {}best}}{361}
+\indexentry{cost@{\ttfamily  {}cost}}{361}
+\indexentry{design!and algebraic types|)}{362}
+\indexentry{examples!edit distance|)}{362}
+\indexentry{classes!and algebraic types|(}{363}
+\indexentry{design!type classes}{363}
+\indexentry{Vector@{\ttfamily  {}Vector}}{364}
+\indexentry{Movable@{\ttfamily  {}Movable}}{364}
+\indexentry{Point@{\ttfamily  {}Point}}{364}
+\indexentry{Figure@{\ttfamily  {}Figure}}{365}
+\indexentry{classes!overriding defaults}{365}
+\indexentry{NamedMovable@{\ttfamily  {}NamedMovable}}{366}
+\indexentry{overloading!advantages of}{366}
+\indexentry{Named@{\ttfamily  {}Named}}{366}
+\indexentry{Name@{\ttfamily  {}Name}}{367}
+\indexentry{classes!putting together}{367}
+\indexentry{mapName@{\ttfamily  {}mapName}}{367}
+\indexentry{reuse}{368}
+\indexentry{classes!and algebraic types|)}{368}
+\indexentry{proof!algebraic types}{368}
+\indexentry{algebraic type!proofs}{368}
+\indexentry{Tree@{\ttfamily  {}Tree}}{369}
+\indexentry{structural induction!trees}{369}
+\indexentry{map@\texttt{map}}{369}
+\indexentry{collapse@{\ttfamily  {}collapse}}{369}
+\indexentry{mapTree@{\ttfamily  {}mapTree}}{369}
+\indexentry{map@\texttt{map}}{369}
+\indexentry{mapTree@{\ttfamily  {}mapTree}}{369}
+\indexentry{collapse@{\ttfamily  {}collapse}}{369}
+\indexentry{error handling!error type}{370}
+\indexentry{Maybe@{\ttfamily  {}Maybe}}{370}
+\indexentry{structural induction!\texttt{Maybe} type}{370}
+\indexentry{maybe@{\ttfamily  {}maybe}}{370}
+\indexentry{proof!non-primitive recursive}{371}
+\indexentry{assoc@{\ttfamily  {}assoc}}{371}
+\indexentry{eval@{\ttfamily  {}eval}}{371}
+\indexentry{structural induction!expression type}{371}
+\indexentry{weather@{\ttfamily  {}weather}}{372}
+\indexentry{tree}{373}
+\indexentry{algebraic type|)}{374}
+\indexentry{Huffman codes|(}{375}
+\indexentry{case studies!Huffman codes|see{Huffman codes}}{375}
+\indexentry{modules|(}{375}
+\indexentry{module@{\ttfamily  {}module}}{376}
+\indexentry{Ant@{\ttfamily  {}Ant}}{376}
+\indexentry{conventions!module file names}{376}
+\indexentry{Bee@{\ttfamily  {}Bee}}{376}
+\indexentry{import@{\ttfamily  {}import}}{376}
+\indexentry{visibility of definitions}{376}
+\indexentry{definition!visibility of}{376}
+\indexentry{Cow@{\ttfamily  {}Cow}}{376}
+\indexentry{export}{376}
+\indexentry{module@{\ttfamily  {}module}}{377}
+\indexentry{modules!export list}{377}
+\indexentry{abstract data type}{377}
+\indexentry{(..)@{\ttfamily  {}(..)}}{377}
+\indexentry{Main@{\ttfamily  {}Main}}{377}
+\indexentry{main@{\ttfamily  {}main}}{377}
+\indexentry{import@{\ttfamily  {}import}}{377}
+\indexentry{modules!import list}{377}
+\indexentry{hiding@{\ttfamily  {}hiding}}{378}
+\indexentry{name!qualified}{378}
+\indexentry{qualified@{\ttfamily  {}qualified}}{378}
+\indexentry{modules!local name on \texttt{import}}{378}
+\indexentry{=@{\ttfamily  {}=}}{378}
+\indexentry{Prelude.hs@{\ttfamily  {}Prelude.hs}}{378}
+\indexentry{modules|)}{379}
+\indexentry{design!modules}{379}
+\indexentry{proof!as documentation}{379}
+\indexentry{documentation}{379}
+\indexentry{information hiding}{380}
+\indexentry{reuse}{380}
+\indexentry{coding|(}{380}
+\indexentry{coding!tree}{381}
+\indexentry{coding!prefix codes}{381}
+\indexentry{coding!Huffman}{382}
+\indexentry{coding|)}{382}
+\indexentry{Types.hs@{\ttfamily  {}Types.hs}}{383}
+\indexentry{Bit@{\ttfamily  {}Bit}}{383}
+\indexentry{HCode@{\ttfamily  {}HCode}}{383}
+\indexentry{Table@{\ttfamily  {}Table}}{383}
+\indexentry{Tree@{\ttfamily  {}Tree}}{383}
+\indexentry{modules!interface documentation}{383}
+\indexentry{Coding.hs@{\ttfamily  {}Coding.hs}}{383}
+\indexentry{codeMessage@{\ttfamily  {}codeMessage}}{385}
+\indexentry{lookupTable@{\ttfamily  {}lookupTable}}{385}
+\indexentry{decodeMessage@{\ttfamily  {}decodeMessage}}{385}
+\indexentry{design!Huffman coding system}{387}
+\indexentry{divide and conquer}{387}
+\indexentry{interface}{387}
+\indexentry{Frequency.hs@{\ttfamily  {}Frequency.hs}}{389}
+\indexentry{frequency@{\ttfamily  {}frequency}}{389}
+\indexentry{sorting!merge sort}{389}
+\indexentry{mergeSort@{\ttfamily  {}mergeSort}}{389}
+\indexentry{alphaMerge@{\ttfamily  {}alphaMerge}}{389}
+\indexentry{freqMerge@{\ttfamily  {}freqMerge}}{390}
+\indexentry{frequency@{\ttfamily  {}frequency}}{390}
+\indexentry{MakeTree.hs@{\ttfamily  {}MakeTree.hs}}{390}
+\indexentry{makeTree@{\ttfamily  {}makeTree}}{390}
+\indexentry{toTreeList@{\ttfamily  {}toTreeList}}{390}
+\indexentry{makeCodes@{\ttfamily  {}makeCodes}}{390}
+\indexentry{CodeTable.hs@{\ttfamily  {}CodeTable.hs}}{391}
+\indexentry{convert@{\ttfamily  {}convert}}{391}
+\indexentry{codeTable@{\ttfamily  {}codeTable}}{392}
+\indexentry{Main.hs@{\ttfamily  {}Main.hs}}{392}
+\indexentry{modules!structure diagram}{394}
+\indexentry{Huffman codes|)}{396}
+\indexentry{abstract data type|(}{397}
+\indexentry{abstract data type!sets|see{sets}}{397}
+\indexentry{abstract data type!store|see{store}}{397}
+\indexentry{module@{\ttfamily  {}module}}{397}
+\indexentry{type@{\ttfamily  {}type}}{397}
+\indexentry{Expr@{\ttfamily  {}Expr}}{397}
+\indexentry{store}{397}
+\indexentry{case studies!calculator|see{calculator}}{397}
+\indexentry{calculator|(}{397}
+\indexentry{initial@{\ttfamily  {}initial}}{397}
+\indexentry{value@{\ttfamily  {}value}}{397}
+\indexentry{update@{\ttfamily  {}update}}{397}
+\indexentry{Store@{\ttfamily  {}Store}}{397}
+\indexentry{ADT|see{abstract data type}}{398}
+\indexentry{interface}{398}
+\indexentry{signature}{398}
+\indexentry{abstract data type!signature}{398}
+\indexentry{divide and conquer}{398}
+\indexentry{program modification}{398}
+\indexentry{algebraic type!vs ADT}{398}
+\indexentry{abstract data type!\texttt{Store}|(}{399}
+\indexentry{modules!ADT via export list}{399}
+\indexentry{conventions!type comments in module headers}{399}
+\indexentry{module@{\ttfamily  {}module}}{399}
+\indexentry{initial@{\ttfamily  {}initial}}{399}
+\indexentry{value@{\ttfamily  {}value}}{399}
+\indexentry{update@{\ttfamily  {}update}}{399}
+\indexentry{abstract data type!`wrapping up' representation}{399}
+\indexentry{store!as a list}{399}
+\indexentry{initial@{\ttfamily  {}initial}}{399}
+\indexentry{value@{\ttfamily  {}value}}{399}
+\indexentry{update@{\ttfamily  {}update}}{399}
+\indexentry{store!as a ADT}{400}
+\indexentry{initial@{\ttfamily  {}initial}}{400}
+\indexentry{value@{\ttfamily  {}value}}{400}
+\indexentry{update@{\ttfamily  {}update}}{400}
+\indexentry{errors!type abstraction}{400}
+\indexentry{type error!ADT}{400}
+\indexentry{newtype@{\ttfamily  {}newtype}}{400}
+\indexentry{classes!and ADTs}{401}
+\indexentry{abstract data type!and classes}{401}
+\indexentry{store!as function}{401}
+\indexentry{Store@{\ttfamily  {}Store}}{401}
+\indexentry{initial@{\ttfamily  {}initial}}{401}
+\indexentry{value@{\ttfamily  {}value}}{401}
+\indexentry{update@{\ttfamily  {}update}}{401}
+\indexentry{abstract data type!\texttt{Store}|)}{403}
+\indexentry{calculator|)}{403}
+\indexentry{abstract data type!queue|(}{403}
+\indexentry{Flo}{403}
+\indexentry{Eddie}{403}
+\indexentry{Queue@{\ttfamily  {}Queue}}{403}
+\indexentry{emptyQ@{\ttfamily  {}emptyQ}}{403}
+\indexentry{isEmptyQ@{\ttfamily  {}isEmptyQ}}{403}
+\indexentry{addQ@{\ttfamily  {}addQ}}{403}
+\indexentry{remQ@{\ttfamily  {}remQ}}{403}
+\indexentry{abstract data type!queue!as list}{404}
+\indexentry{pattern matching!\texttt  {"@}: `as' pattern}{404}
+\indexentry{"@@\texttt  {"@}}{404}
+\indexentry{abstract data type!queue!as list}{404}
+\indexentry{abstract data type!queue!as two lists}{405}
+\indexentry{abstract data type!queue|)}{406}
+\indexentry{design!abstract data types|(}{407}
+\indexentry{signature}{407}
+\indexentry{Tree@{\ttfamily  {}Tree}}{408}
+\indexentry{signature!for \texttt{Tree}}{408}
+\indexentry{size@{\ttfamily  {}size}}{408}
+\indexentry{abstract data type|)}{409}
+\indexentry{design!abstract data types|)}{409}
+\indexentry{simulation|(}{409}
+\indexentry{Inmess@{\ttfamily  {}Inmess}}{409}
+\indexentry{Outmess@{\ttfamily  {}Outmess}}{409}
+\indexentry{QueueState@{\ttfamily  {}QueueState}}{409}
+\indexentry{ServerState@{\ttfamily  {}ServerState}}{410}
+\indexentry{simulation!the queue}{411}
+\indexentry{QueueState@{\ttfamily  {}QueueState}}{411}
+\indexentry{queueStep@{\ttfamily  {}queueStep}}{411}
+\indexentry{simulation!the server}{412}
+\indexentry{ServerState@{\ttfamily  {}ServerState}}{412}
+\indexentry{addToQueue@{\ttfamily  {}addToQueue}}{412}
+\indexentry{serverStep@{\ttfamily  {}serverStep}}{413}
+\indexentry{simulationStep@{\ttfamily  {}simulationStep}}{413}
+\indexentry{simulation|)}{415}
+\indexentry{search tree|(}{415}
+\indexentry{Tree@{\ttfamily  {}Tree}}{415}
+\indexentry{abstract data type!search tree}{415}
+\indexentry{Tree@{\ttfamily  {}Tree}}{415}
+\indexentry{signature!for \texttt{Tree}}{415}
+\indexentry{Tree@{\ttfamily  {}Tree}}{416}
+\indexentry{nil@{\ttfamily  {}nil}}{416}
+\indexentry{isNil@{\ttfamily  {}isNil}}{416}
+\indexentry{isNode@{\ttfamily  {}isNode}}{416}
+\indexentry{leftSub@{\ttfamily  {}leftSub}}{416}
+\indexentry{rightSub@{\ttfamily  {}rightSub}}{416}
+\indexentry{treeVal@{\ttfamily  {}treeVal}}{416}
+\indexentry{search tree!insertion}{416}
+\indexentry{insTree@{\ttfamily  {}insTree}}{417}
+\indexentry{delete@{\ttfamily  {}delete}}{417}
+\indexentry{minTree@{\ttfamily  {}minTree}}{417}
+\indexentry{join@{\ttfamily  {}join}}{417}
+\indexentry{search tree!operations}{417}
+\indexentry{Ord@{\ttfamily  {}Ord}}{418}
+\indexentry{abstract data type!search tree!insertion}{418}
+\indexentry{search tree!deletion}{418}
+\indexentry{abstract data type!search tree!deletion}{418}
+\indexentry{abstract data type!modifying implementation}{419}
+\indexentry{program modification}{419}
+\indexentry{size@{\ttfamily  {}size}}{419}
+\indexentry{Stree@{\ttfamily  {}Stree}}{419}
+\indexentry{examples!document index}{420}
+\indexentry{search tree|)}{420}
+\indexentry{case studies!sets|see{sets}}{421}
+\indexentry{sets|(}{421}
+\indexentry{multiplicity}{421}
+\indexentry{lists!and sets}{421}
+\indexentry{sets!and lists}{421}
+\indexentry{signature}{421}
+\indexentry{Set@{\ttfamily  {}Set}}{422}
+\indexentry{modules!instance declarations}{422}
+\indexentry{Set@{\ttfamily  {}Set}}{423}
+\indexentry{empty@{\ttfamily  {}empty}}{423}
+\indexentry{sing@{\ttfamily  {}sing}}{423}
+\indexentry{memSet@{\ttfamily  {}memSet}}{423}
+\indexentry{union@{\ttfamily  {}union}}{423}
+\indexentry{inter@{\ttfamily  {}inter}}{423}
+\indexentry{sets!operations}{423}
+\indexentry{subSet@{\ttfamily  {}subSet}}{424}
+\indexentry{eqSet@{\ttfamily  {}eqSet}}{424}
+\indexentry{makeSet@{\ttfamily  {}makeSet}}{424}
+\indexentry{mapSet@{\ttfamily  {}mapSet}}{424}
+\indexentry{filterSet@{\ttfamily  {}filterSet}}{424}
+\indexentry{foldSet@{\ttfamily  {}foldSet}}{424}
+\indexentry{showSet@{\ttfamily  {}showSet}}{424}
+\indexentry{card@{\ttfamily  {}card}}{424}
+\indexentry{sets!operations}{424}
+\indexentry{union@{\ttfamily  {}union}}{425}
+\indexentry{==@{\ttfamily  {}==}}{425}
+\indexentry{order!total}{426}
+\indexentry{order!partial}{426}
+\indexentry{sets|)}{427}
+\indexentry{relations|(}{428}
+\indexentry{relation}{428}
+\indexentry{Relation@{\ttfamily  {}Relation}}{428}
+\indexentry{relation!family relations}{428}
+\indexentry{isParent@{\ttfamily  {}isParent}}{428}
+\indexentry{tClosure@{\ttfamily  {}tClosure}}{428}
+\indexentry{image@{\ttfamily  {}image}}{429}
+\indexentry{setImage@{\ttfamily  {}setImage}}{429}
+\indexentry{unionSet@{\ttfamily  {}unionSet}}{429}
+\indexentry{addImage@{\ttfamily  {}addImage}}{429}
+\indexentry{addChildren@{\ttfamily  {}addChildren}}{429}
+\indexentry{compose@{\ttfamily  {}compose}}{429}
+\indexentry{setProduct@{\ttfamily  {}setProduct}}{429}
+\indexentry{adjoin@{\ttfamily  {}adjoin}}{429}
+\indexentry{tClosure@{\ttfamily  {}tClosure}}{429}
+\indexentry{limit@{\ttfamily  {}limit}}{429}
+\indexentry{relation!operations}{429}
+\indexentry{relation!composition}{430}
+\indexentry{sets!product}{430}
+\indexentry{relation!transitive}{430}
+\indexentry{relation!transitive closure}{430}
+\indexentry{limit@{\ttfamily  {}limit}}{430}
+\indexentry{limit@{\ttfamily  {}limit}}{430}
+\indexentry{classes!context simplification}{431}
+\indexentry{relations|)}{431}
+\indexentry{graph|(}{431}
+\indexentry{tClosure@{\ttfamily  {}tClosure}}{431}
+\indexentry{graph!path in}{431}
+\indexentry{graph!strongly connected components}{432}
+\indexentry{connect@{\ttfamily  {}connect}}{432}
+\indexentry{inverse@{\ttfamily  {}inverse}}{432}
+\indexentry{classes@{\ttfamily  {}classes}}{432}
+\indexentry{graph!search}{433}
+\indexentry{graph!search!breadth-first}{433}
+\indexentry{breadthFirst@{\ttfamily  {}breadthFirst}}{434}
+\indexentry{nub@{\ttfamily  {}nub}}{434}
+\indexentry{graph!search!depth-first}{434}
+\indexentry{generalization}{434}
+\indexentry{depthSearch@{\ttfamily  {}depthSearch}}{434}
+\indexentry{recursion!mutual}{435}
+\indexentry{graph|)}{435}
+\indexentry{proof!abstract data types and}{436}
+\indexentry{invariant}{436}
+\indexentry{classes!and ADTs}{436}
+\indexentry{signature}{436}
+\indexentry{abstract data type!and classes}{436}
+\indexentry{signature}{436}
+\indexentry{lazy evaluation|(}{439}
+\indexentry{substitution}{440}
+\indexentry{substitution!duplication on}{441}
+\indexentry{calculation!over graphs}{441}
+\indexentry{pattern matching}{441}
+\indexentry{lazy evaluation|)}{442}
+\indexentry{calculation!rules|(}{442}
+\indexentry{pattern matching!calculation}{442}
+\indexentry{guard!calculation}{443}
+\indexentry{local definitions!calculation}{443}
+\indexentry{operator!calculation}{444}
+\indexentry{\&@\texttt{\&}}{444}
+\indexentry{*@{\ttfamily  {}*}}{445}
+\indexentry{equality}{445}
+\indexentry{evaluation order}{445}
+\indexentry{calculation!rules|)}{445}
+\indexentry{list comprehensions|(}{445}
+\indexentry{list comprehensions!syntax}{446}
+\indexentry{qualifier}{446}
+\indexentry{list comprehensions!generator}{446}
+\indexentry{list comprehensions!test}{446}
+\indexentry{list comprehensions!multiple generators}{446}
+\indexentry{triangle@{\ttfamily  {}triangle}}{446}
+\indexentry{Pythagorean triple}{447}
+\indexentry{pyTriple@{\ttfamily  {}pyTriple}}{447}
+\indexentry{list comprehensions!calculation rules}{447}
+\indexentry{substitution}{447}
+\indexentry{lists!permutations}{449}
+\indexentry{perms@{\ttfamily  {}perms}}{449}
+\indexentry{perm@{\ttfamily  {}perm}}{449}
+\indexentry{Vector@{\ttfamily  {}Vector}}{450}
+\indexentry{scalarProduct@{\ttfamily  {}scalarProduct}}{451}
+\indexentry{Matrix@{\ttfamily  {}Matrix}}{451}
+\indexentry{matrixProduct@{\ttfamily  {}matrixProduct}}{451}
+\indexentry{list comprehensions!refutable patterns}{451}
+\indexentry{pattern!refutable}{451}
+\indexentry{list comprehensions|)}{453}
+\indexentry{data-directed programming|(}{453}
+\indexentry{design!data-directed}{453}
+\indexentry{lists!minimum of}{454}
+\indexentry{iSort@{\ttfamily  {}iSort}}{454}
+\indexentry{ins@{\ttfamily  {}ins}}{454}
+\indexentry{graph!routes through}{454}
+\indexentry{Relation@{\ttfamily  {}Relation}}{454}
+\indexentry{list of successes method}{454}
+\indexentry{routes@{\ttfamily  {}routes}}{455}
+\indexentry{nbhrs@{\ttfamily  {}nbhrs}}{455}
+\indexentry{backtracking}{456}
+\indexentry{routesC@{\ttfamily  {}routesC}}{456}
+\indexentry{data-directed programming|)}{457}
+\indexentry{case studies!parsing|see{parsing}}{457}
+\indexentry{parsing|(}{457}
+\indexentry{calculator|(}{457}
+\indexentry{Expr@{\ttfamily  {}Expr}}{457}
+\indexentry{Ops@{\ttfamily  {}Ops}}{457}
+\indexentry{eval@{\ttfamily  {}eval}}{457}
+\indexentry{Store@{\ttfamily  {}Store}}{457}
+\indexentry{parsing!and \texttt{read}}{457}
+\indexentry{Parse@{\ttfamily  {}Parse}}{457}
+\indexentry{Parse@{\ttfamily  {}Parse}}{458}
+\indexentry{ReadS@{\ttfamily  {}ReadS}}{458}
+\indexentry{parsing!basic parsers}{458}
+\indexentry{none@{\ttfamily  {}none}}{459}
+\indexentry{succeed@{\ttfamily  {}succeed}}{459}
+\indexentry{token@{\ttfamily  {}token}}{459}
+\indexentry{spot@{\ttfamily  {}spot}}{459}
+\indexentry{parsing!combinators}{459}
+\indexentry{Parse@{\ttfamily  {}Parse}}{460}
+\indexentry{none@{\ttfamily  {}none}}{460}
+\indexentry{succeed@{\ttfamily  {}succeed}}{460}
+\indexentry{token@{\ttfamily  {}token}}{460}
+\indexentry{spot@{\ttfamily  {}spot}}{460}
+\indexentry{alt@{\ttfamily  {}alt}}{460}
+\indexentry{\symbol{62}\symbol{42}\symbol{62}@\texttt{\symbol{62}\symbol{42}\symbol{62}}}{460}
+\indexentry{build@{\ttfamily  {}build}}{460}
+\indexentry{list@{\ttfamily  {}list}}{460}
+\indexentry{alt@{\ttfamily  {}alt}}{461}
+\indexentry{\symbol{62}\symbol{42}\symbol{62}@\texttt{\symbol{62}\symbol{42}\symbol{62}}}{461}
+\indexentry{build@{\ttfamily  {}build}}{462}
+\indexentry{Expr@{\ttfamily  {}Expr}}{463}
+\indexentry{parsing!expressions|(}{463}
+\indexentry{parser@{\ttfamily  {}parser}}{463}
+\indexentry{varParse@{\ttfamily  {}varParse}}{463}
+\indexentry{opExpParse@{\ttfamily  {}opExpParse}}{463}
+\indexentry{litParse@{\ttfamily  {}litParse}}{464}
+\indexentry{parsing!top-level parser}{465}
+\indexentry{topLevel@{\ttfamily  {}topLevel}}{465}
+\indexentry{Command@{\ttfamily  {}Command}}{466}
+\indexentry{commandParse@{\ttfamily  {}commandParse}}{466}
+\indexentry{calculator|)}{466}
+\indexentry{parsing!library}{466}
+\indexentry{Parse@{\ttfamily  {}Parse}}{466}
+\indexentry{advantages of functional programming}{467}
+\indexentry{parsing|)}{467}
+\indexentry{parsing!expressions|)}{467}
+\indexentry{lists!infinite|(}{468}
+\indexentry{ones@{\ttfamily  {}ones}}{468}
+\indexentry{evaluation!interruption}{468}
+\indexentry{Enum@{\ttfamily  {}Enum}}{469}
+\indexentry{list comprehensions!infinite}{469}
+\indexentry{Pythagorean triple}{469}
+\indexentry{pythagTriples@{\ttfamily  {}pythagTriples}}{469}
+\indexentry{iterate@{\ttfamily  {}iterate}}{469}
+\indexentry{numbers!prime}{469}
+\indexentry{Eratosthenes}{469}
+\indexentry{primes@{\ttfamily  {}primes}}{470}
+\indexentry{sieve@{\ttfamily  {}sieve}}{470}
+\indexentry{memberOrd@{\ttfamily  {}memberOrd}}{470}
+\indexentry{numbers!random}{470}
+\indexentry{pseudo-random numbers}{471}
+\indexentry{randomSequence@{\ttfamily  {}randomSequence}}{471}
+\indexentry{scaleSequence@{\ttfamily  {}scaleSequence}}{471}
+\indexentry{makeFunction@{\ttfamily  {}makeFunction}}{472}
+\indexentry{System.Random@{\ttfamily  {}System.Random}}{472}
+\indexentry{list comprehensions!infinite generators}{473}
+\indexentry{pitfalls!infinite list generators}{473}
+\indexentry{Pythagorean triple}{473}
+\indexentry{Hamming numbers}{473}
+\indexentry{design!and infinite lists|(}{474}
+\indexentry{lists!infinite!why?}{474}
+\indexentry{infinite lists|see{lists, infinite}}{474}
+\indexentry{abstraction}{474}
+\indexentry{lists!as processes}{474}
+\indexentry{processes}{474}
+\indexentry{recursion}{474}
+\indexentry{feedback}{475}
+\indexentry{zipWith@\texttt{zipWith}}{476}
+\indexentry{listSums@{\ttfamily  {}listSums}}{476}
+\indexentry{scanl@\texttt{scanl\symbol{39}}}{476}
+\indexentry{factorial}{476}
+\indexentry{primitive recursion}{476}
+\indexentry{scanl@{\ttfamily  {}scanl}}{476}
+\indexentry{Fibonacci numbers}{477}
+\indexentry{Hamming numbers}{477}
+\indexentry{design!and infinite lists|)}{477}
+\indexentry{simulation|(}{477}
+\indexentry{randomTimes@{\ttfamily  {}randomTimes}}{477}
+\indexentry{simulationInput@{\ttfamily  {}simulationInput}}{478}
+\indexentry{simulation!experimenting}{478}
+\indexentry{simulation|)}{478}
+\indexentry{lists!infinite|)}{478}
+\indexentry{undefinedness}{479}
+\indexentry{undef@{\ttfamily  {}undef}}{479}
+\indexentry{name}{479}
+\indexentry{value!undefined}{479}
+\indexentry{lists!partial}{479}
+\indexentry{value!defined}{480}
+\indexentry{numbers!defined}{480}
+\indexentry{lists!defined}{480}
+\indexentry{structural induction}{480}
+\indexentry{fp-list}{480}
+\indexentry{lists!finite/partial}{480}
+\indexentry{sum@{\ttfamily  {}sum}}{480}
+\indexentry{doubleAll@{\ttfamily  {}doubleAll}}{480}
+\indexentry{++@{\ttfamily  {}++}}{480}
+\indexentry{reverse@{\ttfamily  {}reverse}}{480}
+\indexentry{lists!infinite}{481}
+\indexentry{lists!infinite!approximation to}{481}
+\indexentry{equality!infinite lists}{482}
+\indexentry{fac@{\ttfamily  {}fac}}{482}
+\indexentry{facMap@{\ttfamily  {}facMap}}{482}
+\indexentry{facs@{\ttfamily  {}facs}}{482}
+\indexentry{mathematical induction}{482}
+\indexentry{extensionality principle}{483}
+\indexentry{actions|(}{487}
+\indexentry{I/O|(}{487}
+\indexentry{sumInts@{\ttfamily  {}sumInts}}{488}
+\indexentry{I/O!files}{491}
+\indexentry{I/O!errors}{491}
+\indexentry{I/O!as lazy lists}{492}
+\indexentry{getContents@{\ttfamily  {}getContents}}{492}
+\indexentry{interact@{\ttfamily  {}interact}}{492}
+\indexentry{System.IO@{\ttfamily  {}System.IO}}{493}
+\indexentry{calculator|(}{493}
+\indexentry{Expr@{\ttfamily  {}Expr}}{493}
+\indexentry{Ops@{\ttfamily  {}Ops}}{493}
+\indexentry{Store@{\ttfamily  {}Store}}{494}
+\indexentry{Command@{\ttfamily  {}Command}}{494}
+\indexentry{commLine@{\ttfamily  {}commLine}}{494}
+\indexentry{eval@{\ttfamily  {}eval}}{494}
+\indexentry{command@{\ttfamily  {}command}}{494}
+\indexentry{calcStep@{\ttfamily  {}calcStep}}{495}
+\indexentry{let@{\ttfamily  {}let}}{495}
+\indexentry{calcSteps@{\ttfamily  {}calcSteps}}{495}
+\indexentry{mainCalc@{\ttfamily  {}mainCalc}}{495}
+\indexentry{calculator|)}{496}
+\indexentry{do@\texttt{do} notation}{496}
+\indexentry{\symbol{62}\symbol{62}\symbol{61}@\texttt{\symbol{62}\symbol{62}\symbol{61}}}{496}
+\indexentry{addOneInt@{\ttfamily  {}addOneInt}}{497}
+\indexentry{I/O|)}{498}
+\indexentry{monad|(}{498}
+\indexentry{monad!definition}{500}
+\indexentry{>>@{\ttfamily  {}>>}}{500}
+\indexentry{fail@{\ttfamily  {}fail}}{500}
+\indexentry{\symbol{62}\symbol{62}\symbol{61}@\texttt{\symbol{62}\symbol{62}\symbol{61}}}{500}
+\indexentry{return@{\ttfamily  {}return}}{500}
+\indexentry{monad!failure in (\texttt{fail})}{500}
+\indexentry{\symbol{62}\symbol{64}\symbol{62}@\texttt{\symbol{62}\symbol{64}\symbol{62}}}{500}
+\indexentry{monad!properties}{501}
+\indexentry{>>@{\ttfamily  {}>>}}{501}
+\indexentry{monad!examples}{501}
+\indexentry{parsing!monad}{501}
+\indexentry{monad!parsing}{501}
+\indexentry{Kleisli composition}{501}
+\indexentry{monad!identity}{502}
+\indexentry{monad!state}{503}
+\indexentry{fmap@{\ttfamily  {}fmap}}{503}
+\indexentry{join@{\ttfamily  {}join}}{503}
+\indexentry{Functor@{\ttfamily  {}Functor}}{504}
+\indexentry{monad!trees}{505}
+\indexentry{Tree@{\ttfamily  {}Tree}}{505}
+\indexentry{sTree@{\ttfamily  {}sTree}}{505}
+\indexentry{sumTree@{\ttfamily  {}sumTree}}{505}
+\indexentry{monad!and imperative programming}{506}
+\indexentry{imperative programming!and monads}{506}
+\indexentry{monad!state}{506}
+\indexentry{numberTree@{\ttfamily  {}numberTree}}{507}
+\indexentry{State@{\ttfamily  {}State}}{507}
+\indexentry{Table@{\ttfamily  {}Table}}{507}
+\indexentry{State@{\ttfamily  {}State}}{508}
+\indexentry{return@{\ttfamily  {}return}}{508}
+\indexentry{\symbol{62}\symbol{62}\symbol{61}@\texttt{\symbol{62}\symbol{62}\symbol{61}}}{508}
+\indexentry{numberNode@{\ttfamily  {}numberNode}}{508}
+\indexentry{monad|)}{510}
+\indexentry{design!monads and}{511}
+\indexentry{monad!advantages of monads}{511}
+\indexentry{actions|)}{511}
+\indexentry{behaviour|(}{537}
+\indexentry{complexity|(}{537}
+\indexentry{order}{538}
+\indexentry{operator sections}{538}
+\indexentry{+@\texttt{O}}{538}
+\indexentry{+@\texttt{\Th}}{538}
+\indexentry{$\ll $@{\ttfamily  {}$\ll $}}{539}
+\indexentry{complexity!linear}{539}
+\indexentry{complexity!quadratic}{539}
+\indexentry{counting}{539}
+\indexentry{lists!bisection of}{539}
+\indexentry{tree!balanced}{539}
+\indexentry{tree!branch length}{539}
+\indexentry{behaviour!time}{542}
+\indexentry{complexity!time}{542}
+\indexentry{behaviour!space}{542}
+\indexentry{complexity!space}{542}
+\indexentry{residency}{542}
+\indexentry{complexity!\texttt{fac}}{542}
+\indexentry{fac@{\ttfamily  {}fac}}{542}
+\indexentry{complexity!\texttt{iSort}}{543}
+\indexentry{iSort@{\ttfamily  {}iSort}}{543}
+\indexentry{complexity!\texttt{++}}{544}
+\indexentry{++@{\ttfamily  {}++}}{544}
+\indexentry{complexity!\texttt{qSort}}{544}
+\indexentry{sorting!quicksort}{544}
+\indexentry{qSort@{\ttfamily  {}qSort}}{544}
+\indexentry{divide and conquer}{545}
+\indexentry{complexity|)}{546}
+\indexentry{sets!behaviour of implementations}{546}
+\indexentry{lists!as sets}{546}
+\indexentry{Set@{\ttfamily  {}Set}}{546}
+\indexentry{search tree}{546}
+\indexentry{design!and behaviour}{546}
+\indexentry{abstract data type}{547}
+\indexentry{..@{\ttfamily  {}..}}{547}
+\indexentry{underlining}{548}
+\indexentry{behaviour!space!local definitions}{548}
+\indexentry{space leak}{548}
+\indexentry{factorial}{548}
+\indexentry{factorial!complexity of}{549}
+\indexentry{folding|(}{550}
+\indexentry{function!strict}{550}
+\indexentry{function!lazy}{550}
+\indexentry{foldr@\texttt{foldr}}{550}
+\indexentry{iSort@{\ttfamily  {}iSort}}{551}
+\indexentry{map@\texttt{map}!defined using \texttt{foldr}}{551}
+\indexentry{fac@{\ttfamily  {}fac}}{551}
+\indexentry{foldl@\texttt{foldl}}{551}
+\indexentry{foldl@\texttt{foldl}!type of}{551}
+\indexentry{seq@{\ttfamily  {}seq}}{552}
+\indexentry{strict@{\ttfamily  {}strict}}{552}
+\indexentry{foldl@\texttt{foldl\symbol{39}}!type of}{552}
+\indexentry{foldl@\texttt{foldl\symbol{39}}}{552}
+\indexentry{folding!designing folds}{555}
+\indexentry{folding|)}{556}
+\indexentry{memoization|(}{557}
+\indexentry{Fibonacci numbers}{557}
+\indexentry{fibP@{\ttfamily  {}fibP}}{557}
+\indexentry{variable}{557}
+\indexentry{fibs@{\ttfamily  {}fibs}}{558}
+\indexentry{lists!as processes}{558}
+\indexentry{dynamic programming|(}{558}
+\indexentry{maximal common subsequence}{558}
+\indexentry{mLen@{\ttfamily  {}mLen}}{559}
+\indexentry{maxLen@{\ttfamily  {}maxLen}}{559}
+\indexentry{maxTab@{\ttfamily  {}maxTab}}{559}
+\indexentry{diff@{\ttfamily  {}diff}}{559}
+\indexentry{Array.hs@{\ttfamily  {}Array.hs}}{560}
+\indexentry{dynamic programming|)}{560}
+\indexentry{greedy algorithm}{561}
+\indexentry{text processing}{561}
+\indexentry{Huffman codes}{561}
+\indexentry{behaviour|)}{562}
+\indexentry{memoization|)}{562}
+\indexentry{Web site!sites with further information|(}{563}
+\indexentry{Haskell!further features}{564}
+\indexentry{Haskell!prospects}{565}
+\indexentry{Haskell!Haskell 2010}{565}
+\indexentry{Curry, Haskell B.!biography}{566}
+\indexentry{Miranda}{566}
+\indexentry{Standard ML}{566}
+\indexentry{Scheme}{567}
+\indexentry{Web site!sites with further information|)}{568}
+\indexentry{imperative programming|(}{569}
+\indexentry{value}{569}
+\indexentry{state}{569}
+\indexentry{data-directed programming}{570}
+\indexentry{function}{570}
+\indexentry{variable}{570}
+\indexentry{proof}{571}
+\indexentry{mathematical induction}{571}
+\indexentry{tuples}{572}
+\indexentry{records}{572}
+\indexentry{pointer}{572}
+\indexentry{lists!as Pascal type}{572}
+\indexentry{design}{574}
+\indexentry{higher-order function}{574}
+\indexentry{polymorphism}{574}
+\indexentry{interface}{575}
+\indexentry{algebraic type}{575}
+\indexentry{abstract data type}{575}
+\indexentry{classes}{575}
+\indexentry{list comprehensions}{575}
+\indexentry{lazy evaluation}{576}
+\indexentry{lists!infinite}{576}
+\indexentry{state}{576}
+\indexentry{monad}{576}
+\indexentry{imperative programming|)}{577}
+\indexentry{abstract data type}{579}
+\indexentry{algebraic type}{579}
+\indexentry{function application}{579}
+\indexentry{argument}{579}
+\indexentry{associativity}{579}
+\indexentry{type!base}{579}
+\indexentry{operator!binding power of}{579}
+\indexentry{Booleans}{579}
+\indexentry{calculation}{579}
+\indexentry{type checking!rule of cancellation}{580}
+\indexentry{characters}{580}
+\indexentry{classes}{580}
+\indexentry{clause}{580}
+\indexentry{comment}{580}
+\indexentry{complexity}{580}
+\indexentry{function composition}{580}
+\indexentry{concatenate}{580}
+\indexentry{conditional equation}{580}
+\indexentry{pattern matching!conformal}{580}
+\indexentry{constructor}{580}
+\indexentry{context}{580}
+\indexentry{currying}{580}
+\indexentry{declaration}{580}
+\indexentry{default}{581}
+\indexentry{definition}{581}
+\indexentry{design}{581}
+\indexentry{instance!derived}{581}
+\indexentry{enumerated type}{581}
+\indexentry{equation}{581}
+\indexentry{equation!conditional}{581}
+\indexentry{evaluation}{581}
+\indexentry{export}{581}
+\indexentry{expression}{581}
+\indexentry{extensionality principle}{581}
+\indexentry{filter}{581}
+\indexentry{numbers!floating point}{581}
+\indexentry{folding}{581}
+\indexentry{forward composition}{581}
+\indexentry{function}{581}
+\indexentry{generalization}{581}
+\indexentry{guard}{582}
+\indexentry{higher-order function}{582}
+\indexentry{identifier}{582}
+\indexentry{import@{\ttfamily  {}import}}{582}
+\indexentry{induction}{582}
+\indexentry{function!infix}{582}
+\indexentry{inheritance}{582}
+\indexentry{input}{582}
+\indexentry{instance}{582}
+\indexentry{instance!of variable}{582}
+\indexentry{instance!of class}{582}
+\indexentry{numbers!integers}{582}
+\indexentry{interface}{582}
+\indexentry{juxtaposition}{582}
+\indexentry{lambda expression}{582}
+\indexentry{lazy evaluation}{583}
+\indexentry{complexity!linear}{583}
+\indexentry{lists}{583}
+\indexentry{literal}{583}
+\indexentry{local definitions}{583}
+\indexentry{mapping}{583}
+\indexentry{mathematical induction}{583}
+\indexentry{memoization}{583}
+\indexentry{modules}{583}
+\indexentry{monad}{583}
+\indexentry{type!monomorphic}{583}
+\indexentry{type!most general}{583}
+\indexentry{recursion!mutual}{583}
+\indexentry{name}{583}
+\indexentry{numbers!natural numbers}{583}
+\indexentry{offside rule}{583}
+\indexentry{operator}{583}
+\indexentry{operator sections}{583}
+\indexentry{output}{583}
+\indexentry{overloading}{583}
+\indexentry{parameter}{584}
+\indexentry{parsing}{584}
+\indexentry{partial application}{584}
+\indexentry{pattern}{584}
+\indexentry{polymorphism}{584}
+\indexentry{function!prefix}{584}
+\indexentry{primitive recursion}{584}
+\indexentry{proof}{584}
+\indexentry{functional programming!pure}{584}
+\indexentry{complexity!quadratic}{584}
+\indexentry{recursion}{584}
+\indexentry{result}{584}
+\indexentry{scope}{584}
+\indexentry{script}{584}
+\indexentry{sets}{584}
+\indexentry{side-effect}{584}
+\indexentry{signature}{584}
+\indexentry{stream}{585}
+\indexentry{strings}{585}
+\indexentry{structural induction}{585}
+\indexentry{substitution}{585}
+\indexentry{type synonym}{585}
+\indexentry{syntax}{585}
+\indexentry{program transformation}{585}
+\indexentry{tuples}{585}
+\indexentry{type}{585}
+\indexentry{type variable}{585}
+\indexentry{undefinedness}{585}
+\indexentry{unification}{585}
+\indexentry{value}{585}
+\indexentry{variable}{585}
+\indexentry{where@{\ttfamily  {}where}}{585}
+\indexentry{pattern!wild card}{585}
+\indexentry{operator!table of properties}{587}
+\indexentry{floating point operators}{587}
+\indexentry{"!@{\ttfamily  {}"!}}{587}
+\indexentry{"!"!@{\ttfamily  {}"!"!}}{587}
+\indexentry{//@{\ttfamily  {}//}}{587}
+\indexentry{.@{\ttfamily  {}.}}{587}
+\indexentry{**@{\ttfamily  {}**}}{587}
+\indexentry{\^{}@{\ttfamily  {}\^{}}}{587}
+\indexentry{\^{}\^{}@{\ttfamily  {}\^{}\^{}}}{587}
+\indexentry{*@{\ttfamily  {}*}}{587}
+\indexentry{/@{\ttfamily  {}/}}{587}
+\indexentry{mod@\texttt{`mod`}}{587}
+\indexentry{div@\texttt{`div`}}{587}
+\indexentry{+@{\ttfamily  {}+}}{587}
+\indexentry{-@{\ttfamily  {}-}}{587}
+\indexentry{:+@{\ttfamily  {}:+}}{587}
+\indexentry{{\ttfamily  \char 92\relax }{\ttfamily  \char 92\relax }@{\ttfamily  {}{\ttfamily  \char 92\relax }{\ttfamily  \char 92\relax }}}{587}
+\indexentry{:@{\ttfamily  {}:}}{587}
+\indexentry{++@{\ttfamily  {}++}}{587}
+\indexentry{/=@{\ttfamily  {}/=}}{587}
+\indexentry{<@{\ttfamily  {}<}}{587}
+\indexentry{<=@{\ttfamily  {}<=}}{587}
+\indexentry{==@{\ttfamily  {}==}}{587}
+\indexentry{>@{\ttfamily  {}>}}{587}
+\indexentry{>=@{\ttfamily  {}>=}}{587}
+\indexentry{elem@\texttt{`elem`}}{587}
+\indexentry{\&\&@{\ttfamily  {}\&\&}}{587}
+\indexentry{"|"|@{\ttfamily  {}"|"|}}{587}
+\indexentry{>>@{\ttfamily  {}>>}}{587}
+\indexentry{\$@{\ttfamily  {}\$}}{587}
+\indexentry{seq@\texttt{`seq`}}{587}
+\indexentry{\symbol{62}\symbol{62}\symbol{61}@\texttt{\symbol{62}\symbol{62}\symbol{61}}}{587}
+\indexentry{\symbol{62}\symbol{46}\symbol{62}@\texttt{\symbol{62}\symbol{46}\symbol{62}}}{587}
+\indexentry{\symbol{62}\symbol{42}\symbol{62}@\texttt{\symbol{62}\symbol{42}\symbol{62}}}{587}
+\indexentry{Haskell!implementations}{589}
+\indexentry{Hugs}{589}
+\indexentry{errors|(}{591}
+\indexentry{errors!syntax}{591}
+\indexentry{syntax error}{591}
+\indexentry{keyword}{593}
+\indexentry{identifier!reserved}{593}
+\indexentry{errors!type}{593}
+\indexentry{type error}{593}
+\indexentry{errors!program}{595}
+\indexentry{program error}{595}
+\indexentry{errors!module}{596}
+\indexentry{modules!errors}{596}
+\indexentry{system messages}{596}
+\indexentry{errors|)}{596}
+\indexentry{project ideas}{597}

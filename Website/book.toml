@@ -9,7 +9,6 @@ language = "en"
 default-theme = "light"
 preferred-dark-theme = "navy"
 git-repository-url = "https://github.com/simonjohnthompson/haskellcraft"
-mathjax-support = true
 
 [output.html.search]
 enable = true

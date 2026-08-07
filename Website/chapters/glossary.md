@@ -174,7 +174,7 @@ An **expression** which denotes a **function**. After a '``' we list the argumen
 \xs n -> length xs + n
 ```
 
-The term 'lambda' is used since '``' is close to the Greek letter '$\lambda$', or lambda, which is used in a similar way in Church's lambda calculus.
+The term 'lambda' is used since '``' is close to the Greek letter '`λ`', or lambda, which is used in a similar way in Church's lambda calculus.
 
 The sort of expression **evaluation** in Haskell. In a function application only those arguments whose values are *needed* will be evaluated, and moreover, only the parts of structures which are needed will be examined.
 

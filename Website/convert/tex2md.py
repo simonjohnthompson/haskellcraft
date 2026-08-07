@@ -128,21 +128,54 @@ SYMBOL_MACROS = {
     "ou": "∨", "an": "∧", "imp": "⇒", "no": "¬",
     "bi": "⇔", "turn": "⊢", "bo": "⊥", "se": "≡",
     "step": "~>",
+    "lambda": "λ", "uparrow": "↑", "downarrow": "↓", "epsilon": "ε",
+    "pm": "±", "mid": "∣", "rightarrow": "→",
 }
 
 
+def _frac_display(a, b):
+    # Clean each side first (not just .strip()) so e.g. "\mbox{\mi -b}"
+    # loses its \mi token and the space it leaves behind, rather than
+    # surfacing as "( -b" once wrapped in parens below.
+    a, b = clean_label_text(a), clean_label_text(b)
+    return f"({a})/({b})" if (" " in a or " " in b) else f"{a}/{b}"
+
+
 def clean_label_text(text):
-    """Flatten inline formatting out of a heading/caption/index term so
-    it's usable as plain display text (e.g. \\texttt{Pictures} ->
-    Pictures, \\symbol{62} -> >, \\forall -> ∀)."""
-    for macro in ("texttt", "textbf", "textit", "emph", "textrm", "textsl", "textsc"):
+    """Flatten inline formatting out of a heading/caption/index term/prose
+    math span so it's usable as plain display text (e.g. \\texttt{Pictures}
+    -> Pictures, \\symbol{62} -> >, \\forall -> ∀, \\frac{22}{7} -> 22/7).
+    """
+    for macro in ("texttt", "textbf", "textit", "emph", "textrm", "textsl", "textsc",
+                  "mbox", "boldmath", "ensuremath"):
         text = strip_balanced_macro(text, macro, lambda arg: arg)
     text = strip_balanced_macro(text, "index", lambda arg: "")
     text = strip_balanced_macro(text, "minx", lambda arg: "")
     text = strip_balanced_macro(text, "symbol", lambda arg: chr(int(arg)) if arg.strip().isdigit() else "")
+    text = strip_balanced_macro(text, "sqrt", lambda arg: f"√({arg.strip()})")
     text = strip_two_arg_macro(text, "rule", lambda a, b: "")  # e.g. \blackbox's \rule{8pt}{8pt}
+    text = strip_two_arg_macro(text, "frac", _frac_display)
+    for macro in ("superscr", "subscr", "smsubscr"):
+        sep = "^" if macro == "superscr" else "_"
+        text = strip_two_arg_macro(text, macro, lambda a, b, sep=sep: f"{a}{sep}{b}")
+
+    # X^{\circ}/X^\circ means "X degrees" -- has to run before \circ falls
+    # into the generic symbol table below, which would otherwise leave a
+    # stray composition-operator "X^∘" instead of "X°".
+    text = re.sub(r"\^\{?\\circ\}?", "°", text)
+
+    # Bare font-switch declarations (no braces, unlike \textrm{...} etc.
+    # above) -- meaningless once this is plain text.
+    for name in ("tt", "rm", "bf", "sl", "it", "mi"):
+        text = re.sub(r"\\" + name + r"(?![a-zA-Z])", "", text)
+
+    # Math-mode delimiters: run this *after* the macro unwrapping above, so
+    # e.g. \boldmath{$\pm$} -- a $...$ span nested inside another macro's
+    # argument -- gets a second chance at stripping once \boldmath's own
+    # braces are gone (the pass below only runs once).
     text = re.sub(r"\\\(|\\\)|\\\[|\\\]", "", text)
     text = re.sub(r"(?<!\\)\$([^$]*)\$", r"\1", text)
+
     for name, symbol in SYMBOL_MACROS.items():
         text = re.sub(r"\\" + name + r"(?![a-zA-Z])(\{\})?", symbol, text)
     for esc, plain in (("#", "#"), ("%", "%"), ("&", "&"), ("_", "_"), ("$", "$")):
@@ -817,6 +850,95 @@ def strip_newcommand_defs(text):
     return text
 
 
+def _find_math_close(text, open_pos):
+    """Index of the '$' closing the math span opened at open_pos, treating
+    a '$' that occurs while brace-depth > 0 as literal content rather than
+    a delimiter -- needed for e.g. \\boldmath{$\\pm$}, a $...$ span nested
+    inside another macro's argument, which real (La)TeX math mode doesn't
+    actually support nesting, but this book's DEFS0/miradefs macros make
+    room for anyway. Returns None if unterminated.
+    """
+    depth = 0
+    j = open_pos + 1
+    while j < len(text):
+        c = text[j]
+        if c == "\\" and j + 1 < len(text):
+            j += 2
+            continue
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+        elif c == "$" and depth == 0:
+            return j
+        j += 1
+    return None
+
+
+def _as_literal_texttt(cleaned):
+    """Wrap already-cleaned plain text back in \\texttt{...} before
+    splicing it into the LaTeX source. Pandoc's markdown writer escapes
+    a bare ^ in ordinary prose (b^2 -> b\\^2, to avoid colliding with the
+    superscript markdown extension) but never inside a Code inline node
+    -- so route flattened math through one instead of emitting it as
+    plain prose text. clean_label_text() already unescaped LaTeX's own
+    special characters (%, &, #, _) as part of flattening to plain text,
+    so they need re-escaping here or pandoc's LaTeX *reader* would trip
+    over them the second time around (e.g. a stray % starting a comment).
+    """
+    if not cleaned:
+        return ""
+    protected = cleaned
+    for ch in ("%", "&", "#", "_"):
+        protected = protected.replace(ch, "\\" + ch)
+    return r"\texttt{" + protected + "}"
+
+
+def flatten_prose_math(text):
+    """$...$/\\(...\\)/\\[...\\] in running prose (outside code listings,
+    already handled inside simplify_alltt_body) -> plain text via
+    clean_label_text. This book's math is mostly simple enough (angles,
+    a Pythagorean a^2=b^2+c^2, an explicit quadratic formula) that
+    flattening it reads fine without a MathJax dependency, and it's the
+    same treatment already used for headings/captions/index terms rather
+    than a one-off special case just for prose.
+    """
+    # \rightarrow\!\!\mid is drawn from a GHCi keyboard-shortcuts table to
+    # mean the Tab key -- \rightarrow and \mid decode separately (below)
+    # to "→" and "∣", which doesn't read as "Tab" the way ⇥ does.
+    text = text.replace(r"\ensuremath{\rightarrow\!\!\mid}", "⇥")
+
+    out = []
+    i = 0
+    n = len(text)
+    while i < n:
+        c = text[i]
+        if c == "\\" and i + 1 < n and text[i + 1] in "([":
+            close = text.find(r"\)" if text[i + 1] == "(" else r"\]", i)
+            if close != -1:
+                out.append(_as_literal_texttt(clean_label_text(text[i + 2:close])))
+                i = close + 2
+                continue
+        if c == "$":
+            close = _find_math_close(text, i)
+            if close is not None:
+                out.append(_as_literal_texttt(clean_label_text(text[i + 1:close])))
+                i = close + 1
+                continue
+        if text[i:i + 12] == r"\ensuremath{":
+            close = _find_matching_brace(text, i + 11)
+            out.append(_as_literal_texttt(clean_label_text(text[i + 12:close - 1])))
+            i = close
+            continue
+        if c == "\\" and i + 1 < n:
+            out.append(text[i:i + 2])
+            i += 2
+            continue
+        out.append(c)
+        i += 1
+    return "".join(out)
+
+
 def escape_bare_underscores_in_texttt(text):
     """A bare `_` outside math mode is invalid LaTeX (needs `\\_`), but a
     handful of \\texttt{...} calls in the book have one anyway -- real
@@ -858,6 +980,23 @@ def preprocess(tex):
         anchors = "".join(r"\hypertarget{%s}{}" % lbl for lbl in code_labels)
         return anchors + r"\begin{minted}{haskell}" + body + r"\end{minted}"
     tex = re.sub(r"\\begin\{alltt\}(.*?)\\end\{alltt\}", _convert_alltt, tex, flags=re.DOTALL)
+
+    # Flatten leftover $...$/\(...\)/\[...\] math in prose -- but skip over
+    # \minted{haskell} blocks: Haskell's `$` (function application) operator
+    # is bare code content there, not a math delimiter, and running the
+    # same dollar-scanning logic over it would misparse two unrelated `$`
+    # operators as one (nonexistent) math span. Split on the code blocks
+    # and only flatten the prose gaps between them, rather than one
+    # regex trying to express both "skip this" and "transform that".
+    minted_re = re.compile(r"\\begin\{minted\}\{haskell\}.*?\\end\{minted\}", re.DOTALL)
+    pieces = []
+    pos = 0
+    for m in minted_re.finditer(tex):
+        pieces.append(flatten_prose_math(tex[pos:m.start()]))
+        pieces.append(m.group(0))
+        pos = m.end()
+    pieces.append(flatten_prose_math(tex[pos:]))
+    tex = "".join(pieces)
 
     # Chapter 20's local \up{X} (mathematical superscript, e.g. n\up{2})
     # used inline in prose, not just inside code listings.

@@ -197,6 +197,48 @@ _LABEL_CONTEXT_TOKEN = re.compile(
 )
 
 
+def find_primary_heading_labels(text):
+    """Which \\label{X} calls are the *first* one following a given
+    \\chapter/\\section/.../\\caption in this text (same decorator-skipping
+    scan as build_label_map()). Pandoc's LaTeX reader can only attach one
+    \\label to a heading as its real {#id} -- a book convention of
+    stacking two or three on the same heading (adjacent, on separate
+    lines, or split across \\index{} entries -- all three occur) means
+    every one past the first needs to become \\hypertarget{X}{} instead,
+    or it's left as a stray, unrenderable inline span pandoc has no
+    heading left to attach it to.
+    """
+    primary = set()
+    pos = 0
+    pending = False  # is there an unclaimed heading/caption context open?
+    while pos < len(text):
+        m = _LABEL_CONTEXT_TOKEN.search(text, pos)
+        if not m:
+            break
+        if text[pos:m.start()].strip():
+            pending = False
+
+        kind = m.lastgroup
+        if kind == "chapstart":
+            pos = m.end()
+            continue
+        if kind == "decorator":
+            pos = _find_matching_brace(text, m.end() - 1)
+            continue
+        if kind in ("heading", "caption"):
+            pos = _find_matching_brace(text, m.end() - 1)
+            pending = True
+            continue
+        if kind == "label":
+            j = _find_matching_brace(text, m.end() - 1)
+            if pending:
+                primary.add(text[m.end():j - 1])
+                pending = False
+            pos = j
+            continue
+    return primary
+
+
 def build_label_map():
     """Scan every chapter's real \\label{...} for cross-reference targets.
 
@@ -1021,9 +1063,23 @@ def preprocess(tex):
     # sits. Protect the "keep as \label" case with a placeholder first:
     # strip_balanced_macro's search loop would otherwise immediately
     # re-match a \label{X} we'd just re-inserted and spin forever.
+    #
+    # A few headings carry two or three \label{}s -- adjacent, on separate
+    # lines, or split across \index{} entries, e.g. Chapter 1's
+    # \section{Tests, properties and proofs}\label{proof}\label{pictureProps}
+    # -- LABEL_MAP classifies all of them as "heading" kind (right link
+    # text either way), but pandoc's LaTeX reader can only attach *one*
+    # \label to a heading as its real {#id}; every one after the first
+    # doesn't get silently dropped, it's orphaned into a stray inline span
+    # pandoc has nowhere left to attach it ([\[pictureProps\]]{#pictureProps
+    # ...}). find_primary_heading_labels() says which one that first one
+    # is, so only that one gets to stay a real \label; the rest are forced
+    # through the \hypertarget path below regardless of LABEL_MAP's kind.
+    primary_heading_labels = find_primary_heading_labels(tex)
+
     def _label_replacement(arg):
         info = LABEL_MAP.get(arg)
-        if info and info["kind"] == "heading":
+        if info and info["kind"] == "heading" and arg in primary_heading_labels:
             return BRACE_PLACEHOLDER_OPEN + "keeplabel" + BRACE_PLACEHOLDER_OPEN + arg + BRACE_PLACEHOLDER_CLOSE
         return r"\hypertarget{%s}{}" % arg
     tex = strip_balanced_macro(tex, "label", _label_replacement)

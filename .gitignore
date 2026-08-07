@@ -41,3 +41,14 @@
 *.pdfsync
 *.rubbercache
 rubber.cache
+
+## Haskell / cabal build artifacts:
+dist/
+dist-newstyle/
+*.hi
+*.o
+cabal.project.local~
+.ghc.environment.*
+
+## macOS:
+.DS_Store

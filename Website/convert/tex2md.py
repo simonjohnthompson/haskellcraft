@@ -135,6 +135,8 @@ SYMBOL_MACROS = {
     # and friends) -- used in Chapter 6's card-games exercise.
     "spade": "♠", "heart": "♥", "dia": "♦", "club": "♣",
     "spadesuit": "♠", "heartsuit": "♥", "diamondsuit": "♦", "clubsuit": "♣",
+    # miradefs.tex/defs0.tex, also never \input by this pipeline.
+    "eps": "ε", "noteq": "≠", "twid": "~",
 }
 
 
@@ -827,6 +829,11 @@ def simplify_alltt_body(body: str):
     body = strip_balanced_macro(body, "hspace*", lambda arg: "    ")
     body = strip_balanced_macro(body, "vertline", lambda arg: "")  # decorative connector line
     body = strip_balanced_macro(body, "ensuremath", lambda arg: arg)
+    # \makebox[width][pos]{text}, e.g. \makebox[0pt][l]{/}\tone (a
+    # zero-width "/" overlaid on the following character, in one of the
+    # ex-\so/\st type-checking examples in Chapter 11) -- drop the
+    # optional positioning args, keep the content.
+    body = re.sub(r"\\makebox(?:\[[^\]]*\])*\{([^{}]*)\}", r"\1", body)
 
     # \begin{minipage}{1in}\begin{tabbing} ... \end{tabbing}\end{minipage}:
     # a boxed sub-diagram nested inside a code listing. We can't draw the
@@ -845,7 +852,6 @@ def simplify_alltt_body(body: str):
     body = re.sub(r"\{\\(?:rm|it|sl|bf)(?![a-zA-Z])(?:\{\}|\s+)([^{}]*)\}", r"\1", body)
 
     body = body.replace(r"\ldots", "...")
-    body = body.replace(r"\twid", "~")
     body = re.sub(r"\\bl(?![a-zA-Z])", "", body)  # forces a blank line in the listing
     body = re.sub(r"\\hrulefill", "", body)
 
@@ -1027,6 +1033,23 @@ def escape_bare_underscores_in_texttt(text):
 
 
 def preprocess(tex):
+    # \so / \st (defs0.tex: \so = \begin{ttdisplay}\parindent 1pc, itself
+    # \begin{alltt}% with some catcode/spacing setup, \st = the matching
+    # \end{ttdisplay}) are an older, shorter way to mark a code/verbatim
+    # display, used for dozens of short type signatures and code
+    # fragments inline in running text across Chapters 7, 11 and the
+    # appendix -- entirely missed by the \begin{alltt} regex below (it
+    # only matches that literal spelling), so all of this was rendering
+    # as ordinary flowed prose with its line breaks collapsed, not code.
+    # Converting to \begin{alltt}/\end{alltt} up front lets it join the
+    # same pipeline as every other code listing in the book. {\hskip1pc}
+    # (sometimes doubled) is just print-layout indentation at the start
+    # of a line -- drop it before that regex runs too, or it leaks as
+    # literal text inside the resulting code block.
+    tex = re.sub(r"\\so\b", r"\\begin{alltt}", tex)
+    tex = re.sub(r"\\st\b", r"\\end{alltt}", tex)
+    tex = re.sub(r"\{\\hskip[0-9.]+[a-z]+\}", "", tex)
+
     tex = strip_newcommand_defs(tex)
     tex = escape_bare_underscores_in_texttt(tex)
 
@@ -1063,11 +1086,56 @@ def preprocess(tex):
     pieces.append(flatten_prose_math(tex[pos:]))
     tex = "".join(pieces)
 
-    # Chapter 20's local \up{X}, and root.tex's near-identical \uppp{X}
-    # (Chapter 12) -- both mean "superscript X" (e.g. n\up{2}), used
-    # inline in prose, not just inside code listings.
+    # Chapter 20's local \up{X}, root.tex's near-identical \uppp{X}
+    # (Chapter 12), and miradefs.tex's \pow{X} (Chapter 20) -- all three
+    # mean "superscript X" (e.g. n\up{2}), used inline in prose, not just
+    # inside code listings.
     tex = strip_balanced_macro(tex, "up", lambda arg: "^" + arg)
     tex = strip_balanced_macro(tex, "uppp", lambda arg: "^" + arg)
+    tex = strip_balanced_macro(tex, "pow", lambda arg: "^" + arg)
+
+    # defs0.tex's \bs{X} (\ttfamily \symbol{92}X) is a literal backslash
+    # followed by X, used in prose (usually inside \texttt{...}) to write
+    # Haskell lambdas like \n -> ...; Pandoc silently drops the whole
+    # argument since \bs is unknown. simplify_alltt_body already handles
+    # \bs inside code listings -- this covers the prose usage. Emit
+    # \textbackslash{} (a real Pandoc-supported command) rather than a
+    # bare "\" + arg, since a bare "\n" would itself be parsed as an
+    # unknown control word and dropped the same way.
+    tex = strip_balanced_macro(tex, "bs", lambda arg: r"\textbackslash{}" + arg)
+
+    # miradefs.tex's \superscr{a}{b}/\subscr{a}{b}/\smsubscr{a}{b} (e.g.
+    # \superscr{2.1}{444}, meaning "2.1 x 10^444") used inline in prose
+    # (usually inside \texttt{...}) -- same silent-drop issue as \bs above.
+    # clean_label_text and simplify_alltt_body already handle these for
+    # headings/index text and code listings respectively.
+    # A bare "_" outside math mode is invalid LaTeX and pandoc's reader
+    # rejects it ("unexpected _") -- same reason escape_bare_underscores_in_texttt
+    # exists above, but that pass runs before this substitution introduces
+    # new underscores, so escape here too.
+    tex = strip_two_arg_macro(tex, "superscr", lambda a, b: f"{a}^{b}")
+    tex = strip_two_arg_macro(tex, "subscr", lambda a, b: f"{a}\\_{b}")
+    tex = strip_two_arg_macro(tex, "smsubscr", lambda a, b: f"{a}\\_{b}")
+
+    # miradefs.tex's other ~35 pre-filled \subscr/\superscr shorthands
+    # (\vone, \gtwo, \pone, ...) -- simplify_alltt_body already expands
+    # these inside code listings, but they're also used bare in ordinary
+    # prose (\texttt{\pone,\ptwo,...}), where the same silent-drop issue
+    # applies. Escape any "_" for the same reason as \subscr above.
+    for _name, _repl in SUBSCRIPT_SHORTHANDS.items():
+        tex = re.sub(r"\\" + _name + r"(?![a-zA-Z])", _repl.replace("_", "\\_"), tex)
+
+    # \blackbox (defs0.tex: \hfill\rule{8pt}{8pt}, an end-of-proof QED
+    # mark) and \startpr (\subparagraph{Proof}, a "Proof" lead-in) --
+    # neither takes an argument, and both are silently dropped by Pandoc
+    # otherwise (unknown bare commands). \inso/\inst (defs0.tex) are a
+    # font-switch pair wrapping a single number in Chapter 3 ("written as
+    # \inso\mbox{}1.16e+143\inst"); neither has a visible symbol of its
+    # own, so just drop both.
+    tex = re.sub(r"\\blackbox(?![a-zA-Z])", "∎", tex)
+    tex = re.sub(r"\\startpr(?![a-zA-Z])", "\n\n" + r"\textbf{Proof}" + "\n\n", tex)
+    tex = re.sub(r"\\inso(?![a-zA-Z])", "", tex)
+    tex = re.sub(r"\\inst(?![a-zA-Z])", "", tex)
 
     # Index entries carry no reader-visible content -> drop entirely.
     tex = strip_balanced_macro(tex, "index", lambda arg: "")
@@ -1188,6 +1256,49 @@ def preprocess(tex):
     tex = re.sub(r"\\end\{example\}", "", tex)
     tex = strip_balanced_macro(tex, "subexample*", lambda arg: r"\textbf{%s} " % arg)
     tex = strip_balanced_macro(tex, "subsubexample*", lambda arg: "\n\n" + r"\textbf{%s}" % arg + "\n\n")
+
+    # \beware{title}{content} (miradefs.tex: a colorbox-and-parbox
+    # callout/warning box) -- used 78+ times across nearly every chapter
+    # for important asides, e.g. \beware{Negative literals}{Negative
+    # literals cause problems...}. Unlike every other unknown macro found
+    # in this book so far, Pandoc doesn't even drop just the box styling
+    # here -- the *entire* title and content vanish outright, since the
+    # colorbox/parbox nesting inside the real definition confuses its
+    # reader enough that it gives up on the whole unrecognized command.
+    # This was the single biggest source of missing content found in this
+    # conversion. No native callout/admonition block in plain CommonMark,
+    # so a blockquote with a bold title is the most portable rendering
+    # that still reads as "pay extra attention to this."
+    tex = strip_two_arg_macro(
+        tex, "beware",
+        lambda title, content: "\n\n" + r"\begin{quote}\textbf{%s}" % title + "\n\n" + content + r"\end{quote}" + "\n\n",
+    )
+
+    # \begin{mytable}/\begin{mytablethree} (defs0.tex: thin aliases for
+    # \begin{tabular}{<colspec>}) -- real \usepackage{array} column specs
+    # Pandoc's LaTeX reader understands fine on their own, just not under
+    # these two book-specific names. Swap in the real environment name
+    # plus the same column spec the macro definitions use.
+    tex = re.sub(r"\\begin\{mytable\}", r"\\begin{tabular}{p{1.3in}p{3in}}", tex)
+    tex = re.sub(r"\\end\{mytable\}", r"\\end{tabular}", tex)
+    tex = re.sub(r"\\begin\{mytablethree\}", r"\\begin{tabular}{p{0.7in}p{1.5in}p{2in}}", tex)
+    tex = re.sub(r"\\end\{mytablethree\}", r"\\end{tabular}", tex)
+
+    # \begin{definition}...\end{definition} (root.tex:
+    # \newtheorem{definition}{definition}[chapter]) -- only 4 uses (4.tex,
+    # 9.tex, 11.tex x2), and unlike \beware the content survives even
+    # unrecognized, just missing its "Definition N" heading and box
+    # styling. [chapter] resets the counter each chapter in the real
+    # book, which conveniently matches the per-chapter counter already
+    # used for \begin{example} above, for the same
+    # script-run-order-independence reason.
+    definition_counter = [0]
+
+    def _next_definition_label(_m):
+        definition_counter[0] += 1
+        return "\n\n" + r"\textbf{Definition %d.}" % definition_counter[0] + "\n\n"
+    tex = re.sub(r"\\begin\{definition\}", _next_definition_label, tex)
+    tex = re.sub(r"\\end\{definition\}", "", tex)
 
     # Now safe to swap in real brace characters -- every pass above that
     # depends on brace-depth counting has already run.

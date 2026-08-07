@@ -37,7 +37,7 @@ A calculation is a line-by-line **evaluation** of a Haskell **expression** on pa
 
 The rule for finding the type of a partial application.
 
-A single letter, such as `’s’` or `’’`, the tab character. They form the `Char` type.
+A single letter, such as `’s’` or `’\t’`, the tab character. They form the `Char` type.
 
 A collection of types. A class is defined by specifying a **signature**; a type is made an **instance** of the class by supplying an implementation of the definitions of the signature over the type.
 
@@ -168,13 +168,13 @@ The common information which is shared between two program modules.
 
 Putting one thing next to another; this is the way in which function application is written down in Haskell.
 
-An **expression** which denotes a **function**. After a '``' we list the arguments of the function, then an '`->`' and then the result. For instance, to add a number to the length of a list we could write
+An **expression** which denotes a **function**. After a '`\`' we list the arguments of the function, then an '`->`' and then the result. For instance, to add a number to the length of a list we could write
 
 ```haskell
 \xs n -> length xs + n
 ```
 
-The term 'lambda' is used since '``' is close to the Greek letter '`λ`', or lambda, which is used in a similar way in Church's lambda calculus.
+The term 'lambda' is used since '`\`' is close to the Greek letter '`λ`', or lambda, which is used in a similar way in Church's lambda calculus.
 
 The sort of expression **evaluation** in Haskell. In a function application only those arguments whose values are *needed* will be evaluated, and moreover, only the parts of structures which are needed will be examined.
 
@@ -222,7 +222,7 @@ A **function** takes one or more parameters into an **output**. Parameters are a
 
 Revealing the structure of a sentence in a formal language.
 
-A **function** of type `->->…->->t` can be applied to `n` arguments, or less. In the latter case, the **application** is partial, since the result can itself be passed further parameters.
+A **function** of type `t_1->t_2->…->t_n->t` can be applied to `n` arguments, or less. In the latter case, the **application** is partial, since the result can itself be passed further parameters.
 
 A pattern is either a **variable**, a **literal**, a **wild card** or the application of a **constructor** to other patterns. The term 'pattern' is also used as short for a 'pattern of computation' such as 'applying an operation to every member of a list', a pattern which in Haskell is realised by the `map` function.
 

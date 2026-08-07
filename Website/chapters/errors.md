@@ -81,7 +81,7 @@ A Haskell system attempts to match the input we give to the syntax of the langua
     fun (x,x) = x+1
     ```
 
--   In specifying constants, we can make errors: floating-point numbers can be too large, and characters specified by an out-of-range ASCII code: for example, on typing `’9999999999999999’` as input we get
+-   In specifying constants, we can make errors: floating-point numbers can be too large, and characters specified by an out-of-range ASCII code: for example, on typing `’\9999999999999999’` as input we get
 
     ```haskell
     <interactive>:1:18:

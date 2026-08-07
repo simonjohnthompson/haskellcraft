@@ -64,7 +64,19 @@ In a functional program a variable stands for an **arbitrary** or **unknown** va
 a^2 - b^2 = (a-b)(a+b)
 ```
 
-In any particular case, the value of all three occurrences of `a` will be the same. In exactly the same way, in sumSquares n = n\*n + sumSquares (n-1) all occurrences of `n` will be interpreted by the same value. For example sumSquares 7 = 7\*7 + sumSquares (7-1) The crucial motto is 'variables in functional programs *do not vary*'.
+In any particular case, the value of all three occurrences of `a` will be the same. In exactly the same way, in
+
+```haskell
+sumSquares n = n*n + sumSquares (n-1)
+```
+
+all occurrences of `n` will be interpreted by the same value. For example
+
+```haskell
+sumSquares 7 = 7*7 + sumSquares (7-1)
+```
+
+The crucial motto is 'variables in functional programs *do not vary*'.
 
 On the other hand, the value of a variable in an imperative program changes throughout its lifetime. In the sum of squares program above, the variable `s` will take the values `0,1,5,…` successively. Variables in imperative programs *do* vary over time, on the other hand.
 
@@ -235,7 +247,7 @@ Higher-order functions {#higher-order-functions .unnumbered}
 
 Traditional imperative languages give little scope for higher-order programming; Pascal, Java and C allow functions as arguments, so long as those functions are not themselves higher-order, but has no facility for returning functions as results. In C++ it is possible to return objects which represent functions by overloading the function application operator! This underlies the genericity hailed in the C++ Standard Template Library, which requires advanced features of the language to implement functions like `map` and `filter`.
 
-Control structures like `if-then-else` bear some resemblance to higher-order functions, as they take commands, ``, `` etc. into other commands,
+Control structures like `if-then-else` bear some resemblance to higher-order functions, as they take commands, `c_1`, `c_2` etc. into other commands,
 
 ```haskell
 if b then c_1 else c_2\ \ \ \ \ \ while b do c_1

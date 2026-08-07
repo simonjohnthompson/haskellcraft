@@ -1,0 +1,36 @@
+Haskell: The Craft of Functional Programming
+==============================================
+
+- [Preface](0.md)
+- [Chapter 1: Introducing functional programming](1.md)
+- [Chapter 2: Getting started with Haskell and GHCi](2.md)
+- [Chapter 3: Basic types and definitions](3.md)
+- [Chapter 4: Designing and writing programs](4.md)
+- [Chapter 5: Data types, tuples and lists](5.md)
+- [Chapter 6: Programming with lists](6.md)
+- [Chapter 7: Defining functions over lists](7.md)
+- [Chapter 8: Playing the game: I/O in Haskell](8.md)
+- [Chapter 9: Reasoning about programs](9.md)
+- [Chapter 10: Generalization: patterns of computation](10.md)
+- [Chapter 11: Higher-order functions](11.md)
+- [Chapter 12: Developing higher-order programs](12.md)
+- [Chapter 13: Overloading, type classes and type checking](13.md)
+- [Chapter 14: Algebraic types](14.md)
+- [Chapter 15: Case study: Huffman codes](15.md)
+- [Chapter 16: Abstract data types](16.md)
+- [Chapter 17: Lazy programming](17.md)
+- [Chapter 18: Programming with monads](18.md)
+- [Chapter 19: Domain-Specific Languages](19.md)
+- [Chapter 20: Time and space behaviour](20.md)
+- [Chapter 21: Conclusion](21.md)
+- [Appendix A: Functional, imperative and OO programming](appendix1.md)
+- [Appendix B: Glossary](glossary.md)
+- [Appendix C: Haskell operators](opsTable.md)
+- [Appendix D: Haskell practicalities](otherHs.md)
+- [Appendix E: GHCi errors](errors.md)
+- [Appendix F: Project ideas](projects.md)
+
+---
+
+- [Index](index.md)
+- [References](bibliography.md)

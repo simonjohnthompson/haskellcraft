@@ -147,6 +147,8 @@ def clean_label_text(text):
         text = re.sub(r"\\" + name + r"(?![a-zA-Z])(\{\})?", symbol, text)
     for esc, plain in (("#", "#"), ("%", "%"), ("&", "&"), ("_", "_"), ("$", "$")):
         text = text.replace("\\" + esc, plain)
+    for spacer in (",", ";", "!", " "):  # LaTeX inter-word spacing tweaks
+        text = text.replace("\\" + spacer, " ")
     text = re.sub(r"\\[a-zA-Z]+", "", text)  # anything else left -> drop the command
     text = text.replace("{", "").replace("}", "")
     return re.sub(r"\s+", " ", text).strip()
@@ -556,6 +558,55 @@ def build_index_page(out_dir: Path):
             lines.extend(_render_index_node(sort_key, tree[sort_key], 0))
         lines.append("")
     out_path = out_dir / "index.md"
+    out_path.write_text("\n".join(lines), encoding="utf-8")
+    return out_path
+
+
+def chapter_titles():
+    """stem -> cleaned title, read from each file's own \\chapter{...} or
+    \\chapter*{...} (root.tex \\includes every CHAPTER_STEMS file at
+    exactly that level -- one chapter/appendix heading each)."""
+    titles = {}
+    pattern = re.compile(r"\\chapter\*?\{")
+    for stem in CHAPTER_STEMS:
+        path = BOOK_DIR / f"{stem}.tex"
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        m = pattern.search(text)
+        if not m:
+            continue
+        j = _find_matching_brace(text, m.end() - 1)
+        titles[stem] = clean_label_text(text[m.end():j - 1])
+    return titles
+
+
+def build_toc_page(out_dir: Path):
+    """The book's own structure -- chapters 1-21 numbered, 0 a bare
+    \\chapter* (Preface), and everything after root.tex's \\appendix
+    switching to letters (Appendix A, B, ...) -- mirrored as a plain
+    navigation page, since nothing else links to the 22 chapter files or
+    bibliography.md/index.md.
+    """
+    titles = chapter_titles()
+    appendix_start = CHAPTER_STEMS.index("appendix1")
+    lines = ["Haskell: The Craft of Functional Programming", "=" * 46, ""]
+    for i, stem in enumerate(CHAPTER_STEMS):
+        title = titles.get(stem, stem)
+        if stem == "0":
+            label = title  # bare \chapter* -- e.g. "Preface", not numbered
+        elif i < appendix_start:
+            label = f"Chapter {stem}: {title}"
+        else:
+            letter = chr(ord("A") + (i - appendix_start))
+            label = f"Appendix {letter}: {title}"
+        lines.append(f"- [{label}]({stem}.md)")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+    lines.append("- [Index](index.md)")
+    lines.append("- [References](bibliography.md)")
+    out_path = out_dir / "toc.md"
     out_path.write_text("\n".join(lines), encoding="utf-8")
     return out_path
 
@@ -1071,3 +1122,5 @@ if __name__ == "__main__":
         print(f"(bibliography) -> {bib_path}")
         index_path = build_index_page(out_dir)
         print(f"(index) -> {index_path}")
+        toc_path = build_toc_page(out_dir)
+        print(f"(toc) -> {toc_path}")

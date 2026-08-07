@@ -590,7 +590,11 @@ def build_index_page(out_dir: Path):
         for sort_key in sorted(by_letter[letter], key=str.lower):
             lines.extend(_render_index_node(sort_key, tree[sort_key], 0))
         lines.append("")
-    out_path = out_dir / "index.md"
+    # Not "index.md": mdBook reserves index.html for the book's own
+    # landing page (a copy of SUMMARY.md's first entry) -- a src/index.md
+    # of ours would silently win that filename collision and replace the
+    # landing page with this term index instead.
+    out_path = out_dir / "term-index.md"
     out_path.write_text("\n".join(lines), encoding="utf-8")
     return out_path
 
@@ -639,16 +643,19 @@ def _numbered_chapter_labels():
 
 def build_toc_page(out_dir: Path):
     """A plain navigation page, since nothing else links to the 22
-    chapter files or bibliography.md/index.md."""
+    chapter files or bibliography.md/term-index.md."""
     lines = ["Haskell: The Craft of Functional Programming", "=" * 46, ""]
     for stem, label in _numbered_chapter_labels():
         lines.append(f"- [{label}]({stem}.md)")
     lines.append("")
     lines.append("---")
     lines.append("")
-    lines.append("- [Index](index.md)")
+    lines.append("- [Index](term-index.md)")
     lines.append("- [References](bibliography.md)")
-    out_path = out_dir / "toc.md"
+    # Not "toc.md": mdBook reserves toc.html for its own sidebar iframe
+    # (the no-JS fallback navigation) -- a src/toc.md of ours would
+    # silently lose that filename collision to mdBook's own file.
+    out_path = out_dir / "overview.md"
     out_path.write_text("\n".join(lines), encoding="utf-8")
     return out_path
 
@@ -668,7 +675,7 @@ def build_summary_page(out_dir: Path):
     lines += ["", "# Appendices", ""]
     for stem in CHAPTER_STEMS[appendix_start:]:
         lines.append(f"- [{labels[stem]}]({stem}.md)")
-    lines += ["", "---", "", "[Index](index.md)", "[References](bibliography.md)"]
+    lines += ["", "---", "", "[Index](term-index.md)", "[References](bibliography.md)"]
     out_path = out_dir / "SUMMARY.md"
     out_path.write_text("\n".join(lines), encoding="utf-8")
     return out_path
@@ -1240,7 +1247,17 @@ def postprocess(md: str, current_file: str) -> str:
     # doesn't render the images itself -- convert Pictures/*.pdf to
     # Pictures/*.png separately (e.g. `sips -s format png` on macOS, or
     # `pdftoppm`/`pdftocairo` from poppler elsewhere) before publishing.
-    md = re.sub(r"(Pictures/[A-Za-z0-9_.\-]+)\.pdf", r"\1.png", md)
+    # Some \includegraphics calls in the book omit the extension
+    # entirely (LaTeX tries .pdf/.png/... in turn), which needs the same
+    # rewrite as an explicit .pdf -- just appending rather than replacing.
+    def _web_image_ext(m):
+        path = m.group(1)
+        if path.lower().endswith((".png", ".jpg", ".jpeg", ".gif")):
+            return path
+        if path.lower().endswith(".pdf"):
+            return path[:-4] + ".png"
+        return path + ".png"
+    md = re.sub(r"(Pictures/[A-Za-z0-9_.\-]+)(?=[)\s\"])", _web_image_ext, md)
 
     return md
 

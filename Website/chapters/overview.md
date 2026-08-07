@@ -32,5 +32,5 @@ Haskell: The Craft of Functional Programming
 
 ---
 
-- [Index](index.md)
+- [Index](term-index.md)
 - [References](bibliography.md)

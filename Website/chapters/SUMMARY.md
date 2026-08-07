@@ -37,5 +37,5 @@
 
 ---
 
-[Index](index.md)
+[Index](term-index.md)
 [References](bibliography.md)

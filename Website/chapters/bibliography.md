@@ -19,9 +19,9 @@ References
 
 <a id="erlangProg"></a>Francesco Cesarini and Simon Thompson, *Erlang Programming: A Concurrent Approach to Software Development*, O'Reilly, 2009.
 
-<a id="monadicQC"></a>Koen Claessen and John Hughes, “Testing monadic code with QuickCheck”, In *Haskell '02*, 65--77, ACM, 2002.
-
 <a id="quickCheck"></a>Koen Claessen and John Hughes, “QuickCheck: a lightweight tool for random testing of Haskell programs”, In *ICFP '00*, 268--279, ACM, 2000.
+
+<a id="monadicQC"></a>Koen Claessen and John Hughes, “Testing monadic code with QuickCheck”, In *Haskell '02*, 65--77, ACM, 2002.
 
 <a id="specBasedTesting"></a>Koen Claessen and John Hughes, “Specification-based testing with QuickCheck”, In *The Fun of Programming*, Palgrave, 2003.
 
@@ -57,9 +57,9 @@ References
 
 <a id="realWorldHaskell"></a>Bryan O'Sullivan, Don Stewart, and John Goerzen, *Real World Haskell*, O'Reilly, 2008.
 
-<a id="awkwardSquad"></a>Simon Peyton Jones, “Tackling the awkward squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell”, 2001. Available at <http://research.microsoft.com/en-us/um/people/simonpj/papers/marktoberdorf/>.
-
 <a id="pj"></a>Simon Peyton Jones, *The Implementation of Functional Programming Languages*, Prentice Hall, 1987.
+
+<a id="awkwardSquad"></a>Simon Peyton Jones, “Tackling the awkward squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell”, 2001. Available at <http://research.microsoft.com/en-us/um/people/simonpj/papers/marktoberdorf/>.
 
 <a id="pj-lester"></a>Simon Peyton Jones and David Lester, *Implementing functional languages*, Prentice Hall, 1992.
 

@@ -112,13 +112,41 @@ CHAPTER_STEMS = [str(i) for i in range(0, 22)] + [
 ]
 
 
+# Bare zero-argument symbol/logic macros that show up inside code listings
+# (mostly in the proof/property exercises, e.g. `\all{}x (square x = x*x)`)
+# and, via \symbol{N}-spelled operator characters, in a few index entries
+# for symbolic operators (e.g. \symbol{62}\symbol{46}\symbol{62} for the
+# book's `>.>` operator, escaped that way because a literal `>.>` in an
+# \index{} argument would collide with the syntax there).
+SYMBOL_MACROS = {
+    "dag": "†", "dagger": "†", "ddag": "‡",
+    "geqq": "≥", "leqq": "≤", "lll": "≪", "eqq": "≡",
+    "geq": "≥", "leq": "≤", "neq": "≠", "times": "×", "cdot": "·",
+    "cup": "∪", "cap": "∩", "in": "∈", "notin": "∉", "subseteq": "⊆", "subset": "⊂",
+    "Th": "Θ",
+    "all": "∀", "allv": "∀", "exi": "∃", "forall": "∀", "exists": "∃",
+    "ou": "∨", "an": "∧", "imp": "⇒", "no": "¬",
+    "bi": "⇔", "turn": "⊢", "bo": "⊥", "se": "≡",
+    "step": "~>",
+}
+
+
 def clean_label_text(text):
-    """Flatten inline formatting out of a heading/caption so it's usable
-    as plain link text (e.g. \\texttt{Pictures} -> Pictures)."""
+    """Flatten inline formatting out of a heading/caption/index term so
+    it's usable as plain display text (e.g. \\texttt{Pictures} ->
+    Pictures, \\symbol{62} -> >, \\forall -> ∀)."""
     for macro in ("texttt", "textbf", "textit", "emph", "textrm", "textsl", "textsc"):
         text = strip_balanced_macro(text, macro, lambda arg: arg)
     text = strip_balanced_macro(text, "index", lambda arg: "")
     text = strip_balanced_macro(text, "minx", lambda arg: "")
+    text = strip_balanced_macro(text, "symbol", lambda arg: chr(int(arg)) if arg.strip().isdigit() else "")
+    text = strip_two_arg_macro(text, "rule", lambda a, b: "")  # e.g. \blackbox's \rule{8pt}{8pt}
+    text = re.sub(r"\\\(|\\\)|\\\[|\\\]", "", text)
+    text = re.sub(r"(?<!\\)\$([^$]*)\$", r"\1", text)
+    for name, symbol in SYMBOL_MACROS.items():
+        text = re.sub(r"\\" + name + r"(?![a-zA-Z])(\{\})?", symbol, text)
+    for esc, plain in (("#", "#"), ("%", "%"), ("&", "&"), ("_", "_"), ("$", "$")):
+        text = text.replace("\\" + esc, plain)
     text = re.sub(r"\\[a-zA-Z]+", "", text)  # anything else left -> drop the command
     text = text.replace("{", "").replace("}", "")
     return re.sub(r"\s+", " ", text).strip()
@@ -374,6 +402,164 @@ def format_bib_entry(key):
     return text
 
 
+# Short link labels for the back-of-book index (a term can rack up dozens
+# of chapter mentions -- "1, 2, 15" reads far better than the full title
+# repeated every time).
+CHAPTER_SHORT_LABELS = {str(i): f"Ch. {i}" for i in range(0, 22)}
+CHAPTER_SHORT_LABELS.update({
+    "appendix1": "Appendix", "glossary": "Glossary", "opsTable": "Operators",
+    "otherHs": "Other implementations", "errors": "Errors", "projects": "Projects",
+})
+
+
+def _split_index_level(s, ch):
+    """Split an \\index{...} argument on `ch` (! between hierarchy levels,
+    @ between a sort key and its display text), skipping occurrences that
+    are escaped (\\!) or inside a brace group (so a literal ! or @ that
+    happens to land inside e.g. \\texttt{...} doesn't split the entry)."""
+    parts = []
+    current = []
+    depth = 0
+    i = 0
+    while i < len(s):
+        c = s[i]
+        if c == "\\" and i + 1 < len(s):
+            current.append(s[i:i + 2])
+            i += 2
+            continue
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+        if c == ch and depth == 0:
+            parts.append("".join(current))
+            current = []
+            i += 1
+            continue
+        current.append(c)
+        i += 1
+    parts.append("".join(current))
+    return parts
+
+
+def parse_index_entry(arg):
+    """\\index{...} syntax (makeidx convention): term[!subterm...][@display]
+    [|( or |) (range markers, meaningless without page numbers, ignored)
+    or |see{...}/|seealso{...}]. Returns (levels, see_target) where levels
+    is [(sort_key, display_text), ...], one pair per hierarchy level, and
+    see_target is a cleaned "see also" string or None.
+    """
+    # |( and |) (range markers) have no argument; |see{...}/|seealso{...}
+    # do, and that argument routinely contains further braces of its own
+    # (\index{sequencing|see{\texttt{do}}}), so it needs the same
+    # balanced-brace scan as everything else, not a [^{}]* regex.
+    see_target = None
+    if arg.endswith("|(") or arg.endswith("|)"):
+        arg = arg[:-2]
+    else:
+        m = re.search(r"\|(see|seealso)\{", arg)
+        if m and _find_matching_brace(arg, m.end() - 1) == len(arg):
+            target = arg[m.end():-1]
+            see_target = clean_label_text(target)
+            arg = arg[:m.start()]
+
+    levels = []
+    for level in _split_index_level(arg, "!"):
+        # Exactly one @ is the documented syntax (key@display); rejoin
+        # anything past a second one rather than silently dropping it --
+        # e.g. one entry in the book has a doubled @ that looks like a
+        # source typo.
+        segments = _split_index_level(level, "@")
+        sort_key = clean_label_text(segments[0])
+        display = clean_label_text("@".join(segments[1:])) if len(segments) > 1 else sort_key
+        levels.append((sort_key or display, display or sort_key))
+    return levels, see_target
+
+
+def build_index_tree():
+    """Scan every chapter's real \\index{...} entries into a term tree:
+    {sort_key: {"display": str, "files": set(), "see": str|None,
+                "children": {...}}}. Terms merge across chapters (and
+    across slightly different \\index{} spellings of the same term) by
+    sort key, e.g. "scale@\\texttt{scale}" always merging under "scale".
+    """
+    root = {}
+    pattern = re.compile(r"\\index\{")
+    for stem in CHAPTER_STEMS:
+        path = BOOK_DIR / f"{stem}.tex"
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        pos = 0
+        while True:
+            m = pattern.search(text, pos)
+            if not m:
+                break
+            j = _find_matching_brace(text, m.end() - 1)
+            arg = text[m.end():j - 1]
+            pos = j
+
+            levels, see_target = parse_index_entry(arg)
+            if any(not sort_key.strip() for sort_key, _ in levels):
+                # A handful of entries index a symbol via a macro this
+                # script doesn't decode (\imp, \forall in math mode, ...)
+                # and clean to nothing -- not a useful web index term.
+                continue
+            node_dict = root
+            node = None
+            for sort_key, display in levels:
+                node = node_dict.setdefault(
+                    sort_key, {"display": display, "files": set(), "see": None, "children": {}}
+                )
+                node_dict = node["children"]
+            if node is None:
+                continue
+            if see_target:
+                node["see"] = see_target
+            else:
+                node["files"].add(stem)
+    return root
+
+
+def _render_index_node(sort_key, node, depth):
+    label = CHAPTER_SHORT_LABELS
+    indent = "  " * depth
+    bullet = f"{indent}- **{node['display']}**" if depth == 0 else f"{indent}- {node['display']}"
+    if node["see"]:
+        line = f"{bullet} — see *{node['see']}*"
+    else:
+        links = ", ".join(
+            f"[{label.get(f, f)}]({f}.md)" for f in sorted(node["files"], key=_chapter_sort_key)
+        )
+        line = f"{bullet} — {links}" if links else bullet
+    lines = [line]
+    for child_key in sorted(node["children"], key=str.lower):
+        lines.extend(_render_index_node(child_key, node["children"][child_key], depth + 1))
+    return lines
+
+
+def _chapter_sort_key(stem):
+    return (0, int(stem)) if stem.isdigit() else (1, CHAPTER_STEMS.index(stem))
+
+
+def build_index_page(out_dir: Path):
+    tree = build_index_tree()
+    lines = ["Index", "=====", ""]
+    by_letter = {}
+    for sort_key, node in tree.items():
+        letter = (sort_key[:1] or "#").upper()
+        by_letter.setdefault(letter, []).append(sort_key)
+    for letter in sorted(by_letter):
+        lines.append(f"### {letter}")
+        lines.append("")
+        for sort_key in sorted(by_letter[letter], key=str.lower):
+            lines.extend(_render_index_node(sort_key, tree[sort_key], 0))
+        lines.append("")
+    out_path = out_dir / "index.md"
+    out_path.write_text("\n".join(lines), encoding="utf-8")
+    return out_path
+
+
 # Plain LaTeX text-mode escapes that survive into code listings; only
 # meaningful once we're inside a verbatim block (elsewhere pandoc's LaTeX
 # reader already converts these on its own).
@@ -393,19 +579,6 @@ ESCAPED_CHARS = {
 # characters only once (in preprocess(), after all of that has run).
 BRACE_PLACEHOLDER_OPEN = "\uE000"
 BRACE_PLACEHOLDER_CLOSE = "\uE001"
-
-# Bare zero-argument symbol/logic macros that show up inside code listings
-# (mostly in the proof/property exercises, e.g. `\all{}x (square x = x*x)`).
-SYMBOL_MACROS = {
-    "dag": "†", "dagger": "†", "ddag": "‡",
-    "geqq": "≥", "leqq": "≤", "lll": "≪", "eqq": "≡",
-    "geq": "≥", "leq": "≤", "neq": "≠", "times": "×", "cdot": "·",
-    "cup": "∪", "cap": "∩", "in": "∈", "notin": "∉", "subseteq": "⊆", "subset": "⊂",
-    "Th": "Θ",
-    "all": "∀", "allv": "∀", "exi": "∃", "forall": "∀", "exists": "∃",
-    "ou": "∨", "an": "∧", "imp": "⇒", "no": "¬",
-    "bi": "⇔", "turn": "⊢", "bo": "⊥", "se": "≡",
-}
 
 # Bare font/typeface declarations with no argument -- meaningless in a
 # code block that's monospace already, so just drop the token.
@@ -868,14 +1041,15 @@ def build_cited_keys():
 
 
 def build_bibliography_page(out_dir: Path):
-    keys = sorted(
-        build_cited_keys(),
-        key=lambda k: format_citation_authors(
-            (BIB_ENTRIES.get(k, {}).get("fields", {}).get("author"))
-            or BIB_ENTRIES.get(k, {}).get("fields", {}).get("editor")
-            or k
-        ).lower(),
-    )
+    # build_cited_keys() returns a set, whose iteration order isn't
+    # guaranteed across runs -- two works by the same authors (e.g. two
+    # Claessen & Hughes papers) tie on the primary sort key, so without a
+    # deterministic tiebreaker their relative order could vary run to run.
+    def sort_key(k):
+        fields = BIB_ENTRIES.get(k, {}).get("fields", {})
+        who = format_citation_authors(fields.get("author") or fields.get("editor") or k).lower()
+        return (who, fields.get("year", ""), k)
+    keys = sorted(build_cited_keys(), key=sort_key)
     lines = ["References", "==========", ""]
     for key in keys:
         lines.append(f'<a id="{key}"></a>{format_bib_entry(key)}')
@@ -895,3 +1069,5 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         bib_path = build_bibliography_page(out_dir)
         print(f"(bibliography) -> {bib_path}")
+        index_path = build_index_page(out_dir)
+        print(f"(index) -> {index_path}")

@@ -1158,6 +1158,37 @@ def preprocess(tex):
     tex = re.sub(r"\\begin\{wrapfigure\}(?:\[[^\]]*\])?\{[^{}]*\}\{[^{}]*\}", "", tex)
     tex = re.sub(r"\\end\{wrapfigure\}", "", tex)
 
+    # \begin{example}...\end{example} (root.tex: \newtheorem{example}
+    # {Example}) groups a run of \subexample*{N.}/\subsubexample*{N. Title}
+    # sub-items -- always several per block, always starred, always
+    # renumbered from 1 inside each block (verified across every use in
+    # chapters 4/5/7/8/9/17/20). \subexample's \@startsection afterskip is
+    # negative (-1em) -- LaTeX's convention for a *run-in* heading, so the
+    # title flows into the same paragraph as the text after it;
+    # \subsubexample's is positive (6pt), i.e. a normal standalone
+    # paragraph heading. Pandoc has no notion of any of these three
+    # commands, and -- unlike \begin{wrapfigure}'s arguments -- silently
+    # drops each one's argument entirely rather than leaking it as text,
+    # so every sub-example's title/number vanishes outright without this.
+    #
+    # \newtheorem{example}{Example} has no [chapter] qualifier, so in the
+    # real book \begin{example}'s own number counts up across the whole
+    # book; reproducing that exactly would need a script-run-order-
+    # dependent global counter, fragile for converting a single chapter
+    # in isolation (as this script is routinely used for while testing).
+    # Numbered per chapter instead: still distinguishes one worked-example
+    # block from the next, without depending on what else got converted
+    # in this run.
+    example_counter = [0]
+
+    def _next_example_label(_m):
+        example_counter[0] += 1
+        return "\n\n" + r"\textbf{Example %d.}" % example_counter[0] + "\n\n"
+    tex = re.sub(r"\\begin\{example\}", _next_example_label, tex)
+    tex = re.sub(r"\\end\{example\}", "", tex)
+    tex = strip_balanced_macro(tex, "subexample*", lambda arg: r"\textbf{%s} " % arg)
+    tex = strip_balanced_macro(tex, "subsubexample*", lambda arg: "\n\n" + r"\textbf{%s}" % arg + "\n\n")
+
     # Now safe to swap in real brace characters -- every pass above that
     # depends on brace-depth counting has already run.
     tex = tex.replace(BRACE_PLACEHOLDER_OPEN, "{").replace(BRACE_PLACEHOLDER_CLOSE, "}")

@@ -56,3 +56,6 @@ cabal.project.local~
 ## Python:
 __pycache__/
 *.pyc
+
+## mdBook build output:
+Website/book/

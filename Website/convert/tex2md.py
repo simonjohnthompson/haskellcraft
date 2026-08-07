@@ -581,25 +581,34 @@ def chapter_titles():
     return titles
 
 
-def build_toc_page(out_dir: Path):
-    """The book's own structure -- chapters 1-21 numbered, 0 a bare
-    \\chapter* (Preface), and everything after root.tex's \\appendix
-    switching to letters (Appendix A, B, ...) -- mirrored as a plain
-    navigation page, since nothing else links to the 22 chapter files or
-    bibliography.md/index.md.
+def _numbered_chapter_labels():
+    """[(stem, label), ...] for every CHAPTER_STEMS file: chapters 1-21
+    numbered, 0's bare \\chapter* left as-is (e.g. "Preface"), and
+    everything from root.tex's \\appendix onward lettered (Appendix A,
+    B, ...) -- the book's own numbering scheme, read from each file's
+    real \\chapter{...}/\\chapter*{...} title via chapter_titles().
     """
     titles = chapter_titles()
     appendix_start = CHAPTER_STEMS.index("appendix1")
-    lines = ["Haskell: The Craft of Functional Programming", "=" * 46, ""]
+    labels = []
     for i, stem in enumerate(CHAPTER_STEMS):
         title = titles.get(stem, stem)
         if stem == "0":
-            label = title  # bare \chapter* -- e.g. "Preface", not numbered
+            label = title
         elif i < appendix_start:
             label = f"Chapter {stem}: {title}"
         else:
             letter = chr(ord("A") + (i - appendix_start))
             label = f"Appendix {letter}: {title}"
+        labels.append((stem, label))
+    return labels
+
+
+def build_toc_page(out_dir: Path):
+    """A plain navigation page, since nothing else links to the 22
+    chapter files or bibliography.md/index.md."""
+    lines = ["Haskell: The Craft of Functional Programming", "=" * 46, ""]
+    for stem, label in _numbered_chapter_labels():
         lines.append(f"- [{label}]({stem}.md)")
     lines.append("")
     lines.append("---")
@@ -607,6 +616,27 @@ def build_toc_page(out_dir: Path):
     lines.append("- [Index](index.md)")
     lines.append("- [References](bibliography.md)")
     out_path = out_dir / "toc.md"
+    out_path.write_text("\n".join(lines), encoding="utf-8")
+    return out_path
+
+
+def build_summary_page(out_dir: Path):
+    """SUMMARY.md, in the exact structure mdBook requires for its sidebar:
+    an unlisted prefix chapter (the Preface), a numbered "Chapters" part,
+    a lettered "Appendices" part, then Index/References as unlisted
+    suffix chapters after a horizontal rule. See
+    https://rust-lang.github.io/mdBook/format/summary.html
+    """
+    labels = dict(_numbered_chapter_labels())
+    appendix_start = CHAPTER_STEMS.index("appendix1")
+    lines = ["# Summary", "", f"[{labels['0']}](0.md)", "", "# Chapters", ""]
+    for stem in CHAPTER_STEMS[1:appendix_start]:
+        lines.append(f"- [{labels[stem]}]({stem}.md)")
+    lines += ["", "# Appendices", ""]
+    for stem in CHAPTER_STEMS[appendix_start:]:
+        lines.append(f"- [{labels[stem]}]({stem}.md)")
+    lines += ["", "---", "", "[Index](index.md)", "[References](bibliography.md)"]
+    out_path = out_dir / "SUMMARY.md"
     out_path.write_text("\n".join(lines), encoding="utf-8")
     return out_path
 
@@ -1124,3 +1154,5 @@ if __name__ == "__main__":
         print(f"(index) -> {index_path}")
         toc_path = build_toc_page(out_dir)
         print(f"(toc) -> {toc_path}")
+        summary_path = build_summary_page(out_dir)
+        print(f"(summary) -> {summary_path}")

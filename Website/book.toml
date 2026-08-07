@@ -1,0 +1,15 @@
+[book]
+title = "Haskell: The Craft of Functional Programming"
+authors = ["Simon Thompson"]
+description = "Online edition of Haskell: The Craft of Functional Programming, 3rd edition"
+src = "chapters"
+language = "en"
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "navy"
+git-repository-url = "https://github.com/simonjohnthompson/haskellcraft"
+mathjax-support = true
+
+[output.html.search]
+enable = true

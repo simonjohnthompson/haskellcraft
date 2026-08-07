@@ -33,7 +33,7 @@ A second problem is to implement an *interactive* version of the game in which a
 
 ### Web graphics {#web-graphics .unnumbered}
 
-The web is moving towards a new standard, HTML5, which will directly render Scalable Vector Graphics (SVG) \[CITE:SVG\] in web browsers. We have used SVG as a way of rendering our pictures, but in doing this we have barely scratched the surface of what is possible. The `gtk` package renders SVG using the Cairo system, but the aim of the projects discussed here is to use standard web technology to do the 'heavy lifting' of rendering.
+The web is moving towards a new standard, HTML5, which will directly render Scalable Vector Graphics (SVG) ([SVG 2010](bibliography.md#SVG)) in web browsers. We have used SVG as a way of rendering our pictures, but in doing this we have barely scratched the surface of what is possible. The `gtk` package renders SVG using the Cairo system, but the aim of the projects discussed here is to use standard web technology to do the 'heavy lifting' of rendering.
 
 #### Representing SVG {#representing-svg .unnumbered}
 
@@ -51,7 +51,7 @@ Alternatively, it is possible to build interactivity using JavaScript, either "r
 
 ### Logic {#logic .unnumbered}
 
-Logic is a branch of mathematics closely linked to computer science \[CITE:HuthAndRyan\], and implementing various logical procedures is a great way to understand precisely how logic works.
+Logic is a branch of mathematics closely linked to computer science ([Huth and Ryan 2004](bibliography.md#HuthAndRyan)), and implementing various logical procedures is a great way to understand precisely how logic works.
 
 #### Truth tables {#truth-tables .unnumbered}
 
@@ -63,7 +63,7 @@ The practicalities of deciding whether or not a formula is satisfiable, the *SAT
 
 #### Tableaux {#tableaux .unnumbered}
 
-Semantic tableaux give a decision procedure not just for propositional logic, but also for temporal and other modal logics. A tableau method is a *constructive* mechanism, which will find all the interpretations satisfying a particular formula. This project is to implement a *tableau procedure* for propositional logic; can also look at tableaux for the temporal logics in \[CITE:HuthAndRyan\].
+Semantic tableaux give a decision procedure not just for propositional logic, but also for temporal and other modal logics. A tableau method is a *constructive* mechanism, which will find all the interpretations satisfying a particular formula. This project is to implement a *tableau procedure* for propositional logic; can also look at tableaux for the temporal logics in ([Huth and Ryan 2004](bibliography.md#HuthAndRyan)).
 
 #### Proof {#proof .unnumbered}
 
@@ -89,7 +89,7 @@ What is the best way to get the result that you want? On the basis of historical
 
 ### Finite-state machines {#finite-state-machines .unnumbered}
 
-One of the fundamental abstractions in computer science is the *finite-state machine* (FSM) \[CITE:dragon2ed\]. We saw earlier that we can write recognisers for regular expressions, but more efficient implementations are given by deriving NFAs from regular expressions, and then (minimal) DFAs from those NFAs.
+One of the fundamental abstractions in computer science is the *finite-state machine* (FSM) ([Aho et al. 2006](bibliography.md#dragon2ed)). We saw earlier that we can write recognisers for regular expressions, but more efficient implementations are given by deriving NFAs from regular expressions, and then (minimal) DFAs from those NFAs.
 
 #### Conversion chain {#conversion-chain .unnumbered}
 
@@ -107,7 +107,7 @@ Develop mechanisms which provide a *visualisation* of the operation of an FSM. a
 
 One theme of this book has been domain-specific languages, and as a part of some of these projects you could build a domain-specific language. Examples include
 
--   A language for describing games has been defined by Conway \[CITE:conwayGames,winningWays\]: look at how you can build a DSL for these games; you could also look at a language for describing strategies to play these games.
+-   A language for describing games has been defined by Conway ([Conway 2002](bibliography.md#conwayGames); [Berlekamp et al. 2001](bibliography.md#winningWays)): look at how you can build a DSL for these games; you could also look at a language for describing strategies to play these games.
 
 -   A language for describing different voting systems: your simulations and visualisations could then work with an arbitrary voting system, as described in the language.
 

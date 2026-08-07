@@ -197,6 +197,183 @@ def build_label_map():
 
 LABEL_MAP = build_label_map()
 
+# LaTeX accent commands that show up in author names (BibTeX escapes them
+# so they survive non-UTF-8 tools) -- e.g. Lipova{\v c}a.
+LATEX_ACCENTS = {
+    "v c": "č", "v C": "Č", "v s": "š", "v S": "Š", "v z": "ž", "v Z": "Ž",
+    "'e": "é", "'a": "á", "'i": "í", "'o": "ó", "'u": "ú",
+    "`e": "è", "`a": "à", "~n": "ñ", '"o': "ö", '"u': "ü",
+}
+
+
+def clean_bib_text(text):
+    """Flatten a BibTeX field value into plain display text: brace-protected
+    capitalization ({{Title}}, {F}unctional), name/case escapes ({\\v c}),
+    \\# and friends, and a \\texttt{URL}/\\url{URL} howpublished note
+    turned into a real link.
+    """
+    for cmd, replacement in LATEX_ACCENTS.items():
+        text = text.replace("{\\" + cmd + "}", replacement)
+    text = strip_balanced_macro(text, "texttt", lambda arg: f"<{arg}>")
+    text = strip_balanced_macro(text, "url", lambda arg: f"<{arg}>")
+    text = text.replace(r"\#", "#").replace(r"\&", "&").replace(r"\%", "%")
+    text = text.replace("{", "").replace("}", "")
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _split_bib_names(field):
+    """BibTeX author/editor lists are " and "-separated; each name is
+    either "First Last" or "Last, First", and a multi-word surname may be
+    brace-protected ("Simon {Peyton Jones}") so it isn't misread as
+    multiple names. That brace is the only thing distinguishing a
+    protected surname from an ordinary "First Last" name once it's
+    cleaned away, so it has to be checked before clean_bib_text() strips
+    it. Returns a list of (display_name, surname) pairs.
+    """
+    names = []
+    for raw in field.split(" and "):
+        raw = raw.strip()
+        if not raw:
+            continue
+        protected = re.search(r"\{([^{}]+)\}\s*$", raw)
+        if protected:
+            surname = clean_bib_text(protected.group(1))
+            display = clean_bib_text(raw)
+        elif "," in raw:
+            surname_part, _, rest = raw.partition(",")
+            surname = clean_bib_text(surname_part)
+            display = f"{clean_bib_text(rest)} {surname}".strip()
+        else:
+            display = clean_bib_text(raw)
+            tokens = display.split()
+            surname = tokens[-1] if tokens else display
+        names.append((display, surname))
+    return names
+
+
+def format_author_list(field):
+    """Full "First Last, First Last, and First Last" form, for the
+    bibliography entry itself."""
+    names = [d for d, _ in _split_bib_names(field)]
+    if not names:
+        return ""
+    if len(names) == 1:
+        return names[0]
+    if len(names) == 2:
+        return f"{names[0]} and {names[1]}"
+    return ", ".join(names[:-1]) + f", and {names[-1]}"
+
+
+def format_citation_authors(field):
+    """Short "Surname" / "Surname1 and Surname2" / "Surname1 et al." form,
+    for an inline \\cite/\\citeyear."""
+    surnames = [s for _, s in _split_bib_names(field)]
+    if not surnames:
+        return ""
+    if len(surnames) == 1:
+        return surnames[0]
+    if len(surnames) == 2:
+        return f"{surnames[0]} and {surnames[1]}"
+    return f"{surnames[0]} et al."
+
+
+def parse_bibtex(path):
+    """Minimal BibTeX parser: enough for this book's big.bib (no @string
+    macros, no crossref-inheritance), handling BibDesk's brace-nesting
+    (double braces for full-title case protection, single-word braces for
+    partial protection) via the same balanced-brace scanner used
+    everywhere else in this script.
+    """
+    entries = {}
+    if not path.exists():
+        return entries
+    text = path.read_text(encoding="utf-8", errors="replace")
+    entry_start = re.compile(r"@(\w+)\{([^,\s]+),")
+    pos = 0
+    while True:
+        m = entry_start.search(text, pos)
+        if not m:
+            break
+        entry_type, key = m.group(1).lower(), m.group(2)
+        fields = {}
+        fpos = m.end()
+        field_re = re.compile(r"\s*([A-Za-z][A-Za-z-]*)\s*=\s*")
+        while True:
+            fm = field_re.match(text, fpos)
+            if not fm:
+                break
+            name = fm.group(1).lower()
+            vpos = fm.end()
+            if vpos < len(text) and text[vpos] == "{":
+                j = _find_matching_brace(text, vpos)
+                value = text[vpos + 1:j - 1]
+                fpos = j
+            else:
+                # bare/unbraced value, e.g. Year = 1987
+                vm = re.match(r"[^,}]*", text[vpos:])
+                value = vm.group(0)
+                fpos = vpos + vm.end()
+            fields[name] = value
+            # optional trailing comma before the next field or entry close
+            comma = re.match(r"\s*,", text[fpos:])
+            if comma:
+                fpos += comma.end()
+        entries[key] = {"type": entry_type, "fields": fields}
+        pos = fpos
+    return entries
+
+
+BIB_ENTRIES = parse_bibtex(BOOK_DIR / "big.bib")
+
+
+def format_bib_entry(key):
+    """One reference-list entry, formatted roughly per the book's own
+    (Chicago, author-date) bibliography style."""
+    entry = BIB_ENTRIES.get(key)
+    if not entry:
+        return f"**{key}**: (source not found in big.bib)"
+    f = entry["fields"]
+    kind = entry["type"]
+    title = clean_bib_text(f.get("title", key))
+    year = clean_bib_text(f.get("year", "n.d."))
+
+    if "author" in f:
+        who = format_author_list(f["author"])
+    elif "editor" in f:
+        editor_names = _split_bib_names(f["editor"])
+        label = "eds." if len(editor_names) > 1 else "ed."
+        who = f"{format_author_list(f['editor'])} ({label})"
+    else:
+        who = ""
+
+    publisher = clean_bib_text(f["publisher"]) if "publisher" in f else ""
+    booktitle = clean_bib_text(f["booktitle"]) if "booktitle" in f else ""
+    journal = clean_bib_text(f["journal"]) if "journal" in f else ""
+    pages = clean_bib_text(f["pages"]) if "pages" in f else ""
+    howpublished = clean_bib_text(f["howpublished"]) if "howpublished" in f else ""
+    note = clean_bib_text(f["note"]) if "note" in f else ""
+
+    parts = [who] if who else []
+    parts.append(f"*{title}*" if kind in ("book", "proceedings") else f"“{title}”")
+    if kind == "inproceedings" and booktitle:
+        tail = f"In *{booktitle}*"
+        if pages:
+            tail += f", {pages}"
+        parts.append(tail)
+    elif kind == "incollection" and booktitle:
+        parts.append(f"In *{booktitle}*")
+    elif kind == "article" and journal:
+        parts.append(f"*{journal}*" + (f", {f['volume']}" if "volume" in f else ""))
+    if publisher and kind != "misc":
+        parts.append(publisher)
+    parts.append(year)
+    text = ", ".join(p for p in parts if p) + "."
+    for extra in (howpublished, note):
+        if extra:
+            text += f" {extra}" + ("" if extra.endswith(".") else ".")
+    return text
+
+
 # Plain LaTeX text-mode escapes that survive into code listings; only
 # meaningful once we're inside a verbatim block (elsewhere pandoc's LaTeX
 # reader already converts these on its own).
@@ -466,8 +643,12 @@ def preprocess(tex):
     tex = re.sub(r",?\s*page\s*\\pageref\{[^{}]*\}", "", tex)
     tex = strip_balanced_macro(tex, "pageref", lambda arg: "")
     tex = strip_balanced_macro(tex, "ref", lambda arg: f"XREFOPEN{arg}XREFCLOSE")
-    tex = strip_balanced_macro(tex, "cite", lambda arg: f"[CITE:{arg}]")
-    tex = strip_balanced_macro(tex, "citeyear", lambda arg: f"[CITE:{arg}]")
+
+    # \cite{a,b}/\citeyear{x} -> a sentinel resolved once the bibliography
+    # page exists to link against (build_bibliography_page(), called from
+    # __main__ after every chapter's been converted).
+    tex = strip_balanced_macro(tex, "citeyear", lambda arg: f"XCITEYEAROPEN{arg}XCITECLOSE")
+    tex = strip_balanced_macro(tex, "cite", lambda arg: f"XCITEOPEN{arg}XCITECLOSE")
 
     # Book-specific glyphs/commands with no args.
     tex = tex.replace(r"\step", "~>")
@@ -623,6 +804,36 @@ def postprocess(md: str, current_file: str) -> str:
         return f"[{info['text']}]({target}#{name})"
     md = re.sub(r"XREFOPEN([A-Za-z0-9_\-]+)XREFCLOSE", _resolve_ref, md)
 
+    # \cite{a,b}/\citeyear{x} -> XCITE(YEAR)OPEN...XCITECLOSE sentinels
+    # (see preprocess()) -> links into bibliography.md, one per key,
+    # "(Surname Year; Surname2 Year2)" -- or just the year for \citeyear.
+    def _resolve_cite(m, year_only):
+        parts = []
+        for key in m.group(1).split(","):
+            key = key.strip()
+            entry = BIB_ENTRIES.get(key)
+            if not entry:
+                parts.append(f"[{key}](bibliography.md#{key})")
+                continue
+            f = entry["fields"]
+            year = clean_bib_text(f.get("year", "n.d."))
+            if year_only:
+                text = year
+            else:
+                who = f.get("author") or f.get("editor")
+                author_text = format_citation_authors(who) if who else key
+                text = f"{author_text} {year}"
+            parts.append(f"[{text}](bibliography.md#{key})")
+        return "(" + "; ".join(parts) + ")"
+    md = re.sub(
+        r"XCITEYEAROPEN([A-Za-z0-9_,\-]+)XCITECLOSE",
+        lambda m: _resolve_cite(m, year_only=True), md,
+    )
+    md = re.sub(
+        r"XCITEOPEN([A-Za-z0-9_,\-]+)XCITECLOSE",
+        lambda m: _resolve_cite(m, year_only=False), md,
+    )
+
     # Pandoc's [text]{.underline} bracketed-span syntax isn't plain
     # CommonMark and can trip up MDX-based site generators -> plain HTML.
     md = re.sub(r"\[([^\[\]]*)\]\{\.underline\}", r"<u>\1</u>", md)
@@ -641,6 +852,39 @@ def postprocess(md: str, current_file: str) -> str:
     return md
 
 
+def build_cited_keys():
+    """Every key actually used in a \\cite/\\citeyear somewhere in the
+    book, so the reference list doesn't include big.bib's ~5000 unused
+    entries."""
+    keys = set()
+    pattern = re.compile(r"\\cite(?:year)?\{([^{}]+)\}")
+    for stem in CHAPTER_STEMS:
+        path = BOOK_DIR / f"{stem}.tex"
+        if not path.exists():
+            continue
+        for m in pattern.finditer(path.read_text(encoding="utf-8")):
+            keys.update(k.strip() for k in m.group(1).split(","))
+    return keys
+
+
+def build_bibliography_page(out_dir: Path):
+    keys = sorted(
+        build_cited_keys(),
+        key=lambda k: format_citation_authors(
+            (BIB_ENTRIES.get(k, {}).get("fields", {}).get("author"))
+            or BIB_ENTRIES.get(k, {}).get("fields", {}).get("editor")
+            or k
+        ).lower(),
+    )
+    lines = ["References", "==========", ""]
+    for key in keys:
+        lines.append(f'<a id="{key}"></a>{format_bib_entry(key)}')
+        lines.append("")
+    out_path = out_dir / "bibliography.md"
+    out_path.write_text("\n".join(lines), encoding="utf-8")
+    return out_path
+
+
 if __name__ == "__main__":
     out_dir = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path(".").resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -648,3 +892,6 @@ if __name__ == "__main__":
         src = BOOK_DIR / chapter
         result = convert_chapter(src, out_dir)
         print(f"{src} -> {result}")
+    if len(sys.argv) > 2:
+        bib_path = build_bibliography_page(out_dir)
+        print(f"(bibliography) -> {bib_path}")

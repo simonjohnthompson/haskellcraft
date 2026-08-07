@@ -130,6 +130,11 @@ SYMBOL_MACROS = {
     "step": "~>",
     "lambda": "λ", "uparrow": "↑", "downarrow": "↓", "epsilon": "ε",
     "pm": "±", "mid": "∣", "rightarrow": "→",
+    # Card-suit shorthands defined in root.tex, not any per-chapter file
+    # this script actually reads (\newcommand{\spade}{\ensuremath{\spadesuit}}
+    # and friends) -- used in Chapter 6's card-games exercise.
+    "spade": "♠", "heart": "♥", "dia": "♦", "club": "♣",
+    "spadesuit": "♠", "heartsuit": "♥", "diamondsuit": "♦", "clubsuit": "♣",
 }
 
 
@@ -985,7 +990,18 @@ def flatten_prose_math(text):
             continue
         out.append(c)
         i += 1
-    return "".join(out)
+    result = "".join(out)
+
+    # A handful of symbol macros (the card-suit shorthands, so far) get
+    # used bare in running prose rather than wrapped in $...$/\ensuremath{}
+    # -- real LaTeX still renders them correctly since \newcommand{\spade}
+    # {\ensuremath{\spadesuit}} enters math mode on its own, but nothing
+    # above touches text outside a math span, and Pandoc's LaTeX reader
+    # just drops a bare command it doesn't recognize. Catch those here,
+    # the same table simplify_alltt_body uses for code listings.
+    for name, symbol in SYMBOL_MACROS.items():
+        result = re.sub(r"\\" + name + r"(?![a-zA-Z])(\{\})?", symbol, result)
+    return result
 
 
 def escape_bare_underscores_in_texttt(text):
@@ -1047,9 +1063,11 @@ def preprocess(tex):
     pieces.append(flatten_prose_math(tex[pos:]))
     tex = "".join(pieces)
 
-    # Chapter 20's local \up{X} (mathematical superscript, e.g. n\up{2})
-    # used inline in prose, not just inside code listings.
+    # Chapter 20's local \up{X}, and root.tex's near-identical \uppp{X}
+    # (Chapter 12) -- both mean "superscript X" (e.g. n\up{2}), used
+    # inline in prose, not just inside code listings.
     tex = strip_balanced_macro(tex, "up", lambda arg: "^" + arg)
+    tex = strip_balanced_macro(tex, "uppp", lambda arg: "^" + arg)
 
     # Index entries carry no reader-visible content -> drop entirely.
     tex = strip_balanced_macro(tex, "index", lambda arg: "")
@@ -1128,6 +1146,17 @@ def preprocess(tex):
     tex = re.sub(r"\\end\{summary\}", r"", tex)
     tex = re.sub(r"\\begin\{(?:exercises|exerciseone)\}", r"\\textbf{Exercises}\n\\begin{enumerate}", tex)
     tex = re.sub(r"\\end\{(?:exercises|exerciseone)\}", r"\\end{enumerate}", tex)
+
+    # \begin{wrapfigure}[lines]{placement}{width} ... \end{wrapfigure}: the
+    # real wrapfig package (root.tex \usepackage{wrapfig}), for a figure
+    # with body text wrapped around it -- pandoc's LaTeX reader has no
+    # built-in notion of it, and without stripping this first, its
+    # [8]{r}{5cm}-style arguments leak into the page as literal text (e.g.
+    # "r5cm") right before the image. No plain-Markdown equivalent of
+    # text-wrap-around-a-figure anyway, so just drop the wrapper and keep
+    # the \includegraphics inside as an ordinary image.
+    tex = re.sub(r"\\begin\{wrapfigure\}(?:\[[^\]]*\])?\{[^{}]*\}\{[^{}]*\}", "", tex)
+    tex = re.sub(r"\\end\{wrapfigure\}", "", tex)
 
     # Now safe to swap in real brace characters -- every pass above that
     # depends on brace-depth counting has already run.

@@ -105,6 +105,98 @@ def _load_subscript_shorthands():
 
 SUBSCRIPT_SHORTHANDS = _load_subscript_shorthands()
 
+# The order root.tex \includes them in -- also the book's own chapter
+# numbering (0 is the intro; the back matter has no chapter number).
+CHAPTER_STEMS = [str(i) for i in range(0, 22)] + [
+    "appendix1", "glossary", "opsTable", "otherHs", "errors", "projects",
+]
+
+
+def clean_label_text(text):
+    """Flatten inline formatting out of a heading/caption so it's usable
+    as plain link text (e.g. \\texttt{Pictures} -> Pictures)."""
+    for macro in ("texttt", "textbf", "textit", "emph", "textrm", "textsl", "textsc"):
+        text = strip_balanced_macro(text, macro, lambda arg: arg)
+    text = strip_balanced_macro(text, "index", lambda arg: "")
+    text = strip_balanced_macro(text, "minx", lambda arg: "")
+    text = re.sub(r"\\[a-zA-Z]+", "", text)  # anything else left -> drop the command
+    text = text.replace("{", "").replace("}", "")
+    return re.sub(r"\s+", " ", text).strip()
+
+
+# Matches whichever of these comes next; m.lastgroup says which.
+_LABEL_CONTEXT_TOKEN = re.compile(
+    r"(?P<heading>\\(?:chapter|section|subsection|subsubsection)\*?\{)"
+    r"|(?P<caption>\\caption\{)"
+    r"|(?P<label>\\label\{)"
+    r"|(?P<chapstart>\\chapstart(?![a-zA-Z]))"
+    r"|(?P<decorator>\\(?:index|minx)\{)"
+)
+
+
+def build_label_map():
+    """Scan every chapter's real \\label{...} for cross-reference targets.
+
+    A label right after \\chapter/\\section/... (skipping only whitespace
+    and no-op decorators like \\index{...}/\\chapstart) names that
+    heading; a label right after \\caption{...} names that figure;
+    anything else (equations, mid-paragraph anchors, labels planted
+    inside a code listing to name a definition) has no natural title, so
+    the label itself becomes the link text.
+    """
+    label_map = {}
+    for stem in CHAPTER_STEMS:
+        path = BOOK_DIR / f"{stem}.tex"
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        pending_title = None
+        pending_caption = None
+        pos = 0
+        while pos < len(text):
+            m = _LABEL_CONTEXT_TOKEN.search(text, pos)
+            if not m:
+                break
+            if text[pos:m.start()].strip():
+                # real content between the last heading/caption and here
+                pending_title = None
+                pending_caption = None
+
+            kind = m.lastgroup
+            if kind == "chapstart":
+                pos = m.end()
+                continue
+            if kind == "decorator":
+                pos = _find_matching_brace(text, m.end() - 1)
+                continue
+            if kind == "heading":
+                j = _find_matching_brace(text, m.end() - 1)
+                pending_title = clean_label_text(text[m.end():j - 1])
+                pending_caption = None
+                pos = j
+                continue
+            if kind == "caption":
+                j = _find_matching_brace(text, m.end() - 1)
+                pending_caption = clean_label_text(text[m.end():j - 1])
+                pending_title = None
+                pos = j
+                continue
+            if kind == "label":
+                j = _find_matching_brace(text, m.end() - 1)
+                name = text[m.end():j - 1]
+                if pending_title is not None:
+                    label_map[name] = {"file": f"{stem}.md", "kind": "heading", "text": pending_title}
+                elif pending_caption is not None:
+                    label_map[name] = {"file": f"{stem}.md", "kind": "figure", "text": pending_caption}
+                else:
+                    label_map[name] = {"file": f"{stem}.md", "kind": "other", "text": name}
+                pos = j
+                continue
+    return label_map
+
+
+LABEL_MAP = build_label_map()
+
 # Plain LaTeX text-mode escapes that survive into code listings; only
 # meaningful once we're inside a verbatim block (elsewhere pandoc's LaTeX
 # reader already converts these on its own).
@@ -146,7 +238,7 @@ FONT_DECLARATIONS = (
 )
 
 
-def simplify_alltt_body(body: str) -> str:
+def simplify_alltt_body(body: str):
     """alltt lets LaTeX commands appear inside literal code (unlike
     verbatim); the book leans on that for right-aligned annotations
     (\\hfill\\textrm{...}), underlining a rewritten sub-term
@@ -155,6 +247,14 @@ def simplify_alltt_body(body: str) -> str:
     \\subscr{g}{i}, ...) in generic function-pattern listings. verbatim
     won't interpret any of that, so flatten it all to plain text before
     the env swap.
+
+    Returns (cleaned_body, labels): a handful of listings plant a
+    \\label{X} inside the code (naming a definition so prose elsewhere can
+    link to it), which can't stay literal text in the displayed code, but
+    also can't become \\hypertarget{X}{} in place either -- that's a real
+    LaTeX command, meaningless as inert characters inside a literal
+    environment. Pulled out here; the caller anchors them just before the
+    code block instead.
     """
     # A couple of listings \input{} an external file (e.g. FirstScript.hs,
     # Pictures.tex) rather than duplicating its source in the chapter --
@@ -169,6 +269,9 @@ def simplify_alltt_body(body: str) -> str:
             return m.group(0)
         return path.read_text()
     body = re.sub(r"\\input\{([^{}]+)\}", _resolve_input, body)
+
+    labels = []
+    body = strip_balanced_macro(body, "label", lambda arg: labels.append(arg) or "")
 
     # \\  (LaTeX hard linebreak) shows up inside \begin{tabbing} blocks used
     # for a couple of nested "scope box" diagrams (e.g. Chapter 4's boxed
@@ -253,7 +356,7 @@ def simplify_alltt_body(body: str) -> str:
     # the very end of preprocess().
     body = body.replace(r"\{", BRACE_PLACEHOLDER_OPEN).replace(r"\}", BRACE_PLACEHOLDER_CLOSE)
 
-    return body
+    return body, labels
 
 
 def strip_newcommand_defs(text):
@@ -319,12 +422,11 @@ def preprocess(tex):
     # Chapter 19 "(Note that equation ...)" false-positive leak warning).
     # \minted{haskell} carries an explicit language class, so pandoc always
     # emits a real ``` fence for it, list-nesting or not.
-    tex = re.sub(
-        r"\\begin\{alltt\}(.*?)\\end\{alltt\}",
-        lambda m: r"\begin{minted}{haskell}" + simplify_alltt_body(m.group(1)) + r"\end{minted}",
-        tex,
-        flags=re.DOTALL,
-    )
+    def _convert_alltt(m):
+        body, code_labels = simplify_alltt_body(m.group(1))
+        anchors = "".join(r"\hypertarget{%s}{}" % lbl for lbl in code_labels)
+        return anchors + r"\begin{minted}{haskell}" + body + r"\end{minted}"
+    tex = re.sub(r"\\begin\{alltt\}(.*?)\\end\{alltt\}", _convert_alltt, tex, flags=re.DOTALL)
 
     # Chapter 20's local \up{X} (mathematical superscript, e.g. n\up{2})
     # used inline in prose, not just inside code listings.
@@ -334,10 +436,36 @@ def preprocess(tex):
     tex = strip_balanced_macro(tex, "index", lambda arg: "")
     tex = strip_balanced_macro(tex, "minx", lambda arg: "")
 
-    # Cross references: placeholder until we build a book-wide label map.
-    tex = strip_balanced_macro(tex, "label", lambda arg: "")
-    tex = strip_balanced_macro(tex, "ref", lambda arg: f"[REF:{arg}]")
-    tex = strip_balanced_macro(tex, "pageref", lambda arg: f"[PAGEREF:{arg}]")
+    # Cross references. A label right after a \chapter/\section/... is left
+    # as a real \label{X} -- pandoc auto-attaches those to the heading as
+    # an explicit id ("## Title {#X}") -- everything else (figures,
+    # equations, mid-paragraph anchors) becomes \hypertarget{X}{}, which
+    # pandoc turns into an explicit (if inert) anchor div wherever it
+    # sits. Protect the "keep as \label" case with a placeholder first:
+    # strip_balanced_macro's search loop would otherwise immediately
+    # re-match a \label{X} we'd just re-inserted and spin forever.
+    def _label_replacement(arg):
+        info = LABEL_MAP.get(arg)
+        if info and info["kind"] == "heading":
+            return BRACE_PLACEHOLDER_OPEN + "keeplabel" + BRACE_PLACEHOLDER_OPEN + arg + BRACE_PLACEHOLDER_CLOSE
+        return r"\hypertarget{%s}{}" % arg
+    tex = strip_balanced_macro(tex, "label", _label_replacement)
+    tex = re.sub(
+        BRACE_PLACEHOLDER_OPEN + "keeplabel" + BRACE_PLACEHOLDER_OPEN + r"([^" + BRACE_PLACEHOLDER_CLOSE + r"]*)" + BRACE_PLACEHOLDER_CLOSE,
+        lambda m: r"\label{%s}" % m.group(1),
+        tex,
+    )
+
+    # \ref{X} -> a plain-ASCII sentinel resolved after pandoc runs, once we
+    # know both this chapter's own output filename and (for labels defined
+    # in another chapter) the target's. A bracketed placeholder here would
+    # risk pandoc's markdown writer treating it as broken link syntax and
+    # escaping it; page numbers are meaningless on a website, so \pageref
+    # and the "on page N" phrasing around it just get dropped.
+    tex = re.sub(r",?\s*on\s+page\s*\\pageref\{[^{}]*\}", "", tex)
+    tex = re.sub(r",?\s*page\s*\\pageref\{[^{}]*\}", "", tex)
+    tex = strip_balanced_macro(tex, "pageref", lambda arg: "")
+    tex = strip_balanced_macro(tex, "ref", lambda arg: f"XREFOPEN{arg}XREFCLOSE")
     tex = strip_balanced_macro(tex, "cite", lambda arg: f"[CITE:{arg}]")
     tex = strip_balanced_macro(tex, "citeyear", lambda arg: f"[CITE:{arg}]")
 
@@ -407,7 +535,7 @@ def convert_chapter(src_path: Path, out_dir: Path):
         sys.exit(1)
 
     md = out_md.read_text()
-    md = postprocess(md)
+    md = postprocess(md, current_file=out_md.name)
     out_md.write_text(md)
     warn_on_leaked_tex(src_path.name, md)
     return out_md
@@ -460,12 +588,40 @@ def warn_on_leaked_tex(chapter_name, md):
             break
 
 
-def postprocess(md: str) -> str:
+def postprocess(md: str, current_file: str) -> str:
     # \minted{haskell} makes pandoc emit ``` {.haskell} (its own attribute
     # syntax) -- normalize to the plain ```haskell info-string that GitHub
     # /Docusaurus/mdBook/VitePress's highlighters all key off of. Handles
     # blocks indented under a list item too (leading whitespace kept).
     md = re.sub(r"^(\s*)``` \{\.haskell\}\s*$", r"\1```haskell", md, flags=re.MULTILINE)
+
+    # \hypertarget{X}{} (see preprocess()) becomes an empty fenced Div when
+    # it sits on its own (block-level), or an inline `[]{#X}` bracketed
+    # span when it's inline before something like a code block -- neither
+    # is plain CommonMark, and no site renderer would treat them as an
+    # anchor. Swap both for a plain inline HTML anchor, universally
+    # supported.
+    md = re.sub(
+        r"^(.*?)::: \{#([A-Za-z0-9_\-]+)\}\n\s*:::\s*$",
+        r'\1<a id="\2"></a>',
+        md,
+        flags=re.MULTILINE,
+    )
+    md = re.sub(r"\[\]\{#([A-Za-z0-9_\-]+)\}", r'<a id="\1"></a>', md)
+
+    # \ref{X} -> XREFOPENxXREFCLOSE sentinel (see preprocess()) -> a real
+    # link, now that we know both this file's own name and (from the
+    # book-wide LABEL_MAP) which file X's anchor actually lives in.
+    def _resolve_ref(m):
+        name = m.group(1)
+        info = LABEL_MAP.get(name)
+        if not info:
+            # Shouldn't happen (every \ref in the book resolves to some
+            # \label), but fail visibly rather than silently mislink.
+            return f"[{name}](#{name})"
+        target = "" if info["file"] == current_file else info["file"]
+        return f"[{info['text']}]({target}#{name})"
+    md = re.sub(r"XREFOPEN([A-Za-z0-9_\-]+)XREFCLOSE", _resolve_ref, md)
 
     # Pandoc's [text]{.underline} bracketed-span syntax isn't plain
     # CommonMark and can trip up MDX-based site generators -> plain HTML.

@@ -1,4 +1,4 @@
-GHCi errors
+GHCi errors {#hugsErrors}
 ===========
 
 This appendix examines some of the more common programming errors in Haskell, and shows the error messages to which they give rise in GHCi.
@@ -305,4 +305,4 @@ In response to some commands and interrupts, the system generates messages, incl
 
     which shows that the space consumption of the evaluation exceeds that available. One way around this is to increase the size of the heap.
 
-A measure of the space complexity of a function, as described in Chapter \[REF:behaviour\], is given by the size of the smallest heap in which the evaluation can take place; how this 'residency' is measured is described in that chapter.
+A measure of the space complexity of a function, as described in Chapter [Time and space behaviour](20.md#behaviour), is given by the size of the smallest heap in which the evaluation can take place; how this 'residency' is measured is described in that chapter.

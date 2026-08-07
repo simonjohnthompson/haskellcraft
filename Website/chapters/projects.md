@@ -1,4 +1,4 @@
-Project ideas
+Project ideas {#projects}
 =============
 
 In this appendix we give some ideas for extended Haskell projects, building on what we have covered here. Most of the projects can be implemented using what you have learned in this text, but many would gain from using libraries on the Hackage site. The projects are also discussed in more detail in the online supplement to the text, which appears at `www.haskellcraft.com`.

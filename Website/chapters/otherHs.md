@@ -1,4 +1,4 @@
-Haskell practicalities
+Haskell practicalities {#OtherHS}
 ======================
 
 It's not difficult to get going using Haskell, and most of the relevant information is easily accessible from the `haskell.org` page. This appendix points you in the right direction.
@@ -29,7 +29,7 @@ www.haskellcraft.com
 
 ### Using GHCi {#using-ghci .unnumbered}
 
-An overview of the main commands of GHCi can be found in Figure \[REF:commands\], page \[PAGEREF:commands\], and full details of other aspects of GHCi are in the online documentation for GHC.
+An overview of the main commands of GHCi can be found in Figure [Principal GHCi commands](2.md#commands), and full details of other aspects of GHCi are in the online documentation for GHC.
 
 ### Editors for Haskell {#editors-for-haskell .unnumbered}
 

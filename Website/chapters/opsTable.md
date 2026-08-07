@@ -1,7 +1,7 @@
-Haskell operators
+Haskell operators {#hsOps}
 =================
 
-The operators in the Haskell prelude are listed below in decreasing order of binding power: see Section \[REF:operators\] for a discussion of associativity and binding power.
+The operators in the Haskell prelude are listed below in decreasing order of binding power: see Section [Operators](3.md#operators) for a discussion of associativity and binding power.
 
       Left associative                   Non-associative                               Right associative
   --- ---------------------------------- --------------------------------------------- -------------------

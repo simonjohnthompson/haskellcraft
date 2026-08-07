@@ -1,4 +1,4 @@
-Functional, imperative and OO programming
+Functional, imperative and OO programming {#vs}
 =========================================
 
 In this appendix we compare programming in Haskell to more traditional notions in imperative languages like Pascal and C and object-oriented (OO) languages such as C\#, C++ and Java.
@@ -101,7 +101,7 @@ Program verification is possible for imperative programs as well, but imperative
 Records and tuples {#records-and-tuples .unnumbered}
 ------------------
 
-In Chapter \[REF:tupleList\] the tuple types of Haskell are introduced. In particular we saw the definition
+In Chapter [Data types, tuples and lists](5.md#tupleList) the tuple types of Haskell are introduced. In particular we saw the definition
 
 ```haskell
 type Person = (String,String,Int)
@@ -241,7 +241,7 @@ Control structures like `if-then-else` bear some resemblance to higher-order fun
 if b then c_1 else c_2\ \ \ \ \ \ while b do c_1
 ```
 
-just as `map` takes one function to another. Turning the analogy around, we can think of higher-order functions in Haskell as **control structures** which we can define ourselves. This perhaps explains why we form libraries of polymorphic functions: they are the control structures we use in programming particular sorts of system. Examples in the text include libraries for building parsers (Section \[REF:parsing\]) and interactive I/O programs (Chapter \[REF:io\]), as well as the built-in list-processing functions.
+just as `map` takes one function to another. Turning the analogy around, we can think of higher-order functions in Haskell as **control structures** which we can define ourselves. This perhaps explains why we form libraries of polymorphic functions: they are the control structures we use in programming particular sorts of system. Examples in the text include libraries for building parsers (Section [Case study: parsing expressions](17.md#parsing)) and interactive I/O programs (Chapter [Playing the game: I/O in Haskell](8.md#io)), as well as the built-in list-processing functions.
 
 Polymorphism {#polymorphism .unnumbered}
 ------------
@@ -257,15 +257,15 @@ As is argued in the text, polymorphism is one of the mechanisms which helps to m
 Defining types and classes {#defining-types-and-classes .unnumbered}
 --------------------------
 
-The algebraic type mechanism of Haskell, explained in Chapter \[REF:algTypes\],
+The algebraic type mechanism of Haskell, explained in Chapter [Algebraic types](14.md#algTypes),
 
 subsumes various traditional type definitions. Enumerated types are given by algebraic types all of whose constructors are 0-ary (take no arguments); variant records can be implemented as algebraic types with more then one constructor, and **recursive** types usually implemented by means of pointers become recursive algebraic types.
 
 Just as we explained for lists, Haskell programs over trees and so on can be seen as *designs* for programs in imperative languages manipulating the pointer implementations of the types.
 
-The abstract data types, introduced in Chapter \[REF:adt\], are very like the abstract data types of `Modula-2` and so on; the design methods we suggest for use of abstract data types mirror aspects of the **object-based** approach advocated for modern imperative languages such as `Ada`.
+The abstract data types, introduced in Chapter [Abstract data types](16.md#adt), are very like the abstract data types of `Modula-2` and so on; the design methods we suggest for use of abstract data types mirror aspects of the **object-based** approach advocated for modern imperative languages such as `Ada`.
 
-The Haskell class system also has object-oriented aspects, as we saw in Section \[REF:algClasses\]. It is important to note that Haskell classes are in some ways quite different from the classes of, for instance, `C++`. In Haskell classes are made up of types, which themselves have members; in `C++` a class is like a type, in that it contains objects. Because of this many of the aspects of object-oriented design in `C++` are seen as issues of type design in Haskell.
+The Haskell class system also has object-oriented aspects, as we saw in Section [Algebraic types and type classes](14.md#algClasses). It is important to note that Haskell classes are in some ways quite different from the classes of, for instance, `C++`. In Haskell classes are made up of types, which themselves have members; in `C++` a class is like a type, in that it contains objects. Because of this many of the aspects of object-oriented design in `C++` are seen as issues of type design in Haskell.
 
 List comprehensions {#list-comprehensions .unnumbered}
 -------------------
@@ -325,11 +325,11 @@ In general, it will not be possible to predict the behaviour of even the simples
 State, infinite lists and monads {#state-infinite-lists-and-monads .unnumbered}
 --------------------------------
 
-Section \[REF:infLists\] introduced infinite lists, and one of the first examples given there was an infinite list of random numbers. This list could be supplied to a function requiring a supply of random numbers; because of lazy evaluation, these numbers will only be generated on demand.
+Section [infLists](17.md#infLists) introduced infinite lists, and one of the first examples given there was an infinite list of random numbers. This list could be supplied to a function requiring a supply of random numbers; because of lazy evaluation, these numbers will only be generated on demand.
 
 If we were to implement this imperatively, we would probably keep in a variable the last random number generated, and at each request for a number we would update this store. We can see the infinite list as supplying *all the values that the variable will take* as a single structure; we therefore do not need to keep the state, and hence have an **abstraction** from the imperative view.
 
-We have seen in Section \[REF:monadFP\] that there has been recent important work on integrating side-effecting programs into a functional system by a monadic approach.
+We have seen in Section [Monads: languages for functional programming](18.md#monadFP) that there has been recent important work on integrating side-effecting programs into a functional system by a monadic approach.
 
 Conclusion {#conclusion .unnumbered}
 ----------

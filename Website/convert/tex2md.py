@@ -1609,6 +1609,33 @@ def preprocess(tex):
     tex = strip_balanced_macro(tex, "index", lambda arg: "")
     tex = strip_balanced_macro(tex, "minx", lambda arg: "")
 
+    # \gitem{Term} (glossary.tex: \newcommand{\gitem}[1]{\medskip\noindent
+    # {\bf #1\ \ \ }} -- a *local* macro defined in glossary.tex itself,
+    # not one of the shared root.tex/defs0.tex/miradefs.tex files, so it
+    # was never in this pipeline's macro list at all) starts each
+    # glossary entry with its bolded term. strip_newcommand_defs() above
+    # already drops the \newcommand{...} definition itself so it doesn't
+    # leak, but left unhandled, \gitem{Term} is just an unrecognized
+    # command with an argument to Pandoc -- the same "silently swallows
+    # its argument" failure as \beware and friends, so the term
+    # ("Abstract type", "Algebraic type", ...) vanished from the start
+    # of every single glossary definition, leaving only the definition
+    # text with no visible heading at all.
+    tex = strip_balanced_macro(tex, "gitem", lambda arg: "\n\n" + r"\textbf{%s}" % arg + "  ")
+
+    # \begin{multicols}{2}...\end{multicols} (glossary.tex: 2-column
+    # print layout for the whole glossary) -- Pandoc doesn't understand
+    # the multicol package's environment, and its own {2} column-count
+    # argument leaked as literal text right after the glossary's intro
+    # paragraph. A web page reflows to its own width regardless, so
+    # column count is meaningless here; keep the content, drop the
+    # wrapper (and the bare \raggedright/{...} grouping around it, a
+    # paragraph-alignment declaration with the same "meaningless for the
+    # web" status as the font declarations already dropped elsewhere).
+    tex = re.sub(r"\\begin\{multicols\}\{[0-9]+\}", "", tex)
+    tex = re.sub(r"\\end\{multicols\}", "", tex)
+    tex = re.sub(r"\\raggedright(?![a-zA-Z])", "", tex)
+
     # \markright{X}/\markboth{X}{Y} (print-only running-header text, no
     # web equivalent) commonly sit directly between \section{...} and its
     # \label{...}. Pandoc's own heading/label attachment needs \label to

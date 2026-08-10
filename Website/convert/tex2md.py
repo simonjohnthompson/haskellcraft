@@ -457,6 +457,47 @@ def build_label_map():
 
 LABEL_MAP = build_label_map()
 
+
+def _web_image_ext_path(path):
+    """Pictures/X.pdf (or an extension-less Pictures/X, which LaTeX
+    resolves by trying .pdf/.png/... in turn) -> the web-friendly
+    Pictures/X.png this script's own image batch actually produces."""
+    if path.lower().endswith((".png", ".jpg", ".jpeg", ".gif")):
+        return path
+    if path.lower().endswith(".pdf"):
+        return path[:-4] + ".png"
+    return path + ".png"
+
+
+def build_wrapfigure_images():
+    """Every Pictures/X.png inside a \\begin{wrapfigure} anywhere in the
+    book -- wrapfigure images are meant to float beside body text (their
+    whole point), not sit centered on their own line like every other
+    figure, so postprocess() needs to know which images these are to
+    skip centering them. Pandoc drops the distinction entirely by the
+    time postprocess() sees plain markdown (both \\begin{wrapfigure} and
+    \\begin{center} collapse to the same bare ![](...)), so this has to
+    be figured out from the raw LaTeX source instead, the same way
+    LABEL_MAP is.
+    """
+    images = set()
+    pattern = re.compile(
+        r"\\begin\{wrapfigure\}.*?\\end\{wrapfigure\}", re.DOTALL,
+    )
+    img_pattern = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{([^{}]*)\}")
+    for stem in CHAPTER_STEMS:
+        path = BOOK_DIR / f"{stem}.tex"
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for m in pattern.finditer(text):
+            for im in img_pattern.finditer(m.group(0)):
+                images.add(_web_image_ext_path(im.group(1)))
+    return images
+
+
+WRAPFIGURE_IMAGES = build_wrapfigure_images()
+
 # LaTeX accent commands that show up in author names (BibTeX escapes them
 # so they survive non-UTF-8 tools) -- e.g. Lipova{\v c}a.
 LATEX_ACCENTS = {
@@ -1711,14 +1752,7 @@ def postprocess(md: str, current_file: str) -> str:
     # Some \includegraphics calls in the book omit the extension
     # entirely (LaTeX tries .pdf/.png/... in turn), which needs the same
     # rewrite as an explicit .pdf -- just appending rather than replacing.
-    def _web_image_ext(m):
-        path = m.group(1)
-        if path.lower().endswith((".png", ".jpg", ".jpeg", ".gif")):
-            return path
-        if path.lower().endswith(".pdf"):
-            return path[:-4] + ".png"
-        return path + ".png"
-    md = re.sub(r"(Pictures/[A-Za-z0-9_.\-]+)(?=[)\s\"])", _web_image_ext, md)
+    md = re.sub(r"(Pictures/[A-Za-z0-9_.\-]+)(?=[)\s\"])", lambda m: _web_image_ext_path(m.group(1)), md)
 
     # \includegraphics[width=Xin]/[height=Ycm] becomes pandoc's markdown
     # attribute syntax `{width="Xin"}`, but mdBook's markdown renderer
@@ -1805,13 +1839,23 @@ def postprocess(md: str, current_file: str) -> str:
         if not n:
             break
 
-    # Images with no caption (empty alt) but a LaTeX width/height still
-    # need the sized raw <img> from before, just without a <figcaption>.
+    # Images with no caption (empty alt): almost all are still wrapped in
+    # \begin{center} in the LaTeX source even without one, so they need
+    # the same centered <figure> treatment as captioned images (just
+    # without a <figcaption>) -- covers both the sized raw <img> from
+    # above (has a width/height attrs block) and a plain ![](...) with
+    # neither (attrs is None then). The one exception is \begin{wrapfigure}
+    # images (WRAPFIGURE_IMAGES): those are meant to float beside body
+    # text, not center on their own line, so they're left as a bare
+    # thumbnail with no <figure> wrapper.
     def _uncaptioned_image_to_html(m):
         src, attrs = m.group("src"), m.group("attrs")
-        return _sized_thumbnail(src, "", _style_attr(attrs))
+        thumb = _sized_thumbnail(src, "", _style_attr(attrs))
+        if src in WRAPFIGURE_IMAGES:
+            return thumb
+        return f"<figure>{thumb}</figure>"
     md = re.sub(
-        r'!\[\]\((?P<src>[^()\s]+)(?:\s+"[^"]*")?\)\{(?P<attrs>[^{}]*)\}',
+        r'!\[\]\((?P<src>[^()\s]+)(?:\s+"[^"]*")?\)(?:\{(?P<attrs>[^{}]*)\})?',
         _uncaptioned_image_to_html, md,
     )
 

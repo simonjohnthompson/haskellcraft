@@ -108,27 +108,33 @@ def strip_three_arg_macro(text, macro, fmt):
     return text
 
 
-def wrap_mi_font_switch(tex):
+def wrap_bare_font_switches(tex):
     """\\mi (defs0.tex: \\newcommand{\\mi}{\\mytt}, \\newfont{\\mytt}
-    {cmtt10} -- the Computer Modern Typewriter font) is a bare
-    font-switch declaration, not a \\mi{...}-wrapped command: real LaTeX
-    applies it to everything up to the next "&" (table cell boundary),
-    "\\\\" (row end), or "}" (enclosing group close). Used 71 times
-    across most chapters, almost always inside a plain \\begin{tabular}
-    (not \\texttt{}) for typewriter-style cell content, e.g. Chapter 3's
-    Boolean truth tables (\\mi \\tone\\ \\&\\& \\ttwo, \\mi T, ...).
-    Pandoc silently drops the bare, unrecognized command (nothing to
-    consume, so not even a visible leak -- just plain unstyled text
-    where monospace was intended, invisible until compared against the
-    print original). Materialize \\mi's implicit scope into an explicit
+    {cmtt10} -- the Computer Modern Typewriter font) and \\ttfamily
+    (plain LaTeX's own typewriter-font switch) are both bare font-switch
+    declarations, not \\mi{...}/\\ttfamily{...}-wrapped commands: real
+    LaTeX applies each to everything up to the next "&" (table cell
+    boundary), "\\\\" (row end), or "}" (enclosing group close). Used
+    71 and 76 times respectively across most chapters, almost always
+    inside a plain \\begin{tabular} (not \\texttt{}) for typewriter-style
+    cell content -- e.g. Chapter 3's Boolean truth tables (\\mi
+    \\tone\\ \\&\\& \\ttwo, \\mi T, ...) and its "Floating-point
+    operations and functions." table (\\ttfamily + - *, \\ttfamily
+    Float -> Float -> Float, ...). \\mi is unknown to Pandoc and
+    silently dropped outright; \\ttfamily is real LaTeX Pandoc does
+    recognize structurally, but its markdown writer has no equivalent
+    for a bare font switch and just emits the scoped text unstyled --
+    either way, not even a visible leak, just plain text where
+    monospace was intended, invisible until compared against the print
+    original. Materialize each one's implicit scope into an explicit
     \\texttt{...} wrapper here, which the rest of the pipeline already
     turns into a real code span.
     """
     out = []
     pos = 0
-    mi_re = re.compile(r"\\mi\b")
+    switch_re = re.compile(r"\\(?:mi|ttfamily)\b")
     while True:
-        m = mi_re.search(tex, pos)
+        m = switch_re.search(tex, pos)
         if not m:
             out.append(tex[pos:])
             break
@@ -1414,8 +1420,8 @@ def preprocess(tex):
     tex = convert_description_item_braces(tex)
     # Must run before the SYMBOL_MACROS/subscript-shorthand prose passes
     # below, so e.g. \tone inside \mi's scope ends up inside the
-    # \texttt{...} wrapper wrap_mi_font_switch materializes for it.
-    tex = wrap_mi_font_switch(tex)
+    # \texttt{...} wrapper wrap_bare_font_switches materializes for it.
+    tex = wrap_bare_font_switches(tex)
 
     # \mbox{X} in ordinary prose/tables (48 occurrences) -- \mbox only
     # ever means "don't break this across lines" in print, nothing a

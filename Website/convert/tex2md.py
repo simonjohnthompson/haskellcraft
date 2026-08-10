@@ -108,6 +108,60 @@ def strip_three_arg_macro(text, macro, fmt):
     return text
 
 
+def wrap_mi_font_switch(tex):
+    """\\mi (defs0.tex: \\newcommand{\\mi}{\\mytt}, \\newfont{\\mytt}
+    {cmtt10} -- the Computer Modern Typewriter font) is a bare
+    font-switch declaration, not a \\mi{...}-wrapped command: real LaTeX
+    applies it to everything up to the next "&" (table cell boundary),
+    "\\\\" (row end), or "}" (enclosing group close). Used 71 times
+    across most chapters, almost always inside a plain \\begin{tabular}
+    (not \\texttt{}) for typewriter-style cell content, e.g. Chapter 3's
+    Boolean truth tables (\\mi \\tone\\ \\&\\& \\ttwo, \\mi T, ...).
+    Pandoc silently drops the bare, unrecognized command (nothing to
+    consume, so not even a visible leak -- just plain unstyled text
+    where monospace was intended, invisible until compared against the
+    print original). Materialize \\mi's implicit scope into an explicit
+    \\texttt{...} wrapper here, which the rest of the pipeline already
+    turns into a real code span.
+    """
+    out = []
+    pos = 0
+    mi_re = re.compile(r"\\mi\b")
+    while True:
+        m = mi_re.search(tex, pos)
+        if not m:
+            out.append(tex[pos:])
+            break
+        out.append(tex[pos:m.start()])
+        i = m.end()
+        depth = 0
+        while i < len(tex):
+            c = tex[i]
+            if c == "\\" and i + 1 < len(tex):
+                if tex[i + 1] == "\\":
+                    break  # \\ (row end)
+                if tex[i:].startswith(r"\end{") or tex[i:].startswith(r"\begin{"):
+                    break  # \mi's scope can't extend past the environment itself
+                # Any other backslash-escaped character (\&, \%, \_, \{,
+                # \}, or the start of a command like \tone) isn't a real
+                # boundary -- skip both chars so e.g. \& (a literal "&")
+                # doesn't get mistaken for a real column-separator &.
+                i += 2
+                continue
+            if c == "{":
+                depth += 1
+            elif c == "}":
+                if depth == 0:
+                    break
+                depth -= 1
+            elif c == "&" and depth == 0:
+                break
+            i += 1
+        out.append(r"\texttt{" + tex[m.end():i].strip() + "}")
+        pos = i
+    return "".join(out)
+
+
 def _load_subscript_shorthands():
     """miradefs.tex defines ~35 shorthand macros like \\vone, \\gtwo, \\ei
     as pre-filled \\subscr{letter}{index} calls (v1, v2, ..., vn, g1, g2,
@@ -1344,6 +1398,22 @@ def preprocess(tex):
     tex = swap_label_before_caption(tex)
     tex = mark_non_image_captions(tex)
     tex = convert_description_item_braces(tex)
+    # Must run before the SYMBOL_MACROS/subscript-shorthand prose passes
+    # below, so e.g. \tone inside \mi's scope ends up inside the
+    # \texttt{...} wrapper wrap_mi_font_switch materializes for it.
+    tex = wrap_mi_font_switch(tex)
+
+    # \mbox{X} in ordinary prose/tables (48 occurrences) -- \mbox only
+    # ever means "don't break this across lines" in print, nothing a
+    # web page needs, but left alone it's a recurring source of content
+    # silently vanishing: confirmed in isolation that \mbox specifically
+    # (not \texttt) breaks Pandoc's \item[...] bracket-argument parser
+    # for description terms (see convert_description_item_braces), and
+    # Chapter 3's truth table has a whole cell -- \mbox{\texttt{||}} --
+    # disappear the same way. clean_label_text/simplify_alltt_body/
+    # convert_description_item_braces already strip \mbox in their own
+    # narrower contexts; this covers everywhere else.
+    tex = strip_balanced_macro(tex, "mbox", lambda arg: arg)
 
     # \so / \st (defs0.tex: \so = \begin{ttdisplay}\parindent 1pc, itself
     # \begin{alltt}% with some catcode/spacing setup, \st = the matching

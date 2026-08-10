@@ -337,7 +337,7 @@ In general, it will not be possible to predict the behaviour of even the simples
 State, infinite lists and monads {#state-infinite-lists-and-monads .unnumbered}
 --------------------------------
 
-[infLists](17.md#infLists) introduced infinite lists, and one of the first examples given there was an infinite list of random numbers. This list could be supplied to a function requiring a supply of random numbers; because of lazy evaluation, these numbers will only be generated on demand.
+[Infinite lists](17.md#infLists) introduced infinite lists, and one of the first examples given there was an infinite list of random numbers. This list could be supplied to a function requiring a supply of random numbers; because of lazy evaluation, these numbers will only be generated on demand.
 
 If we were to implement this imperatively, we would probably keep in a variable the last random number generated, and at each request for a number we would update this store. We can see the infinite list as supplying *all the values that the variable will take* as a single structure; we therefore do not need to keep the state, and hence have an **abstraction** from the imperative view.
 

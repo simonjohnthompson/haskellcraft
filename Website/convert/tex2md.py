@@ -196,7 +196,7 @@ def clean_label_text(text):
 
 # Matches whichever of these comes next; m.lastgroup says which.
 _LABEL_CONTEXT_TOKEN = re.compile(
-    r"(?P<heading>\\(?:chapter|section|subsection|subsubsection)\*?\{)"
+    r"(?P<heading>\\(?:chapter|section|subsection|subsubsection)\*?(?:\[[^\]]*\])?\{)"
     r"|(?P<caption>\\caption\{)"
     r"|(?P<label>\\label\{)"
     r"|(?P<chapstart>\\chapstart(?![a-zA-Z]))"
@@ -377,10 +377,14 @@ def build_label_map():
     and no-op decorators like \\index{...}/\\chapstart/\\markright{...}/
     \\markboth{...}{...}, the last a print-only running-header pair often
     sandwiched between a heading and its label) names that heading; a
-    label right after \\caption{...} names that figure;
-    anything else (equations, mid-paragraph anchors, labels planted
-    inside a code listing to name a definition) has no natural title, so
-    the label itself becomes the link text.
+    label right after \\caption{...} names that figure; a label with
+    neither (an equation, a mid-paragraph anchor, one planted at the
+    start of a list/code listing/etc.) falls back to the title of
+    whichever heading encloses it -- the book always refers to these as
+    "Section \\ref{X}"/"Chapter \\ref{X}", so the raw label name alone
+    would read as nonsense text in place of a section title. Only a
+    label with no enclosing heading at all (shouldn't happen -- every
+    chapter opens with \\chapter{...}) falls back to its own name.
     """
     label_map = {}
     for stem in CHAPTER_STEMS:
@@ -390,6 +394,7 @@ def build_label_map():
         text = swap_label_before_caption(hoist_labels_out_of_captions(path.read_text(encoding="utf-8")))
         pending_title = None
         pending_caption = None
+        enclosing_title = None
         pos = 0
         while pos < len(text):
             m = _LABEL_CONTEXT_TOKEN.search(text, pos)
@@ -414,6 +419,7 @@ def build_label_map():
                 j = _find_matching_brace(text, m.end() - 1)
                 pending_title = clean_label_text(text[m.end():j - 1])
                 pending_caption = None
+                enclosing_title = pending_title
                 pos = j
                 continue
             if kind == "caption":
@@ -429,6 +435,19 @@ def build_label_map():
                     label_map[name] = {"file": f"{stem}.md", "kind": "heading", "text": pending_title}
                 elif pending_caption is not None:
                     label_map[name] = {"file": f"{stem}.md", "kind": "figure", "text": pending_caption}
+                elif enclosing_title is not None:
+                    # Not a heading/caption's own label (a mid-paragraph
+                    # anchor, or one planted at the start of a list/code
+                    # listing/etc.) -- but the book always refers to these
+                    # as "Section \ref{X}"/"Chapter \ref{X}", so the raw
+                    # label name alone (e.g. "ShowBrowser") would read as
+                    # nonsense text where a section title belongs. Fall
+                    # back to the title of whichever heading encloses it.
+                    # Deliberately not "heading" kind: that also decides
+                    # whether \label{X} is kept as a real \label (see
+                    # preprocess()), which must stay a plain \hypertarget
+                    # here since this label isn't the heading's own id.
+                    label_map[name] = {"file": f"{stem}.md", "kind": "enclosing", "text": enclosing_title}
                 else:
                     label_map[name] = {"file": f"{stem}.md", "kind": "other", "text": name}
                 pos = j

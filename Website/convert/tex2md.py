@@ -82,6 +82,32 @@ def strip_two_arg_macro(text, macro, fmt):
     return text
 
 
+def strip_three_arg_macro(text, macro, fmt):
+    """Remove \\macro{a}{b}{c}, replacing with fmt(a, b, c). Each arg may
+    itself contain balanced (and escaped) braces."""
+    pattern = re.compile(r"\\" + re.escape(macro) + r"\{")
+
+    def read_group(s, start):
+        assert s[start] == "{"
+        j = _find_matching_brace(s, start)
+        return s[start + 1:j - 1], j
+
+    while True:
+        m = pattern.search(text)
+        if not m:
+            break
+        start = m.start()
+        arg1, after1 = read_group(text, m.end() - 1)
+        if after1 >= len(text) or text[after1] != "{":
+            break  # malformed use; bail rather than loop forever
+        arg2, after2 = read_group(text, after1)
+        if after2 >= len(text) or text[after2] != "{":
+            break
+        arg3, after3 = read_group(text, after2)
+        text = text[:start] + fmt(arg1, arg2, arg3) + text[after3:]
+    return text
+
+
 def _load_subscript_shorthands():
     """miradefs.tex defines ~35 shorthand macros like \\vone, \\gtwo, \\ei
     as pre-filled \\subscr{letter}{index} calls (v1, v2, ..., vn, g1, g2,
@@ -367,6 +393,63 @@ def mark_non_image_captions(tex):
             )
         out.append(block)
         pos = end_m.end()
+    return "".join(out)
+
+
+def convert_description_item_braces(tex):
+    """\\begin{description}'s \\item takes an optional *bracketed*
+    argument, \\item[label] -- Chapter 6's cabal-commands list uses
+    \\item{label} (braces) instead, which Pandoc's LaTeX reader doesn't
+    recognize as a description term at all, dropping it outright (the
+    label -- e.g. "cabal update" -- vanished from the start of every
+    entry, the same "unknown-looking argument silently swallowed"
+    failure as \\beware and friends). Only \\item{...} inside a
+    description environment needs converting: itemize/enumerate's
+    \\item{...} (Chapters 9/13/18/19) already renders fine as ordinary
+    scoped text starting the item body -- unwrapping *those* braces
+    instead would let any \\bf/\\it font declaration inside bleed into
+    the rest of the list instead of staying scoped to just that item.
+
+    description environments nest in this book (Chapter 6 has one
+    inside another), so track \\begin/\\end depth by hand rather than a
+    single non-greedy regex, which would mispair with the first inner
+    \\end{description} it finds.
+
+    Every one of Chapter 6's terms is \\mbox{\\texttt{...}} -- \\texttt
+    alone inside \\item[...] parses fine, but \\mbox specifically breaks
+    Pandoc's bracket-argument parser for description terms even on its
+    own (confirmed in isolation: \\item[\\mbox{X}] loses X the same way),
+    so \\mbox is stripped from the term while converting -- it only
+    ever meant "don't break this across lines" in print anyway, nothing
+    a web page needs.
+    """
+    out = []
+    pos = 0
+    token_re = re.compile(r"\\begin\{description\}|\\end\{description\}|\\item\{")
+    depth = 0
+    while pos < len(tex):
+        m = token_re.search(tex, pos)
+        if not m:
+            out.append(tex[pos:])
+            break
+        out.append(tex[pos:m.start()])
+        if m.group(0) == r"\begin{description}":
+            depth += 1
+            out.append(m.group(0))
+            pos = m.end()
+        elif m.group(0) == r"\end{description}":
+            depth = max(0, depth - 1)
+            out.append(m.group(0))
+            pos = m.end()
+        else:  # \item{
+            j = _find_matching_brace(tex, m.end() - 1)
+            arg = tex[m.end():j - 1]
+            if depth > 0:
+                arg = strip_balanced_macro(arg, "mbox", lambda a: a)
+                out.append(r"\item[%s]" % arg)
+            else:
+                out.append(tex[m.start():j])
+            pos = j
     return "".join(out)
 
 
@@ -1260,6 +1343,7 @@ def preprocess(tex):
     tex = hoist_labels_out_of_captions(tex)
     tex = swap_label_before_caption(tex)
     tex = mark_non_image_captions(tex)
+    tex = convert_description_item_braces(tex)
 
     # \so / \st (defs0.tex: \so = \begin{ttdisplay}\parindent 1pc, itself
     # \begin{alltt}% with some catcode/spacing setup, \st = the matching
@@ -1277,6 +1361,13 @@ def preprocess(tex):
     tex = re.sub(r"\\so\b", r"\\begin{alltt}", tex)
     tex = re.sub(r"\\st\b", r"\\end{alltt}", tex)
     tex = re.sub(r"\{\\hskip[0-9.]+[a-z]+\}", "", tex)
+
+    # Bare (unbraced) \hskip<len> -- print-layout horizontal spacing with
+    # no web equivalent, same as the braced form above, just used 64
+    # times without braces around it too (e.g. Chapter 13's
+    # \item{\bf Reuse}\hskip 1em The definition..., where an unhandled
+    # \hskip 1em leaked as literal "1em" right after "Reuse").
+    tex = re.sub(r"\\hskip\s*[0-9.]+[a-z]+", "", tex)
 
     tex = strip_newcommand_defs(tex)
     tex = escape_bare_underscores_in_texttt(tex)
@@ -1535,6 +1626,15 @@ def preprocess(tex):
     tex = re.sub(r"\\begin\{mytablethree\}", r"\\begin{tabular}{p{0.7in}p{1.5in}p{2in}}", tex)
     tex = re.sub(r"\\end\{mytablethree\}", r"\\end{tabular}", tex)
 
+    # \multicolumn{span}{align}{content} (Chapter 2's GHCi-commands table
+    # header, "Command (abbrev.)" spanning the first two columns): Pandoc's
+    # LaTeX table reader doesn't understand it, and -- the same "unknown
+    # macro swallows its argument" failure seen throughout this pipeline --
+    # the header text vanished outright, rendering as a blank row. Column
+    # span and alignment have no clean equivalent in a Pandoc/CommonMark
+    # table anyway, so just keep the content.
+    tex = strip_three_arg_macro(tex, "multicolumn", lambda span, align, content: content)
+
     # \begin{definition}...\end{definition} (root.tex:
     # \newtheorem{definition}{definition}[chapter]) -- only 4 uses (4.tex,
     # 9.tex, 11.tex x2), and unlike \beware the content survives even
@@ -1580,7 +1680,14 @@ def convert_chapter(src_path: Path, out_dir: Path):
         [
             "pandoc",
             "-f", "latex",
-            "-t", "markdown-raw_tex",
+            # -simple_tables-multiline_tables-grid_tables forces pipe_tables
+            # (left enabled) for every table: pandoc's own dash-delimited
+            # "simple table" format (its default choice whenever a table
+            # fits) isn't GFM/CommonMark pipe-table syntax, and mdBook's
+            # renderer (pulldown-cmark) doesn't understand it at all --
+            # every such table rendered as one run-on paragraph with <br>
+            # line breaks instead of an actual <table>.
+            "-t", "markdown-raw_tex-simple_tables-multiline_tables-grid_tables",
             "--wrap=none",
             str(tmp_tex),
             "-o", str(out_md),

@@ -3,25 +3,25 @@ Haskell operators {#hsOps}
 
 The operators in the Haskell prelude are listed below in decreasing order of binding power: see [Operators](3.md#operators) for a discussion of associativity and binding power.
 
-      Left associative                   Non-associative                               Right associative
-  --- ---------------------------------- --------------------------------------------- -------------------
-  9   !!                                                                               .
-  8                                                                                    \*, \^, \^\^
-  7   , /, 'div', 'mod', 'rem', 'quot'                                                 
-  6   +, -                                                                             
-  5                                                                                    :, ++
-  4                                      /=, \<, \<=, ==, \>, \>=, 'elem', 'notElem'   
-  3                                                                                    &&
-  2                                                                                    \|\|
-  1   \>\>, \>\>=                                                                      
-  0                                                                                    \$, \$!, 'seq'
+|     | Left associative                 | Non-associative                             | Right associative |
+|:----|:---------------------------------|:--------------------------------------------|:------------------|
+| 9   | !!                               |                                             | .                 |
+| 8   |                                  |                                             | \*, \^, \^\^      |
+| 7   | , /, 'div', 'mod', 'rem', 'quot' |                                             |                   |
+| 6   | +, -                             |                                             |                   |
+| 5   |                                  |                                             | :, ++             |
+| 4   |                                  | /=, \<, \<=, ==, \>, \>=, 'elem', 'notElem' |                   |
+| 3   |                                  |                                             | &&                |
+| 2   |                                  |                                             | \|\|              |
+| 1   | \>\>, \>\>=                      |                                             |                   |
+| 0   |                                  |                                             | \$, \$!, 'seq'    |
 
 Also defined in this text are the operators
 
-  --- ------- -- --------
-  9   \>.\>      
-  5              \>\*\>
-  --- ------- -- --------
+|     |       |     |        |
+|:----|:------|:----|:-------|
+| 9   | \>.\> |     |        |
+| 5   |       |     | \>\*\> |
 
 The restrictions on names of operators, which are formed using the characters
 

@@ -1,6 +1,7 @@
 # Summary
 
 [Preface](0.md)
+[License](license.md)
 
 # Chapters
 

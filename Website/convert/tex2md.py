@@ -709,6 +709,46 @@ def build_toc_page(out_dir: Path):
     return out_path
 
 
+def build_license_page(out_dir: Path):
+    """A short front-matter page, listed first in SUMMARY.md ahead of the
+    Preface, carrying the CC BY-NC-SA 4.0 license for the online edition."""
+    lines = [
+        "License",
+        "=" * 7,
+        "",
+        "This online edition of *Haskell: The Craft of Functional "
+        "Programming* is licensed under a "
+        "[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 "
+        "International License](https://creativecommons.org/licenses/by-nc-sa/4.0/) "
+        "(CC BY-NC-SA 4.0).",
+        "",
+        "Under this license you are free to:",
+        "",
+        "-   **Share** -- copy and redistribute the material in any medium "
+        "or format",
+        "-   **Adapt** -- remix, transform, and build upon the material",
+        "",
+        "under the following terms:",
+        "",
+        "-   **Attribution** -- You must give appropriate credit, provide "
+        "a link to the license, and indicate if changes were made.",
+        "-   **NonCommercial** -- You may not use the material for "
+        "commercial purposes.",
+        "-   **ShareAlike** -- If you remix, transform, or build upon the "
+        "material, you must distribute your contributions under the same "
+        "license as the original.",
+        "",
+        "No additional restrictions -- you may not apply legal terms or "
+        "technological measures that legally restrict others from doing "
+        "anything the license permits.",
+        "",
+        "© Simon Thompson.",
+    ]
+    out_path = out_dir / "license.md"
+    out_path.write_text("\n".join(lines), encoding="utf-8")
+    return out_path
+
+
 def build_summary_page(out_dir: Path):
     """SUMMARY.md, in the exact structure mdBook requires for its sidebar:
     an unlisted prefix chapter (the Preface), a numbered "Chapters" part,
@@ -718,7 +758,9 @@ def build_summary_page(out_dir: Path):
     """
     labels = dict(_numbered_chapter_labels())
     appendix_start = CHAPTER_STEMS.index("appendix1")
-    lines = ["# Summary", "", f"[{labels['0']}](0.md)", "", "# Chapters", ""]
+    # Preface must stay first: mdBook's index.html (the site's landing
+    # page at the root URL) is a copy of SUMMARY.md's first entry.
+    lines = ["# Summary", "", f"[{labels['0']}](0.md)", "[License](license.md)", "", "# Chapters", ""]
     for stem in CHAPTER_STEMS[1:appendix_start]:
         lines.append(f"- [{labels[stem]}]({stem}.md)")
     lines += ["", "# Appendices", ""]
@@ -1565,6 +1607,8 @@ if __name__ == "__main__":
         result = convert_chapter(src, out_dir)
         print(f"{src} -> {result}")
     if len(sys.argv) > 2:
+        license_path = build_license_page(out_dir)
+        print(f"(license) -> {license_path}")
         bib_path = build_bibliography_page(out_dir)
         print(f"(bibliography) -> {bib_path}")
         index_path = build_index_page(out_dir)

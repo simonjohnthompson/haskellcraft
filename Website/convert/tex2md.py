@@ -297,6 +297,52 @@ def hoist_labels_out_of_captions(text):
     return "".join(out)
 
 
+def mark_non_image_captions(tex):
+    """Pandoc's LaTeX reader only turns \\caption{...} into a real
+    caption (which this pipeline then renders as alt text -> a visible
+    <figcaption>, see postprocess()) for the specific case of a
+    \\begin{figure} containing a single \\includegraphics. A sizeable
+    number of \\begin{figure} blocks in this book instead wrap a code
+    listing (\\begin{alltt}...) or, once, a table, purely for print
+    placement -- for those, \\caption{...} is just a standalone command
+    Pandoc doesn't recognize, and (the same "unknown macro swallows its
+    argument" failure as \\beware and friends) the caption vanishes
+    outright, not merely hidden in an attribute. \\ref{X} elsewhere still
+    resolves correctly (LABEL_MAP is built straight from the LaTeX
+    source), so the caption text is only missing where a reader actually
+    lands.
+
+    Mark these with sentinels instead of touching \\caption directly, so
+    Pandoc still does its own normal formatting of the caption text
+    (\\texttt{} -> backtick code, etc.) before postprocess() wraps the
+    result in a visible caption. Figure environments never nest in this
+    book (checked book-wide), so plain start/end string search is safe.
+    """
+    out = []
+    pos = 0
+    fig_re = re.compile(r"\\begin\{figure\}")
+    end_fig_re = re.compile(r"\\end\{figure\}")
+    while True:
+        m = fig_re.search(tex, pos)
+        if not m:
+            out.append(tex[pos:])
+            break
+        end_m = end_fig_re.search(tex, m.end())
+        if not end_m:
+            out.append(tex[pos:])
+            break
+        out.append(tex[pos:m.start()])
+        block = tex[m.start():end_m.end()]
+        if r"\includegraphics" not in block:
+            block = strip_balanced_macro(
+                block, "caption",
+                lambda arg: "\n\nCAPTIONSENTINELOPEN " + arg + " CAPTIONSENTINELCLOSE\n\n",
+            )
+        out.append(block)
+        pos = end_m.end()
+    return "".join(out)
+
+
 def build_label_map():
     """Scan every chapter's real \\label{...} for cross-reference targets.
 
@@ -1135,6 +1181,7 @@ def preprocess(tex):
     # hoist_labels_out_of_captions's docstring (Chapter 6's \label{horsePos}
     # sits mid-sentence inside its \caption{...} instead of right after it).
     tex = hoist_labels_out_of_captions(tex)
+    tex = mark_non_image_captions(tex)
 
     # \so / \st (defs0.tex: \so = \begin{ttdisplay}\parindent 1pc, itself
     # \begin{alltt}% with some catcode/spacing setup, \st = the matching
@@ -1527,6 +1574,21 @@ def postprocess(md: str, current_file: str) -> str:
     # /Docusaurus/mdBook/VitePress's highlighters all key off of. Handles
     # blocks indented under a list item too (leading whitespace kept).
     md = re.sub(r"^(\s*)``` \{\.haskell\}\s*$", r"\1```haskell", md, flags=re.MULTILINE)
+
+    # CAPTIONSENTINELOPEN/CLOSE (see mark_non_image_captions() in
+    # preprocess()) mark a \caption{...} that had no \includegraphics for
+    # Pandoc to attach it to as alt text -- by this point Pandoc has
+    # already applied its own formatting to the caption text (texttt{} ->
+    # backtick code, etc.), so it's just a matter of making it visible.
+    # Not wrapped in a <figure> (there's no reliable way to locate the
+    # preceding fenced code block's boundary here to wrap it too), but a
+    # bare <figcaption> still picks up the same visible caption styling.
+    md = re.sub(
+        r"CAPTIONSENTINELOPEN\s*(.*?)\s*CAPTIONSENTINELCLOSE",
+        r"<figcaption>\1</figcaption>",
+        md,
+        flags=re.DOTALL,
+    )
 
     # \hypertarget{X}{} (see preprocess()) becomes an empty fenced Div when
     # it sits on its own (block-level), or an inline `[]{#X}` bracketed

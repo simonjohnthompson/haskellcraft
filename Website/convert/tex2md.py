@@ -297,6 +297,33 @@ def hoist_labels_out_of_captions(text):
     return "".join(out)
 
 
+def swap_label_before_caption(text):
+    """Chapter 14's two \\includegraphics{...}\\label{X}\\caption{Y}
+    figures put \\label before \\caption, the reverse of the order every
+    other captioned figure in the book (and every label-scanning
+    function here) uses -- a label claims whichever \\caption/heading
+    came *before* it. Unclaimed, the label falls into LABEL_MAP's
+    "other" bucket, using its own raw name as link text instead of the
+    figure's real caption (\\ref{either} rendered as the bare word
+    "either" rather than "Joining together functions."). Swap the two
+    into the order the rest of the book already uses.
+    """
+    out = []
+    pos = 0
+    pat = re.compile(r"\\label\{([^{}]*)\}\s*\\caption\{")
+    while True:
+        m = pat.search(text, pos)
+        if not m:
+            out.append(text[pos:])
+            break
+        j = _find_matching_brace(text, m.end() - 1)
+        caption_inner = text[m.end():j - 1]
+        out.append(text[pos:m.start()])
+        out.append(r"\caption{" + caption_inner + "}" + r"\label{%s}" % m.group(1))
+        pos = j
+    return "".join(out)
+
+
 def mark_non_image_captions(tex):
     """Pandoc's LaTeX reader only turns \\caption{...} into a real
     caption (which this pipeline then renders as alt text -> a visible
@@ -360,7 +387,7 @@ def build_label_map():
         path = BOOK_DIR / f"{stem}.tex"
         if not path.exists():
             continue
-        text = hoist_labels_out_of_captions(path.read_text(encoding="utf-8"))
+        text = swap_label_before_caption(hoist_labels_out_of_captions(path.read_text(encoding="utf-8")))
         pending_title = None
         pending_caption = None
         pos = 0
@@ -1181,6 +1208,7 @@ def preprocess(tex):
     # hoist_labels_out_of_captions's docstring (Chapter 6's \label{horsePos}
     # sits mid-sentence inside its \caption{...} instead of right after it).
     tex = hoist_labels_out_of_captions(tex)
+    tex = swap_label_before_caption(tex)
     tex = mark_non_image_captions(tex)
 
     # \so / \st (defs0.tex: \so = \begin{ttdisplay}\parindent 1pc, itself

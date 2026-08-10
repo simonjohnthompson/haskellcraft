@@ -263,6 +263,40 @@ def find_primary_heading_labels(text):
     return primary
 
 
+def hoist_labels_out_of_captions(text):
+    """Chapter 6's \\caption{An example \\texttt{Image}.\\label{horsePos}}
+    plants its \\label mid-sentence inside the caption text, instead of
+    right after the caption's closing brace like every other captioned
+    figure in the book. Every label-scanning function here jumps straight
+    from \\caption{ to its matching closing brace in one step, so a label
+    buried inside is skipped entirely -- never registered in LABEL_MAP,
+    so \\ref{horsePos} elsewhere falls back to the raw label name with a
+    dead link, and downstream in preprocess() the resulting
+    \\hypertarget{horsePos}{} stays nested inside the caption text too,
+    corrupting the image's alt attribute with literal anchor HTML. Move
+    it out to right after the caption instead, matching the book's usual
+    shape, so the rest of the pipeline needs no special-casing for it.
+    """
+    out = []
+    pos = 0
+    cap_re = re.compile(r"\\caption\{")
+    while True:
+        m = cap_re.search(text, pos)
+        if not m:
+            out.append(text[pos:])
+            break
+        j = _find_matching_brace(text, m.end() - 1)
+        inner = text[m.end():j - 1]
+        lm = re.search(r"\\label\{[^{}]*\}", inner)
+        out.append(text[pos:m.start()])
+        if lm:
+            out.append(r"\caption{" + inner[:lm.start()] + inner[lm.end():] + "}" + lm.group(0))
+        else:
+            out.append(text[m.start():j])
+        pos = j
+    return "".join(out)
+
+
 def build_label_map():
     """Scan every chapter's real \\label{...} for cross-reference targets.
 
@@ -280,7 +314,7 @@ def build_label_map():
         path = BOOK_DIR / f"{stem}.tex"
         if not path.exists():
             continue
-        text = path.read_text(encoding="utf-8")
+        text = hoist_labels_out_of_captions(path.read_text(encoding="utf-8"))
         pending_title = None
         pending_caption = None
         pos = 0
@@ -1097,6 +1131,11 @@ def escape_bare_underscores_in_texttt(text):
 
 
 def preprocess(tex):
+    # Must run before anything else touches \caption/\label -- see
+    # hoist_labels_out_of_captions's docstring (Chapter 6's \label{horsePos}
+    # sits mid-sentence inside its \caption{...} instead of right after it).
+    tex = hoist_labels_out_of_captions(tex)
+
     # \so / \st (defs0.tex: \so = \begin{ttdisplay}\parindent 1pc, itself
     # \begin{alltt}% with some catcode/spacing setup, \st = the matching
     # \end{ttdisplay}) are an older, shorter way to mark a code/verbatim

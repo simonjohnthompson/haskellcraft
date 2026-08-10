@@ -250,7 +250,7 @@ Traditional imperative languages give little scope for higher-order programming;
 Control structures like `if-then-else` bear some resemblance to higher-order functions, as they take commands, `c_1`, `c_2` etc. into other commands,
 
 ```haskell
-if b then c_1 else c_2      while b do c_1
+if b then c1 else c2      while b do c1
 ```
 
 just as `map` takes one function to another. Turning the analogy around, we can think of higher-order functions in Haskell as **control structures** which we can define ourselves. This perhaps explains why we form libraries of polymorphic functions: they are the control structures we use in programming particular sorts of system. Examples in the text include libraries for building parsers ([Case study: parsing expressions](17.md#parsing)) and interactive I/O programs ([Playing the game: I/O in Haskell](8.md#io)), as well as the built-in list-processing functions.

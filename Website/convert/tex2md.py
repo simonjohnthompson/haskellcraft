@@ -1169,14 +1169,21 @@ def simplify_alltt_body(body: str):
 
     body = re.sub(r"\\hfill\s*", "  -- ", body)
 
+    # Subscripts (\vone, \subscr{v}{1}, ...) render as "v1" here, not
+    # "v_1" -- inside a monospace code listing there's no way to show a
+    # real typeset subscript, and the underscore reads as if it were
+    # part of the identifier itself rather than a subscript marker.
+    # Superscripts keep their "^" separator (\up{2}/\superscr{n}{2} ->
+    # "n^2"): unlike subscripts, dropping it would change the meaning
+    # (n2 doesn't read as "n squared").
     if SUBSCRIPT_SHORTHANDS:
         shorthand_pat = re.compile(
             r"\\(" + "|".join(re.escape(k) for k in SUBSCRIPT_SHORTHANDS) + r")(?![a-zA-Z])"
         )
-        body = shorthand_pat.sub(lambda m: SUBSCRIPT_SHORTHANDS[m.group(1)], body)
+        body = shorthand_pat.sub(lambda m: SUBSCRIPT_SHORTHANDS[m.group(1)].replace("_", ""), body)
 
-    body = strip_two_arg_macro(body, "subscr", lambda a, b: f"{a}_{b}")
-    body = strip_two_arg_macro(body, "smsubscr", lambda a, b: f"{a}_{b}")
+    body = strip_two_arg_macro(body, "subscr", lambda a, b: f"{a}{b}")
+    body = strip_two_arg_macro(body, "smsubscr", lambda a, b: f"{a}{b}")
     body = strip_two_arg_macro(body, "superscr", lambda a, b: f"{a}^{b}")
     body = strip_two_arg_macro(body, "rule", lambda a, b: "")  # decorative spacer rule
 

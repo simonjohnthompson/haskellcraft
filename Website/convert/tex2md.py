@@ -1865,9 +1865,22 @@ def postprocess(md: str, current_file: str) -> str:
     # span when it's inline before something like a code block -- neither
     # is plain CommonMark, and no site renderer would treat them as an
     # anchor. Swap both for a plain inline HTML anchor, universally
-    # supported.
+    # supported. The opening/closing ":::" lines can each carry a nesting
+    # prefix: "> " for a \label{} planted as the very first thing inside
+    # a \beware{title}{...} block (which becomes a blockquote -- Pandoc
+    # prefixes every line of blockquote content with "> "), or a list
+    # marker ("-   "/"2.  ") for one planted as \item\label{X} (naming
+    # that list item) -- the opening line keeps the real marker, but
+    # Pandoc indents the matching *continuation* line with plain spaces
+    # of the same width instead of repeating it, so the two lines' own
+    # prefixes aren't identical text the way a blockquote's are. A
+    # \item[Term]\label{X} (\begin{description}, e.g. Chapter 6's
+    # "Hoogle search") becomes a definition list instead -- "Term",
+    # blank line, then ":   " marking the definition body -- so ":" is a
+    # marker character here too, alongside "-"/"*"/"+"/a numeral.
     md = re.sub(
-        r"^(.*?)::: \{#([A-Za-z0-9_\-]+)\}\n\s*:::\s*$",
+        r"^([ \t>]*(?:[-*+:][ \t]+|\d+[.)][ \t]+)?)"
+        r"::: \{#([A-Za-z0-9_\-]+)\}\n[ \t>]*:::[ \t]*$",
         r'\1<a id="\2"></a>',
         md,
         flags=re.MULTILINE,

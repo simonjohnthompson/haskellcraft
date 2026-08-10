@@ -1078,9 +1078,15 @@ def simplify_alltt_body(body: str):
     # brace form, so drop the bare command name and leave "[x]" as-is.
     body = re.sub(r"\\texttt(?=\[)", "", body)
 
-    for macro in ("texttt", "textrm", "textbf", "textsl", "underline", "minx",
+    for macro in ("texttt", "textrm", "textbf", "textsl", "underline",
                   "mbox", "framebox"):
         body = strip_balanced_macro(body, macro, lambda arg: arg)
+
+    # \minx{X} is a pure index marker (no visible content of its own,
+    # unlike the formatting macros above) -- dropping the wrapper but
+    # keeping X, like those, would leak the index term as visible code
+    # text (e.g. "above = (++)\minx{above}" -> "above = (++)above").
+    body = strip_balanced_macro(body, "minx", lambda arg: "")
 
     for name in FONT_DECLARATIONS:
         body = re.sub(r"\\" + name + r"(?![a-zA-Z])", "", body)

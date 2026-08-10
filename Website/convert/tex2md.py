@@ -200,8 +200,22 @@ _LABEL_CONTEXT_TOKEN = re.compile(
     r"|(?P<caption>\\caption\{)"
     r"|(?P<label>\\label\{)"
     r"|(?P<chapstart>\\chapstart(?![a-zA-Z]))"
-    r"|(?P<decorator>\\(?:index|minx)\{)"
+    r"|(?P<decorator>\\(?:index|minx|markright)\{)"
+    r"|(?P<decorator2>\\markboth\{)"
 )
+
+
+def _skip_decorator2(text, open_pos):
+    """\\markboth{left}{right}'s second {...} argument -- decorator2 only
+    covers the first via _find_matching_brace like every other decorator,
+    so this skips the immediately-following second group too."""
+    j = _find_matching_brace(text, open_pos)
+    k = j
+    while k < len(text) and text[k].isspace():
+        k += 1
+    if k < len(text) and text[k] == "{":
+        k = _find_matching_brace(text, k)
+    return k
 
 
 def find_primary_heading_labels(text):
@@ -232,6 +246,9 @@ def find_primary_heading_labels(text):
         if kind == "decorator":
             pos = _find_matching_brace(text, m.end() - 1)
             continue
+        if kind == "decorator2":
+            pos = _skip_decorator2(text, m.end() - 1)
+            continue
         if kind in ("heading", "caption"):
             pos = _find_matching_brace(text, m.end() - 1)
             pending = True
@@ -250,8 +267,10 @@ def build_label_map():
     """Scan every chapter's real \\label{...} for cross-reference targets.
 
     A label right after \\chapter/\\section/... (skipping only whitespace
-    and no-op decorators like \\index{...}/\\chapstart) names that
-    heading; a label right after \\caption{...} names that figure;
+    and no-op decorators like \\index{...}/\\chapstart/\\markright{...}/
+    \\markboth{...}{...}, the last a print-only running-header pair often
+    sandwiched between a heading and its label) names that heading; a
+    label right after \\caption{...} names that figure;
     anything else (equations, mid-paragraph anchors, labels planted
     inside a code listing to name a definition) has no natural title, so
     the label itself becomes the link text.
@@ -280,6 +299,9 @@ def build_label_map():
                 continue
             if kind == "decorator":
                 pos = _find_matching_brace(text, m.end() - 1)
+                continue
+            if kind == "decorator2":
+                pos = _skip_decorator2(text, m.end() - 1)
                 continue
             if kind == "heading":
                 j = _find_matching_brace(text, m.end() - 1)
@@ -1182,6 +1204,18 @@ def preprocess(tex):
     # Index entries carry no reader-visible content -> drop entirely.
     tex = strip_balanced_macro(tex, "index", lambda arg: "")
     tex = strip_balanced_macro(tex, "minx", lambda arg: "")
+
+    # \markright{X}/\markboth{X}{Y} (print-only running-header text, no
+    # web equivalent) commonly sit directly between \section{...} and its
+    # \label{...}. Pandoc's own heading/label attachment needs \label to
+    # immediately follow the heading -- left in place, these silently
+    # break that, leaving the heading with no id and the label orphaned
+    # as a stray inline span in the body instead. Drop both here, before
+    # pandoc ever sees the text (find_primary_heading_labels/
+    # build_label_map already treat them as no-op decorators for our own
+    # link-text bookkeeping, but that doesn't help pandoc's parse).
+    tex = strip_balanced_macro(tex, "markright", lambda arg: "")
+    tex = strip_two_arg_macro(tex, "markboth", lambda a, b: "")
 
     # Cross references. A label right after a \chapter/\section/... is left
     # as a real \label{X} -- pandoc auto-attaches those to the heading as

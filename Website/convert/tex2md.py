@@ -1618,17 +1618,8 @@ def postprocess(md: str, current_file: str) -> str:
     # width regardless of what LaTeX asked for. LaTeX's in/cm/pt units
     # are also valid CSS length units, so the value carries over as-is
     # into a raw <img style="..."> tag, which mdBook passes through
-    # untouched. The optional "fig:" title (pandoc's side-by-side-image
-    # marker) is dropped since it's not meant to be shown.
-    def _image_to_html(m):
-        alt, src, attrs = m.group("alt"), m.group("src"), m.group("attrs")
-        styles = []
-        for key in ("width", "height"):
-            am = re.search(key + r'="([^"]*)"', attrs)
-            if am:
-                styles.append(f"{key}:{am.group(1)}")
-        style_attr = f' style="{"; ".join(styles)}"' if styles else ""
-        alt_attr = alt.replace('"', "&quot;")
+    # untouched.
+    def _sized_thumbnail(src, alt_attr, style_attr):
         # Replicate mdBook's own click-to-zoom wrapper (normally added by
         # its markdown renderer for plain `![]()` images) by hand, since
         # writing raw HTML here bypasses that renderer entirely. The sized
@@ -1640,9 +1631,72 @@ def postprocess(md: str, current_file: str) -> str:
             f'<img src="{src}" alt="{alt_attr}"{style_attr}>'
             f'<span class="img-wrapper"><img src="{src}" alt="{alt_attr}"></span></label>'
         )
+
+    def _style_attr(attrs):
+        if not attrs:
+            return ""
+        styles = []
+        for key in ("width", "height"):
+            am = re.search(key + r'="([^"]*)"', attrs)
+            if am:
+                styles.append(f"{key}:{am.group(1)}")
+        return f' style="{"; ".join(styles)}"' if styles else ""
+
+    # A \caption{...} becomes the image's alt text (both plain pandoc
+    # markdown images and the styled ones above) -- alt text is invisible
+    # to sighted readers, so every caption in the book was going unseen.
+    # Wrap any image with non-empty alt text in a real <figure>/
+    # <figcaption> so the caption actually renders. The optional "fig:"
+    # title (pandoc's side-by-side-image marker, e.g. two diagrams
+    # sharing one caption) is dropped since it's not meant to be shown.
+    #
+    # Two things this has to work around:
+    # - CommonMark's raw-HTML-block content is never re-parsed as
+    #   markdown, so a caption's own backtick-code-span syntax (the only
+    #   inline markdown captions ever use, per a book-wide check) needs
+    #   converting to a real <code> tag by hand here, or it would show up
+    #   as literal backticks.
+    # - The whole thing has to stay on one line. A multi-line <figure>
+    #   block breaks when the image it replaces sits inside a list item
+    #   (e.g. Chapter 6's "Superimposing two Images" figure, indented
+    #   under a numbered step): pulldown-cmark's HTML-block indentation
+    #   tracking doesn't carry through a raw multi-line replacement the
+    #   way it does surrounding markdown, and the closing </figure> ends
+    #   up detected as outside the item ("unclosed HTML tag" warning).
+    def _caption_html(alt):
+        return re.sub(r"`([^`]*)`", r"<code>\1</code>", alt)
+
+    def _captioned_image_to_html(m):
+        alt, src, attrs = m.group("alt"), m.group("src"), m.group("attrs")
+        style_attr = _style_attr(attrs)
+        alt_attr = alt.replace('"', "&quot;")
+        thumb = _sized_thumbnail(src, alt_attr, style_attr)
+        return f"<figure>{thumb}<figcaption>{_caption_html(alt)}</figcaption></figure>"
     md = re.sub(
-        r'!\[(?P<alt>[^\[\]]*)\]\((?P<src>[^()\s]+)(?:\s+"[^"]*")?\)\{(?P<attrs>[^{}]*)\}',
-        _image_to_html, md,
+        r'!\[(?P<alt>[^\[\]]+)\]\((?P<src>[^()\s]+)(?:\s+"[^"]*")?\)(?:\{(?P<attrs>[^{}]*)\})?',
+        _captioned_image_to_html, md,
+    )
+
+    # Two figures placed side by side sharing one caption (pandoc's
+    # "fig:"-title convention above, e.g. Chapter 18's before/after
+    # trees) each got their own <figure> from the substitution above,
+    # duplicating the caption -- merge an adjacent pair with identical
+    # captions into one <figure> with a single, shared <figcaption>.
+    md = re.sub(
+        r"<figure>(.*?)<figcaption>([^<]*)</figcaption></figure>"
+        r"\s*<figure>(.*?)<figcaption>\2</figcaption></figure>",
+        r"<figure>\1 \3<figcaption>\2</figcaption></figure>",
+        md,
+    )
+
+    # Images with no caption (empty alt) but a LaTeX width/height still
+    # need the sized raw <img> from before, just without a <figcaption>.
+    def _uncaptioned_image_to_html(m):
+        src, attrs = m.group("src"), m.group("attrs")
+        return _sized_thumbnail(src, "", _style_attr(attrs))
+    md = re.sub(
+        r'!\[\]\((?P<src>[^()\s]+)(?:\s+"[^"]*")?\)\{(?P<attrs>[^{}]*)\}',
+        _uncaptioned_image_to_html, md,
     )
 
     return md

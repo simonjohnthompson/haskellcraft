@@ -1739,17 +1739,24 @@ def postprocess(md: str, current_file: str) -> str:
         _captioned_image_to_html, md,
     )
 
-    # Two figures placed side by side sharing one caption (pandoc's
-    # "fig:"-title convention above, e.g. Chapter 18's before/after
-    # trees) each got their own <figure> from the substitution above,
-    # duplicating the caption -- merge an adjacent pair with identical
-    # captions into one <figure> with a single, shared <figcaption>.
-    md = re.sub(
+    # N images placed side by side sharing one caption (pandoc's
+    # "fig:"-title convention above -- e.g. Chapter 18's before/after
+    # trees, or Chapter 16's 3- and 4-image search-tree diagrams) each
+    # got their own <figure> from the substitution above, duplicating
+    # the caption N times over -- merge each *run* of adjacent figures
+    # with identical captions into one <figure> with a single, shared
+    # <figcaption>. One pass only merges adjacent pairs, so a run of 3+
+    # (Chapter 16) needs repeating until nothing more merges: pass 1
+    # joins images 1+2, pass 2 then sees that merged figure sitting next
+    # to image 3 and joins those.
+    pair_re = re.compile(
         r"<figure>(.*?)<figcaption>([^<]*)</figcaption></figure>"
-        r"\s*<figure>(.*?)<figcaption>\2</figcaption></figure>",
-        r"<figure>\1 \3<figcaption>\2</figcaption></figure>",
-        md,
+        r"\s*<figure>(.*?)<figcaption>\2</figcaption></figure>"
     )
+    while True:
+        md, n = pair_re.subn(r"<figure>\1 \3<figcaption>\2</figcaption></figure>", md)
+        if not n:
+            break
 
     # Images with no caption (empty alt) but a LaTeX width/height still
     # need the sized raw <img> from before, just without a <figcaption>.

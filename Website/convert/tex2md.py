@@ -470,19 +470,21 @@ def _web_image_ext_path(path):
 
 
 def build_wrapfigure_images():
-    """Every Pictures/X.png inside a \\begin{wrapfigure} anywhere in the
-    book -- wrapfigure images are meant to float beside body text (their
-    whole point), not sit centered on their own line like every other
-    figure, so postprocess() needs to know which images these are to
-    skip centering them. Pandoc drops the distinction entirely by the
-    time postprocess() sees plain markdown (both \\begin{wrapfigure} and
-    \\begin{center} collapse to the same bare ![](...)), so this has to
-    be figured out from the raw LaTeX source instead, the same way
-    LABEL_MAP is.
+    """Every Pictures/X.png inside a \\begin{wrapfigure}[lines]{l or r}
+    {width} anywhere in the book, mapped to its 'l'/'r' placement --
+    wrapfigure images are meant to float beside body text (their whole
+    point), not sit centered on their own line like every other figure,
+    so postprocess() needs to know both which images these are (to skip
+    centering them) and which side to float them on. Pandoc drops the
+    distinction entirely by the time postprocess() sees plain markdown
+    (\\begin{wrapfigure} and \\begin{center} both collapse to the same
+    bare ![](...)), so this has to be figured out from the raw LaTeX
+    source instead, the same way LABEL_MAP is.
     """
-    images = set()
+    images = {}
     pattern = re.compile(
-        r"\\begin\{wrapfigure\}.*?\\end\{wrapfigure\}", re.DOTALL,
+        r"\\begin\{wrapfigure\}(?:\[[^\]]*\])?\{([lr])\}.*?\\end\{wrapfigure\}",
+        re.DOTALL,
     )
     img_pattern = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{([^{}]*)\}")
     for stem in CHAPTER_STEMS:
@@ -491,8 +493,9 @@ def build_wrapfigure_images():
             continue
         text = path.read_text(encoding="utf-8")
         for m in pattern.finditer(text):
+            placement = m.group(1)
             for im in img_pattern.finditer(m.group(0)):
-                images.add(_web_image_ext_path(im.group(1)))
+                images[_web_image_ext_path(im.group(1))] = placement
     return images
 
 
@@ -1775,14 +1778,13 @@ def postprocess(md: str, current_file: str) -> str:
             f'<span class="img-wrapper"><img src="{src}" alt="{alt_attr}"></span></label>'
         )
 
-    def _style_attr(attrs):
-        if not attrs:
-            return ""
-        styles = []
-        for key in ("width", "height"):
-            am = re.search(key + r'="([^"]*)"', attrs)
-            if am:
-                styles.append(f"{key}:{am.group(1)}")
+    def _style_attr(attrs, extra=()):
+        styles = list(extra)
+        if attrs:
+            for key in ("width", "height"):
+                am = re.search(key + r'="([^"]*)"', attrs)
+                if am:
+                    styles.append(f"{key}:{am.group(1)}")
         return f' style="{"; ".join(styles)}"' if styles else ""
 
     # A \caption{...} becomes the image's alt text (both plain pandoc
@@ -1846,13 +1848,20 @@ def postprocess(md: str, current_file: str) -> str:
     # above (has a width/height attrs block) and a plain ![](...) with
     # neither (attrs is None then). The one exception is \begin{wrapfigure}
     # images (WRAPFIGURE_IMAGES): those are meant to float beside body
-    # text, not center on their own line, so they're left as a bare
-    # thumbnail with no <figure> wrapper.
+    # text with the following paragraphs wrapping around them (that's
+    # the whole point of \begin{wrapfigure}[lines]{l or r}{width}), not
+    # center on their own line, so instead of the <figure> wrapper they
+    # get an actual CSS float on whichever side the LaTeX specified.
     def _uncaptioned_image_to_html(m):
         src, attrs = m.group("src"), m.group("attrs")
+        placement = WRAPFIGURE_IMAGES.get(src)
+        if placement:
+            float_style = (
+                ("float:left", "margin:0 1em 0.5em 0") if placement == "l"
+                else ("float:right", "margin:0 0 0.5em 1em")
+            )
+            return _sized_thumbnail(src, "", _style_attr(attrs, extra=float_style))
         thumb = _sized_thumbnail(src, "", _style_attr(attrs))
-        if src in WRAPFIGURE_IMAGES:
-            return thumb
         return f"<figure>{thumb}</figure>"
     md = re.sub(
         r'!\[\]\((?P<src>[^()\s]+)(?:\s+"[^"]*")?\)(?:\{(?P<attrs>[^{}]*)\})?',

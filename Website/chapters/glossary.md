@@ -222,7 +222,7 @@ A **function** takes one or more parameters into an **output**. Parameters are a
 
 Revealing the structure of a sentence in a formal language.
 
-A **function** of type `t_1->t_2->…->t_n->t` can be applied to `n` arguments, or less. In the latter case, the **application** is partial, since the result can itself be passed further parameters.
+A **function** of type `t1->t2->…->tn->t` can be applied to `n` arguments, or less. In the latter case, the **application** is partial, since the result can itself be passed further parameters.
 
 A pattern is either a **variable**, a **literal**, a **wild card** or the application of a **constructor** to other patterns. The term 'pattern' is also used as short for a 'pattern of computation' such as 'applying an operation to every member of a list', a pattern which in Haskell is realised by the `map` function.
 

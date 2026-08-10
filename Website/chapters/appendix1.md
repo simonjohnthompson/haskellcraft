@@ -54,11 +54,7 @@ where `square x = x*x`, the operation `map` applies its first argument to every 
 Functions and variables {#functions-and-variables .unnumbered}
 -----------------------
 
-An important difference between the two styles is what is meant by some of the terminology. Both 'function' and 'variable' have different interpretations.
-
-As was explained earlier, a function in a functional program is simply something which returns a value which depends upon some inputs. In imperative and object-oriented languages like Pascal, C, C++ and Java a function is rather different. It will return a value depending upon its arguments, but in general it will also change the values of variables. Rather than being a pure function it is really a procedure which returns a value when it terminates.
-
-In a functional program a variable stands for an **arbitrary** or **unknown** value. Every occurrence of a variable in an equation is interpreted in the same way. They are just like variables in logical formulas, or the mathematical variables familiar from equations like
+An important difference between the two styles is what is meant by some of the terminology. Both 'function' and 'variable' have different interpretations. As was explained earlier, a function in a functional program is simply something which returns a value which depends upon some inputs. In imperative and object-oriented languages like Pascal, C, C++ and Java a function is rather different. It will return a value depending upon its arguments, but in general it will also change the values of variables. Rather than being a pure function it is really a procedure which returns a value when it terminates. In a functional program a variable stands for an **arbitrary** or **unknown** value. Every occurrence of a variable in an equation is interpreted in the same way. They are just like variables in logical formulas, or the mathematical variables familiar from equations like
 
 ```haskell
 a^2 - b^2 = (a-b)(a+b)
@@ -247,7 +243,7 @@ Higher-order functions {#higher-order-functions .unnumbered}
 
 Traditional imperative languages give little scope for higher-order programming; Pascal, Java and C allow functions as arguments, so long as those functions are not themselves higher-order, but has no facility for returning functions as results. In C++ it is possible to return objects which represent functions by overloading the function application operator! This underlies the genericity hailed in the C++ Standard Template Library, which requires advanced features of the language to implement functions like `map` and `filter`.
 
-Control structures like `if-then-else` bear some resemblance to higher-order functions, as they take commands, `c_1`, `c_2` etc. into other commands,
+Control structures like `if-then-else` bear some resemblance to higher-order functions, as they take commands, `c1`, `c2` etc. into other commands,
 
 ```haskell
 if b then c1 else c2      while b do c1
@@ -269,15 +265,11 @@ As is argued in the text, polymorphism is one of the mechanisms which helps to m
 Defining types and classes {#defining-types-and-classes .unnumbered}
 --------------------------
 
-The algebraic type mechanism of Haskell, explained in [Algebraic types](14.md#algTypes),
-
-subsumes various traditional type definitions. Enumerated types are given by algebraic types all of whose constructors are 0-ary (take no arguments); variant records can be implemented as algebraic types with more then one constructor, and **recursive** types usually implemented by means of pointers become recursive algebraic types.
+The algebraic type mechanism of Haskell, explained in [Algebraic types](14.md#algTypes), subsumes various traditional type definitions. Enumerated types are given by algebraic types all of whose constructors are 0-ary (take no arguments); variant records can be implemented as algebraic types with more then one constructor, and **recursive** types usually implemented by means of pointers become recursive algebraic types.
 
 Just as we explained for lists, Haskell programs over trees and so on can be seen as *designs* for programs in imperative languages manipulating the pointer implementations of the types.
 
-The abstract data types, introduced in [Abstract data types](16.md#adt), are very like the abstract data types of `Modula-2` and so on; the design methods we suggest for use of abstract data types mirror aspects of the **object-based** approach advocated for modern imperative languages such as `Ada`.
-
-The Haskell class system also has object-oriented aspects, as we saw in [Algebraic types and type classes](14.md#algClasses). It is important to note that Haskell classes are in some ways quite different from the classes of, for instance, `C++`. In Haskell classes are made up of types, which themselves have members; in `C++` a class is like a type, in that it contains objects. Because of this many of the aspects of object-oriented design in `C++` are seen as issues of type design in Haskell.
+The abstract data types, introduced in [Abstract data types](16.md#adt), are very like the abstract data types of `Modula-2` and so on; the design methods we suggest for use of abstract data types mirror aspects of the **object-based** approach advocated for modern imperative languages such as `Ada`. The Haskell class system also has object-oriented aspects, as we saw in [Algebraic types and type classes](14.md#algClasses). It is important to note that Haskell classes are in some ways quite different from the classes of, for instance, `C++`. In Haskell classes are made up of types, which themselves have members; in `C++` a class is like a type, in that it contains objects. Because of this many of the aspects of object-oriented design in `C++` are seen as issues of type design in Haskell.
 
 List comprehensions {#list-comprehensions .unnumbered}
 -------------------

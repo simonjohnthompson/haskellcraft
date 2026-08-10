@@ -168,6 +168,49 @@ def wrap_bare_font_switches(tex):
     return "".join(out)
 
 
+def collapse_standalone_index_lines(tex):
+    """\\index{X}/\\minx{X} planted alone on its own source line --
+    e.g. Chapter 3's "...the guards and results\\n\\index{clause}\\nare
+    lined up" -- is just a LaTeX source-formatting habit; \\index{}
+    itself carries no visible content, and LaTeX doesn't treat a lone
+    newline as a paragraph break anyway (only a *blank* line is). The
+    generic \\index/\\minx strip elsewhere just deletes the command
+    text and leaves both surrounding newlines in place, though, so once
+    that line's content is gone those two newlines end up adjacent --
+    a blank line, splitting one sentence into two separate paragraphs.
+    Collapse the whole "\\n<index commands>\\n" span (a run of one or
+    more \\index{}/\\minx{} calls, in case several are stacked) into a
+    single space instead, wherever nothing but those calls and
+    whitespace occupies that line, so the sentence rejoins.
+    """
+    out = []
+    pos = 0
+    line_start_re = re.compile(r"\n[ \t]*")
+    idx_re = re.compile(r"\\(?:index|minx)\{")
+    while True:
+        m = line_start_re.search(tex, pos)
+        if not m:
+            out.append(tex[pos:])
+            break
+        i = m.end()
+        consumed_any = False
+        while True:
+            im = idx_re.match(tex, i)
+            if not im:
+                break
+            i = _find_matching_brace(tex, im.end() - 1)
+            consumed_any = True
+        rest_m = consumed_any and re.match(r"[ \t]*\n", tex[i:])
+        if rest_m:
+            out.append(tex[pos:m.start()])
+            out.append(" ")
+            pos = i + rest_m.end()
+            continue
+        out.append(tex[pos:m.end()])
+        pos = m.end()
+    return "".join(out)
+
+
 def _load_subscript_shorthands():
     """miradefs.tex defines ~35 shorthand macros like \\vone, \\gtwo, \\ei
     as pre-filled \\subscr{letter}{index} calls (v1, v2, ..., vn, g1, g2,
@@ -1522,24 +1565,28 @@ def preprocess(tex):
 
     # miradefs.tex's \superscr{a}{b}/\subscr{a}{b}/\smsubscr{a}{b} (e.g.
     # \superscr{2.1}{444}, meaning "2.1 x 10^444") used inline in prose
-    # (usually inside \texttt{...}) -- same silent-drop issue as \bs above.
-    # clean_label_text and simplify_alltt_body already handle these for
-    # headings/index text and code listings respectively.
-    # A bare "_" outside math mode is invalid LaTeX and pandoc's reader
-    # rejects it ("unexpected _") -- same reason escape_bare_underscores_in_texttt
-    # exists above, but that pass runs before this substitution introduces
-    # new underscores, so escape here too.
+    # (almost always inside \texttt{...}, e.g. Chapter 3's "the
+    # expressions \texttt{\ei} or guards \texttt{\gi}") -- same
+    # silent-drop issue as \bs above. clean_label_text and
+    # simplify_alltt_body already handle these for headings/index text
+    # and code listings respectively; subscripts render there as "v1"
+    # rather than "v_1" (a monospace/code context has no way to show a
+    # real typeset subscript, and the underscore reads as if it were
+    # part of the identifier), so match that here too rather than
+    # falling back to an escaped-underscore prose convention nothing
+    # else in the book actually uses. Superscripts keep "^"
+    # (\superscr{n}{2} -> "n^2"): dropping it would change the meaning.
     tex = strip_two_arg_macro(tex, "superscr", lambda a, b: f"{a}^{b}")
-    tex = strip_two_arg_macro(tex, "subscr", lambda a, b: f"{a}\\_{b}")
-    tex = strip_two_arg_macro(tex, "smsubscr", lambda a, b: f"{a}\\_{b}")
+    tex = strip_two_arg_macro(tex, "subscr", lambda a, b: f"{a}{b}")
+    tex = strip_two_arg_macro(tex, "smsubscr", lambda a, b: f"{a}{b}")
 
     # miradefs.tex's other ~35 pre-filled \subscr/\superscr shorthands
     # (\vone, \gtwo, \pone, ...) -- simplify_alltt_body already expands
     # these inside code listings, but they're also used bare in ordinary
     # prose (\texttt{\pone,\ptwo,...}), where the same silent-drop issue
-    # applies. Escape any "_" for the same reason as \subscr above.
+    # applies. Same "v1" not "v_1" convention as above.
     for _name, _repl in SUBSCRIPT_SHORTHANDS.items():
-        tex = re.sub(r"\\" + _name + r"(?![a-zA-Z])", _repl.replace("_", "\\_"), tex)
+        tex = re.sub(r"\\" + _name + r"(?![a-zA-Z])", _repl.replace("_", ""), tex)
 
     # \blackbox (defs0.tex: \hfill\rule{8pt}{8pt}, an end-of-proof QED
     # mark) and \startpr (\subparagraph{Proof}, a "Proof" lead-in) --
@@ -1552,6 +1599,11 @@ def preprocess(tex):
     tex = re.sub(r"\\startpr(?![a-zA-Z])", "\n\n" + r"\textbf{Proof}" + "\n\n", tex)
     tex = re.sub(r"\\inso(?![a-zA-Z])", "", tex)
     tex = re.sub(r"\\inst(?![a-zA-Z])", "", tex)
+
+    # Must run before the generic strip below, which would otherwise
+    # leave a mid-sentence \index{}/\minx{} on its own line as a blank
+    # line (a spurious paragraph break) once its own text is gone.
+    tex = collapse_standalone_index_lines(tex)
 
     # Index entries carry no reader-visible content -> drop entirely.
     tex = strip_balanced_macro(tex, "index", lambda arg: "")

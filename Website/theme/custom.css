@@ -16,3 +16,11 @@
     font-style: italic;
     opacity: 0.75;
 }
+
+/* \begin{wrapfigure} images (see tex2md.py's WRAPFIGURE_IMAGES) float
+   beside body text -- without this, a heading landing while the float
+   is still active would get squeezed down next to the image instead of
+   spanning the full text width. */
+.content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+    clear: both;
+}

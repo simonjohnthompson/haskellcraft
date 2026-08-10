@@ -1,6 +1,10 @@
 GHCi errors {#hugsErrors}
 ===========
 
+<a id="ix-errors-errors"></a>
+
+<a id="ix-errors-ghci-errors"></a>
+
 This appendix examines some of the more common programming errors in Haskell, and shows the error messages to which they give rise in GHCi.
 
 The programs we write all too often contain errors. On encountering an error, the system either halts, and gives an **error message**, or continues, but gives a **warning message** to tell us that something unusual has happened, which might signal that we have made an error. In this appendix, we look at a selection of the messages output by GHCi; we have chosen the messages which are both common and require some explanation; messages like
@@ -13,6 +17,10 @@ are self-explanatory. The messages are classified into roughly distinct areas. S
 
 Syntax errors {#syntax-errors .unnumbered}
 -------------
+
+<a id="ix-errors-errors-syntax"></a>
+
+<a id="ix-errors-syntax-error"></a>
 
 A Haskell system attempts to match the input we give to the syntax of the language. Commonly, when something goes wrong, we type something *unexpected*.
 
@@ -88,7 +96,7 @@ A Haskell system attempts to match the input we give to the syntax of the langua
         lexical error in string/character literal at character '\''
     ```
 
--   Not every string can be used as a name; some words in Haskell are **keywords** or **reserved identifiers**, and will give an error if used as an identifier. The keywords are
+-   Not every string can be used as a name; some words in Haskell are **keywords** or **reserved identifiers**, and will give an error if used as an identifier. The keywords are <a id="ix-errors-keyword"></a> <a id="ix-errors-identifier-reserved"></a>
 
     ```haskell
     case class data default deriving do else if import in infix
@@ -133,6 +141,10 @@ A Haskell system attempts to match the input we give to the syntax of the langua
 
 Type errors {#type-errors .unnumbered}
 -----------
+
+<a id="ix-errors-errors-type"></a>
+
+<a id="ix-errors-type-error"></a>
 
 In this section we look at various different type errors that we can provoke in GHCi.
 
@@ -237,6 +249,10 @@ In this section we look at various different type errors that we can provoke in 
 Program errors {#program-errors .unnumbered}
 --------------
 
+<a id="ix-errors-errors-program"></a>
+
+<a id="ix-errors-program-error"></a>
+
 Once we have written a syntactically and type correct script, and asked for the value of an expression which is itself acceptable, other errors can be produced during the **evaluation** of the expression.
 
 -   The first class of errors comes from missing cases in definitions. If we have written a definition like
@@ -284,10 +300,16 @@ Once we have written a syntactically and type correct script, and asked for the 
 Module errors {#module-errors .unnumbered}
 -------------
 
+<a id="ix-errors-errors-module"></a>
+
+<a id="ix-errors-modules-errors"></a>
+
 The `module` and `import` statements can provoke a variety of error messages: files may not be present, or may contain errors; names may be included more than once, or an alias on inclusion may cause a name clash. The error messages for these and other errors are self-explanatory.
 
 System messages {#system-messages .unnumbered}
 ---------------
+
+<a id="ix-errors-system-messages"></a>
 
 In response to some commands and interrupts, the system generates messages, including
 

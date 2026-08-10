@@ -1,6 +1,8 @@
 Project ideas {#projects}
 =============
 
+<a id="ix-projects-project-ideas"></a>
+
 In this appendix we give some ideas for extended Haskell projects, building on what we have covered here. Most of the projects can be implemented using what you have learned in this text, but many would gain from using libraries on the Hackage site. The projects are also discussed in more detail in the online supplement to the text, which appears at `www.haskellcraft.com`.
 
 ### Games and puzzles {#games-and-puzzles .unnumbered}
@@ -104,6 +106,8 @@ There is a well-developed literature on deriving machines, regular expressions o
 Develop mechanisms which provide a *visualisation* of the operation of an FSM. and of the algorithms discussed earlier.
 
 ### Domain-specific languages {#domain-specific-languages .unnumbered}
+
+<a id="ix-projects-dsl-project-ideas"></a>
 
 One theme of this book has been domain-specific languages, and as a part of some of these projects you could build a domain-specific language. Examples include
 

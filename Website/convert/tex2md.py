@@ -14,6 +14,7 @@ converted to web-friendly images separately (e.g. via `sips` on macOS or
 `pdftoppm`/`pdftocairo` from poppler) -- this script only rewrites the
 Markdown to point at Pictures/<name>.png, it doesn't render them.
 """
+import hashlib
 import re
 import subprocess
 import sys
@@ -904,6 +905,161 @@ def _split_index_level(s, ch):
     return parts
 
 
+def _index_anchor_id(stem, level_path):
+    """Deterministic, URL-safe anchor id for the first occurrence of a
+    given index term within a given chapter. Shared between
+    mark_first_index_occurrences() (which plants the anchor in the
+    chapter text) and build_index_tree() (which points the index page's
+    link at it) purely by both computing the same id from the same
+    (stem, level_path) pair -- no need to coordinate through anything
+    else, e.g. position in the source text, which could easily drift
+    out of sync between the two (build_index_tree scans the raw file
+    directly; preprocess() sees it after earlier steps have already
+    touched it).
+    """
+    # Symbol-only terms (e.g. "@", "&", "\forall" once cleaned to "∀") have
+    # no letters/digits at all, so the a-z0-9 slug below comes out empty --
+    # falling back to a fixed placeholder there would collide two different
+    # symbol terms in the same chapter onto the same id (seen for real: Ch.
+    # 17's "&" and ">*>" both wanting "ix-17-x"). Hash the raw key instead,
+    # so it stays deterministic (same key -> same id, still in sync with
+    # build_index_tree()) but distinct per term.
+    def _slug(key):
+        s = re.sub(r"[^a-z0-9]+", "-", key.lower()).strip("-")
+        return s or "s" + hashlib.md5(key.encode()).hexdigest()[:6]
+
+    slug = "-".join(_slug(key) for key in level_path)
+    return f"ix-{stem}-{slug}"
+
+
+def _scan_index_calls(text):
+    """Yield (start, end, level_path, see_target, levels, anchorable) for
+    every \\index{...} call in text, in source order. `anchorable` is True
+    for exactly one occurrence of a given level_path per call to this
+    generator: the first one that is both a real term (not a |see{}
+    cross-reference) and outside an alltt-derived code listing (see below).
+    Shared by mark_first_index_occurrences() (plants a \\hypertarget{} at
+    each anchorable occurrence) and build_index_tree() (points the index
+    page's link at that same spot) so the two independent scans -- one
+    over text already reshaped by earlier preprocess() steps, one over
+    the chapter's raw file straight off disk -- agree on what "first"
+    means without needing to coordinate any other way.
+
+    Several contexts can't safely receive a \\hypertarget{...}{}, verified
+    directly against pandoc rather than assumed -- an \\index{} occurrence
+    in any of them is never anchorable; if every occurrence of a term in a
+    chapter happens to fall in one, that term simply gets no precise
+    anchor there (the caller falls back to linking the chapter as a
+    whole, as it did before this existed):
+
+    - alltt listings (and the \\so...\\st shorthand for the same): they
+      bypass Pandoc's LaTeX parsing entirely (simplify_alltt_body
+      flattens them to plain text by hand, the same reason a mid-listing
+      \\label{} has to be pulled out rather than left in place -- see
+      that function's docstring), so a hypertarget left inside one would
+      show up as literal, visible "\\hypertarget{ix-...}{}" text in the
+      rendered code block.
+    - \\texttt{...} arguments: pandoc turns these into an inline Code
+      node, which can only hold literal text -- any \\hypertarget nested
+      inside is silently dropped (confirmed: \\texttt{\\hypertarget{x}{}y}
+      -> plain `y`, no trace of the anchor at all), unlike e.g.
+      \\textbf{...}/\\emph{...}, which keep it (-> **[]{#x}y**).
+    - display math (\\[...\\], $$...$$) and inline math ($...$): not
+      real LaTeX content to Pandoc's math parser, so a hypertarget there
+      is dropped the same way.
+    - the gap between \\begin{itemize,titemize,description,enumerate} and
+      its first \\item: confirmed dropped entirely (pandoc has nowhere
+      to attach floating content before the list's first item starts).
+    - commented-out lines (an unescaped "%" earlier on the same source
+      line): the \\index{} call itself never reaches pandoc at all, so
+      textually matching it here would plant a hypertarget that's just
+      as dead -- and, independently of anchoring, a commented-out
+      \\index{} was never really "in the book" and arguably shouldn't
+      count as making that chapter contain the term either.
+    """
+    def _spans(pat):
+        return [(m.start(), m.end()) for m in re.finditer(pat, text, flags=re.DOTALL)]
+
+    unsafe_spans = _spans(r"\\begin\{alltt\}.*?\\end\{alltt\}|\\so\b.*?\\st\b")
+    # (?<!\\) on the opening \[ rules out "\\[-9pt]" (a real, common LaTeX
+    # line-break-with-spacing, \\ followed by a [len] argument) being
+    # misread as the start of a \[...\] display-math block and then
+    # swallowing everything up to some unrelated \] far later in the
+    # chapter as one giant bogus "unsafe" span (found for real: Chapter
+    # 20's tabular row spacing did exactly this).
+    unsafe_spans += _spans(r"(?<!\\)\\\[.*?\\\]|\$\$.*?\$\$")
+    unsafe_spans += _spans(r"(?<!\\)\$[^$]*(?<!\\)\$")
+    unsafe_spans += _spans(
+        r"\\begin\{(?:itemize|titemize|description|enumerate)\}.*?(?=\\item\b)"
+    )
+    for m in re.finditer(r"\\texttt\{", text):
+        j = _find_matching_brace(text, m.end() - 1)
+        unsafe_spans.append((m.start(), j))
+
+    def _unsafe(start):
+        return any(a <= start < b for a, b in unsafe_spans)
+
+    def _commented_out(start):
+        line_start = text.rfind("\n", 0, start) + 1
+        line = text[line_start:start]
+        return bool(re.search(r"(?<!\\)%", line))
+
+    seen = set()
+    pos = 0
+    pattern = re.compile(r"\\index\{")
+    while True:
+        m = pattern.search(text, pos)
+        if not m:
+            return
+        j = _find_matching_brace(text, m.end() - 1)
+        arg = text[m.end():j - 1]
+        if _commented_out(m.start()):
+            pos = j
+            continue
+        levels, see_target = parse_index_entry(arg)
+        level_path = tuple(sort_key for sort_key, _ in levels)
+        valid = level_path and not see_target and all(k.strip() for k in level_path)
+        anchorable = valid and level_path not in seen and not _unsafe(m.start())
+        if anchorable:
+            seen.add(level_path)
+        yield m.start(), j, level_path, see_target, levels, anchorable
+        pos = j
+
+
+def mark_first_index_occurrences(tex, stem):
+    """The back-of-book index used to link every term only to the
+    *chapter* it appears in (Figure X.Y), not the specific spot within
+    it -- \\index{...} carries no reader-visible content, so nothing
+    was ever left behind to link to. Plant a real, invisible anchor
+    (\\hypertarget{...}{}, the same mechanism used for \\label{} that
+    can't stay a real \\label -- see preprocess()) at the first
+    anchorable occurrence of each distinct index term in this chapter
+    (see _scan_index_calls), so the index page can point there directly
+    instead. Later occurrences of the same term in the same chapter are
+    left as plain \\index{...}, still stripped with no anchor by the
+    generic pass further down -- the index page's link only ever needs
+    to reach *a* mention of the term in that chapter, and anchoring every
+    single occurrence would scatter far more invisible anchors through
+    the text than useful, for no reader-visible benefit.
+
+    Must run first, before anything else in preprocess() touches
+    \\index{...} or reshapes the surrounding text, since build_index_tree()
+    (which this has to stay in exact agreement with about what "first"
+    means) scans each chapter's raw, unmodified file from disk.
+    """
+    out = []
+    pos = 0
+    for start, end, level_path, _see_target, _levels, anchorable in _scan_index_calls(tex):
+        out.append(tex[pos:start])
+        if anchorable:
+            out.append(r"\hypertarget{%s}{}" % _index_anchor_id(stem, level_path))
+        else:
+            out.append(tex[start:end])
+        pos = end
+    out.append(tex[pos:])
+    return "".join(out)
+
+
 def parse_index_entry(arg):
     """\\index{...} syntax (makeidx convention): term[!subterm...][@display]
     [|( or |) (range markers, meaningless without page numbers, ignored)
@@ -940,28 +1096,27 @@ def parse_index_entry(arg):
 
 def build_index_tree():
     """Scan every chapter's real \\index{...} entries into a term tree:
-    {sort_key: {"display": str, "files": set(), "see": str|None,
-                "children": {...}}}. Terms merge across chapters (and
+    {sort_key: {"display": str, "files": {stem: anchor_id|None}, "see":
+    str|None, "children": {...}}}. Terms merge across chapters (and
     across slightly different \\index{} spellings of the same term) by
     sort key, e.g. "scale@\\texttt{scale}" always merging under "scale".
+    files maps each chapter this term appears in to the anchor id of its
+    first *anchorable* occurrence there (see _scan_index_calls, and
+    mark_first_index_occurrences which plants the matching
+    \\hypertarget{...}{} in the chapter text using the exact same
+    (stem, level_path) -> id scheme via _index_anchor_id) -- so the index
+    page can link straight to that spot instead of just the chapter as a
+    whole. None means the term only ever occurs there inside an alltt
+    listing, so no anchor exists to link to; the index page falls back to
+    linking the chapter as a whole, as it did before this existed.
     """
     root = {}
-    pattern = re.compile(r"\\index\{")
     for stem in CHAPTER_STEMS:
         path = BOOK_DIR / f"{stem}.tex"
         if not path.exists():
             continue
         text = path.read_text(encoding="utf-8")
-        pos = 0
-        while True:
-            m = pattern.search(text, pos)
-            if not m:
-                break
-            j = _find_matching_brace(text, m.end() - 1)
-            arg = text[m.end():j - 1]
-            pos = j
-
-            levels, see_target = parse_index_entry(arg)
+        for _start, _end, level_path, see_target, levels, anchorable in _scan_index_calls(text):
             if any(not sort_key.strip() for sort_key, _ in levels):
                 # A handful of entries index a symbol via a macro this
                 # script doesn't decode (\imp, \forall in math mode, ...)
@@ -971,15 +1126,17 @@ def build_index_tree():
             node = None
             for sort_key, display in levels:
                 node = node_dict.setdefault(
-                    sort_key, {"display": display, "files": set(), "see": None, "children": {}}
+                    sort_key, {"display": display, "files": {}, "see": None, "children": {}}
                 )
                 node_dict = node["children"]
             if node is None:
                 continue
             if see_target:
                 node["see"] = see_target
-            else:
-                node["files"].add(stem)
+            elif anchorable:
+                node["files"][stem] = _index_anchor_id(stem, level_path)
+            elif stem not in node["files"]:
+                node["files"][stem] = None
     return root
 
 
@@ -990,9 +1147,12 @@ def _render_index_node(sort_key, node, depth):
     if node["see"]:
         line = f"{bullet} — see *{node['see']}*"
     else:
-        links = ", ".join(
-            f"[{label.get(f, f)}]({f}.md)" for f in sorted(node["files"], key=_chapter_sort_key)
-        )
+        def _link(f):
+            anchor = node["files"][f]
+            target = f"{f}.md#{anchor}" if anchor else f"{f}.md"
+            return f"[{label.get(f, f)}]({target})"
+
+        links = ", ".join(_link(f) for f in sorted(node["files"], key=_chapter_sort_key))
         line = f"{bullet} — {links}" if links else bullet
     lines = [line]
     for child_key in sorted(node["children"], key=str.lower):
@@ -1460,7 +1620,13 @@ def escape_bare_underscores_in_texttt(text):
     return text
 
 
-def preprocess(tex):
+def preprocess(tex, stem):
+    # Must run before anything else touches \index{...} -- see
+    # mark_first_index_occurrences's docstring (it has to see each
+    # chapter's \index{} calls in exactly the order/form
+    # build_index_tree() does, scanning the same raw file from disk).
+    tex = mark_first_index_occurrences(tex, stem)
+
     # Must run before anything else touches \caption/\label -- see
     # hoist_labels_out_of_captions's docstring (Chapter 6's \label{horsePos}
     # sits mid-sentence inside its \caption{...} instead of right after it).
@@ -1845,7 +2011,7 @@ WRAPPER = r"""\documentclass{book}
 
 def convert_chapter(src_path: Path, out_dir: Path):
     raw = src_path.read_text()
-    cleaned = preprocess(raw)
+    cleaned = preprocess(raw, src_path.stem)
     wrapped = WRAPPER % cleaned
 
     tmp_tex = out_dir / (src_path.stem + "_wrapped.tex")

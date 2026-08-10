@@ -1,10 +1,16 @@
 Functional, imperative and OO programming {#vs}
 =========================================
 
+<a id="ix-appendix1-imperative-programming"></a>
+
 In this appendix we compare programming in Haskell to more traditional notions in imperative languages like Pascal and C and object-oriented (OO) languages such as C\#, C++ and Java.
 
 Values and states {#values-and-states .unnumbered}
 -----------------
+
+<a id="ix-appendix1-value"></a>
+
+<a id="ix-appendix1-state"></a>
 
 Consider the example of finding the sum of squares of natural numbers up to a particular number. A functional program describes the values that are to be calculated, directly.
 
@@ -49,12 +55,20 @@ newSumSq :: Int -> Int
 newSumSq n = sum (map square [1 .. n])
 ```
 
-where `square x = x*x`, the operation `map` applies its first argument to every member of a list, and `sum` finds the sum of a list of numbers. More examples of this sort of **data-directed** programming can be seen in the body of the text.
+where `square x = x*x`, the operation `map` applies its first argument to every member of a list, and `sum` finds the sum of a list of numbers. More examples of this sort of **data-directed** programming<a id="ix-appendix1-data-directed-programming"></a> can be seen in the body of the text.
 
 Functions and variables {#functions-and-variables .unnumbered}
 -----------------------
 
-An important difference between the two styles is what is meant by some of the terminology. Both 'function' and 'variable' have different interpretations. As was explained earlier, a function in a functional program is simply something which returns a value which depends upon some inputs. In imperative and object-oriented languages like Pascal, C, C++ and Java a function is rather different. It will return a value depending upon its arguments, but in general it will also change the values of variables. Rather than being a pure function it is really a procedure which returns a value when it terminates. In a functional program a variable stands for an **arbitrary** or **unknown** value. Every occurrence of a variable in an equation is interpreted in the same way. They are just like variables in logical formulas, or the mathematical variables familiar from equations like
+An important difference between the two styles is what is meant by some of the terminology. Both 'function' and 'variable' have different interpretations.
+
+<a id="ix-appendix1-function"></a>
+
+As was explained earlier, a function in a functional program is simply something which returns a value which depends upon some inputs. In imperative and object-oriented languages like Pascal, C, C++ and Java a function is rather different. It will return a value depending upon its arguments, but in general it will also change the values of variables. Rather than being a pure function it is really a procedure which returns a value when it terminates.
+
+<a id="ix-appendix1-variable"></a>
+
+In a functional program a variable stands for an **arbitrary** or **unknown** value. Every occurrence of a variable in an equation is interpreted in the same way. They are just like variables in logical formulas, or the mathematical variables familiar from equations like
 
 ```haskell
 a^2 - b^2 = (a-b)(a+b)
@@ -79,6 +93,8 @@ On the other hand, the value of a variable in an imperative program changes thro
 Program verification {#program-verification .unnumbered}
 --------------------
 
+<a id="ix-appendix1-proof"></a>
+
 Probably the most important difference between functional and imperative programs is logical. As well as being a program, a functional definition is a logical equation describing a **property** of the function. Functional programs are **self-describing**, as it were. Using the definitions, other properties of the functions can be deduced.
 
 To take a simple example, for all `n>0`, it is the case that
@@ -102,12 +118,16 @@ which is greater than 0. In general, for `n` greater than zero,
 sumSquares n = n*n + sumSquares (n-1)
 ```
 
-Now, `n*n` is positive, and if `sumSquares (n-1)` is positive, their sum, `sumSquares n`, must be. This proof can be formalized using **mathematical induction**. The body of the text contains numerous examples of proofs by induction over the structure of data structures like lists and trees, as well as over numbers.
+Now, `n*n` is positive, and if `sumSquares (n-1)` is positive, their sum, `sumSquares n`, must be. This proof can be formalized using **mathematical induction**<a id="ix-appendix1-mathematical-induction"></a>. The body of the text contains numerous examples of proofs by induction over the structure of data structures like lists and trees, as well as over numbers.
 
 Program verification is possible for imperative programs as well, but imperative programs are not self-describing in the way functional ones are. To describe the effect of an imperative program, like the 'sum of squares' program above, we need to add to the program logical formulas or assertions which describe the state of the program at various points in its execution. These methods are both more indirect and more difficult, and verification seems very difficult indeed for 'real' languages like Pascal and C. Another aspect of program verification is **program transformation** in which programs are transformed to other programs which have the same effect but better performance, for example. Again, this is difficult for traditional imperative languages.
 
 Records and tuples {#records-and-tuples .unnumbered}
 ------------------
+
+<a id="ix-appendix1-tuples"></a>
+
+<a id="ix-appendix1-records"></a>
 
 In [Data types, tuples and lists](5.md#tupleList) the tuple types of Haskell are introduced. In particular we saw the definition
 
@@ -148,7 +168,9 @@ To implement the analogue of an algebraic data type with more than one construct
 Lists and pointers {#lists-and-pointers .unnumbered}
 ------------------
 
-Haskell contains the type of lists built in, and other recursive types such as trees can be defined directly. We can think of the type of linked lists given by pointers in Pascal as an **implementation** of lists, since in Haskell it is not necessary to think of pointer values, or of storage allocation ( `new` and `dispose`) as it is in Pascal. Indeed, we can think of Haskell programs as **designs** for Pascal list programs. If we define
+<a id="ix-appendix1-pointer"></a>
+
+Haskell contains the type of lists built in, and other recursive types such as trees can be defined directly. We can think of the type of linked lists given by pointers in Pascal as an **implementation** of lists, since in Haskell it is not necessary to think of pointer values, or of storage allocation ( `new` and `dispose`) as it is in Pascal. Indeed, we can think of Haskell programs as **designs** for Pascal list programs. If we define <a id="ix-appendix1-lists-as-pascal-type"></a>
 
 ```haskell
 type list = ^node;
@@ -236,10 +258,12 @@ function doubleAll(xs:list):list;
   end;
 ```
 
-This is strong evidence that a functional approach can be useful even if we are writing in an imperative language: the functional language can be the high-level *design* language for the imperative implementation. Making this separation can give us substantial help in finding imperative programs -- we can think about the design and the lower level implementation *separately*, which makes each problem smaller, simpler and therefore easier to solve.
+This is strong evidence that a functional approach can be useful even if we are writing in an imperative language: the functional language can be the high-level *design*<a id="ix-appendix1-design"></a> language for the imperative implementation. Making this separation can give us substantial help in finding imperative programs -- we can think about the design and the lower level implementation *separately*, which makes each problem smaller, simpler and therefore easier to solve.
 
 Higher-order functions {#higher-order-functions .unnumbered}
 ----------------------
+
+<a id="ix-appendix1-higher-order-function"></a>
 
 Traditional imperative languages give little scope for higher-order programming; Pascal, Java and C allow functions as arguments, so long as those functions are not themselves higher-order, but has no facility for returning functions as results. In C++ it is possible to return objects which represent functions by overloading the function application operator! This underlies the genericity hailed in the C++ Standard Template Library, which requires advanced features of the language to implement functions like `map` and `filter`.
 
@@ -254,25 +278,33 @@ just as `map` takes one function to another. Turning the analogy around, we can 
 Polymorphism {#polymorphism .unnumbered}
 ------------
 
+<a id="ix-appendix1-polymorphism"></a>
+
 Again, this aspect is poorly represented in many imperative languages; the best we can do in `Pascal`, say, is to use a text editor to copy and modify the list processing code from one type of lists for use with another. Of course, we then run the risk that the different versions of the programs are not modified in step, unless we are very careful to keep track of modifications, and so on.
 
 Polymorphism in Haskell is what is commonly known as **generic** polymorphism: the same 'generic' code works over a whole collection of types. A simple example is the function which reverses the elements in a list.
 
-Haskell classes support what is known as 'ad hoc' polymorphism, or in object-oriented terminology simply 'polymorphism', in which different programs implement the same operation over different types. An example of this is the `Eq` class of types carrying an equality operation: the way in which equality is checked is completely different at different types. Another way of viewing classes is as **interfaces** which different types can implement in different ways; in this way they resemble the interfaces of object-oriented languages like Java.
+Haskell classes support what is known as 'ad hoc' polymorphism, or in object-oriented terminology simply 'polymorphism', in which different programs implement the same operation over different types. An example of this is the `Eq` class of types carrying an equality operation: the way in which equality is checked is completely different at different types. Another way of viewing classes is as **interfaces**<a id="ix-appendix1-interface"></a> which different types can implement in different ways; in this way they resemble the interfaces of object-oriented languages like Java.
 
 As is argued in the text, polymorphism is one of the mechanisms which helps to make programs *reusable* in Haskell; it remains to be seen whether this will also be true of advanced imperative languages.
 
 Defining types and classes {#defining-types-and-classes .unnumbered}
 --------------------------
 
-The algebraic type mechanism of Haskell, explained in [Algebraic types](14.md#algTypes), subsumes various traditional type definitions. Enumerated types are given by algebraic types all of whose constructors are 0-ary (take no arguments); variant records can be implemented as algebraic types with more then one constructor, and **recursive** types usually implemented by means of pointers become recursive algebraic types.
+The algebraic type mechanism of Haskell, explained in [Algebraic types](14.md#algTypes), <a id="ix-appendix1-algebraic-type"></a> subsumes various traditional type definitions. Enumerated types are given by algebraic types all of whose constructors are 0-ary (take no arguments); variant records can be implemented as algebraic types with more then one constructor, and **recursive** types usually implemented by means of pointers become recursive algebraic types.
 
 Just as we explained for lists, Haskell programs over trees and so on can be seen as *designs* for programs in imperative languages manipulating the pointer implementations of the types.
 
-The abstract data types, introduced in [Abstract data types](16.md#adt), are very like the abstract data types of `Modula-2` and so on; the design methods we suggest for use of abstract data types mirror aspects of the **object-based** approach advocated for modern imperative languages such as `Ada`. The Haskell class system also has object-oriented aspects, as we saw in [Algebraic types and type classes](14.md#algClasses). It is important to note that Haskell classes are in some ways quite different from the classes of, for instance, `C++`. In Haskell classes are made up of types, which themselves have members; in `C++` a class is like a type, in that it contains objects. Because of this many of the aspects of object-oriented design in `C++` are seen as issues of type design in Haskell.
+The abstract data types<a id="ix-appendix1-abstract-data-type"></a>, introduced in [Abstract data types](16.md#adt), are very like the abstract data types of `Modula-2` and so on; the design methods we suggest for use of abstract data types mirror aspects of the **object-based** approach advocated for modern imperative languages such as `Ada`.
+
+<a id="ix-appendix1-classes"></a>
+
+The Haskell class system also has object-oriented aspects, as we saw in [Algebraic types and type classes](14.md#algClasses). It is important to note that Haskell classes are in some ways quite different from the classes of, for instance, `C++`. In Haskell classes are made up of types, which themselves have members; in `C++` a class is like a type, in that it contains objects. Because of this many of the aspects of object-oriented design in `C++` are seen as issues of type design in Haskell.
 
 List comprehensions {#list-comprehensions .unnumbered}
 -------------------
+
+<a id="ix-appendix1-list-comprehensions"></a>
 
 List comprehensions provide a convenient notation for **iteration** along lists: the analogue of a `for` loop, which can be used to run through the indices of an array. For instance, to sum all pairs of elements of `xs` and `ys`, we write
 
@@ -308,6 +340,8 @@ if we so wish.
 Lazy evaluation {#lazy-evaluation .unnumbered}
 ---------------
 
+<a id="ix-appendix1-lazy-evaluation"></a>
+
 Lazy evaluation and imperative languages do not mix well. In `Pascal`, for instance, we can write the function definition
 
 ```haskell
@@ -328,6 +362,10 @@ In general, it will not be possible to predict the behaviour of even the simples
 
 State, infinite lists and monads {#state-infinite-lists-and-monads .unnumbered}
 --------------------------------
+
+<a id="ix-appendix1-lists-infinite"></a>
+
+<a id="ix-appendix1-monad"></a>
 
 [Infinite lists](17.md#infLists) introduced infinite lists, and one of the first examples given there was an infinite list of random numbers. This list could be supplied to a function requiring a supply of random numbers; because of lazy evaluation, these numbers will only be generated on demand.
 

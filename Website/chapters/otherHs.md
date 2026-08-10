@@ -1,6 +1,10 @@
 Haskell practicalities {#OtherHS}
 ======================
 
+<a id="ix-otherHs-haskell-implementations"></a>
+
+<a id="ix-otherHs-haskell-platform"></a>
+
 It's not difficult to get going using Haskell, and most of the relevant information is easily accessible from the `haskell.org` page. This appendix points you in the right direction.
 
 ### Implementations {#implementations .unnumbered}
@@ -29,9 +33,13 @@ www.haskellcraft.com
 
 ### Using GHCi {#using-ghci .unnumbered}
 
+<a id="ix-otherHs-ghci-documentation"></a>
+
 An overview of the main commands of GHCi can be found in [Principal GHCi commands](2.md#commands), and full details of other aspects of GHCi are in the online documentation for GHC.
 
 ### Editors for Haskell {#editors-for-haskell .unnumbered}
+
+<a id="ix-otherHs-editors-for-haskell"></a>
 
 While there is no preferred editor for Haskell, emacs is probably the best loved and most used. To tune emacs to work with Haskell, it's good to use the Haskell mode, which is documented extensively at
 

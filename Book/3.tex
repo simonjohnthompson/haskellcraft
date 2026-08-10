@@ -309,11 +309,15 @@ Section \ref{operators} for more details.}
 \begin{figure}[t]
 \beware{Understanding GHCi error messages}{When you first see an error message like this
 \begin{alltt}\index{GHCi!understanding error messages}
-    No instance for (Num (a -> a))
-      arising from a use of `-' at <interactive>:1:0-9
-    Possible fix: add an instance declaration for (Num (a -> a))
-      In the expression: negate - 34
-    In the definition of `it': it = negate - 34
+\ \ \ \ No instance for (Num (a -> a))
+
+\ \ \ \ \ \ arising from a \colorbox{white}{use of `-' at <interactive>:1:0-9}
+
+\ \ \ \ Possible fix: add an instance declaration for (Num (a -> a))
+
+\ \ \ \ \colorbox{white}{In the expression: negate - 34}
+
+\ \ \ \ In the definition of `it': it = negate - 34
 \end{alltt}
 you could be forgiven for being bemused, because it talks about things we've not covered yet. 
 
@@ -385,7 +389,8 @@ which we introduce later in the chapter use the \texttt{Int} type, rather than \
 What functions and operators can we use over \texttt{Int}? All the functions we have already given for \texttt{Integer}, in fact, because these functions are \emph{overloaded}: we look at this in Section \ref{overlIntro}. We can also covert between the two types using
 \begin{alltt}\minx{fromInteger}\index{toInteger}
 fromInteger :: Integer -> Int
-toInteger   :: Int -> Integer
+
+toInteger\ \ \ :: Int -> Integer
 \end{alltt}}
 \end{figure}
 

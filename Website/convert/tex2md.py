@@ -1228,6 +1228,16 @@ def preprocess(tex):
     tex = strip_balanced_macro(tex, "pageref", lambda arg: "")
     tex = strip_balanced_macro(tex, "ref", lambda arg: f"XREFOPEN{arg}XREFCLOSE")
 
+    # "Chapter \ref{X}"/"Section \ref{X}" (and plural "Chapters \ref{a}
+    # and \ref{b}") render in LaTeX as "Chapter 5"/"Section 5.2" -- a
+    # word followed by a number. On the website \ref resolves to the
+    # target heading's actual title text instead of a number (chapters
+    # aren't numbered the same way across the two mediums), so the same
+    # phrasing would read as "Chapter Introducing functional
+    # programming". Drop the leading word -- the linked title alone
+    # reads naturally and the link itself shows it's a cross-reference.
+    tex = re.sub(r"\b(?:Chapters?|Sections?)[\s~]*(?=XREFOPEN)", "", tex)
+
     # \cite{a,b}/\citeyear{x} -> a sentinel resolved once the bibliography
     # page exists to link against (build_bibliography_page(), called from
     # __main__ after every chapter's been converted).

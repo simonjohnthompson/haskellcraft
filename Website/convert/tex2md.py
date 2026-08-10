@@ -1765,15 +1765,20 @@ def postprocess(md: str, current_file: str) -> str:
     # are also valid CSS length units, so the value carries over as-is
     # into a raw <img style="..."> tag, which mdBook passes through
     # untouched.
-    def _sized_thumbnail(src, alt_attr, style_attr):
+    def _sized_thumbnail(src, alt_attr, style_attr, label_class=""):
         # Replicate mdBook's own click-to-zoom wrapper (normally added by
         # its markdown renderer for plain `![]()` images) by hand, since
         # writing raw HTML here bypasses that renderer entirely. The sized
         # style only applies to the inline thumbnail; the zoomed overlay
         # copy stays unstyled so the CSS's own max-width/max-height rules
-        # size it, same as every other image in the book.
+        # size it, same as every other image in the book. label_class
+        # (e.g. "wrapfigure-left") is on the outer <label> rather than a
+        # style="" attribute, so a stylesheet media query can still
+        # override it responsively -- an inline style can't be beaten
+        # without !important.
+        class_attr = f' class="checkbox-label {label_class}"' if label_class else ' class="checkbox-label"'
         return (
-            '<label class="checkbox-label"><input class="checkbox-img" type="checkbox">'
+            f'<label{class_attr}><input class="checkbox-img" type="checkbox">'
             f'<img src="{src}" alt="{alt_attr}"{style_attr}>'
             f'<span class="img-wrapper"><img src="{src}" alt="{alt_attr}"></span></label>'
         )
@@ -1856,11 +1861,8 @@ def postprocess(md: str, current_file: str) -> str:
         src, attrs = m.group("src"), m.group("attrs")
         placement = WRAPFIGURE_IMAGES.get(src)
         if placement:
-            float_style = (
-                ("float:left", "margin:0 1em 0.5em 0") if placement == "l"
-                else ("float:right", "margin:0 0 0.5em 1em")
-            )
-            return _sized_thumbnail(src, "", _style_attr(attrs, extra=float_style))
+            label_class = "wrapfigure-left" if placement == "l" else "wrapfigure-right"
+            return _sized_thumbnail(src, "", _style_attr(attrs), label_class=label_class)
         thumb = _sized_thumbnail(src, "", _style_attr(attrs))
         return f"<figure>{thumb}</figure>"
     md = re.sub(

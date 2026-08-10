@@ -24,3 +24,27 @@
 .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
     clear: both;
 }
+
+.content .wrapfigure-left {
+    float: left;
+    margin: 0 1em 0.5em 0;
+}
+
+.content .wrapfigure-right {
+    float: right;
+    margin: 0 0 0.5em 1em;
+}
+
+/* A fixed LaTeX width (e.g. Chapter 6's 5cm Cards.png) leaves too
+   little room for the wrapped text beside it once the viewport itself
+   is only a little wider than that -- drop the float below a phone-ish
+   width and let the image sit full-width above its text like every
+   other uncaptioned image instead. */
+@media (max-width: 500px) {
+    .content .wrapfigure-left,
+    .content .wrapfigure-right {
+        float: none;
+        display: block;
+        margin: 1em auto;
+    }
+}

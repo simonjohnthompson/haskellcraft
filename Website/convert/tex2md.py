@@ -2035,6 +2035,35 @@ def postprocess(md: str, current_file: str) -> str:
         _uncaptioned_image_to_html, md,
     )
 
+    # A literal "|" inside an inline code span within a markdown table
+    # row (e.g. Chapter 3's Boolean truth table, a cell showing
+    # Haskell's `||` operator) breaks pulldown-cmark's table-row parsing
+    # even though it's backtick-quoted -- the *whole table* falls back
+    # to one raw run-on paragraph of pipe-delimited text instead of a
+    # <table>, not just that one cell. Escape any "|" found inside a
+    # code span on a table-row line (starts and ends with "|") as "\|",
+    # which pulldown-cmark's table parser does correctly treat as a
+    # literal pipe rather than a column separator. The delimiter row
+    # itself (|:---:|:---:|) has no backticks, so it's untouched.
+    def _escape_pipes_in_table_row(line):
+        chars = []
+        in_code = False
+        for c in line:
+            if c == "`":
+                in_code = not in_code
+                chars.append(c)
+            elif c == "|" and in_code:
+                chars.append(r"\|")
+            else:
+                chars.append(c)
+        return "".join(chars)
+    md = "\n".join(
+        _escape_pipes_in_table_row(line)
+        if (s := line.strip()).startswith("|") and s.endswith("|") and s.count("|") >= 2
+        else line
+        for line in md.split("\n")
+    )
+
     return md
 
 

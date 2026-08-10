@@ -882,25 +882,6 @@ def _numbered_chapter_labels():
     return labels
 
 
-def build_toc_page(out_dir: Path):
-    """A plain navigation page, since nothing else links to the 22
-    chapter files or bibliography.md/term-index.md."""
-    lines = ["Haskell: The Craft of Functional Programming", "=" * 46, ""]
-    for stem, label in _numbered_chapter_labels():
-        lines.append(f"- [{label}]({stem}.md)")
-    lines.append("")
-    lines.append("---")
-    lines.append("")
-    lines.append("- [Index](term-index.md)")
-    lines.append("- [References](bibliography.md)")
-    # Not "toc.md": mdBook reserves toc.html for its own sidebar iframe
-    # (the no-JS fallback navigation) -- a src/toc.md of ours would
-    # silently lose that filename collision to mdBook's own file.
-    out_path = out_dir / "overview.md"
-    out_path.write_text("\n".join(lines), encoding="utf-8")
-    return out_path
-
-
 def build_license_page(out_dir: Path):
     """A short front-matter page, listed first in SUMMARY.md ahead of the
     Preface, carrying the CC BY-NC-SA 4.0 license for the online edition."""
@@ -1921,7 +1902,5 @@ if __name__ == "__main__":
         print(f"(bibliography) -> {bib_path}")
         index_path = build_index_page(out_dir)
         print(f"(index) -> {index_path}")
-        toc_path = build_toc_page(out_dir)
-        print(f"(toc) -> {toc_path}")
         summary_path = build_summary_page(out_dir)
         print(f"(summary) -> {summary_path}")

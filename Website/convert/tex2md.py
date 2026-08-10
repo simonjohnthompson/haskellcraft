@@ -332,20 +332,39 @@ _LABEL_CONTEXT_TOKEN = re.compile(
     r"|(?P<chapstart>\\chapstart(?![a-zA-Z]))"
     r"|(?P<decorator>\\(?:index|minx|markright)\{)"
     r"|(?P<decorator2>\\markboth\{)"
+    r"|(?P<decorator3>\\addcontentsline\{)"
+    r"|(?P<hypertarget>\\hypertarget\{)"
 )
+
+
+def _skip_extra_brace_groups(text, pos, count):
+    """Skip `count` further {...} groups starting at pos (whitespace
+    tolerated before each), returning the position right after the last
+    one. Shared by every label-context decorator that takes more than one
+    brace argument."""
+    for _ in range(count):
+        k = pos
+        while k < len(text) and text[k].isspace():
+            k += 1
+        if k < len(text) and text[k] == "{":
+            pos = _find_matching_brace(text, k)
+        else:
+            break
+    return pos
 
 
 def _skip_decorator2(text, open_pos):
     """\\markboth{left}{right}'s second {...} argument -- decorator2 only
     covers the first via _find_matching_brace like every other decorator,
     so this skips the immediately-following second group too."""
-    j = _find_matching_brace(text, open_pos)
-    k = j
-    while k < len(text) and text[k].isspace():
-        k += 1
-    if k < len(text) and text[k] == "{":
-        k = _find_matching_brace(text, k)
-    return k
+    return _skip_extra_brace_groups(text, _find_matching_brace(text, open_pos), 1)
+
+
+def _skip_decorator3(text, open_pos):
+    """\\addcontentsline{toc}{chapter}{title}'s second and third {...}
+    arguments -- decorator3 only covers the first via _find_matching_brace
+    like every other decorator, so this skips the two more that follow."""
+    return _skip_extra_brace_groups(text, _find_matching_brace(text, open_pos), 2)
 
 
 def find_primary_heading_labels(text):
@@ -358,6 +377,16 @@ def find_primary_heading_labels(text):
     every one past the first needs to become \\hypertarget{X}{} instead,
     or it's left as a stray, unrenderable inline span pandoc has no
     heading left to attach it to.
+
+    By the time this runs, mark_first_index_occurrences() has already
+    replaced some \\index{...} decorators between a heading and its label
+    with \\hypertarget{ix-...}{}  -- e.g. Chapter 3's
+    \\section{Syntax}\\index{syntax|(}\\label{syntax} -- so that also has
+    to be skipped as a no-op, the same as a bare \\index{...} would be,
+    or \\label{syntax} reads as not-immediately-following the heading,
+    loses its "primary" status, and becomes a second, redundant
+    \\hypertarget{syntax}{} that collides with the heading's own
+    auto-generated id="syntax".
     """
     primary = set()
     pos = 0
@@ -376,8 +405,11 @@ def find_primary_heading_labels(text):
         if kind == "decorator":
             pos = _find_matching_brace(text, m.end() - 1)
             continue
-        if kind == "decorator2":
+        if kind in ("decorator2", "hypertarget"):
             pos = _skip_decorator2(text, m.end() - 1)
+            continue
+        if kind == "decorator3":
+            pos = _skip_decorator3(text, m.end() - 1)
             continue
         if kind in ("heading", "caption"):
             pos = _find_matching_brace(text, m.end() - 1)
@@ -599,8 +631,11 @@ def build_label_map():
             if kind == "decorator":
                 pos = _find_matching_brace(text, m.end() - 1)
                 continue
-            if kind == "decorator2":
+            if kind in ("decorator2", "hypertarget"):
                 pos = _skip_decorator2(text, m.end() - 1)
+                continue
+            if kind == "decorator3":
+                pos = _skip_decorator3(text, m.end() - 1)
                 continue
             if kind == "heading":
                 j = _find_matching_brace(text, m.end() - 1)
@@ -1627,6 +1662,27 @@ def preprocess(tex, stem):
     # build_index_tree() does, scanning the same raw file from disk).
     tex = mark_first_index_occurrences(tex, stem)
 
+    # A hypertarget just planted above can end up sitting directly between
+    # a heading/caption and its \label{} (e.g. Chapter 3's \section{Syntax}
+    # \index{syntax|(}\label{syntax} -- the \index{} there is now a
+    # hypertarget). Pandoc only attaches \label{} to its enclosing heading
+    # as a real {#id} when the label immediately follows the heading with
+    # nothing at all in between -- confirmed directly: even an inert
+    # \hypertarget{}{} in the gap is enough to break it, leaving the label
+    # as an orphaned, unrenderable span instead (find_primary_heading_labels
+    # still correctly decides to keep it a real \label further down, since
+    # it already treats a hypertarget as a no-op decorator to see through
+    # -- but that only decides which label pandoc *should* attach; pandoc
+    # itself still needs the adjacency for real). So move any run of
+    # hypertargets immediately before a \label to just after it instead --
+    # harmless if the label wasn't a heading's primary label anyway, since
+    # both end up as inert anchors in the same vicinity regardless of order.
+    tex = re.sub(
+        r"((?:\\hypertarget\{[^{}]*\}\{\}\s*\n\s*)+)(\\label\{[^{}]*\})",
+        r"\2\n\1",
+        tex,
+    )
+
     # Must run before anything else touches \caption/\label -- see
     # hoist_labels_out_of_captions's docstring (Chapter 6's \label{horsePos}
     # sits mid-sentence inside its \caption{...} instead of right after it).
@@ -1813,6 +1869,13 @@ def preprocess(tex, stem):
     # link-text bookkeeping, but that doesn't help pandoc's parse).
     tex = strip_balanced_macro(tex, "markright", lambda arg: "")
     tex = strip_two_arg_macro(tex, "markboth", lambda a, b: "")
+
+    # \addcontentsline{toc}{chapter}{Title} (0.tex's Preface: another
+    # print-only macro, here for the LaTeX-generated table of contents --
+    # meaningless on the web, where mdBook's own SUMMARY.md-driven sidebar
+    # is the real table of contents) -- same "breaks heading/label
+    # adjacency if left in place" issue as \markright/\markboth above.
+    tex = strip_three_arg_macro(tex, "addcontentsline", lambda a, b, c: "")
 
     # Cross references. A label right after a \chapter/\section/... is left
     # as a real \label{X} -- pandoc auto-attaches those to the heading as

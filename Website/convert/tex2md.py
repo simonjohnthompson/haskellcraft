@@ -1486,6 +1486,40 @@ def postprocess(md: str, current_file: str) -> str:
         return path + ".png"
     md = re.sub(r"(Pictures/[A-Za-z0-9_.\-]+)(?=[)\s\"])", _web_image_ext, md)
 
+    # \includegraphics[width=Xin]/[height=Ycm] becomes pandoc's markdown
+    # attribute syntax `{width="Xin"}`, but mdBook's markdown renderer
+    # (pulldown-cmark) doesn't support that extension -- it leaks as
+    # literal text after the image, and every image renders at full text
+    # width regardless of what LaTeX asked for. LaTeX's in/cm/pt units
+    # are also valid CSS length units, so the value carries over as-is
+    # into a raw <img style="..."> tag, which mdBook passes through
+    # untouched. The optional "fig:" title (pandoc's side-by-side-image
+    # marker) is dropped since it's not meant to be shown.
+    def _image_to_html(m):
+        alt, src, attrs = m.group("alt"), m.group("src"), m.group("attrs")
+        styles = []
+        for key in ("width", "height"):
+            am = re.search(key + r'="([^"]*)"', attrs)
+            if am:
+                styles.append(f"{key}:{am.group(1)}")
+        style_attr = f' style="{"; ".join(styles)}"' if styles else ""
+        alt_attr = alt.replace('"', "&quot;")
+        # Replicate mdBook's own click-to-zoom wrapper (normally added by
+        # its markdown renderer for plain `![]()` images) by hand, since
+        # writing raw HTML here bypasses that renderer entirely. The sized
+        # style only applies to the inline thumbnail; the zoomed overlay
+        # copy stays unstyled so the CSS's own max-width/max-height rules
+        # size it, same as every other image in the book.
+        return (
+            '<label class="checkbox-label"><input class="checkbox-img" type="checkbox">'
+            f'<img src="{src}" alt="{alt_attr}"{style_attr}>'
+            f'<span class="img-wrapper"><img src="{src}" alt="{alt_attr}"></span></label>'
+        )
+    md = re.sub(
+        r'!\[(?P<alt>[^\[\]]*)\]\((?P<src>[^()\s]+)(?:\s+"[^"]*")?\)\{(?P<attrs>[^{}]*)\}',
+        _image_to_html, md,
+    )
+
     return md
 
 

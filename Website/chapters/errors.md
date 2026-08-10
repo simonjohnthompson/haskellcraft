@@ -269,7 +269,7 @@ Once we have written a syntactically and type correct script, and asked for the 
 -   If we make a conformal definition, like
 
     ```haskell
-    [a,b] = [1 ..\ 10]
+    [a,b] = [1 .. 10]
     ```
 
     this will fail with the message

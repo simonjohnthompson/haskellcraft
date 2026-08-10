@@ -1181,6 +1181,20 @@ def simplify_alltt_body(body: str):
     body = strip_balanced_macro(body, "hspace*", lambda arg: "    ")
     body = strip_balanced_macro(body, "vertline", lambda arg: "")  # decorative connector line
     body = strip_balanced_macro(body, "ensuremath", lambda arg: arg)
+    # \colorbox{color}{text} -- print-only highlighting (e.g. Chapter 3's
+    # simulated GHCi error messages, \colorbox{white}{use of `-' at
+    # ...}); no web equivalent needed inside a code block, just keep the
+    # text. Pandoc doesn't recognize it either way, so left alone it
+    # leaks as literal "\colorbox{white}{...}" in the rendered code.
+    body = strip_two_arg_macro(body, "colorbox", lambda color, text: text)
+    # Bare \  (a backslash followed by a literal space -- LaTeX's
+    # "explicit interword space", used here purely for indentation, e.g.
+    # "\ \ \ \ No instance for ..." = 4 spaces). Not real LaTeX
+    # whitespace-collapsing behavior to worry about inside alltt (which
+    # already preserves whitespace verbatim) -- it's simply never
+    # processed at all, so it leaks as the literal two characters
+    # "\ " instead of becoming a single space.
+    body = re.sub(r"\\ ", " ", body)
     # \makebox[width][pos]{text}, e.g. \makebox[0pt][l]{/}\tone (a
     # zero-width "/" overlaid on the following character, in one of the
     # ex-\so/\st type-checking examples in Chapter 11) -- drop the

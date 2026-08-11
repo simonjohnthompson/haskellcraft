@@ -1513,7 +1513,7 @@ FONT_DECLARATIONS = (
 )
 
 
-def simplify_alltt_body(body: str):
+def simplify_alltt_body(body: str, in_beware: bool = False):
     """alltt lets LaTeX commands appear inside literal code (unlike
     verbatim); the book leans on that for right-aligned annotations
     (\\hfill\\textrm{...}), underlining a rewritten sub-term
@@ -1530,6 +1530,16 @@ def simplify_alltt_body(body: str):
     LaTeX command, meaningless as inert characters inside a literal
     environment. Pulled out here; the caller anchors them just before the
     code block instead.
+
+    in_beware: whether this listing sits inside a \\beware box. A blank
+    source line there (unlike one in an ordinary top-level alltt listing,
+    which really is a blank line in print -- verbatim-like environments
+    preserve those faithfully) gets collapsed away by \\beware's own
+    \\parbox nesting in the real book -- confirmed directly against
+    print, e.g. Chapter 3's "prop_max3" example is single-spaced there
+    despite a blank source line between every line. A fenced code block
+    has no such special-cased collapsing, so left alone this leaked
+    straight through as an actually double-spaced listing on the web.
     """
     # A couple of listings \input{} an external file (e.g. FirstScript.hs,
     # Pictures.tex) rather than duplicating its source in the chapter --
@@ -1550,9 +1560,26 @@ def simplify_alltt_body(body: str):
 
     # \\  (LaTeX hard linebreak) shows up inside \begin{tabbing} blocks used
     # for a couple of nested "scope box" diagrams (e.g. Chapter 4's boxed
-    # where-clause trace) -- turn it into a real newline before anything
-    # else touches single backslashes.
-    body = body.replace("\\\\", "\n")
+    # where-clause trace) and inside \beware boxes (whose \parbox nesting
+    # stops alltt's normal per-source-line splitting from working, so
+    # \\  is used to force each line explicitly instead) -- turn it into a
+    # real newline before anything else touches single backslashes.
+    #
+    # \\  is always written at the end of its own source line, which
+    # already has a real newline character right after it in the file
+    # (ordinary .tex formatting, one statement per line) -- a plain
+    # string .replace() doesn't consume that trailing newline, so it
+    # survives *in addition to* the newline the replacement just added,
+    # doubling every such line break into a blank line. That is invisible
+    # in the printed book (LaTeX's own \\  already ends the line; the
+    # incidental source newline after it is inert either way), but very
+    # visible here: a fenced code block preserves blank lines literally,
+    # so e.g. Chapter 5's fibStep/fibTwoStep comparison ends up rendered
+    # as five separate paragraphs of code instead of five plain lines.
+    # Consume that one optional trailing newline (plus any trailing
+    # horizontal whitespace before it) as part of the same replacement so
+    # \\  always becomes exactly one line break, matching print, not two.
+    body = re.sub(r"\\\\[ \t]*\n?", "\n", body)
 
     # Inline/display math delimiters -- keep the content, drop the wrapper.
     # Must run before \bs{...} below: \bs{}\bs{}[x] (Haskell's \\ operator,
@@ -1597,6 +1624,19 @@ def simplify_alltt_body(body: str):
     # text. Pandoc doesn't recognize it either way, so left alone it
     # leaks as literal "\colorbox{white}{...}" in the rendered code.
     body = strip_two_arg_macro(body, "colorbox", lambda color, text: text)
+
+    # Collapse a genuinely blank (or whitespace-only) source line -- see
+    # in_beware's docstring note above -- before the "\ " conversion
+    # just below turns a *deliberate* single-line separator (e.g.
+    # Chapter 5's fibStep/fibTwoStep example, written "\ \\ " on its own
+    # line) into something that would otherwise look identical: a line
+    # containing only a space. Run first, so that distinction is still
+    # visible: a bare "\ " isn't matched by [ \t]* (it contains a
+    # backslash), so a deliberate separator line survives this untouched
+    # and only a truly-empty-or-plain-whitespace line collapses.
+    if in_beware:
+        body = re.sub(r"\n[ \t]*\n+", "\n", body)
+
     # Bare \  (a backslash followed by a literal space -- LaTeX's
     # "explicit interword space", used here purely for indentation, e.g.
     # "\ \ \ \ No instance for ..." = 4 spaces). Not real LaTeX
@@ -1910,8 +1950,35 @@ def preprocess(tex, stem):
     # Chapter 19 "(Note that equation ...)" false-positive leak warning).
     # \minted{haskell} carries an explicit language class, so pandoc always
     # emits a real ``` fence for it, list-nesting or not.
+    # Whether a listing sits inside a \beware box matters to
+    # simplify_alltt_body (see its in_beware docstring note) -- computed
+    # here, on tex as it stands right before \beware itself gets
+    # processed much further down, since \beware's own \parbox{\textwidth}
+    # argument is exactly what breaks alltt's normal per-line spacing in
+    # the first place.
+    beware_spans = []
+    pos = 0
+    beware_re = re.compile(r"\\beware\{")
+    while True:
+        bm = beware_re.search(tex, pos)
+        if not bm:
+            break
+        j1 = _find_matching_brace(tex, bm.end() - 1)
+        k = j1
+        while k < len(tex) and tex[k].isspace():
+            k += 1
+        if k < len(tex) and tex[k] == "{":
+            j2 = _find_matching_brace(tex, k)
+            beware_spans.append((bm.start(), j2))
+            pos = j2
+        else:
+            pos = j1
+
+    def _in_beware(start):
+        return any(a <= start < b for a, b in beware_spans)
+
     def _convert_alltt(m):
-        body, code_labels = simplify_alltt_body(m.group(1))
+        body, code_labels = simplify_alltt_body(m.group(1), in_beware=_in_beware(m.start()))
         anchors = "".join(r"\hypertarget{%s}{}" % lbl for lbl in code_labels)
         return anchors + r"\begin{minted}{haskell}" + body + r"\end{minted}"
     tex = re.sub(r"\\begin\{alltt\}(.*?)\\end\{alltt\}", _convert_alltt, tex, flags=re.DOTALL)

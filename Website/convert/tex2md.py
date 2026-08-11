@@ -409,6 +409,26 @@ SYMBOL_MACROS = {
 }
 
 
+def _rule_to_symbol(width, height):
+    """\\rule{width}{height}: real LaTeX's black-bar primitive. A roughly
+    square, non-zero rule (e.g. \\blackbox's \\rule{8pt}{8pt}, an
+    end-of-proof mark, and Chapter 9's own description of it, "We use
+    the box, \\rule{8pt}{8pt}\\ , to signify...") is meant to look like a
+    filled black square in print -- left as real LaTeX, pandoc reads a
+    bare \\rule as a *thematic break* (a horizontal "---" rule) instead,
+    which is not just the wrong shape but corrupts the surrounding
+    paragraph into three separate blocks. Render it as U+2B1B (BLACK
+    LARGE SQUARE) instead, which needs no such reinterpretation. A
+    zero-width or zero-height rule (e.g. Chapter 4's alltt-diagram
+    \\rule{0cm}{0.4cm} row-spacing struts) is invisible spacing with no
+    mark and no web equivalent, so stays dropped instead.
+    """
+    def _is_zero(dim):
+        m = re.match(r"\s*([0-9.]+)", dim)
+        return m is not None and float(m.group(1)) == 0
+    return "" if _is_zero(width) or _is_zero(height) else "⬛"
+
+
 def _frac_display(a, b):
     # Clean each side first (not just .strip()) so e.g. "\mbox{\mi -b}"
     # loses its \mi token and the space it leaves behind, rather than
@@ -429,7 +449,7 @@ def clean_label_text(text):
     text = strip_balanced_macro(text, "minx", lambda arg: "")
     text = strip_balanced_macro(text, "symbol", lambda arg: chr(int(arg)) if arg.strip().isdigit() else "")
     text = strip_balanced_macro(text, "sqrt", lambda arg: f"√({arg.strip()})")
-    text = strip_two_arg_macro(text, "rule", lambda a, b: "")  # e.g. \blackbox's \rule{8pt}{8pt}
+    text = strip_two_arg_macro(text, "rule", _rule_to_symbol)  # e.g. \blackbox's \rule{8pt}{8pt}
     text = strip_two_arg_macro(text, "frac", _frac_display)
     for macro in ("superscr", "subscr", "smsubscr"):
         sep = "^" if macro == "superscr" else "_"
@@ -1963,10 +1983,16 @@ def preprocess(tex, stem):
     # font-switch pair wrapping a single number in Chapter 3 ("written as
     # \inso\mbox{}1.16e+143\inst"); neither has a visible symbol of its
     # own, so just drop both.
-    tex = re.sub(r"\\blackbox(?![a-zA-Z])", "∎", tex)
+    tex = re.sub(r"\\blackbox(?![a-zA-Z])", "⬛", tex)
     tex = re.sub(r"\\startpr(?![a-zA-Z])", "\n\n" + r"\textbf{Proof}" + "\n\n", tex)
     tex = re.sub(r"\\inso(?![a-zA-Z])", "", tex)
     tex = re.sub(r"\\inst(?![a-zA-Z])", "", tex)
+
+    # A bare \rule{...}{...} in ordinary prose (Chapter 9's own
+    # description of \blackbox: "We use the box, \rule{8pt}{8pt}\ , to
+    # signify the end of a proof.") -- see _rule_to_symbol's docstring
+    # for why this can't be left as real LaTeX for pandoc.
+    tex = strip_two_arg_macro(tex, "rule", _rule_to_symbol)
 
     # Must run before the generic strip below, which would otherwise
     # leave a mid-sentence \index{}/\minx{} on its own line as a blank

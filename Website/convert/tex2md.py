@@ -2516,6 +2516,23 @@ def postprocess(md: str, current_file: str) -> str:
     # the whole point of \begin{wrapfigure}[lines]{l or r}{width}), not
     # center on their own line, so instead of the <figure> wrapper they
     # get an actual CSS float on whichever side the LaTeX specified.
+    # A few images (e.g. Chapter 7's list-sorting diagrams) sit directly
+    # inline mid-paragraph, chained to the surrounding prose by \\ hard
+    # breaks, rather than wrapped in \begin{figure}/\begin{center} as
+    # their own standalone block -- pandoc's own markdown keeps them
+    # inline correctly (a plain ![]()  participates in the paragraph's
+    # inline content like any other span), but <figure> is one of
+    # CommonMark's block-level HTML tags: opening a *line* with it starts
+    # a raw HTML block that swallows every following line verbatim (no
+    # bold/code-span processing at all) up to the next blank line --
+    # corrupting the rest of the paragraph instead of just losing the
+    # image's own styling. Detected here by the telltale trailing "\\\n"
+    # a hard break leaves immediately before/after the match (real
+    # standalone figures always have a blank line -- or blockquote/list
+    # continuation line -- on both sides instead, never a hard break).
+    def _is_inline_image(text, start, end):
+        return text[:start].endswith("\\\n") or text[end:].startswith("\\\n")
+
     def _uncaptioned_image_to_html(m):
         src, attrs = m.group("src"), m.group("attrs")
         placement = WRAPFIGURE_IMAGES.get(src)
@@ -2523,6 +2540,8 @@ def postprocess(md: str, current_file: str) -> str:
             label_class = "wrapfigure-left" if placement == "l" else "wrapfigure-right"
             return _sized_thumbnail(src, "", _style_attr(attrs), label_class=label_class)
         thumb = _sized_thumbnail(src, "", _style_attr(attrs))
+        if _is_inline_image(m.string, m.start(), m.end()):
+            return thumb
         return f"<figure>{thumb}</figure>"
     md = re.sub(
         r'!\[\]\((?P<src>[^()\s]+)(?:\s+"[^"]*")?\)(?:\{(?P<attrs>[^{}]*)\})?',

@@ -169,6 +169,145 @@ def wrap_bare_font_switches(tex):
     return "".join(out)
 
 
+def _parse_ttfamily_colspec(spec):
+    """Parse a \\begin{tabular}{<spec>} column spec into (new_spec,
+    ttfamily_cols): new_spec has every array-package >{...}/<{...}
+    per-column decorator stripped out (pandoc's LaTeX table reader
+    doesn't understand them and garbles the whole table if they're left
+    in -- confirmed directly: a >{\\ttfamily} prefix caused a whole cell's
+    "[a]" to vanish and stray backticks to appear elsewhere), and
+    ttfamily_cols is the set of column indices (0-based) whose >{...}
+    decorator was exactly \\ttfamily or \\mi -- those need their cell
+    content rewrapped in a real \\texttt{...} by the caller, the same
+    convention wrap_bare_font_switches already applies to a bare mid-cell
+    \\ttfamily, since column-level font declarations have no pandoc
+    equivalent otherwise (Chapter 6's polymorphic/monomorphic list-
+    operation tables mark their first two columns this way).
+    """
+    tokens = []
+    ttfamily_cols = set()
+    i = 0
+    col_idx = 0
+    n = len(spec)
+    while i < n:
+        ch = spec[i]
+        if ch.isspace():
+            i += 1
+            continue
+        if ch in "><":
+            j = spec.index("{", i)
+            close = _find_matching_brace(spec, j)
+            if ch == ">" and spec[j + 1:close - 1].strip() in (r"\ttfamily", r"\mi"):
+                ttfamily_cols.add(col_idx)
+            i = close
+            continue
+        if ch in "lcr":
+            tokens.append(ch)
+            col_idx += 1
+            i += 1
+            continue
+        if ch in "pmb":
+            j = spec.index("{", i)
+            close = _find_matching_brace(spec, j)
+            tokens.append(spec[i:close])
+            col_idx += 1
+            i = close
+            continue
+        # Column-separator decoration (|, @{...}, etc.) -- not a column of
+        # its own; pass through untouched.
+        if ch == "@":
+            j = spec.index("{", i)
+            close = _find_matching_brace(spec, j)
+            tokens.append(spec[i:close])
+            i = close
+            continue
+        tokens.append(ch)
+        i += 1
+    return "".join(tokens), ttfamily_cols
+
+
+def _split_tabular_body(body):
+    """Split a tabular environment's body into rows of cells, splitting
+    on \\\\  (row end) and & (cell separator) only at brace depth 0, so a
+    nested macro argument containing either (e.g. \\texttt{a \\&\\& b})
+    isn't mistaken for a real separator.
+    """
+    rows = []
+    row = []
+    cell_start = 0
+    depth = 0
+    i = 0
+    n = len(body)
+    while i < n:
+        c = body[i]
+        if depth == 0 and c == "\\" and body[i:i + 2] == "\\\\":
+            row.append(body[cell_start:i])
+            rows.append(row)
+            row = []
+            i += 2
+            cell_start = i
+            continue
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+        elif c == "&" and depth == 0:
+            row.append(body[cell_start:i])
+            i += 1
+            cell_start = i
+            continue
+        i += 1
+    row.append(body[cell_start:])
+    rows.append(row)
+    return rows
+
+
+def convert_ttfamily_table_columns(tex):
+    """\\begin{tabular}{>{\\ttfamily}p{0.7in}...} -- see
+    _parse_ttfamily_colspec's docstring for why this has to be rewritten
+    (a >{...} column decorator left in place garbles the whole table for
+    pandoc, not just left unstyled). Rewrites the column spec to drop the
+    decorators and wraps each marked column's own cell content in
+    \\texttt{...} directly, which the rest of the pipeline already turns
+    into a real code span.
+    """
+    out = []
+    pos = 0
+    begin_re = re.compile(r"\\begin\{tabular\}\{")
+    while True:
+        m = begin_re.search(tex, pos)
+        if not m:
+            out.append(tex[pos:])
+            break
+        spec_open = m.end() - 1
+        spec_close = _find_matching_brace(tex, spec_open)
+        spec = tex[spec_open + 1:spec_close - 1]
+        if r"\ttfamily" not in spec and r"\mi}" not in spec:
+            out.append(tex[pos:spec_close])
+            pos = spec_close
+            continue
+        new_spec, tt_cols = _parse_ttfamily_colspec(spec)
+        end_m = re.search(r"\\end\{tabular\}", tex[spec_close:])
+        if not end_m:
+            out.append(tex[pos:spec_close])
+            pos = spec_close
+            continue
+        body_end = spec_close + end_m.start()
+        body = tex[spec_close:body_end]
+        new_rows = []
+        for row in _split_tabular_body(body):
+            new_cells = [
+                r"\texttt{%s}" % cell.strip() if col_idx in tt_cols and cell.strip() else cell
+                for col_idx, cell in enumerate(row)
+            ]
+            new_rows.append("&".join(new_cells))
+        out.append(tex[pos:m.start()])
+        out.append(r"\begin{tabular}{%s}" % new_spec)
+        out.append("\\\\".join(new_rows))
+        pos = body_end
+    return "".join(out)
+
+
 def collapse_standalone_index_lines(tex):
     """\\index{X}/\\minx{X} planted alone on its own source line --
     e.g. Chapter 3's "...the guards and results\\n\\index{clause}\\nare
@@ -1690,6 +1829,13 @@ def preprocess(tex, stem):
     tex = swap_label_before_caption(tex)
     tex = mark_non_image_captions(tex)
     tex = convert_description_item_braces(tex)
+    # Must run before wrap_bare_font_switches below: a >{\ttfamily} column
+    # decorator's \ttfamily would otherwise be seen as a bare mid-text
+    # font switch and "materialized" right there in the column spec
+    # itself, corrupting it (see convert_ttfamily_table_columns's
+    # docstring) instead of being recognized as a per-column decorator.
+    tex = convert_ttfamily_table_columns(tex)
+
     # Must run before the SYMBOL_MACROS/subscript-shorthand prose passes
     # below, so e.g. \tone inside \mi's scope ends up inside the
     # \texttt{...} wrapper wrap_bare_font_switches materializes for it.

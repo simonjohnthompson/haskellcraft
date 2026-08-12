@@ -1,21 +1,34 @@
 // Dev container for "Haskell: The Craft of Functional Programming".
 //
-// Gives a reader a ready-to-use GHC + cabal environment with no local
-// install, via GitHub Codespaces ("Code" -> "Create codespace on main")
-// or VS Code's Dev Containers extension. Uses the official Haskell
-// Docker image (https://hub.docker.com/_/haskell), the same GHC line
-// (9.6) the code in Code/Craft3e was verified against -- see
-// Admin/CODE-COMPATIBILITY-REPORT.md.
+// Gives a reader a ready-to-use GHC + cabal + HLS environment with no
+// local install, via GitHub Codespaces ("Code" -> "Create codespace on
+// main") or VS Code's Dev Containers extension.
+//
+// Built on a plain, actively-maintained devcontainers base image plus
+// GHCup, rather than the official haskell:9.6 Docker image: testing found
+// that image's Debian 11 base is too old (glibc) for the prebuilt HLS
+// binaries GHCup currently distributes, which broke the Haskell
+// extension's in-editor diagnostics/hover -- see
+// Admin/DEVELOPMENT-ENVIRONMENT-OPTIONS-REPORT.md. GHCup here installs the
+// same GHC 9.6.7 line verified in Admin/CODE-COMPATIBILITY-REPORT.md, plus
+// cabal and a matching HLS build.
 //
 // On first create this builds the book's Craft3e package so that, once
 // the container is ready, `cd Code/Craft3e && cabal repl` (or `:load
-// Chapter5`, `:load Solutions4`, etc.) works immediately -- see
-// Admin/RUNNING-HASKELL-OPTIONS-REPORT.md for the full set of options.
+// Chapter5`, `:load Solutions4`, etc.) works immediately, and opening a
+// .hs file in the editor gets live diagnostics/hover via HLS -- see
+// Admin/RUNNING-HASKELL-OPTIONS-REPORT.md and
+// Admin/DEVELOPMENT-ENVIRONMENT-OPTIONS-REPORT.md for the full set of
+// options.
 {
   "name": "Haskell: The Craft of Functional Programming",
-  "image": "haskell:9.6",
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+  "remoteUser": "vscode",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-  "postCreateCommand": "cd Code/Craft3e && cabal update && cabal build",
+  "containerEnv": {
+    "PATH": "/home/vscode/.ghcup/bin:/home/vscode/.cabal/bin:${containerEnv:PATH}"
+  },
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libffi-dev libffi8 libgmp-dev libgmp10 libncurses-dev libncurses6 libtinfo6 pkg-config zlib1g-dev && curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | BOOTSTRAP_HASKELL_NONINTERACTIVE=1 BOOTSTRAP_HASKELL_GHC_VERSION=9.6.7 BOOTSTRAP_HASKELL_INSTALL_NO_STACK=1 BOOTSTRAP_HASKELL_INSTALL_HLS=1 sh && cd Code/Craft3e && cabal update && cabal build",
   "customizations": {
     "vscode": {
       "extensions": [

@@ -75,11 +75,19 @@ through the browser (or through VS Code talking to that VM) — no local
 install of anything at all, including no Docker.
 
 **Implemented**: `.devcontainer/devcontainer.json` is now checked into this
-repository, built on the official `haskell:9.6` image (Option B) — the same
-GHC line the code was verified against for
-`Admin/CODE-COMPATIBILITY-REPORT.md`. It runs `cabal update && cabal build`
-inside `Code/Craft3e` on first create, so the container is ready for
-`cabal repl` as soon as it finishes. A reader:
+repository, built on a plain `mcr.microsoft.com/devcontainers/base:bookworm`
+image plus GHCup (not the official `haskell:9.6` image from Option B —
+testing while preparing `Admin/DEVELOPMENT-ENVIRONMENT-OPTIONS-REPORT.md`
+found that image's Debian 11 base is too old for the Haskell Language
+Server binaries GHCup currently distributes, which broke in-editor
+diagnostics/hover; GHCup on a current base avoids this). GHCup installs the
+same GHC 9.6.7 line the code was verified against for
+`Admin/CODE-COMPATIBILITY-REPORT.md`, plus cabal and a matching HLS build.
+It runs `cabal update && cabal build` inside `Code/Craft3e` on first
+create, so the container is ready for `cabal repl` as soon as it finishes,
+and opening a `.hs` file gets live diagnostics/hover via HLS — see
+`Admin/DEVELOPMENT-ENVIRONMENT-OPTIONS-REPORT.md` for the full editor/IDE
+picture. A reader:
 
 - **GitHub Codespaces**: on the repo's GitHub page, "Code" → "Codespaces" →
   "Create codespace on main". Lands in a browser-based VS Code with GHC,
@@ -170,10 +178,25 @@ under the sandbox's bundled Node 10/npm 6 `npx`, an unrelated local
 toolchain issue — but since `devcontainer.json` here is just an image plus
 a `postCreateCommand`, running that image and command directly through
 `docker run` exercises the same thing a Codespace or the Dev Containers
-extension would.) Still worth a first real run through an actual GitHub
-Codespace before pointing readers at it, to confirm the browser-based VS
-Code experience itself, but the underlying environment is confirmed
-working.
+extension would.) **Confirmed in a live GitHub Codespace too**: a real
+codespace was created on `main`, opened in the browser, and — following
+exactly the Route 1 steps above — `postCreateCommand` completed and
+`cabal repl` reached a working `ghci>` prompt. Both the underlying
+environment and the actual browser-based reader experience are confirmed
+working end-to-end.
+
+**Base image subsequently changed** (see above) to fix the HLS/glibc issue
+found while preparing `Admin/DEVELOPMENT-ENVIRONMENT-OPTIONS-REPORT.md`.
+The exact `postCreateCommand` now in `.devcontainer/devcontainer.json` was
+re-verified locally via Docker, run as the non-root `vscode` user with the
+same `PATH` the container config sets: `cabal build` completes cleanly (all
+68 modules plus the three executables) and
+`haskell-language-server-wrapper --probe-tools`, run from inside the
+project, correctly reports "Tool versions in your project: ghc: 9.6.7" —
+confirming HLS is now resolvable, not just cabal build/repl. *(Re-testing
+this specific config in the live Codespace, as was done for the previous
+version above, is the next step — see git history for whether that has
+landed.)*
 
 ## Option D — Browser-based playgrounds (no install, but limited)
 

@@ -94,11 +94,23 @@ inside `Code/Craft3e` on first create, so the container is ready for
 **This is the closest thing available to "zero install, but still the real,
 exact book environment"** — genuinely more capable than any browser
 playground (below), because it's actually running full GHC/cabal in a VM,
-not a sandboxed subset. The devcontainer was authored and reviewed here but
-**could not be built and run end-to-end in this environment (no Docker
-available)** — it should be smoke-tested via an actual Codespace or a local
-Dev Containers run before being relied on or pointed to from the book's
-front matter.
+not a sandboxed subset. **Smoke-tested successfully**: with Docker running
+locally, `docker run` against the `haskell:9.6` image reproduced the
+container's exact lifecycle — `cabal update && cabal build` inside
+`Code/Craft3e` completed with no errors (all 68 modules plus the three
+`Chapter20` performance executables), and a subsequent `cabal repl` in that
+same container loaded all 67 modules and correctly `:load`ed both a chapter
+file (`Chapter5`) and a reader-style exercise file (`Solutions4`), matching
+the workflow in `Admin/CODE-COMPATIBILITY-REPORT.md`. (The dedicated
+`devcontainers` CLI itself couldn't be run in this environment — it failed
+under the sandbox's bundled Node 10/npm 6 `npx`, an unrelated local
+toolchain issue — but since `devcontainer.json` here is just an image plus
+a `postCreateCommand`, running that image and command directly through
+`docker run` exercises the same thing a Codespace or the Dev Containers
+extension would.) Still worth a first real run through an actual GitHub
+Codespace before pointing readers at it, to confirm the browser-based VS
+Code experience itself, but the underlying environment is confirmed
+working.
 
 ## Option D — Browser-based playgrounds (no install, but limited)
 
@@ -177,7 +189,7 @@ whoever's time would go into adding either.
 |---|---|---|---|
 | A. GHCup | Yes (once) | Yes, fully | None — already works |
 | B. Docker `haskell` image | Docker only | Yes, fully | None — already works |
-| C. Codespaces / Gitpod | None | Yes, fully | Done — `.devcontainer/` added, needs a live smoke test |
+| C. Codespaces / Gitpod | None | Yes, fully | Done — `.devcontainer/` added, smoke-tested via Docker |
 | D. play.haskell.org / similar | None | No — single file, uncertain packages | None |
 | E. GHC-in-browser (Wasm) | None | Not yet — no external packages | None today; future potential |
 | F. IHaskell + Binder | None | Yes, but slow cold start | Larger: maintain notebook build |
@@ -187,11 +199,10 @@ instructions, exactly as today, since it's what the rest of this project's
 tooling (and the companion compatibility report) already assumes and tests
 against. **Mention Option B (Docker)** as a one-line alternative for readers
 who'd rather not touch their system Haskell install at all. **Option C (a
-Codespaces/Gitpod devcontainer) is now available** in this repository as
-the "try the real thing with nothing installed" path — it's the only
-zero-install option that isn't crippled by missing packages or single-file
-limits; it still wants a live smoke test (see above) before being
-advertised to readers. Do **not** send readers to `tryhaskell.org`
+Codespaces/Gitpod devcontainer) is now available and smoke-tested** in this
+repository as the "try the real thing with nothing installed" path — it's
+the only zero-install option that isn't crippled by missing packages or
+single-file limits. Do **not** send readers to `tryhaskell.org`
 (defunct); if a bare "try one line right now" link is wanted anywhere in
 the front matter or on the website, `play.haskell.org` is the current
 legitimate option, clearly scoped to short standalone snippets only.

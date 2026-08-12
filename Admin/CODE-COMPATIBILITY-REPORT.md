@@ -164,6 +164,26 @@ ghci", relevant for a book aimed at newcomers; first run downloads and
 compiles ~10 dependency packages, which takes a few minutes and needs
 network access.
 
+**Addendum: readers adding their own files under Option A.** This was
+tested directly (scratch copy, not `Code/`): after the automatic 67-module
+load, `cabal repl`'s `:load` is not restricted to the paths listed in
+`Craft3e.cabal`'s `hs-source-dirs` — it happily loads a brand-new file the
+reader creates anywhere under `Code/Craft3e` (tested both at the top level
+and inside a freshly-created subdirectory), and that file can freely
+`import` any existing chapter module or any of the package's declared
+dependencies (confirmed with `import Chapter5 (minAndMax)` alongside
+`import Test.QuickCheck`, with `quickCheck` run successfully against a
+property in the new file). The only side effect is a harmless
+`-Wmissing-home-modules` warning when the new file imports a chapter module
+that isn't itself in `exposed-modules`. Workflow for a reader:
+
+1. `cd Code/Craft3e && cabal repl` — as above.
+2. In an editor, create e.g. `Code/Craft3e/MyExercise.hs` starting with
+   `module MyExercise where`, with whatever `import`s are needed.
+3. In the REPL: `:load MyExercise`.
+4. After further edits, `:reload` — no `.cabal` changes or REPL restart
+   needed.
+
 ### Option B — a shared package environment + a checked-in `.ghci`, readers use bare `ghci`
 
 This reproduces the book's original "just run `ghci Chapter5.hs`" workflow

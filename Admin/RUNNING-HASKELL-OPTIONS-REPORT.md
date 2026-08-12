@@ -91,6 +91,69 @@ inside `Code/Craft3e` on first create, so the container is ready for
   Containers" extension, "Reopen in Container" on the cloned repo uses the
   same config.
 
+**Using it from VS Code (recommended default workflow for students).** VS
+Code is a reasonable default development environment for this book's
+readers — it's free, cross-platform, and both routes below land the reader
+in it, whether or not they install anything locally first. The two are the
+same editor experience; they differ only in where the container actually
+runs.
+
+*Route 1 — GitHub Codespaces (VS Code in the browser, nothing local at all):*
+
+1. Go to the repository's GitHub page.
+2. Click the green **"Code"** button → **"Codespaces"** tab → **"Create
+   codespace on main"**.
+3. GitHub builds the container from `.devcontainer/devcontainer.json`
+   (a few minutes the first time) and opens a full VS Code window in the
+   browser tab, already connected to it.
+4. Wait for the **"Running postCreateCommand"** notification in the bottom
+   right to finish — that's `cabal update && cabal build` completing inside
+   `Code/Craft3e`.
+5. Open a terminal in VS Code (`` Ctrl+` `` / `` Cmd+` ``, or Terminal →
+   New Terminal), then:
+   ```
+   cd Code/Craft3e
+   cabal repl
+   ```
+6. At the `ghci>` prompt, `:load Chapter5` (or any other chapter/solutions
+   file) works immediately, exactly as described in
+   `Admin/CODE-COMPATIBILITY-REPORT.md`.
+7. The `haskell.haskell` extension (Haskell Language Server) that
+   `devcontainer.json` installs also gives inline type info, error
+   highlighting, and "go to definition" when a reader opens any `.hs` file
+   in the editor pane — useful beyond just the REPL.
+8. When finished, the reader can just close the browser tab — GitHub
+   suspends the codespace automatically (personal accounts get a free
+   monthly quota of Codespaces hours; a suspended, unused codespace does not
+   burn through it). Re-opening later resumes the same codespace with its
+   state intact, from "Code" → "Codespaces" → the codespace's name in the
+   list.
+
+*Route 2 — VS Code installed locally, container running via Docker Desktop:*
+
+1. Install [VS Code](https://code.visualstudio.com/) and
+   [Docker Desktop](https://www.docker.com/products/docker-desktop/) (this
+   is Option B's Docker install, reused here).
+2. In VS Code, install the **"Dev Containers"** extension (published by
+   Microsoft; `ms-vscode-remote.remote-containers`).
+3. Clone this repository and open the cloned folder in VS Code
+   (File → Open Folder).
+4. VS Code detects `.devcontainer/devcontainer.json` and offers **"Reopen in
+   Container"** as a notification in the bottom right — click it. (If the
+   notification doesn't appear: Command Palette →
+   "Dev Containers: Reopen in Container".)
+5. VS Code builds the container and re-opens the same window connected to
+   it — the reader's local GHC/Haskell install (or lack of one) is
+   irrelevant from this point on, everything runs inside the container.
+6. Steps 4–7 from Route 1 above apply identically (wait for
+   `postCreateCommand`, open a terminal, `cd Code/Craft3e && cabal repl`).
+
+Route 1 needs no local install of anything and is the simpler recommendation
+for a reader trying this for the first time; Route 2 suits a reader who
+wants their usual local VS Code (their own settings, keybindings, other
+extensions) rather than the browser-hosted one, and who is comfortable
+installing Docker Desktop.
+
 **This is the closest thing available to "zero install, but still the real,
 exact book environment"** — genuinely more capable than any browser
 playground (below), because it's actually running full GHC/cabal in a VM,

@@ -1,0 +1,26 @@
+// Dev container for "Haskell: The Craft of Functional Programming".
+//
+// Gives a reader a ready-to-use GHC + cabal environment with no local
+// install, via GitHub Codespaces ("Code" -> "Create codespace on main")
+// or VS Code's Dev Containers extension. Uses the official Haskell
+// Docker image (https://hub.docker.com/_/haskell), the same GHC line
+// (9.6) the code in Code/Craft3e was verified against -- see
+// Admin/CODE-COMPATIBILITY-REPORT.md.
+//
+// On first create this builds the book's Craft3e package so that, once
+// the container is ready, `cd Code/Craft3e && cabal repl` (or `:load
+// Chapter5`, `:load Solutions4`, etc.) works immediately -- see
+// Admin/RUNNING-HASKELL-OPTIONS-REPORT.md for the full set of options.
+{
+  "name": "Haskell: The Craft of Functional Programming",
+  "image": "haskell:9.6",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "postCreateCommand": "cd Code/Craft3e && cabal update && cabal build",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "haskell.haskell"
+      ]
+    }
+  }
+}

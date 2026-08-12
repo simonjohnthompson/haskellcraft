@@ -68,31 +68,37 @@ download for Docker itself), so it's not the best *first* recommendation for
 this book's actual target reader, but worth listing as a clean alternative,
 and it's the natural base for the cloud dev environment option below.
 
-## Option C — Cloud dev environments (GitHub Codespaces / Gitpod)
+## Option C — Cloud dev environments (GitHub Codespaces / Gitpod) — implemented
 
 These give a reader a full Linux VM with GHC already configured, reachable
 through the browser (or through VS Code talking to that VM) — no local
 install of anything at all, including no Docker.
 
-- **GitHub Codespaces**: since the book's repository already lives on
-  GitHub, a `.devcontainer/devcontainer.json` checked into the repo (using
-  the community-maintained pattern of installing GHCup inside a devcontainer
-  — several public examples of this exist) would let a reader click "Code →
-  Create codespace" on the repo and land in a browser-based VS Code with GHC,
-  cabal, and — if the devcontainer also runs `cabal build` on creation — the
-  entire `Craft3e` package already built and ready for `cabal repl`. GitHub
-  gives every personal account a free monthly quota of Codespaces hours.
-- **Gitpod** offers the equivalent via a `.gitpod.yml`, opened by visiting
-  a `gitpod.io/#<repo-url>` link.
+**Implemented**: `.devcontainer/devcontainer.json` is now checked into this
+repository, built on the official `haskell:9.6` image (Option B) — the same
+GHC line the code was verified against for
+`Admin/CODE-COMPATIBILITY-REPORT.md`. It runs `cabal update && cabal build`
+inside `Code/Craft3e` on first create, so the container is ready for
+`cabal repl` as soon as it finishes. A reader:
+
+- **GitHub Codespaces**: on the repo's GitHub page, "Code" → "Codespaces" →
+  "Create codespace on main". Lands in a browser-based VS Code with GHC,
+  cabal, and the `Craft3e` package already built. GitHub gives every
+  personal account a free monthly quota of Codespaces hours.
+- **Gitpod**: reads the same `devcontainer.json`; open via a
+  `gitpod.io/#<repo-url>` link.
+- **VS Code locally, no Haskell install at all**: with Docker and the "Dev
+  Containers" extension, "Reopen in Container" on the cloned repo uses the
+  same config.
 
 **This is the closest thing available to "zero install, but still the real,
 exact book environment"** — genuinely more capable than any browser
 playground (below), because it's actually running full GHC/cabal in a VM,
-not a sandboxed subset. The cost is that *someone* has to author and
-maintain the devcontainer/Gitpod config; none exists in this repository
-today. This report flags it as worth doing (a small, one-time addition to
-the repo, not a code change to `Book/` or `Code/`) but does not implement
-it, since only a report was requested here.
+not a sandboxed subset. The devcontainer was authored and reviewed here but
+**could not be built and run end-to-end in this environment (no Docker
+available)** — it should be smoke-tested via an actual Codespace or a local
+Dev Containers run before being relied on or pointed to from the book's
+front matter.
 
 ## Option D — Browser-based playgrounds (no install, but limited)
 
@@ -171,7 +177,7 @@ whoever's time would go into adding either.
 |---|---|---|---|
 | A. GHCup | Yes (once) | Yes, fully | None — already works |
 | B. Docker `haskell` image | Docker only | Yes, fully | None — already works |
-| C. Codespaces / Gitpod | None | Yes, fully (once configured) | Small: author a devcontainer |
+| C. Codespaces / Gitpod | None | Yes, fully | Done — `.devcontainer/` added, needs a live smoke test |
 | D. play.haskell.org / similar | None | No — single file, uncertain packages | None |
 | E. GHC-in-browser (Wasm) | None | Not yet — no external packages | None today; future potential |
 | F. IHaskell + Binder | None | Yes, but slow cold start | Larger: maintain notebook build |
@@ -180,12 +186,12 @@ whoever's time would go into adding either.
 instructions, exactly as today, since it's what the rest of this project's
 tooling (and the companion compatibility report) already assumes and tests
 against. **Mention Option B (Docker)** as a one-line alternative for readers
-who'd rather not touch their system Haskell install at all. **Consider
-adding Option C (a Codespaces/Gitpod devcontainer)** as a genuine "try the
-real thing with nothing installed" path — it's the only zero-install option
-that isn't crippled by missing packages or single-file limits, and it's a
-modest, self-contained addition to the repository whenever that's wanted.
-Do **not** send readers to `tryhaskell.org` (defunct); if a bare "try one
-line right now" link is wanted anywhere in the front matter or on the
-website, `play.haskell.org` is the current legitimate option, clearly
-scoped to short standalone snippets only.
+who'd rather not touch their system Haskell install at all. **Option C (a
+Codespaces/Gitpod devcontainer) is now available** in this repository as
+the "try the real thing with nothing installed" path — it's the only
+zero-install option that isn't crippled by missing packages or single-file
+limits; it still wants a live smoke test (see above) before being
+advertised to readers. Do **not** send readers to `tryhaskell.org`
+(defunct); if a bare "try one line right now" link is wanted anywhere in
+the front matter or on the website, `play.haskell.org` is the current
+legitimate option, clearly scoped to short standalone snippets only.

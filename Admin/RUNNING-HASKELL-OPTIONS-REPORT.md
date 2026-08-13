@@ -115,8 +115,10 @@ runs.
    (a few minutes the first time) and opens a full VS Code window in the
    browser tab, already connected to it.
 4. Wait for the **"Running postCreateCommand"** notification in the bottom
-   right to finish — that's `cabal update && cabal build` completing inside
-   `Code/Craft3e`.
+   right to finish — that's installing GHC, cabal, and HLS via GHCup, then
+   running `cabal update && cabal build` inside `Code/Craft3e`. **This takes
+   several minutes, not seconds** — it's genuinely working, not stuck; there
+   is no need to reload or restart the codespace while it runs.
 5. Open a terminal in VS Code (`` Ctrl+` `` / `` Cmd+` ``, or Terminal →
    New Terminal) — it opens directly in `Code/Craft3e`, since that's the
    window's workspace folder — then:
@@ -129,7 +131,10 @@ runs.
 7. The `haskell.haskell` extension (Haskell Language Server) that
    `devcontainer.json` installs also gives inline type info, error
    highlighting, and "go to definition" when a reader opens any `.hs` file
-   in the editor pane — useful beyond just the REPL.
+   in the editor pane — useful beyond just the REPL. The first time it
+   activates, it may pop up a prompt asking how to manage the Haskell
+   toolchain (GHCup, PATH, etc.) — **choose the "Automatic"/GHCup-managed
+   option**; this is what was tested and confirmed working.
 8. When finished, the reader can just close the browser tab — GitHub
    suspends the codespace automatically (personal accounts get a free
    monthly quota of Codespaces hours; a suspended, unused codespace does not

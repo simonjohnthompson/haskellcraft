@@ -14,21 +14,32 @@
 // cabal and a matching HLS build.
 //
 // On first create this builds the book's Craft3e package so that, once
-// the container is ready, `cd Code/Craft3e && cabal repl` (or `:load
-// Chapter5`, `:load Solutions4`, etc.) works immediately, and opening a
-// .hs file in the editor gets live diagnostics/hover via HLS -- see
+// the container is ready, `cabal repl` (or `:load Chapter5`, `:load
+// Solutions4`, etc.) works immediately, and opening a .hs file in the
+// editor gets live diagnostics/hover via HLS -- see
 // Admin/RUNNING-HASKELL-OPTIONS-REPORT.md and
 // Admin/DEVELOPMENT-ENVIRONMENT-OPTIONS-REPORT.md for the full set of
 // options.
+//
+// workspaceFolder is Code/Craft3e itself, not the repo root: testing in a
+// live Codespace found that HLS's cradle detection (hie-bios) anchors its
+// search for a cabal.project/*.cabal file to the VS Code workspace root,
+// not to the individual file being edited -- with the repo root open, it
+// never looked inside Code/Craft3e at all and silently fell back to a
+// bare GHC session with no package database, so external deps like
+// QuickCheck showed as missing modules. Opening Code/Craft3e directly
+// fixes this. One consequence: the rest of the repo (book source, Admin
+// reports) isn't shown in this window -- readers of this devcontainer are
+// expected to only need Code/Craft3e.
 {
   "name": "Haskell: The Craft of Functional Programming",
   "image": "mcr.microsoft.com/devcontainers/base:bookworm",
   "remoteUser": "vscode",
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/Code/Craft3e",
   "remoteEnv": {
     "PATH": "/home/vscode/.ghcup/bin:/home/vscode/.cabal/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
   },
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libffi-dev libffi8 libgmp-dev libgmp10 libncurses-dev libncurses6 libtinfo6 pkg-config zlib1g-dev && curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | BOOTSTRAP_HASKELL_NONINTERACTIVE=1 BOOTSTRAP_HASKELL_GHC_VERSION=9.6.7 BOOTSTRAP_HASKELL_INSTALL_NO_STACK=1 BOOTSTRAP_HASKELL_INSTALL_HLS=1 sh && cd Code/Craft3e && cabal update && cabal build",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libffi-dev libffi8 libgmp-dev libgmp10 libncurses-dev libncurses6 libtinfo6 pkg-config zlib1g-dev && curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | BOOTSTRAP_HASKELL_NONINTERACTIVE=1 BOOTSTRAP_HASKELL_GHC_VERSION=9.6.7 BOOTSTRAP_HASKELL_INSTALL_NO_STACK=1 BOOTSTRAP_HASKELL_INSTALL_HLS=1 sh && cabal update && cabal build",
   "customizations": {
     "vscode": {
       "extensions": [

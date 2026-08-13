@@ -146,46 +146,55 @@ invokes HLS. The cost is a slower edit/error feedback loop (save, then
 This section reflects hands-on testing of `.devcontainer/devcontainer.json`
 specifically for HLS/editor support, distinct from the `cabal build`/
 `cabal repl` testing already reported as successful in the companion
-report.
+report. Both issues found below have since been fixed in the checked-in
+config and reconfirmed in a live GitHub Codespace.
 
-- The current devcontainer is based directly on the official
-  [`haskell:9.6`](https://hub.docker.com/_/haskell) Docker image, which
-  provides GHC and cabal but **not** the `ghcup` tool itself — so opening a
-  `.hs` file in that devcontainer produces the extension's
-  "Project requires GHCup but it isn't installed" message. This is the
-  issue that prompted this report.
-- Installing `ghcup` alongside the image's existing GHC/cabal is
-  straightforward (`BOOTSTRAP_HASKELL_MINIMAL=1`, which installs only the
-  `ghcup` binary and leaves the image's own GHC/cabal untouched). However,
-  testing found a second, more fundamental problem: **the prebuilt HLS
-  binaries `ghcup` currently distributes require a newer version of glibc
-  (Debian 12/13-era) than the `haskell:9.6` image's Debian 11 base
-  provides**, on both `aarch64` and `x86_64` — this is an OS/packaging
-  mismatch, not an architecture-specific one, and would affect a real
-  Codespace exactly as it did local Docker testing.
-- **The fix, confirmed working via local Docker testing**: base the
-  devcontainer on a current, actively maintained OS instead (e.g. plain
-  `debian:bookworm`, or a `mcr.microsoft.com/devcontainers/base` image) and
-  install the whole toolchain (GHC 9.6.7 pinned, cabal, and HLS) via GHCup
-  directly — mirroring the companion report's Option A almost exactly, just
-  automated inside the container. On `debian:bookworm`, `ghcup install hls`
-  installs one binary per supported GHC version (`haskell-language-server-9.6.7`,
-  `-9.8.4`, `-9.10.3`, etc., all from one release download), and running
-  `haskell-language-server-wrapper --probe-tools` from inside a copy of
-  `Code/Craft3e` correctly reports "Tool versions in your project: ghc:
-  9.6.7" — confirming the wrapper resolves the project's real GHC version
-  and would dispatch to the matching, working binary.
-- **This fix has not yet been applied to the checked-in
-  `.devcontainer/devcontainer.json`** — the testing above used a
-  hand-built, disposable container, not the repository's actual
-  devcontainer config. Applying it (changing the base image, adding the
-  GHCup/HLS install steps, re-verifying `cabal build`/`cabal repl` still
-  work under the new toolchain, and re-testing in a live Codespace) is a
-  further piece of work beyond the scope of this report.
-- None of this affects `cabal build`/`cabal repl` inside the devcontainer,
-  which were already confirmed working end-to-end, including in a live
-  GitHub Codespace — only the editor's live-diagnostics layer is in
-  question.
+**Issue 1 — glibc too old for prebuilt HLS binaries (fixed).** The
+devcontainer was originally based directly on the official
+[`haskell:9.6`](https://hub.docker.com/_/haskell) Docker image, which
+provides GHC and cabal but not the `ghcup` tool itself — so opening a `.hs`
+file produced the extension's "Project requires GHCup but it isn't
+installed" message, the issue that prompted this report. Installing `ghcup`
+alongside the image's existing GHC/cabal is straightforward, but testing
+then found a second, more fundamental problem: the prebuilt HLS binaries
+`ghcup` currently distributes require a newer glibc (Debian 12/13-era) than
+the `haskell:9.6` image's Debian 11 base provides, on both `aarch64` and
+`x86_64` — an OS/packaging mismatch, not an architecture-specific one.
+**Fix**: `.devcontainer/devcontainer.json` now uses
+`mcr.microsoft.com/devcontainers/base:bookworm` (a current, actively
+maintained Debian 12 base) and installs the whole toolchain (GHC 9.6.7
+pinned, cabal, and HLS) via GHCup directly, mirroring the companion
+report's Option A almost exactly, just automated inside the container.
+
+**Issue 2 — HLS cradle detection anchored to the wrong workspace root
+(fixed).** With Issue 1 fixed and the devcontainer's workspace folder set
+to the repository root, opening `Chapter5.hs` still showed
+`Test.QuickCheck` as an unresolvable module and gave no hover-for-type —
+despite `QuickCheck` being correctly listed in `Craft3e.cabal`'s
+`build-depends`. The Haskell extension's Output log showed HLS falling
+back to a bare GHC session with no package database at all (`In-place unit
+ids: [ main-... ]`), meaning `hie-bios` (the library HLS uses to work out
+how to load a file) never found `Craft3e.cabal` in the first place. Adding
+a `cabal.project` file did not fix it. The actual cause: `hie-bios`'s
+automatic cradle search anchors to the *VS Code workspace root*, not to
+the individual file being edited — and the workspace root was the
+repository root, two directories above `Code/Craft3e` where the actual
+cabal package lives, so the search never looked there at all. Confirmed by
+opening `Code/Craft3e` itself as the workspace root in the same running
+container: the `QuickCheck` error disappeared and hover-for-type started
+working immediately. **Fix**: `.devcontainer/devcontainer.json`'s
+`workspaceFolder` now points directly at `Code/Craft3e` rather than the
+repository root — the one consequence being that the rest of the repo
+(book source, `Admin/` reports) isn't shown in that VS Code window, judged
+acceptable since this devcontainer exists for readers running/editing the
+book's code, not editing the book itself.
+
+Both fixes are now live in `.devcontainer/devcontainer.json`, and a full
+round-trip — create a live Codespace, open `Chapter5.hs`, confirm no
+GHCup/module errors and working hover-for-type — was used to confirm the
+final config, not just `cabal build`/`cabal repl` (which were already
+confirmed working end-to-end, including in a live Codespace, before this
+editor-tooling testing began).
 
 ## Summary and recommendation
 

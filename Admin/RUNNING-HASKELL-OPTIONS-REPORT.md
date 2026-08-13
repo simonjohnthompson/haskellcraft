@@ -118,9 +118,9 @@ runs.
    right to finish — that's `cabal update && cabal build` completing inside
    `Code/Craft3e`.
 5. Open a terminal in VS Code (`` Ctrl+` `` / `` Cmd+` ``, or Terminal →
-   New Terminal), then:
+   New Terminal) — it opens directly in `Code/Craft3e`, since that's the
+   window's workspace folder — then:
    ```
-   cd Code/Craft3e
    cabal repl
    ```
 6. At the `ghci>` prompt, `:load Chapter5` (or any other chapter/solutions
@@ -154,7 +154,7 @@ runs.
    it — the reader's local GHC/Haskell install (or lack of one) is
    irrelevant from this point on, everything runs inside the container.
 6. Steps 4–7 from Route 1 above apply identically (wait for
-   `postCreateCommand`, open a terminal, `cd Code/Craft3e && cabal repl`).
+   `postCreateCommand`, open a terminal, `cabal repl`).
 
 Route 1 needs no local install of anything and is the simpler recommendation
 for a reader trying this for the first time; Route 2 suits a reader who
@@ -185,18 +185,45 @@ exactly the Route 1 steps above — `postCreateCommand` completed and
 environment and the actual browser-based reader experience are confirmed
 working end-to-end.
 
-**Base image subsequently changed** (see above) to fix the HLS/glibc issue
-found while preparing `Admin/DEVELOPMENT-ENVIRONMENT-OPTIONS-REPORT.md`.
-The exact `postCreateCommand` now in `.devcontainer/devcontainer.json` was
-re-verified locally via Docker, run as the non-root `vscode` user with the
-same `PATH` the container config sets: `cabal build` completes cleanly (all
-68 modules plus the three executables) and
-`haskell-language-server-wrapper --probe-tools`, run from inside the
-project, correctly reports "Tool versions in your project: ghc: 9.6.7" —
-confirming HLS is now resolvable, not just cabal build/repl. *(Re-testing
-this specific config in the live Codespace, as was done for the previous
-version above, is the next step — see git history for whether that has
-landed.)*
+**Base image changed, and HLS confirmed working end-to-end in a live
+Codespace.** The base image was switched (see above) to fix the HLS/glibc
+issue found while preparing
+`Admin/DEVELOPMENT-ENVIRONMENT-OPTIONS-REPORT.md`, and that fix — plus two
+further issues only visible in a real Codespace, not local Docker testing —
+was confirmed working via a full round-trip: create a live Codespace,
+open `Chapter5.hs`, and check the Haskell extension's actual in-editor
+behaviour (not just `cabal build`/`cabal repl`).
+
+- `cabal build` completes cleanly in the live Codespace (all 68 modules
+  plus the three `Chapter20` performance executables).
+- Opening `Chapter5.hs` initially still showed `Test.QuickCheck` as an
+  unresolvable module, with no hover-for-type — a real dependency
+  (`QuickCheck`) is correctly listed in `Craft3e.cabal`'s `build-depends`,
+  so this wasn't a missing-dependency bug. The Haskell extension's Output
+  log showed HLS falling back to a bare GHC session (`In-place unit ids:
+  [ main-... ]`, no package database) rather than a real cabal-based
+  session — i.e. `hie-bios`'s cradle detection wasn't finding
+  `Craft3e.cabal` at all.
+- Root cause, confirmed by testing: `hie-bios`'s cradle search anchors to
+  the *VS Code workspace root*, not to the individual file being edited.
+  With the workspace root at the repo root (`/workspaces/haskellcraft`,
+  two directories above `Code/Craft3e`), it never looked inside
+  `Code/Craft3e` at all. Opening `Code/Craft3e` itself as the workspace
+  root fixed it immediately — confirmed live: the `QuickCheck` error
+  disappeared and hover-for-type started working.
+- **Fix applied**: `.devcontainer/devcontainer.json`'s `workspaceFolder`
+  now points at `Code/Craft3e` directly rather than the repo root, so this
+  works out of the box for a fresh Codespace/devcontainer with no manual
+  step. The one consequence is that the rest of the repo (book source,
+  `Admin/` reports) isn't shown in that VS Code window — acceptable since
+  Option C exists specifically for readers running/editing the book's
+  code, not editing the book itself. A `Code/Craft3e/cabal.project` file
+  (`packages: .`) was also added along the way; it turned out not to be
+  the fix, but is a harmless, standard addition worth keeping.
+
+Both `cabal build`/`cabal repl` and HLS's live diagnostics/hover are now
+confirmed working end-to-end in a real GitHub Codespace, not just locally
+via Docker.
 
 ## Option D — Browser-based playgrounds (no install, but limited)
 
@@ -275,7 +302,7 @@ whoever's time would go into adding either.
 |---|---|---|---|
 | A. GHCup | Yes (once) | Yes, fully | None — already works |
 | B. Docker `haskell` image | Docker only | Yes, fully | None — already works |
-| C. Codespaces / Gitpod | None | Yes, fully | Done — `.devcontainer/` added, smoke-tested via Docker |
+| C. Codespaces / Gitpod | None | Yes, fully | Done — `.devcontainer/` added, confirmed end-to-end in a live Codespace (build, repl, and HLS) |
 | D. play.haskell.org / similar | None | No — single file, uncertain packages | None |
 | E. GHC-in-browser (Wasm) | None | Not yet — no external packages | None today; future potential |
 | F. IHaskell + Binder | None | Yes, but slow cold start | Larger: maintain notebook build |
@@ -285,10 +312,11 @@ instructions, exactly as today, since it's what the rest of this project's
 tooling (and the companion compatibility report) already assumes and tests
 against. **Mention Option B (Docker)** as a one-line alternative for readers
 who'd rather not touch their system Haskell install at all. **Option C (a
-Codespaces/Gitpod devcontainer) is now available and smoke-tested** in this
-repository as the "try the real thing with nothing installed" path — it's
-the only zero-install option that isn't crippled by missing packages or
-single-file limits. Do **not** send readers to `tryhaskell.org`
+Codespaces/Gitpod devcontainer) is now available and confirmed working
+end-to-end in a live Codespace** — including HLS's in-editor
+diagnostics/hover, not just `cabal build`/`cabal repl` — as the "try the
+real thing with nothing installed" path; it's the only zero-install option
+that isn't crippled by missing packages or single-file limits. Do **not** send readers to `tryhaskell.org`
 (defunct); if a bare "try one line right now" link is wanted anywhere in
 the front matter or on the website, `play.haskell.org` is the current
 legitimate option, clearly scoped to short standalone snippets only.

@@ -22,19 +22,7 @@
 %\usepackage{hyperref}
 \makeatletter
 \def\graybullet{{\enskip$\bullet$\enskip}}
-\renewcommand\maketitle{%	
-  \null%
-  \vspace*{0\p@}%
-   {\noindent%
-  \thispagestyle{empty}
-  {\vbox{\parindent \z@ \raggedright \normalfont
-    \interlinepenalty\@M
-   {\Large\sffamily\bfseries\@title\raggedright}\par\nobreak\vfill
-  }}}
-  \vfill\clearpage
-\thispagestyle{empty}
-\input{halftitle}
-\clearpage
+\renewcommand\maketitle{%
 \thispagestyle{empty}
 {%  \let \footnote \thanks
   \vspace*{0\p@}%
@@ -59,18 +47,6 @@
 %      \end{tabular}
     }%
   \vfill%
-%  \begin{tabular*}{\textwidth}{@{}l@{}}
-    {\includegraphics[width=27pt]{AW-Logo.pdf}}\\[2pt]
-    \sffamily\normalsize\bfseries{Addison-Wesley}\\[2pt]
-    \sffamily\small Harlow, England{\graybullet}Reading, Massachusetts{\graybullet}Menlo Park,
-    California{\graybullet}New York\\
-    \sffamily\small Don Mills,
-    \sffamily\small
-Ontario{\graybullet}Amsterdam{\graybullet}Bonn{\graybullet}Sydney{\graybullet}Singapore\\
-    \sffamily\small Tokyo{\graybullet}Madrid{\graybullet}San
-    Juan{\graybullet}Milan{\graybullet}Mexico
-    City{\graybullet}Seoul{\graybullet}Taipei
-%  \end{tabular*}
   \setcounter{footnote}{0}%
   \global\let\thanks\relax
   \global\let\maketitle\relax

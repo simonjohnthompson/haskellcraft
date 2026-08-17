@@ -32,6 +32,11 @@
 *-blx.bib
 *.run.xml
 
+## makeindex auxiliary files:
+*.idx
+*.ilg
+*.ind
+
 ## Build tool auxiliary files:
 *.fdb_latexmk
 *.synctex

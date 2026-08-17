@@ -280,6 +280,78 @@ others as real needs come up), authored the same ordinary way as any
 LaTeX book's house style, not the accumulated, undocumented,
 catcode-dependent pile it's built on today.
 
+## Option (ii) and web-only content
+
+The one thing the testing above doesn't settle is the disadvantage named
+for option (ii) throughout this report: LaTeX has no native notion of
+"this content targets one output only," so embedded video and
+AI-assisted exercise feedback need *some* mechanism invented, and
+`Website/convert/tex2md.py` will need matching code for it — worth being
+concrete about, since `tex2md.py` currently has no generic "pass an
+unrecognised macro through" fallback; every custom macro it handles
+(`\beware`, `\minx`, citations, and so on) is special-cased by name.
+Whatever mechanism is chosen adds to that list, it doesn't sidestep it.
+
+Four mechanisms are worth naming, in order of how well they fit
+everything else already established in this report:
+
+1. **Typed semantic macros** — e.g. `\webvideo{id}{caption}`,
+   `\aifeedback{5.3}`, defined once in the shared `book-macros.tex`. In the
+   PDF build they're ordinary LaTeX commands with a print-friendly
+   definition (a short "watch online at ..." note, or silent for things
+   with no print equivalent). `tex2md.py` pattern-matches the same macro
+   calls — exactly as it already does for `\cite`/`\index`/`\minx` — and
+   emits real HTML for the web build. This is the most consistent option
+   with everything else in this report: same architecture as the working
+   parts of the current pipeline, greppable/auditable (`grep webvideo`
+   answers "which chapters have web content?"), and ties naturally to the
+   exercise numbering (`\theexercise`) that already exists.
+2. **Raw HTML dropped into a no-op LaTeX block** (`\begin{rawhtml}...
+   \end{rawhtml}`, swallowed via the `comment` package for PDF, passed
+   through verbatim by `tex2md.py`). Maximum flexibility for whoever builds
+   the embed markup, but it's the exact mechanism that already silently
+   dropped this chapter's figures in the Markdown→PDF test above — using
+   it *inside* LaTeX would import that same fragility into option (ii)
+   rather than avoid it, and it dilutes the "clean, readable LaTeX" result
+   just demonstrated for the surrounding content.
+3. **A lookup-by-ID indirection** — the LaTeX source only ever contains a
+   stable ID (`\webresource{ex5-3-feedback}`), and the actual video URL,
+   AI-prompt configuration, or embed HTML lives in a separate manifest
+   under `Website/` that only the web build reads. This decouples content
+   that changes often (video hosting, AI backend tuning) from the
+   document, so swapping a URL never touches `Book/*.tex` or triggers a
+   PDF rebuild. Costs an extra layer of indirection nobody's built yet, and
+   puts "what actually plays here" one hop away from the book source.
+4. **A plain LaTeX comment as an insertion marker**
+   (`% WEB-INSERT: video-5-3`), with the real content living entirely as a
+   separate Markdown snippet merged in later by an mdBook preprocessor.
+   Zero risk to the PDF build — a comment can never break compilation —
+   but unstructured: nothing checks the referenced snippet exists, and
+   it's invisible to anyone reading the LaTeX for content.
+
+**The best fit is option 1 for the marker, combined with option 3's
+decoupling for the payload**: a small family of named macros
+(`\webvideo{}{}`, `\aifeedback{}`) keeps the book's actual content visible
+and greppable in the LaTeX source — consistent with how exercises are
+already delimited — but each macro's argument should be a stable ID rather
+than a raw URL or embed config, so that changing a video host or tuning an
+AI prompt never touches `Book/*.tex` at all, only the manifest
+`tex2md.py` looks the ID up in. This isn't a new architecture — it's the
+same shape as the existing, working `\cite`/`big.bib` split (a stable key
+in the LaTeX, the actual data external to it), applied to web content
+instead of references.
+
+Worth being explicit about the honest trade-off, surfaced directly by the
+Markdown→PDF test above: this is inherently more homegrown under
+LaTeX-as-source than under Quarto specifically, which has this exact
+mechanism (`.content-visible when-format=`) built in and battle-tested.
+That's real, and part of why option (iv) remains genuinely worth a
+prototype (see below) — but it doesn't change the shape of option (ii)'s
+case: this is bounded, buildable work — one macro family, one small
+manifest format, a few dozen lines in `tex2md.py` — not an open design
+question, and not different in kind from work `tex2md.py` already does
+today for citations and the index.
+
 ## What the decision actually has to satisfy
 
 Four things, in tension with each other, are worth naming explicitly
@@ -404,7 +476,11 @@ more directly since its input is no longer full of bespoke macros).
   macros with no meaning outside this project, and every future contributor
   (human or AI) authoring the rewrite still has to know LaTeX, not prose
   Markdown — this option makes that LaTeX *nicer*, it doesn't remove the
-  requirement.
+  requirement. A concrete mechanism for this is worked out in "Option (ii)
+  and web-only content" below — it's bounded, buildable work, not an open
+  question, but it is real, additional work this option carries that
+  option (iii)/(iv) wouldn't (Quarto in particular has this mechanism
+  built in already).
 - The cleanup pass is itself a large, one-shot migration over 33,000+
   lines that has to be checked for silent meaning changes — realistically
   via visual PDF diffing chapter-by-chapter against the now-confirmed

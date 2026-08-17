@@ -31,18 +31,29 @@ sit underneath every chapter, and `Book/root.tex` overrides core LaTeX
 internals like `\maketitle` directly. This is not "LaTeX" in the sense of a
 clean `\section`/`\textbf`/`\begin{itemize}` document — it's a working but
 idiosyncratic macro system that only this book's own build understands.
-Worth noting directly: **`Book/root.pdf` in the repo is dated March 2014**,
-and there is no build script, Makefile, or CI job anywhere in this repo
-that regenerates it — `Book/make-text` is a leftover list of manual `pandoc`
-invocations from an earlier, abandoned conversion attempt, not a PDF build.
-So, going into this report, "the ability to produce a PDF" from
+Worth noting directly: **`Book/root.pdf` in the repo was, at the start of
+this investigation, dated March 2014**, and there was no build script,
+Makefile, or CI job anywhere in the repo that regenerated it —
+`Book/make-text` is a leftover list of manual `pandoc` invocations from an
+earlier, abandoned conversion attempt, not a PDF build. (Both of those
+facts are now history rather than current state: `root.pdf` has since been
+rebuilt from source and `Book/Makefile` added, see below — but they're
+worth recording as the actual starting point, since they're what prompted
+this report's LaTeX build test in the first place.) So, going into this
+report, "the ability to produce a PDF" from
 `Book/*.tex` was a claim about what LaTeX in principle could still do with
 this source, not a pipeline anyone had exercised recently. That gap has
 since been closed directly, by actually running the build — see "The
 LaTeX PDF build, tested directly" immediately below — and the short
-version is that it works cleanly, with no drama. What's still genuinely
-missing under every option is the small mechanical step of wiring an
-actual build (a `Makefile`/CI job) into the repo, since none exists yet.
+version is that it works cleanly, with no drama. The small mechanical gap
+that testing left behind — an actual build script — has since been closed
+too: `Book/Makefile` (added in commit `8705a04`, alongside a one-line fix
+to the `appendix1.tex` bug found during testing, see below) runs the
+confirmed sequence end to end; `make` in `Book/` is now genuinely all it
+takes. What's still missing under every option is CI automation (a
+GitHub Actions job that runs the build on push, the way
+`.github/workflows/deploy-book.yml` already does for the website) — a
+smaller, optional step, not a blocker.
 
 ## The LaTeX PDF build, tested directly
 
@@ -96,15 +107,18 @@ is a known LaTeX2e kernel compatibility break — the kernel's default
 PDF/accessibility tagging), and this line's raw, hand-rolled call still
 uses the old 3-argument form from whenever it was written. It's non-fatal
 and self-resolves from the second `pdflatex` pass onward, so it never
-actually reaches the final PDF — but it's a latent, kernel-version-
-dependent trap worth replacing with the standard
+actually reaches the final PDF — but it was a latent, kernel-version-
+dependent trap, and has since been fixed (commit `8705a04`): the
+hand-rolled call was replaced with the standard
 `\addcontentsline{toc}{chapter}{Appendices}`, which lets LaTeX generate
-the correctly-sized call itself rather than hand-writing one that can go
+the correctly-sized call itself rather than relying on one that can go
 stale again as the kernel evolves. Separately, `pdflatex` returned exit
-code 1 even on the fully clean, warning-free final pass — worth resolving
-before wiring this into CI (verify success by checking the log/output
-file, not the exit code alone, until the cause is understood), but it
-didn't correspond to any actual defect in the output itself.
+code 1 even on the fully clean, warning-free final pass — this is worked
+around, rather than actually resolved, in `Book/Makefile` (added in the
+same commit) by prefixing each `pdflatex`/`bibtex`/`makeindex` call with
+`-` so `make` doesn't treat it as fatal; the underlying cause is still not
+understood, and would be worth chasing down before relying on the exit
+code in CI.
 
 **The website pipeline (`Website/`)** is new, and already works end to end:
 `Website/convert/tex2md.py` (2,725 lines, ~80 functions) preprocesses the
@@ -130,6 +144,141 @@ and (nominally) still a PDF path; a working, evidenced, one-directional
 LaTeX→Markdown pipeline already exists and already feeds the live,
 auto-deployed website. Any option below is a variation on what to do with
 that fact, not a decision made from scratch.
+
+## The Markdown→PDF path, tested directly
+
+Following the same principle as the LaTeX build test above — check rather
+than assume — Chapter 5 (`Website/chapters/5.md`, "Data types, tuples and
+lists") was run through a plain `pandoc` conversion to PDF, with no custom
+template or flags, to see what the "unproven" side of option (iii)/(iv)
+actually looks like today, rather than leave it as a prediction.
+
+The first attempt, `pandoc 5.md -o chapter5.pdf` (Pandoc's default engine,
+`pdflatex`), crashed outright: `! LaTeX Error: Unicode character ∈
+(U+2208) not set up for use with LaTeX` — a bare Unicode math symbol
+surviving unchanged from the original LaTeX prose. Switching the PDF
+engine to `xelatex` (native Unicode support) got past the crash and
+produced a real, readable, 26-page PDF for one chapter with no template
+work at all: prose, headings, bold/italic, ordered/unordered lists, and
+code blocks (with nicer syntax highlighting than the original's plain
+monospace) all converted correctly.
+
+Three things did not survive, and — this is the more important finding
+than the crash — none of them announced themselves as errors:
+
+- **All three figures in the chapter (`lineSoln`, `rectanglePos`,
+  `rectangleMove`) disappeared, silently.** `tex2md.py` currently emits
+  each figure as raw HTML (a checkbox-based click-to-zoom trick, used only
+  for the web edition) rather than a plain Markdown image. Pandoc's
+  Markdown→LaTeX path has no defined behaviour for raw HTML, so it just
+  drops the block — confirmed by inspecting the intermediate `.tex`: zero
+  occurrences of `includegraphics`, `figure`, or `Pictures/` anywhere in
+  the output, and no warning at any point in the process. This is the
+  specific, current shape of the "web-only content needs an explicit print
+  fallback" risk this report already named — caught in the act, not argued
+  in the abstract. It's a property of *this converter's current markup
+  choice* for figures, not of Markdown-to-PDF in general — a pipeline that
+  emitted plain `![alt](path)` image syntax instead of the raw-HTML
+  lightbox trick would not have this problem — but it's a real, current
+  fact about `Website/chapters/*.md` as it exists today, not a hypothetical.
+- **The missing `∈` glyph didn't get fixed by switching to `xelatex`, just
+  downgraded from a crash to a silent gap**: `Missing character: There is
+  no ∈ (U+2208) in font [lmmono10-regular]`. The character is simply blank
+  in the rendered PDF. Any raw Unicode math/logic symbol embedded in prose
+  (a pattern used throughout the book — `⇒`, `∀`, and others) would need
+  either a proper math-mode macro or a font with full glyph coverage;
+  neither happens automatically.
+- **Cross-chapter links resolve to nothing.** `[...](1.md#intro)` survives
+  as a hyperlink with the right visible text but no working target outside
+  a full multi-file build — expected, in isolation, but a concrete reminder
+  that a real Markdown→PDF pipeline needs either one merged document per
+  build or a proper cross-reference resolution step, not per-file relative
+  links carried over unchanged from the website output.
+
+On top of those three, none of the book's typographic identity survived,
+because nothing asked it to: no chapter number or running head, no
+`5.1`-style section numbering, the default Latin Modern font rather than
+the book's `fourier`/scaled-`helvet` pairing, generic page margins,
+exercises renumbering from 1 instead of the book's per-chapter
+`Exercise 5.1` scheme, and no index. None of this is a dead end — it's all
+template and flag work — but it's real, unbudgeted work, exactly as this
+report already argued before running the test, now with a concrete
+worked example rather than a general claim.
+
+**Net effect on the comparison**: this doesn't rule out option (iii)/(iv),
+but it moves "Pandoc's generic LaTeX template will not, out of the box,
+reproduce the specific camera-ready layout" from an informed prediction to
+a directly observed result, and it surfaces one risk this report hadn't
+explicitly separated out before running the test: *silent* content loss —
+specifically of figures — is a real, current property of today's
+converter output, not just a hypothetical gap to design around later.
+
+## Option (ii)'s cleaned-up LaTeX, tested directly
+
+Rather than leave "cleaned-up LaTeX" as a description, a real passage was
+cleaned up and compiled, to check both how readable the result actually is
+and how closely it still matches the original. The "shopping basket"
+example from `Book/5.tex` (`ShopItem`/`Basket` tuple and list types, a
+footnote, a `\beware` note box) was taken unmodified and compiled with the
+book's real preamble plus the full `defs0.tex`/`miradefs.tex`, then
+compared against a hand-cleaned version of the same passage compiled
+against a new 13-line, commented `book-macros.tex` in place of those two
+files (193 + 110 lines).
+
+**The diff between the two source files is almost nothing.** The only
+changes needed anywhere in the passage were renaming `\minx{X}` (index a
+code term in typewriter font) to `\ix{X}`, and `\beware{title}{body}` (a
+grey note box) to `\note{title}{body}` — both re-implemented, transparently,
+in `book-macros.tex`:
+
+```latex
+% Index a code identifier in typewriter font, e.g. \ix{ShopItem}.
+\newcommand{\ix}[1]{\index{#1@\texttt{#1}}}
+
+% A grey callout box for an aside, e.g. \note{Title}{body text}.
+\newcommand{\note}[2]{%
+  \medskip\noindent\colorbox{light-gray}{\parbox{\textwidth}{%
+    \textbf{\large #1}\medskip\noindent\\ #2}\medskip\noindent}}
+```
+
+Nothing else in the passage changed — `\section`, `\subsubsection*`,
+`\begin{itemize}`, `\begin{alltt}...\end{alltt}` for code, `\footnote{}`,
+`\texttt{}` are all already standard LaTeX. This particular passage
+happens to already sit close to plain LaTeX at the paragraph level; what
+made it feel messy was entirely the invisible machinery underneath
+(`defs0.tex`'s catcode tricks, dead Miranda-era subscript shortcuts like
+`\aone`/`\atwo` this passage never uses), not the visible markup a chapter
+author actually types. Not every passage will be this easy — five files
+in `Book/` still use the more catcode-heavy `ttdisplay`/`\so`/`\st`
+environment rather than plain `alltt`, and those would need real
+translation work, not just a rename — but it's a fair, representative
+sample, not a cherry-picked best case.
+
+**Fidelity was checked, not assumed.** Both versions were compiled with
+the book's actual fonts and packages (`fourier`, scaled `helvet`, etc.)
+and every page rendered to PNG for comparison: the note-box page and the
+generated index page came out **byte-identical**; the page with the code
+listings differed by 2 bytes in PNG encoding — visually indistinguishable
+side by side. That's expected, not a coincidence: since only the macro
+*names* changed, not their definitions, nothing about the printed output
+had any reason to move.
+
+**Extensibility was tested too, not just claimed.** A brand-new macro —
+`\pitfall{title}{body}`, a pink "common mistake" box, copy-pasted from the
+shape of `\note` with a different name and colour — was added to
+`book-macros.tex`, used once in the sample text, and the whole thing
+rebuilt. It worked on the first attempt: no errors, box rendered exactly
+as intended. This is the honest answer to "would an author be able to add
+macros themselves": yes, because the mechanism involved (`\newcommand`
+with numbered arguments, `#1`/`#2`) is beginner-level LaTeX, not the
+brace-matching/catcode territory `defs0.tex` currently requires. One
+clarification worth being explicit about, since it's easy to
+over-interpret "cleaned up": this is not "delete the macros and write
+vanilla LaTeX" — it's "keep a small, shared, documented set of macros that
+earn their keep" (an index helper, a note box, presumably a couple of
+others as real needs come up), authored the same ordinary way as any
+LaTeX book's house style, not the accumulated, undocumented,
+catcode-dependent pile it's built on today.
 
 ## What the decision actually has to satisfy
 
@@ -183,11 +332,13 @@ unchanged in role.
   different toolchain.
 - The website pipeline is already downstream of this and already works;
   choosing this option changes nothing about `Website/`'s CI or output.
-- The PDF build itself is now directly confirmed, not assumed: a plain
-  four-command `pdflatex`/`bibtex`/`makeindex`/`pdflatex`×2 sequence
-  converges cleanly against this exact source (see above), with no missing
-  packages and no index-specific complexity beyond the ordinary
-  `makeindex` step.
+- The PDF build itself is now directly confirmed, automated, and its one
+  known bug fixed, not just assumed: the four-command
+  `pdflatex`/`bibtex`/`makeindex`/`pdflatex`×2 sequence (see above)
+  converges cleanly against this exact source, is wired up as
+  `Book/Makefile`, and the `appendix1.tex` `\contentsline` bug it
+  surfaced is fixed — all pushed in commit `8705a04`. Running `make` in
+  `Book/` is now genuinely all it takes.
 
 **Disadvantages**
 
@@ -205,12 +356,6 @@ unchanged in role.
   need special-casing to either render for the web or silently drop for
   print. Every new web-only feature is a new piece of two-sided macro
   plumbing to maintain.
-- The PDF build isn't automated — no `Makefile`/CI job regenerates
-  `root.pdf` today, so "keep the ability to produce a PDF" still means
-  adding that automation, plus the one-line `appendix1.tex` fix found
-  during testing (see above). Small, concrete, well-understood tasks now,
-  rather than the open-ended re-verification this report originally
-  flagged.
 - LaTeX source is comparatively hostile to diff-based review and to
   AI-assisted editing: heavy macro nesting, non-semantic line-wrapping
   conventions, and file-specific abbreviations mean both a human reviewer
@@ -231,11 +376,17 @@ more directly since its input is no longer full of bespoke macros).
 
 - Keeps LaTeX — and therefore full print fidelity (index, bibliography,
   figure layout) — as the definitive format, building on a print pipeline
-  now directly confirmed to work cleanly (see above), with no new PDF
-  pipeline to build or trust.
+  now directly confirmed to work cleanly and already automated via
+  `Book/Makefile` (see above), with no new PDF pipeline to build or trust.
 - Removes the specific pain named in option (i): a rewrite would be against
   clean, standard LaTeX, not 1989-era macro soup. This is a one-off cost
   (cleaning 33k lines) rather than an ongoing one paid by every future edit.
+  Tested directly, not just argued (see "Option (ii)'s cleaned-up LaTeX,
+  tested directly" above): on a real sample passage, cleaning up meant
+  renaming two macros and nothing else, the rendered output came out
+  byte-identical/visually indistinguishable, and adding a brand-new macro
+  afterward worked first try with plain `\newcommand` — the kind of thing
+  an author, not just a LaTeX specialist, can do.
 - Much of the hard work already exists: the macro-stripping logic in
   `tex2md.py` (`strip_balanced_macro`, `strip_two_arg_macro`,
   `collapse_standalone_index_lines`, etc.) already knows how to flatten
@@ -259,7 +410,12 @@ more directly since its input is no longer full of bespoke macros).
   via visual PDF diffing chapter-by-chapter against the now-confirmed
   baseline build — before it can be trusted as the new definitive source.
   That's real, non-trivial verification work, not a mechanical no-risk
-  refactor.
+  refactor. The one sample passage tested (above) needed almost no
+  translation work, but it was also already close to plain LaTeX at the
+  paragraph level; the five files that use the more catcode-heavy
+  `ttdisplay`/`\so`/`\st` environment instead of plain `alltt` would need
+  real, non-mechanical rewriting, not a rename, so the 33k-line estimate
+  shouldn't be read down just because one representative passage was easy.
 - Doesn't remove the round-trip problem, it just makes the round trip
   nicer: the web edition is still a generated, lossy derivative of a source
   optimised for print, so richer web-only features remain second-class,
@@ -326,6 +482,17 @@ switch," and can be archived once the switch is complete.
   demonstrably working one, so choosing this option means deliberately
   setting aside a proven pipeline in favour of building a new one, not
   replacing a broken one.
+- No longer just predicted, either: a plain, untemplated `pandoc`
+  conversion of one chapter (see "The Markdown→PDF path, tested directly"
+  above) crashed under the default engine on a bare Unicode symbol,
+  silently dropped all three of the chapter's figures (raw HTML that
+  Pandoc's LaTeX writer has no defined behaviour for), and reproduced none
+  of the book's typographic identity. None of that is fatal — it's exactly
+  the custom-template work this report already anticipated — but it turns
+  "Pandoc won't reproduce the layout out of the box" from a prediction into
+  a measured result, and specifically surfaces *silent* figure loss as a
+  real, current property of today's converter output, not a hypothetical
+  one.
 - Because of the above, "maintain the ability to produce a PDF" under this
   option most realistically means "produce a good, clean, but visually
   different PDF," not "reproduce the original Addison-Wesley layout exactly" —
@@ -388,10 +555,10 @@ recommended.
 
 | Option | Print fidelity | Authoring ergonomics for a rewrite | Web-only features | Migration risk |
 |---|---|---|---|---|
-| (i) LaTeX as-is | Confirmed high — direct build test, minor known bug | Poor — legacy macro layer | None natively; bespoke macros needed | Low — build now proven; just needs a Makefile/CI wired up |
-| (ii) Cleaned-up LaTeX | Confirmed high — same proven build, cleaner source | Better, still LaTeX | None natively; bespoke macros needed | Medium — one large cleanup + verification pass |
-| (iii) Markdown definitive | Unproven, now measured against a confirmed working alternative | Best — plain text, AI/diff-friendly | Well-precedented patterns available | Medium — new PDF path, but reuses proven MD output |
-| (iv) Quarto/MyST | Unproven, same caveat as (iii) | Best, plus native citations/refs | First-class, built-in mechanism | Medium-high — new framework to adopt |
+| (i) LaTeX as-is | Confirmed high — direct build test, known bug fixed, build automated | Poor — legacy macro layer | None natively; bespoke macros needed | Low — build proven and automated (`Book/Makefile`); only CI wiring is optional/outstanding |
+| (ii) Cleaned-up LaTeX | Confirmed high — same proven, automated build; tested directly on a sample passage (byte-identical/indistinguishable output) | Tested directly — reads as near-plain LaTeX, extensible via ordinary `\newcommand`, still LaTeX | None natively; bespoke macros needed | Medium — one large cleanup + verification pass; sample passage was easy, catcode-heavy files won't be |
+| (iii) Markdown definitive | Tested directly, not just predicted — structurally works, but silently drops raw-HTML figures and all book identity without real template work (see test above) | Best — plain text, AI/diff-friendly | Well-precedented patterns available | Medium — new PDF path, but reuses proven MD output; concrete gaps now known, not just guessed |
+| (iv) Quarto/MyST | Same caveat as (iii) on book identity/templating; untested itself, though its native image handling likely avoids the specific raw-HTML figure loss found in (iii) | Best, plus native citations/refs | First-class, built-in mechanism | Medium-high — new framework to adopt |
 | (v) Hybrid MD + fixed LaTeX front matter | Confirmed high for front matter; unproven for body | Best for the material actually being rewritten | Well-precedented (MD portion) | Lower — smaller MD surface to prove out |
 
 ## Recommendation
@@ -426,22 +593,52 @@ bibliography/index generation that's already solved in the
 LaTeX→Markdown direction (`tex2md.py`) is unaffected by this test either
 way.
 
+**What also moved, in the same direction:** the Markdown→PDF side of the
+comparison is no longer purely hypothetical either — see "The
+Markdown→PDF path, tested directly" above. A plain, untemplated `pandoc`
+conversion of one chapter confirmed the report's prediction rather than
+overturning it: real content (all three of the chapter's figures) was
+silently dropped, a Unicode symbol crashed the default engine, and none
+of the book's typographic identity survived. None of this is fatal to
+option (iii)/(iv) — it's exactly the "real, non-trivial custom-template
+work" this report already anticipated — but that gap is now a measured
+one, not a guessed one, and it modestly reinforces rather than narrows the
+case for option (ii) if minimising new risk is the priority.
+
+**And option (ii) specifically was tested, not just argued for:** see
+"Option (ii)'s cleaned-up LaTeX, tested directly" above. On a real sample
+passage, cleanup meant renaming two macros and nothing else; the printed
+output came out byte-identical/visually indistinguishable from the
+original; and adding a genuinely new macro afterward — the concern raised
+directly in conversation, "would I still be able to add macros myself" —
+worked first try with ordinary `\newcommand`. That's the strongest
+concrete evidence in this report for any single option: not just that
+option (ii)'s print pipeline is proven (which was already established),
+but that its *authoring* experience is, too.
+
 So the honest updated position is a genuinely closer call than the
 original draft suggested, not a reversal of it:
 
 - If preserving the original book's exact camera-ready layout, at minimum
   new risk, matters most: **option (ii)** is now clearly the stronger
-  choice — its print pipeline is proven, and the cleanup itself can reuse
+  choice — its print pipeline is proven, the cleanup itself can reuse
   `tex2md.py`'s existing macro-stripping logic rather than starting from
-  scratch.
+  scratch, and the resulting authoring experience has been tested directly
+  and found genuinely readable and extensible, not just theoretically
+  cleaner.
 - If the authoring ergonomics of the rewrite itself, and first-class
   support for web-only features, matter most: **option (iii)/(iv)** is
   still the better fit — but should now be weighed with the understanding
   that it means deliberately setting aside a demonstrably working print
   pipeline to build a new one, not replacing a broken one.
 
-Either way, two small, low-risk items are worth doing immediately,
-independent of which option is ultimately chosen: fix the one-line
-`appendix1.tex` `\contentsline` bug, and add a real `Makefile`/CI job that
-runs the four-step build confirmed above, so `root.pdf` stops silently
-drifting out of date the way it has since 2014.
+Both small, low-risk items flagged earlier in this report as worth doing
+immediately, independent of which option is ultimately chosen, have since
+been done (commit `8705a04`): the one-line `appendix1.tex` `\contentsline`
+bug is fixed, and `Book/Makefile` runs the four-step build confirmed
+above end to end, so `root.pdf` no longer has to drift out of date by
+hand the way it did since 2014 — running `make` in `Book/` keeps it
+current. The one remaining item in the same spirit, still outstanding and
+still optional, is CI automation: a GitHub Actions job that rebuilds (and
+perhaps publishes) the PDF on push, mirroring what
+`.github/workflows/deploy-book.yml` already does for the website.

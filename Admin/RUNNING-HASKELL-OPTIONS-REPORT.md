@@ -66,6 +66,18 @@ reader to a working, current GHC exactly as intended — but worth knowing so
 a "why won't this compile, I copied it straight from the book" report from
 a reader isn't mistaken for an environment-setup problem.
 
+**Released, for readers who get the code via Hackage rather than this git
+repo.** `Craft3e` is also published on Hackage (`cabal unpack Craft3e` /
+`cabal install Craft3e`, per this book's own `README.txt` instructions) —
+a separate distribution channel from cloning this repository, and one this
+report hadn't previously distinguished. `ParseLib.hs`'s `MonadFail
+(SParse a)` fix (the specific example above) has been released as
+`Craft3e-0.2.0.3`, confirmed live by pulling it back down fresh with
+`cabal update && cabal get Craft3e-0.2.0.3` and checking the instance is
+present in the downloaded source. A reader on Option A who fetches the
+package the book's own way, rather than cloning `Code/Craft3e` directly,
+now gets the fix too.
+
 **Alternatives to GHCup for local install**, mentioned for completeness:
 a system package manager (Homebrew's `ghc`/`cabal-install` on macOS, `apt`
 on Debian/Ubuntu, `choco`/`winget` on Windows) — usable, but versions lag

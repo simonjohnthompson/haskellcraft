@@ -120,6 +120,31 @@ same commit) by prefixing each `pdflatex`/`bibtex`/`makeindex` call with
 understood, and would be worth chasing down before relying on the exit
 code in CI.
 
+**A further gap in that confirmation surfaced later**, during the Option
+(ii) testing below, and is recorded here because it bears on this build
+test's completeness rather than on Option (ii) itself: the spot-checks
+above compared rendered pages against expectation, not against the book's
+own prior PDF, and that gap let a real regression through unnoticed.
+`Book/root.pdf` was rebuilt from unmodified source as part of this test
+(`Book/Makefile`, commit `8705a04`, then the rebuilt PDF committed at
+`2219aa3`), replacing a copy that had sat in the repo since the original
+import (`8f3d2a2`) — the same "dated March 2014" PDF flagged as stale at
+the top of this report. Pulling that earlier copy back out of git history
+and rendering the same page from both (book page 181, Chapter 7's
+exercises 7.29–7.34) shows every `\so`/`\st` type signature on that page
+losing the space after `->` in the fresh rebuild (`wc :: String
+->(Int,Int,Int)`, `isPalin :: String ->Bool`) that's present, correctly,
+in the pre-rebuild copy — from identical `Book/7.tex`, `defs0.tex` and
+`miradefs.tex` either way, so the only variable is the TeX toolchain that
+built it. This is a real, if narrow, print-fidelity regression from
+rebuilding this 30-year-old macro layer on a current TeX Live install
+rather than whatever produced the 2014 PDF, and it's specific to the
+catcode-heavy `\so`/`\st`/`ttdisplay` environment — a nearby plain
+`\begin{alltt}` block on the same page is unaffected. Worth a proper fix
+(or at minimum a documented known issue) before `root.pdf` is treated as
+print-identical to the original, independent of which source-format
+option is ultimately chosen.
+
 **The website pipeline (`Website/`)** is new, and already works end to end:
 `Website/convert/tex2md.py` (2,725 lines, ~80 functions) preprocesses the
 custom macros above into something Pandoc's LaTeX reader can parse, shells
@@ -253,6 +278,24 @@ in `Book/` still use the more catcode-heavy `ttdisplay`/`\so`/`\st`
 environment rather than plain `alltt`, and those would need real
 translation work, not just a rename — but it's a fair, representative
 sample, not a cherry-picked best case.
+
+**A follow-up test on one of those five files confirmed exactly that.**
+`Book/7.tex`'s exercises (7.29–7.34) lean on `\so`/`\st` repeatedly for
+short inline type signatures. Translating each pair to plain
+`\begin{alltt}...\end{alltt}` compiled cleanly and matched the book's
+*intended* spacing — but it was not a pure rename the way the chapter 5
+passage was: `ttdisplay` also switches to a raw, non-NFSS typewriter font
+(`\mi`, loaded via `\newfont`, bypassing the document's own `\ttdefault`)
+and re-applies `\obeyspaces`/`\frenchspacing`/a catcode change on top of
+what `alltt` already sets up internally, and on this passage that specific
+combination is exactly what's silently dropping the space after `->` in
+the current `root.pdf` rebuild (see "The LaTeX PDF build, tested
+directly" above). So the plain-`alltt` translation happens to sidestep
+that regression, but the honest framing is narrower than "cleanup fixes a
+bug": it confirms this report's original caution that the five
+`ttdisplay` files need real, page-by-page verification against the book's
+own prior output, not a mechanical rename waved through on the strength of
+the chapter 5 result.
 
 **Fidelity was checked, not assumed.** Both versions were compiled with
 the book's actual fonts and packages (`fourier`, scaled `helvet`, etc.)

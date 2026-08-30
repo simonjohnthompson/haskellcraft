@@ -48,6 +48,32 @@ Proposal required for `Calculator/CalcParseLib.hs`'s copy of the same type.
 See `Admin/CODE-VS-BOOK-DISCREPANCIES-REPORT.md` for the full analysis and
 `Code/Craft3e/ParseLib.hs`/`Code/Craft3e/Chapter19/parselib.hs`'s current
 `instance MonadFail (SParse a) where fail s = SParse none` for the fix.
+
+A follow-up sweep of the exercise-solution and orphaned files for the same
+class of gap (missing `Applicative`/`Functor` alongside a custom `Monad`
+instance) turned up one more, previously undocumented here: `Solutions18.hs`
+defines `instance Monad Mlist` (Solution 18.22, an exercise solution, not a
+scratch/orphan file) with no `Applicative`/`Functor` instance at all — a
+genuine, live compile error (`No instance for (Applicative Mlist)`,
+confirmed directly with `ghc -fno-code`), missed by this report's original
+methodology because loading `Solutions18.hs` via `cabal repl` hits the
+already-documented `SolutionsSet.hs` indentation bug first (see 1a below),
+masking the separate error underneath it. Now fixed, the same way as every
+other instance of this gap in the package: `instance Applicative Mlist`
+(`pure = return; (<*>) = ap`) and `instance Functor Mlist` (`fmap = liftM`)
+added alongside the existing `instance Monad Mlist`, plus a
+`Control.Monad (liftM, ap)` import; confirmed compiling cleanly with the
+same benign `-Wnoncanonical-monad-instances` warnings every other fixed
+instance in this package produces. `IO/TreeId.hs`'s `Id` and
+`IO/TreeState.hs`'s `State` have the identical gap (see 1b and "Files that
+look orphaned" below) but were deliberately left as-is, consistent with
+this report's existing recommendation to exclude those two files from
+delivery rather than patch them — neither is an exercise solution, and
+`IO/` isn't even in `hs-source-dirs`. No other file among the exercise
+solutions or orphans (`Foo.hs`, `Test.hs`, `UsePictures.hs`,
+`Chapter19/PositionedImages.hs`) defines a custom `Monad` instance at all;
+this is the complete set.
+
 Every other finding below is unaffected and still accurate.
 
 ## Headline finding
@@ -116,6 +142,7 @@ one-line or few-line fix, no rewrite required.
 | `Solutions12.hs` | Same `Ambiguous occurrence 'Word'`, this time between `Index.hs`'s `type Word = String` and `Prelude.Word` | Same cause as above; `Solutions12.hs`'s own `import Prelude hiding (succ,lines)` doesn't hide `Word`. | Add `Word` to that hiding list. |
 | `Chapter19/Solutions19.hs` | `Ambiguous occurrence '<*>'` | `Chapter19/RegExp.hs` defines its own regex-sequencing operator `(<*>)`. `<*>` was later made a `Prelude`-exported method of `Applicative` (the Applicative-Monad Proposal, GHC 7.10/2015). `Solutions19.hs` imports `RegExp` and (implicitly) all of `Prelude` without hiding either's `<*>`. | Add `import Prelude hiding ((<*>))`, or `import RegExp hiding ((<*>))`, to `Solutions19.hs`. |
 | `IO/TreeId.hs` | `No instance for (Applicative Id)` | Same Applicative-Monad Proposal: since GHC 7.10, every `Monad` instance requires a corresponding `Applicative` instance; `instance Monad Id` here has none. | Add `instance Functor Id where fmap f (Id x) = Id (f x)` and `instance Applicative Id where pure = Id; Id f <*> Id x = Id (f x)` above the existing `instance Monad Id`. |
+| `Solutions18.hs` (Solution 18.22) — **fixed** | `No instance for (Applicative Mlist)` | Same Applicative-Monad Proposal; `instance Monad Mlist` here had none. | Added `instance Applicative Mlist where pure = return; (<*>) = ap` and `instance Functor Mlist where fmap = liftM`, plus `import Control.Monad (liftM, ap)`. |
 | `IO/MonadIO.hs:10` | `Could not find module 'IO'` | `import IO` refers to the pre-Haskell-2010 monolithic `IO` compatibility module, removed from `base` long ago. | Change to `import System.IO`. |
 | `SolutionsParsing.hs:120` | `Parse error in pattern: n + 1` | `nTimes (n+1) p = ...` uses an "n+k pattern", a Haskell 98 feature dropped from the language in the Haskell 2010 report (GHC keeps it only behind the now-off-by-default `NPlusKPatterns` extension, still available in GHC 9.6.7). | Either add `{-# LANGUAGE NPlusKPatterns #-}` at the top of the file, or (preferable for an introductory text, since the extension is obscure and non-standard today) rewrite as a guard: `nTimes n p \| n > 0 = (p >*> nTimes (n-1) p) \`build\` (uncurry (:))` with a base case `nTimes 0 p = succeed []` already present. |
 | `Chapter19/PositionedImages.hs:12` | `Could not load module 'Data.Map' — hidden package 'containers'` | `containers` is a GHC boot library but is *not* automatically exposed the way `base` is; it must be a declared dependency. | Add `containers` to `build-depends` in `Craft3e.cabal` if this file is kept (see "orphaned" note below — recommend dropping it instead). |
@@ -162,10 +189,10 @@ All of `Chapter1.hs`–`Chapter20.hs` (including the `Chapter15`, `Chapter16`,
 `Chapter19`, `Chapter20`, `Calculator` and `Simulation` sub-modules),
 `ParseLib.hs`, `ParsingBasics.hs`, `Pictures.hs`, `PicturesSVG.hs`, `Set.hs`,
 `Relation.hs`, `Index.hs`, `RPS.hs`, `UseMonads.hs`, `FirstScript.hs`,
-`UsePictures.hs`, and 15 of the 18 top-level `SolutionsN.hs` files
-(`Solutions2,3,4,5,6,9,10,11,13,14_1,14_2,17,20` and
-`Chapter15/Solutions15.hs`, `Chapter16/Solutions16.hs`) load without error
-as-is.
+`UsePictures.hs`, and 14 of the 17 top-level `SolutionsN.hs` files
+(`Solutions2,3,4,5,6,9,10,11,13,14_1,14_2,17,20` and, since the fix noted
+under "Update" above, `Solutions18`, plus `Chapter15/Solutions15.hs`,
+`Chapter16/Solutions16.hs`) load without error.
 
 ## Part 2: Delivering module dependencies to readers
 

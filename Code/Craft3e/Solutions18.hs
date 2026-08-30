@@ -18,6 +18,7 @@ import Chapter8 (getInt)
 import Data.Time
 import System.Locale
 import System.IO.Unsafe (unsafePerformIO)
+import Control.Monad (liftM, ap)
 import SolutionsSet
 
 --
@@ -277,6 +278,13 @@ instance Monad Mlist where
   m >>= f   = if nil (mlist m)
                        then Mlist []
                        else Mlist (take 1 (mlist (f (head (mlist m)))))
+
+instance Applicative Mlist where
+  pure = return
+  (<*>) = ap
+
+instance Functor Mlist where
+  fmap = liftM
 
 nil :: [a] -> Bool
 nil [] = True

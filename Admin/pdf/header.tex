@@ -1,0 +1,30 @@
+% Shared style for Admin/*.md report PDFs.
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\textsc{haskellcraft --- admin report}}
+\fancyhead[R]{\footnotesize\rightmark}
+\fancyfoot[C]{\footnotesize\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\sectionmark}[1]{\markright{#1}}
+
+\usepackage{titling}
+\pretitle{\begin{flushleft}\LARGE\bfseries}
+\posttitle{\end{flushleft}\vspace{0.2em}}
+\preauthor{\begin{flushleft}\large}
+\postauthor{\end{flushleft}}
+\predate{\begin{flushleft}\small\itshape}
+\postdate{\end{flushleft}\vspace{0.8em}\noindent\rule{\linewidth}{0.6pt}\vspace{1.2em}}
+
+\usepackage{titlesec}
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.6em}{0.6em}
+\titlespacing*{\subsection}{0pt}{1.2em}{0.4em}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=[RGB]{120,40,10},
+  urlcolor=[RGB]{120,40,10},
+  citecolor=[RGB]{120,40,10}
+}

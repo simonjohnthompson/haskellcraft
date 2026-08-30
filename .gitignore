@@ -64,3 +64,6 @@ __pycache__/
 
 ## mdBook build output:
 Website/book/
+
+## Generated report PDFs (rebuild with Admin/pdf/make-pdfs.sh):
+Admin/pdf/*.pdf

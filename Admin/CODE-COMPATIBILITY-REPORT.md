@@ -74,6 +74,23 @@ solutions or orphans (`Foo.hs`, `Test.hs`, `UsePictures.hs`,
 `Chapter19/PositionedImages.hs`) defines a custom `Monad` instance at all;
 this is the complete set.
 
+**Sweep complete.** A final pass specifically over `Chapter19/` and
+`Simulation/` (the two directories not otherwise itemised by name above)
+found nothing further: `Chapter19/parselib.hs`'s `SParse` (already fixed,
+above) is the only custom `Monad` instance in either directory, and every
+other `Monad`-related mention there is an ordinary import of standard
+library machinery (`Control.Monad`, `Control.Monad.State` in
+`Chapter19/PositionedImages.hs`; `liftM`/`liftM2` in `Chapter19/QC.hs`), not
+a hand-rolled instance. Combined with the exposed-modules check (Headline
+finding), the exercise-solutions/orphans check immediately above, and this
+final pass, **every `.hs` file under `Code/Craft3e` has now been checked
+for the Applicative-Monad-Proposal/MonadFail-Proposal gap**, and the full
+list of instances affected is: `ParseLib.hs`, `Calculator/CalcParseLib.hs`,
+`Chapter19/parselib.hs`, and `Chapter18.hs` (all fixed and shipped),
+`Solutions18.hs` (fixed and shipped, this report), and `IO/TreeId.hs` /
+`IO/TreeState.hs` (left as-is, excluded-from-delivery orphans). Nothing else
+in the tree has this gap.
+
 Every other finding below is unaffected and still accurate.
 
 ## Headline finding

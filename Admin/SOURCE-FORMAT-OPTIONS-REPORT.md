@@ -413,6 +413,16 @@ via a small build step, and no harder in principle for LaTeX via more
 this rewrite would need to make and enforce, where the status quo makes
 neither.
 
+**Released, as one concrete data point on the code side of this gap:** the
+`ParseLib.hs` fix has since shipped as `Craft3e-0.2.0.3` on Hackage
+(confirmed by pulling the package back down fresh), so `Code/Craft3e` — the
+half of this drift that's actually reachable through a build/compiler — is
+now current. The book's *prose*, `Book/18.tex`, is not, and can't be fixed
+by a package release: this is exactly the asymmetry the finding above is
+about — code has a compiler to catch drift and a release channel to fix it;
+hand-transcribed prose listings have neither, which is precisely why the
+gap survived undetected for a decade in the first place.
+
 ## What the decision actually has to satisfy
 
 Four things, in tension with each other, are worth naming explicitly

@@ -352,6 +352,67 @@ manifest format, a few dozen lines in `tex2md.py` — not an open design
 question, and not different in kind from work `tex2md.py` already does
 today for citations and the index.
 
+## A related finding: hand-transcribed code listings have already drifted from the real code
+
+Separately from this report's own testing, a direct comparison of
+`Book/18.tex` ("Programming with monads") against the current
+`Code/Craft3e` cabal package turned up a concrete, already-realised
+instance of exactly the kind of drift risk this report has been assessing
+in the abstract — worth folding in here because it bears directly on
+"authoring ergonomics for a rewrite" and, specifically, on how code
+listings should be kept honest going forward, independent of which prose
+format wins. Full detail in `Admin/CODE-VS-BOOK-DISCREPANCIES-REPORT.md`;
+the shape of it:
+
+The book teaches a `Monad` class with `fail` as one of its four methods,
+and its two worked monad examples in Chapter 18 (`MP`, the parsing monad;
+`State`, the imperative-store monad) define `instance Monad` with nothing
+else — no `Applicative`, no `Functor`. That was accurate in 2011. It isn't
+today: **the word "Applicative" does not appear anywhere in `Book/*.tex`**,
+yet two language changes since publication — the Applicative-Monad
+Proposal (GHC 7.10, 2015, `Applicative` became a superclass of `Monad`) and
+the MonadFail Proposal (GHC 8.8, 2019, `fail` was removed from `Monad`
+entirely into its own class) — mean every one of the book's printed `Monad`
+instances would fail to compile exactly as shown. The shipped
+`Code/Craft3e` package had already been silently patched around both
+changes in the three places affected (`ParseLib.hs`'s `SParse`,
+`Calculator/CalcParseLib.hs`'s `SParse`, `Chapter18.hs`'s `State`) — but the
+book's prose was never updated to match, and, until this investigation, the
+patching itself was inconsistent: `ParseLib.hs`'s copy had silently
+*dropped* `fail` rather than moving it to `MonadFail` the way
+`Calculator/CalcParseLib.hs`'s identical copy had, quietly changing
+behaviour rather than just syntax. (Now fixed and consistent across both
+copies, and confirmed via `-Wall`/`-Wcompat` that no other exposed module
+has the same gap — see the discrepancies report and
+`Admin/CODE-COMPATIBILITY-REPORT.md`'s "Update" section.)
+
+The structural reason this went unnoticed for a decade is directly
+relevant to the source-format decision: **only one chapter's code listing
+is actually connected to the real, compiling source.** `Book/2.tex:31` does
+`\input{FirstScript.hs}` — a literal, mechanical inclusion of the real
+file. Every other chapter's code, in every one of `Book/1.tex` through
+`Book/21.tex`, is hand-transcribed prose typed inside `\begin{alltt}...
+\end{alltt}` blocks, with no mechanical link back to `Code/Craft3e` at all.
+Nothing checks that a `\begin{alltt}` listing still matches the file it was
+copied from, let alone that it still compiles — a language-level break
+that made three worked instances uncompilable, sitting in the book's own
+core teaching chapter on monads, was invisible to any process for over ten
+years, simply because there was no process capable of noticing it.
+
+This doesn't favour any one option above on its own — the drift is a
+property of *how code listings are authored*, not of whether the
+surrounding prose is LaTeX or Markdown — but it's a real, evidenced
+argument that the rewrite should treat "code listings stay synchronised
+with `Code/Craft3e`" as a design requirement in its own right, not an
+assumed side-effect of choosing a prose format. It also gives one more
+concrete data point for authoring ergonomics: mechanically including or
+generating code listings from source (as `Book/2.tex` already does for one
+file) is comparatively natural to retrofit onto fenced-code-block Markdown
+via a small build step, and no harder in principle for LaTeX via more
+`\input{}`/`\lstinputlisting{}` use — but *either* is a deliberate choice
+this rewrite would need to make and enforce, where the status quo makes
+neither.
+
 ## What the decision actually has to satisfy
 
 Four things, in tension with each other, are worth naming explicitly
@@ -377,6 +438,14 @@ because each option trades them off differently:
   that discards them is spending that back down to zero; any option that
   keeps LaTeX authoritative keeps relying on them indefinitely rather than
   retiring them.
+- **Code-listing fidelity to the real, compiling source.** Not previously
+  named as its own criterion, but demonstrated to matter directly (see "A
+  related finding" above): with only one chapter's listing mechanically
+  tied to `Code/Craft3e`, a decade-old, language-level break sat unnoticed
+  in the book's own monad chapter. Whichever format wins, the rewrite
+  should treat generating or verifying listings against the real source as
+  a requirement, not leave every chapter as hand-typed prose the way
+  `Book/*.tex` is today.
 
 One structural fact is worth flagging up front, because it's independent of
 which format wins: both video embeds and AI exercise feedback need
@@ -718,3 +787,14 @@ current. The one remaining item in the same spirit, still outstanding and
 still optional, is CI automation: a GitHub Actions job that rebuilds (and
 perhaps publishes) the PDF on push, mirroring what
 `.github/workflows/deploy-book.yml` already does for the website.
+
+One further item belongs in the same "do regardless of which option is
+chosen" bucket: the code-listing drift documented above ("A related
+finding") is independent of the LaTeX-vs-Markdown decision, but it's a
+concrete, evidenced case for building *some* mechanical link between the
+rewrite's chapter text and `Code/Craft3e`'s real, compiling modules —
+extending `Book/2.tex`'s existing `\input{FirstScript.hs}` pattern (or its
+Markdown fenced-code-block equivalent) to more chapters, or at minimum an
+automated check that flags when a listing and its source file diverge —
+rather than carrying forward a decade of unchecked hand-transcription into
+the next edition.

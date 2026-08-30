@@ -1053,3 +1053,72 @@ regression. The migration is mechanical for 6 of the 25 sites (rename
 only) and needs the same page-render check applied here for the other 19,
 but the target environment for all of them is decided: `alltt`, not a
 `ttdisplay` variant.
+
+**Done, not just decided.** All 25 sites across `Book/7.tex`, `Book/11.tex`
+and `Book/appendix1.tex` have been migrated to plain `alltt`; the now-unused
+`ttdisplay`/`\so`/`\st`/`\stt` definitions are removed from `defs0.tex`, and
+the dead `\mira`/`\arim` wrapper is removed from `miradefs.tex`. Verified by
+rebuilding `root.pdf`: clean build, zero LaTeX warnings, the same page
+count, and every one of the 19 previously-broken sites re-checked — all now
+match the pre-rebuild PDF exactly, including the "rule of cancellation" box
+and the text-fill example. The website side needed no changes:
+`tex2md.py` already special-cased `\so`/`\st` by rewriting them to
+`\begin{alltt}` internally before its own processing, so regenerating
+`Website/chapters/*.md` from the migrated source and diffing against what's
+committed showed only trailing-whitespace differences on the two affected
+chapters — the arrow/comma bug never reached the website, since it's a
+PDF-renderer artefact, not a Pandoc one.
+
+### `\inso`/`\inst`: same fix, applied
+
+`\inso`/`\inst` (`\newcommand{\inso}{\mi\catcode`\_=12}`,
+`\newcommand{\inst}{\rm}`) is the inline cousin of the same font-switch —
+used to typeset a short piece of code mid-sentence rather than as a
+display. It had exactly one call site in the entire book,
+`3.tex:1065` (`\inso\mbox{}1.162433e+143\inst`), and — same as every
+`\so`/`\st` block — no underscore in it. Replacing it with
+`\texttt{1.162433e+143}` was checked directly (both forms compiled and
+rendered side by side) and comes out visually identical; on the website it
+is an improvement, not just neutral, since `tex2md.py` was previously
+stripping `\inso`/`\inst` to plain text (no code formatting) while
+`\texttt` renders as proper inline code. Applied, and `\inso`/`\inst`
+removed from `defs0.tex` as now-unused.
+
+### `\mi`: audited, found unaffected, left alone
+
+Neither `\so`/`\st` nor `\inso`/`\inst` were the only callers of `\mi`
+(the raw, non-NFSS `cmtt10` switch underneath all of them). `Book/*.tex`
+has 119 further bare `{\mi ...}` uses across 13 chapters (2, 3, 4, 5, 6, 7,
+9, 11, 12, 14, 16, 17, 20), doing the same job as `\texttt{}` for inline
+monospace text — plus `miradefs.tex`'s `\superscr`/`\subscr`, used
+throughout the "rule of cancellation" box above, call `\mi` internally
+too. This was checked for the same regression before deciding whether it
+belonged in this cleanup, not assumed clean by association:
+
+- **Content audit**: none of the 119 sites contain `->`. Two contain a
+  comma inside the `\mi` group (`5.tex`: `{\mi (String,Int)}`,
+  `{\mi (2.1,True)}`) — but the source itself has no space after the
+  comma in either case (deliberate Haskell tuple-type styling), so there
+  is no space for the bug to eat, and both render identically in the
+  current and pre-rebuild PDFs.
+- **Mechanism check**: rather than conclude "safe" from absent at-risk
+  content alone, `{\mi a, b}` and `{\mi a -> b}` were tested directly in
+  plain running text, with none of `ttdisplay`'s
+  `\obeylines`/`\obeyspaces`/`\frenchspacing` wrapper. Both render with
+  the space intact. This matches the earlier single-factor probes on
+  `\so`/`\st` itself, where `\mi` added to plain text never reproduced the
+  bug alone — it needed `ttdisplay`'s full combination. Bare `\mi` never
+  had that combination, so it was never exposed.
+
+**Verdict: not in scope.** There is no bug to fix here. A weaker, separate
+case exists for replacing `\mi` with `\texttt{}` anyway, purely for
+consistency (the book already mixes `\texttt{Char}` and `{\mi Integer}` in
+the same sentence in places, e.g. `2.tex`) — but that carries a different
+kind of risk than the `\so`/`\st` migration: `\mi` and `\texttt` resolve to
+different font *instances* (raw `amsfonts` `cmtt10` vs. NFSS's `cm-super`
+substitute), so swapping 119 inline call sites across running prose in 13
+chapters could shift line-wrapping in ways that would need the same
+page-by-page visual check this appendix did for `ttdisplay` — a cosmetic
+change needing its own verification pass, not a correctness fix riding
+along with one. Left as-is; a candidate for a future, separately-scoped
+pass if consistency is worth pursuing on its own.

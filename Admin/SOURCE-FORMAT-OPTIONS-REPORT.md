@@ -423,6 +423,18 @@ about — code has a compiler to catch drift and a release channel to fix it;
 hand-transcribed prose listings have neither, which is precisely why the
 gap survived undetected for a decade in the first place.
 
+A second release, `Craft3e-0.2.0.4`, surfaced a smaller but relevant
+wrinkle on the licensing front specifically: an attempt to set the
+package's `license:` field to `CC-BY-NC-SA-4.0`, matching `Book/titlepage.tex`'s
+front-matter licensing, was rejected outright by Hackage — Creative
+Commons' NonCommercial clause isn't OSI-approved open source, which
+Hackage requires of anything it hosts. `Craft3e`'s code stays MIT; the
+book's prose licensing is a separate, unaffected decision. Worth keeping
+in mind for whichever source-format option is chosen: code and book prose
+don't just have different drift-detection tooling (the point above), they
+can also legitimately need different licenses, for reasons specific to
+each distribution channel rather than to the rewrite itself.
+
 ## What the decision actually has to satisfy
 
 Four things, in tension with each other, are worth naming explicitly

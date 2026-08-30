@@ -104,6 +104,19 @@ reader who fetches the package the book's own documented way
 fix too. See `Admin/RUNNING-HASKELL-OPTIONS-REPORT.md` for the reader-facing
 write-up of this.
 
+A follow-up release, `Craft3e-0.2.0.4`, updated the package's own metadata
+(`copyright`, `homepage`, `synopsis`) and cleared the `HUnit`
+missing-upper-bound warning plus a `time`/`open-browser`
+trailing-zero-upper-bound warning Hackage's uploader flags but local
+`cabal check` in this environment doesn't. One finding worth recording
+here: an initial attempt to set `license: CC-BY-NC-SA-4.0` (matching the
+book's own front-matter licensing) was rejected server-side by Hackage's
+uploader ("Invalid package") — Hackage requires an OSI-approved license,
+and Creative Commons' NonCommercial clause isn't OSI-approved.
+`Craft3e`'s code license stays MIT; only the book's prose is CC BY-NC-SA
+4.0. Confirmed live by downloading the published `0.2.0.4` tarball
+directly and checking its `Craft3e.cabal`/`LICENSE`.
+
 Every other finding below is unaffected and still accurate.
 
 ## Headline finding

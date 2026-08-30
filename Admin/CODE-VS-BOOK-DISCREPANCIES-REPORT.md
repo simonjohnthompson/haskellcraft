@@ -137,6 +137,16 @@ reader who fetches the package the book's own documented way
 (`cabal unpack Craft3e`) now gets this fix, independent of whether or when
 `Book/18.tex`'s prose itself is ever updated to match.
 
+A related footnote to the licensing discussion elsewhere in this project:
+a follow-up release, `Craft3e-0.2.0.4`, attempted to align the package's
+`license:` field with the book's own front-matter CC BY-NC-SA 4.0
+licensing, and was rejected outright by Hackage's uploader — Creative
+Commons' NonCommercial clause isn't an OSI-approved open source license,
+which Hackage requires. `Craft3e`'s code license stays MIT; the book's
+prose licensing is unaffected and unrelated. See
+`Admin/CODE-COMPATIBILITY-REPORT.md`'s "Released" note for the full
+detail.
+
 ### `Calculator/CalcParseLib.hs` — `fail` preserved via `MonadFail`
 
 ```haskell

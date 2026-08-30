@@ -122,6 +122,10 @@ same live HLS squiggle regardless of which package version they have
 installed, since the gap is in the *book's printed text*, not in whichever
 `Craft3e` a reader's project happens to depend on.
 
+A follow-up release, `Craft3e-0.2.0.4`, updated only package metadata
+(copyright, homepage, license) — nothing that changes anything above; see
+`Admin/RUNNING-HASKELL-OPTIONS-REPORT.md` for detail.
+
 **Caveat, confirmed during testing for this report:** the version-tie
 described above means that if the GHC version visible to the extension has
 no matching prebuilt HLS binary — which normally only happens right after a

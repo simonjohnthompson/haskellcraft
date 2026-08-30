@@ -101,13 +101,13 @@ equations like
 \end{alltt}
 In any particular case, the value of all three occurrences of \texttt{a} will be
 the same. In exactly the same way, in
-\so
+\begin{alltt}
 sumSquares n = n*n + sumSquares (n-1)
-\st
+\end{alltt}
 all occurrences of \texttt{n} will be interpreted by the same value. For example
-\so
+\begin{alltt}
 sumSquares 7 = 7*7 + sumSquares (7-1)
-\st
+\end{alltt}
 The crucial motto is `variables in functional programs {\em do not vary}'.
 
 On the other hand, the value of a variable in an imperative

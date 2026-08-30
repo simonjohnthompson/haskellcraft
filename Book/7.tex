@@ -945,38 +945,38 @@ Write QuickCheck properties which test your implementations of the tests for `su
 In word processing systems it is customary for lines to be filled and
 broken automatically, to enhance the appearance of the
 text. This book is no exception. Input of the form
-\so
-{\hskip1pc}The heat bloomed     in December 
- as the   carnival  season 
+\begin{alltt}
+{\hskip1pc}The heat bloomed     in December
+ as the   carnival  season
             kicked into  gear.
 Nearly helpless with sun and glare, I avoided Rio's brilliant
 sidewalks
   and glittering beaches,
 panting in dark   corners
 and waiting out the inverted southern summer.
-\st
+\end{alltt}
 would be transformed by \textbf{filling} to \index{text processing!filling}
-\so
+\begin{alltt}
 {\hskip1pc}The heat bloomed in December as the
 carnival season kicked into gear.
-Nearly helpless with sun and glare, 
+Nearly helpless with sun and glare,
 I avoided Rio's brilliant sidewalks
 and glittering beaches, panting in
 dark corners and waiting out the
 inverted southern summer.
-\st
+\end{alltt}
 To align the right-hand margin, the text is \textbf{justified} by adding extra
 \index{text processing!justification}
 inter-word spaces on all lines but the last:
-\so
+\begin{alltt}
 {\hskip1pc}The heat bloomed in December as the
 carnival  season  kicked into gear.
-Nearly helpless with sun and glare, 
+Nearly helpless with sun and glare,
 I avoided Rio's brilliant sidewalks
 and glittering beaches, panting  in
 dark  corners  and  waiting out the
-inverted southern summer. 
-\st
+inverted southern summer.
+\end{alltt}
 An input file in Haskell can be
 treated as a string of characters, and so string-manipulating operations
 play an important role here. Also, since strings are lists, this example
@@ -1176,19 +1176,19 @@ specified in the text.
 
 \item
 Give a definition of the function
-\so
+\begin{alltt}
 {\hskip1pc}joinLine :: Line -> String
-\st
+\end{alltt}
 which turns a line into printable form. For example,
-\so
+\begin{alltt}
 {\hskip1pc}joinLine [ "dog" , "cat" ] = "dog cat"
-\st
+\end{alltt}
 
 \item
 Using the function \texttt{joinLine}, or otherwise, define the function
-\so
+\begin{alltt}
 {\hskip1pc}joinLines :: [Line] -> String
-\st
+\end{alltt}
 which joins together the lines, separated by newlines.
 
 \item
@@ -1204,28 +1204,28 @@ between the words.
 
 \item
 Design a function
-\so
+\begin{alltt}
 {\hskip1pc}wc :: String -> (Int,Int,Int)
-\st
+\end{alltt}
 which when given a text string returns the number of characters, words and
 lines in the string. The end of a line in the string is signalled by the
-newline character, \texttt{'\bs{n}'}. Define a similar function 
-\so
+newline character, \texttt{'\bs{n}'}. Define a similar function
+\begin{alltt}
 {\hskip1pc}wcFormat :: String -> (Int,Int,Int)
-\st
+\end{alltt}
 which returns the same statistics for the text {\em after\/} it has been
 filled.
 
-\item 
+\item
 Define a function
-\so
+\begin{alltt}
 {\hskip1pc}isPalin :: String -> Bool
-\st 
+\end{alltt}
 which tests whether a string is a palindrome -- that is whether it is the
 same read both backwards and forwards. An example is the string
-\so
+\begin{alltt}
 {\hskip1pc}Madam I'm Adam
-\st
+\end{alltt}
 Note that punctuation and white space are ignored in the test, and that no
 distinction is made between capital and small letters. You might first like to
 develop a test which simply tests whether the string is exactly the same
@@ -1234,20 +1234,19 @@ capital letters.
 
 \item
 {[Harder]} Design a function
-\so
-{\hskip1pc}subst :: String -> String -> String -> String 
-\st
-so that 
+\begin{alltt}
+{\hskip1pc}subst :: String -> String -> String -> String
+\end{alltt}
+so that
 \begin{alltt}
 subst oldSub newSub st
 \end{alltt}
  is the result of replacing the first
-occurrence in \texttt{st} of the substring \texttt{oldSub} by the substring {\mi
-newSub}. For instance,
-\so
-{\hskip1pc}subst "much  " "tall " "How much  is that?" 
+occurrence in \texttt{st} of the substring \texttt{oldSub} by the substring \texttt{newSub}. For instance,
+\begin{alltt}
+{\hskip1pc}subst "much  " "tall " "How much  is that?"
   = "How tall is that?"
-\st
+\end{alltt}
 If the substring \texttt{oldSub} does not occur in \texttt{st}, the result should
 be \texttt{st}.
 

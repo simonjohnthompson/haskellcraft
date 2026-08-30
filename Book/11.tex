@@ -397,21 +397,21 @@ a partial application could not.
 Using a lambda abstraction, the Boolean function \texttt{not}
 and the built-in function \texttt{elem}
 describe a function of type
-\so
+\begin{alltt}
 {\hskip1pc}Char -> Bool
-\st
+\end{alltt}
 which is \texttt{True} only on non-whitespace characters, that is those which are
 not elements of the list \texttt{" \bs{t}\bs{n}"}.
 
 \item
 Define a function \texttt{total}
-\so
+\begin{alltt}
 {\hskip1pc}total :: (Integer -> Integer) -> (Integer -> Integer)
-\st
+\end{alltt}
 so that \texttt{total f} is the function which at value \texttt{n} gives the total
-\so
+\begin{alltt}
 {\hskip1pc}f 0 + f 1 + \ldots + f n
-\st
+\end{alltt}
 You should be able to do this using built-in functions, rather than using recursion.
 
 \item
@@ -426,9 +426,9 @@ which takes its arguments in the other order. Pictorially,
 
 \item
 Using the last exercise, or otherwise, give a definition of the function
-\so
-{\hskip1pc}{\hskip1pc}flip :: (a -> b -> c) -> (b -> a -> c) 
-\st
+\begin{alltt}
+{\hskip1pc}{\hskip1pc}flip :: (a -> b -> c) -> (b -> a -> c)
+\end{alltt}
 which reverses the order in which its function argument takes its arguments.
 
 
@@ -782,22 +782,22 @@ is a simple rule which explains it.
 
 \begin{quote}
 If the type of a function \texttt{f} is
-\so
+\begin{alltt}
 {\hskip1pc}\tone -> \ttwo -> ... -> \tn -> t
-\st
-and it is applied to arguments 
-\so
+\end{alltt}
+and it is applied to arguments
+\begin{alltt}
 {\hskip1pc}\eone::\tone, \etwo::\ttwo, \ldots, \subscr{e}{k}::\subscr{t}{k}
-\st
+\end{alltt}
 (where$\;$\texttt{k$\leq$n})$\;$then$\;$the$\;$result$\;$type$\;$is$\;$given$\;$by$\;${\bf cancelling}$\;$the$\;$types$\;$\texttt{\tone}$\;$to~\subscr{t}{k}
 
-\so
+\begin{alltt}
 {\hskip1pc}\makebox[0pt][l]{/}\tone -> \makebox[0pt][l]{/}\ttwo -> ... -> \makebox[0pt][l]{/}\subscr{t}{k}-> \subscr{t}{k+1} -> ... -> \tn -> t
-\st
+\end{alltt}
 which gives the type
-\so
+\begin{alltt}
 {\hskip1pc}\subscr{t}{k+1} -> \subscr{t}{k+2} -> ... -> \tn -> t
-\st\end{quote}}
+\end{alltt}\end{quote}}
 \end{definition}
 
 
@@ -1005,11 +1005,11 @@ As an example of using \texttt{iter}, we can define \texttt{\superscr{2}{n}} as 
 
 \item
 Give calculations of
-\so
+\begin{alltt}
 {\hskip1pc}iter 3 double 1
 (comp2 succ (*)) 3 4
 comp2 sq add 3 4
-\st
+\end{alltt}
 
 \item
 What is the type and effect of the function
@@ -1205,18 +1205,18 @@ first defined in Section \ref{exprFuns}.
 
 \item
 {[Harder]} Define a function
-\so
+\begin{alltt}
 {\hskip1pc}slope :: (Float -> Float) -> (Float -> Float)
-\st
+\end{alltt}
 which takes a function \texttt{f} as argument, and returns (an approximation to)
-its derivative \texttt{f'} as result. 
+its derivative \texttt{f'} as result.
 
 
 \item
 {[Harder]} Define a function
-\so
+\begin{alltt}
 {\hskip1pc}integrate :: (Float -> Float) -> (Float -> Float -> Float)
-\st
+\end{alltt}
 which takes a function \texttt{f} as argument, and returns (an approximation to)
 the two argument function which gives the area under its graph between two end
 points as its result.

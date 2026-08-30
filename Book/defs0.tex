@@ -25,36 +25,21 @@
 %	use quantifiers and logical operations outside
 %	math mode.
 
-%change of catcode commented out - 12.6.92
-\newenvironment{ttdisplay}{\begin{alltt}%
-\mi\obeylines\obeyspaces\frenchspacing\catcode`\_=12%
-\setlength{\parskip}{0pt}%
-}{\end{alltt}}
-
-\newcommand{\so}{\begin{ttdisplay}\parindent 1pc}
-\newcommand{\st}{\end{ttdisplay} \noindent }
-\newcommand{\stt}{\end{ttdisplay}}
-
 \newcommand{\inso}{\mi\catcode`\_=12}
 \newcommand{\inst}{\rm}
 
-% An environment which allows Miranda text to be printed in a verbatim
-% form, whilst at the same time allowing math style quantifiers and
-% the like.
-% The change of catcode for underscore is to disable its
-% special interpretation under TeX. We can therefore
-% still use it within Miranda identifiers, etc.
-% The abbreviations \so \st are used for historical reasons, as
-% similar ones were used in troff -ms.
-% The \noindent in the \st is to ensure that we can use \st
-% within a paragraph to perform some displaying, without
-% the line that follows starting with an indentation.
+% \inso/\inst switch to typewriter font with the underscore catcode
+% changed to 12 (disabling its special interpretation under TeX), so
+% Miranda/Haskell identifiers with underscores can be typed literally
+% inline. Displayed code uses plain alltt directly; the former
+% \so/\st/\stt/ttdisplay wrapper around it added nothing any current
+% listing needed and is gone.
 
 {\obeyspaces\global\let =\ }
 
 % See pages 380-381 of the TeX book for the source of the line above.
-% It makes sure that spaces are really treated as spaces by the 
-% obeyspaces macro, and so by the ttdisplay environment.
+% It makes sure that spaces are really treated as spaces by the
+% obeyspaces macro, and so by any alltt-based display or \inso/\inst use.
 
 % Tight itemized lists: make \itemsep zero
 

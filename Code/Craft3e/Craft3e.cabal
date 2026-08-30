@@ -1,17 +1,16 @@
-
+cabal-version: 2.2
 name: Craft3e
-version: 0.2.0.3
-license: MIT
+version: 0.2.0.4
+license: CC-BY-NC-SA-4.0
 license-file: LICENSE
-copyright: (c) Addison Wesley
+copyright: (c) Simon Thompson
 author: Simon Thompson
 maintainer: Simon Thompson <s.j.thompson@kent.ac.uk>
 bug-reports: mailto:s.j.thompson@kent.ac.uk
 stability: stable
-homepage: http://www.haskellcraft.com/
-synopsis: Code for Haskell: the Craft of Functional Programming, 3rd ed.
+homepage: https://simonjohnthompson.github.io/haskellcraft/
+synopsis: Code for Haskell: the Craft of Functional Programming
 category: Education
-cabal-version: >= 1.10
 build-type: Simple
 description:
   .
@@ -42,7 +41,7 @@ library
     old-locale == 1.0.*,
     time >= 1.1 && < 2.0,
     mtl >= 1.1 && < 2.3,
-    HUnit >= 1.2.0,
+    HUnit >= 1.2.0 && < 1.7,
     open-browser >= 0.1.0.0 && < 0.5.0.0
   
   exposed-modules:

@@ -12,6 +12,23 @@ very unlikely to change any of the findings below — the issues found are
 either long-settled language/library changes (10+ years old) or pre-existing
 source bugs.
 
+## Update
+
+Since this report was first written, `ParseLib.hs` and its stray duplicate
+`Chapter19/parselib.hs` (see "Files that look orphaned" below) were both
+given an explicit `instance MonadFail (SParse a)`, matching the fix already
+present in `Calculator/CalcParseLib.hs`. This wasn't a compile error — both
+files already built cleanly under the "Headline finding" below — but a
+*semantic* gap this report's compile-only methodology didn't catch: the
+book's `fail s = MP none` (its worked parsing-monad example, Chapter 18)
+had been silently dropped from `SParse`'s API rather than moved to
+`MonadFail`, the same way the Applicative-Monad Proposal and MonadFail
+Proposal required for `Calculator/CalcParseLib.hs`'s copy of the same type.
+See `Admin/CODE-VS-BOOK-DISCREPANCIES-REPORT.md` for the full analysis and
+`Code/Craft3e/ParseLib.hs`/`Code/Craft3e/Chapter19/parselib.hs`'s current
+`instance MonadFail (SParse a) where fail s = SParse none` for the fix.
+Every other finding below is unaffected and still accurate.
+
 ## Headline finding
 
 **The book's main chapter code is already clean.** All 20 chapters' primary
@@ -108,7 +125,8 @@ from the module list despite being co-located with files that are (`Foo.hs`,
   `-- Solutions to Exercises N.N` banner); read as the author's own
   scratch/experimentation files.
 - **`Chapter19/parselib.hs`** — byte-for-byte identical to the top-level
-  `ParseLib.hs` (confirmed via `diff`), both declaring `module ParseLib`. A
+  `ParseLib.hs` (confirmed via `diff`, still true after both files' shared
+  `MonadFail` fix, see "Update" above), both declaring `module ParseLib`. A
   stray duplicate; this is *why* it's excluded from `exposed-modules` (cabal
   would reject two same-named modules in one package).
 

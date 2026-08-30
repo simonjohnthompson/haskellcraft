@@ -277,7 +277,10 @@ author actually types. Not every passage will be this easy — five files
 in `Book/` still use the more catcode-heavy `ttdisplay`/`\so`/`\st`
 environment rather than plain `alltt`, and those would need real
 translation work, not just a rename — but it's a fair, representative
-sample, not a cherry-picked best case.
+sample, not a cherry-picked best case. **Decided as part of this
+cleanup's scope: `ttdisplay` is replaced by plain `alltt` at all 25 call
+sites, not kept as a parallel environment** — see the appendix for the
+usage and regression audit behind that decision.
 
 **A follow-up test on one of those five files confirmed exactly that.**
 `Book/7.tex`'s exercises (7.29–7.34) lean on `\so`/`\st` repeatedly for
@@ -626,6 +629,12 @@ more directly since its input is no longer full of bespoke macros).
   `ttdisplay`/`\so`/`\st` environment instead of plain `alltt` would need
   real, non-mechanical rewriting, not a rename, so the 33k-line estimate
   shouldn't be read down just because one representative passage was easy.
+  The target for that rewrite is settled, though, not open: `ttdisplay` is
+  replaced by plain `alltt` throughout (see the appendix) — the audit there
+  found nothing it provides over `alltt` that the current text actually
+  uses, and 19 of its 25 call sites are already silently mis-rendering
+  under the current TeX Live rebuild, so keeping it as-is isn't a neutral
+  default to fall back on.
 - Doesn't remove the round-trip problem, it just makes the round trip
   nicer: the web edition is still a generated, lossy derivative of a source
   optimised for print, so richer web-only features remain second-class,
@@ -863,3 +872,184 @@ Markdown fenced-code-block equivalent) to more chapters, or at minimum an
 automated check that flags when a listing and its source file diverge —
 rather than carrying forward a decade of unchecked hand-transcription into
 the next edition.
+
+## Appendix: `ttdisplay`/`\so`/`\st` usage audit
+
+Full detail behind the claims made above (in "Option (ii)'s cleaned-up
+LaTeX, tested directly" and "The LaTeX PDF build, tested directly") about
+the five files that use `defs0.tex`'s catcode-heavy `ttdisplay` environment
+instead of plain `alltt`. Two questions were asked of the source directly,
+rather than left as impressions: what is `ttdisplay` actually used *for*
+in the current text, and exactly how much of it breaks under the current
+TeX Live rebuild. Both were answered by reading every call site, not by
+sampling.
+
+### What `ttdisplay` is, and what it's used for
+
+`defs0.tex` defines the family as:
+
+```latex
+\newenvironment{ttdisplay}{\begin{alltt}%
+\mi\obeylines\obeyspaces\frenchspacing\catcode`\_=12%
+\setlength{\parskip}{0pt}%
+}{\end{alltt}}
+
+\newcommand{\so}{\begin{ttdisplay}\parindent 1pc}
+\newcommand{\st}{\end{ttdisplay} \noindent }
+\newcommand{\stt}{\end{ttdisplay}}
+
+\newcommand{\inso}{\mi\catcode`\_=12}
+\newcommand{\inst}{\rm}
+```
+
+i.e. `alltt` plus: a switch to a raw, non-NFSS typewriter font (`\mi`,
+loaded via `\newfont{\mytt}{cmtt10}`, bypassing the document's own
+`\ttdefault=cmtt`), a second `\obeylines`/`\obeyspaces` on top of what
+`alltt` already sets internally, `\frenchspacing`, an underscore-catcode
+change (so literal `_` can be typed without triggering LaTeX's default
+subscript error), `\parskip 0`, and — `\so` only — `\parindent 1pc`,
+which is never reset. `miradefs.tex` additionally defines `\mira`/`\arim`,
+a decorative hrule-bordered wrapper around the same `\so`/`\st` pair.
+
+Every call site in `Book/*.tex` was checked (25 real `\so`/`\st` pairs
+across three files, plus the one `\inso`/`\inst` call and the environment's
+own definition):
+
+- **Underscores in identifiers — defined, never exercised.** Not one of
+  the 25 `\so`/`\st` blocks contains a literal `_`. The catcode change
+  `ttdisplay` exists to provide is a pure holdover from Miranda, where
+  snake_case identifiers were more common; every Haskell example in the
+  current text is camelCase (`joinLine`, `wcFormat`, `isPalin`, ...).
+- **Right-justified line-reference labels — a real, pervasive pattern,
+  but not `ttdisplay`'s.** `\hfill(map.1)`-style labels, referencing
+  calculation steps later via "by (map.1)", appear 415 times across
+  nearly every chapter (1, 3–20, both appendices, `root.tex`). Every
+  occurrence checked (`1.tex`, `10.tex`, `11.tex`) sits inside a **plain**
+  `\begin{alltt}` block; a search for `\hfill` inside the span of any
+  `\so...\st` pair, across all 25, found none. `defs0.tex` even defines a
+  `\push` macro (`\newcommand{\push}[1]{\hfill{\rm #1}}`) that looks
+  purpose-built for this and is never called anywhere. So this pattern —
+  probably the real memory behind "`ttdisplay` right-justifies labels" —
+  is independent of `ttdisplay`'s existence; plain `alltt` already
+  supports it, because `alltt` (which `ttdisplay` just wraps) keeps
+  `\`/`{}` live for ordinary LaTeX commands.
+- **Dead code.** `\stt` (the close-without-`\noindent` variant) and
+  `\mira`/`\arim` are defined but never invoked anywhere in the current 21
+  chapters.
+- **`\inso`/`\inst` is used exactly once** (`3.tex:1065`, typesetting
+  `1.162433e+143` inline) — and that call contains no underscore either.
+- **Active macros inside a display**: `11.tex:785–800` (the "rule of
+  cancellation" definition box) embeds Miranda-era subscript macros
+  (`\tone`, `\eone`, `\subscr{t}{k}`) and `\makebox[0pt][l]{/}`
+  strikethrough marks inside `\so`/`\st`. Real usage, but not distinctive
+  to `ttdisplay` — plain `alltt` executes embedded macros identically.
+- **Usage is inconsistent even within one file.** `11.tex:1059` sets
+  `flip :: (a -> b -> c) -> (b -> a -> c)` via plain `\begin{alltt}`
+  (introducing it in the main text); `11.tex:429-431`, ~600 lines earlier,
+  sets the identical string via `\so`/`\st` (an exercise asking for the
+  same definition). `appendix1.tex:99` (plain `\begin{alltt}`) and
+  `appendix1.tex:104` (`\so`/`\st`), five lines apart, show the same
+  split for equally short one-line examples. No rule distinguishes which
+  an author reached for.
+
+Net effect: of the two capabilities `ttdisplay` is remembered for, one
+(underscores) is defined but dead in the current text, and the other
+(right-justified labels) turns out to belong to plain `alltt`, not to
+`ttdisplay`, and already works there. What's left once those are set aside
+is a font switch implicated directly in the regression below, a set of
+re-assertions of settings `alltt` already makes internally, and a
+`\parindent` change that's never undone.
+
+### The rebuild regression, checked pair by pair
+
+Method: `Book/root.pdf` was rebuilt from unmodified source on 17 Aug 2026
+(commit `2219aa3`), replacing a copy that had sat in the repo since the
+original import (`8f3d2a2`, 7 Aug 2026) — the same "dated March 2014" PDF
+this report opens with. That earlier blob was pulled back out of git
+history (`git show 8f3d2a2:Book/root.pdf`) and both PDFs were text-extracted
+(Ghostscript's `txtwrite` device) and, where extraction was ambiguous
+(subscripted/strikethrough content), rendered to PNG and compared visually
+on the same book page. All 25 real `\so`/`\st` pairs across `Book/7.tex`,
+`Book/11.tex` and `Book/appendix1.tex` were checked this way — not a
+sample, the complete set.
+
+**Result: every pair containing `->` or `,` loses the single space
+immediately after it in the current rebuild; every pair containing
+neither renders identically to the pre-rebuild copy.** This is broader
+than first thought — the initial finding (from `Book/7.tex`'s exercises
+alone) named `->` specifically, but checking the remaining pairs surfaced
+the same space-loss after a bare `,`, in both prose and code.
+
+`Book/7.tex` (12 pairs):
+
+| Lines | Content | Result |
+|---|---|---|
+| 948–957 | "unfilled" text-processing example | `beaches,panting` — comma-space lost |
+| 959–967 | "filled" version of the same example | `beaches,panting` — comma-space lost |
+| 971–979 | "justified" version of the same example | `beaches,panting` — comma-space lost (deliberate multi-space justification elsewhere unaffected) |
+| 1179–1181 | `joinLine :: Line -> String` | arrow-space lost |
+| 1183–1185 | `joinLine [ "dog" ,"cat" ] = "dog cat"` | comma-space lost |
+| 1189–1191 | `joinLines :: [Line] -> String` | arrow-space lost |
+| 1207–1209 | `wc :: String -> (Int,Int,Int)` | arrow-space lost |
+| 1213–1215 | `wcFormat :: String -> (Int,Int,Int)` | arrow-space lost |
+| 1221–1223 | `isPalin :: String -> Bool` | arrow-space lost |
+| 1226–1228 | `Madam I'm Adam` | clean — no `->` or `,` |
+| 1237–1239 | `subst :: String -> String -> String -> String` | arrow-space lost (×3) |
+| 1247–1250 | `subst "much  " "tall " "How much  is that?"` / `= "How tall is that?"` | clean — no `->` or `,` |
+
+`Book/11.tex` (11 pairs):
+
+| Lines | Content | Result |
+|---|---|---|
+| 400–402 | `Char -> Bool` | arrow-space lost |
+| 408–410 | `total :: (Integer -> Integer) -> (Integer -> Integer)` | arrow-space lost (×3) |
+| 412–414 | `f 0 + f 1 + ... + f n` | clean — no `->` or `,` |
+| 429–431 | `flip :: (a -> b -> c) -> (b -> a -> c)` | arrow-space lost (×3) |
+| 785–787 | rule-of-cancellation box: `t₁ -> t₂ -> ... -> tₙ -> t` | arrow-space lost |
+| 789–791 | `e₁::t₁, e₂::t₂, ..., eₖ::tₖ` | comma-space lost |
+| 794–796 | cancellation strikethrough line | arrow-space lost |
+| 798–800 | `tₖ₊₁ -> tₖ₊₂ -> ... -> tₙ -> t` | arrow-space lost |
+| 1008–1012 | `iter 3 double 1` / `(comp2 succ (*)) 3 4` / `comp2 sq add 3 4` | clean — no `->` or `,` |
+| 1208–1210 | `slope :: (Float -> Float) -> (Float -> Float)` | arrow-space lost |
+| 1217–1219 | `integrate :: (Float -> Float) -> (Float -> Float -> Float)` | arrow-space lost |
+
+`Book/appendix1.tex` (2 pairs):
+
+| Lines | Content | Result |
+|---|---|---|
+| 104–106 | `sumSquares n = n*n + sumSquares (n-1)` | clean — no `->` or `,` |
+| 108–110 | `sumSquares 7 = 7*7 + sumSquares (7-1)` | clean — no `->` or `,` |
+
+19 of the 25 pairs are affected (14 via `->`, 5 via `,`); the 6 clean
+pairs are exactly the ones containing neither character. One case is
+worth naming directly because it's the cleanest control available:
+`11.tex:1059` sets `flip :: (a -> b -> c) -> (b -> a -> c)` via plain
+`\begin{alltt}` and renders it correctly in the current, buggy rebuild;
+`11.tex:429-431` sets the byte-identical string via `\so`/`\st`, ~600
+lines away in the same chapter, same PDF, same page range, and loses all
+three spaces. Same document, same TeX Live, same font — only the
+environment differs.
+
+An initial text-extraction pass also suggested a second dropped space, in
+`7.tex`'s text-processing example ("glare, I avoided" → "glare,I
+avoided"). Rendering the actual page showed that line matches in both
+PDFs — an extraction artefact, not a real difference — and it's recorded
+here rather than silently dropped, since the rest of this table rests on
+the same extraction method being trusted everywhere it wasn't
+cross-checked visually.
+
+### What this settles for Option (ii)
+
+**Replacing `ttdisplay` with plain `alltt` is to be done as part of the
+cleanup**, not left as an open question resolved case-by-case. The usage
+audit above found nothing `ttdisplay` provides over plain `alltt` that the
+current text actually exercises; the regression audit found that every
+site using it is either silently broken today or one content change away
+from being silently broken the next time this book is rebuilt on a newer
+TeX Live. Plain `alltt` is what the rest of the book already uses for the
+same kind of one-line display, it's what `tex2md.py` already understands,
+and — per `11.tex:1059` above — it's demonstrably not subject to this
+regression. The migration is mechanical for 6 of the 25 sites (rename
+only) and needs the same page-render check applied here for the other 19,
+but the target environment for all of them is decided: `alltt`, not a
+`ttdisplay` variant.

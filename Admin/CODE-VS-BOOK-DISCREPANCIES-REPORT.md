@@ -125,6 +125,18 @@ the pre-existing, harmless `-Wnoncanonical-monad-instances` notes already
 present on both copies (see the class-hierarchy discussion above for why
 those warnings are expected and benign).
 
+**Released.** This fix has since shipped to Hackage as `Craft3e-0.2.0.3` —
+the version bump was made specifically because `ParseLib.hs` is the one
+copy of this fix that actually reaches `cabal sdist` (`Solutions18.hs`
+doesn't, and `Chapter19/parselib.hs`'s identical copy rides along as inert,
+uncompiled source either way; see `Admin/CODE-COMPATIBILITY-REPORT.md`'s
+"Released" note for the full detail). Confirmed live by running
+`cabal update && cabal get Craft3e-0.2.0.3` fresh and checking the
+downloaded `ParseLib.hs` for the `instance MonadFail (SParse a)` above. A
+reader who fetches the package the book's own documented way
+(`cabal unpack Craft3e`) now gets this fix, independent of whether or when
+`Book/18.tex`'s prose itself is ever updated to match.
+
 ### `Calculator/CalcParseLib.hs` — `fail` preserved via `MonadFail`
 
 ```haskell

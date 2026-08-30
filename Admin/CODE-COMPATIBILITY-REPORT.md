@@ -91,6 +91,19 @@ list of instances affected is: `ParseLib.hs`, `Calculator/CalcParseLib.hs`,
 `IO/TreeState.hs` (left as-is, excluded-from-delivery orphans). Nothing else
 in the tree has this gap.
 
+**Released.** The `ParseLib.hs` fix — the one instance of this gap that
+actually reaches Hackage's `cabal sdist` (confirmed directly: neither
+`Solutions18.hs` nor `Chapter19/parselib.hs`'s copy affects what
+`cabal unpack`/`cabal install Craft3e` ever delivered, since only
+`exposed-modules`/`extra-source-files` get packed, and `Solutions18.hs`
+isn't either) — has shipped as `Craft3e-0.2.0.3` on Hackage. Confirmed live
+by running `cabal update && cabal get Craft3e-0.2.0.3` fresh and checking
+the downloaded `ParseLib.hs` for the `instance MonadFail (SParse a)`. A
+reader who fetches the package the book's own documented way
+(`cabal unpack Craft3e`) rather than cloning this repository now gets the
+fix too. See `Admin/RUNNING-HASKELL-OPTIONS-REPORT.md` for the reader-facing
+write-up of this.
+
 Every other finding below is unaffected and still accurate.
 
 ## Headline finding

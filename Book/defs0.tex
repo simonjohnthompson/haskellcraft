@@ -25,21 +25,11 @@
 %	use quantifiers and logical operations outside
 %	math mode.
 
-\newcommand{\inso}{\mi\catcode`\_=12}
-\newcommand{\inst}{\rm}
-
-% \inso/\inst switch to typewriter font with the underscore catcode
-% changed to 12 (disabling its special interpretation under TeX), so
-% Miranda/Haskell identifiers with underscores can be typed literally
-% inline. Displayed code uses plain alltt directly; the former
-% \so/\st/\stt/ttdisplay wrapper around it added nothing any current
-% listing needed and is gone.
-
 {\obeyspaces\global\let =\ }
 
 % See pages 380-381 of the TeX book for the source of the line above.
 % It makes sure that spaces are really treated as spaces by the
-% obeyspaces macro, and so by any alltt-based display or \inso/\inst use.
+% obeyspaces macro, and so by any alltt-based display.
 
 % Tight itemized lists: make \itemsep zero
 

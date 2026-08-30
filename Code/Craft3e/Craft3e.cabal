@@ -1,7 +1,7 @@
 cabal-version: 2.2
 name: Craft3e
 version: 0.2.0.4
-license: CC-BY-NC-SA-4.0
+license: MIT
 license-file: LICENSE
 copyright: (c) Simon Thompson
 author: Simon Thompson

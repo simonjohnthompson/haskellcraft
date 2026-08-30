@@ -180,6 +180,32 @@ block above, verbatim, with no `Applicative`/`Functor` block at all — and no
 cleanest of the three cases: purely an *addition* the book doesn't show, not
 a behaviour change.
 
+## Sweep: no further gaps of this kind in the exposed modules
+
+After fixing `ParseLib.hs`'s dropped `fail` (and its duplicate,
+`Chapter19/parselib.hs`), the rest of `Craft3e.cabal`'s `exposed-modules`
+were swept for the same class of issue, two ways: an exhaustive `grep` for
+`instance Monad`/`Applicative`/`Functor`/`MonadFail` across all of
+`Code/Craft3e`, and a full `cabal build lib:Craft3e --ghc-options="-Wall
+-Wcompat"` (478 warnings, triaged by category).
+
+The three instances catalogued above — `ParseLib.hs`'s `SParse`,
+`Calculator/CalcParseLib.hs`'s `SParse`, `Chapter18.hs`'s `State` — are the
+**entire set** of custom `Monad` instances anywhere in the package's
+exposed modules; there is no fourth one. A parallel check for the
+analogous `Semigroup`-became-a-superclass-of-`Monoid` split (`base-4.11`,
+GHC 8.4, 2018) and for `Alternative`/`MonadPlus` found zero instances of
+either anywhere in the tree, so neither split can produce a gap here at
+all. The `-Wall` sweep's remaining ~470 warnings are pedagogical-code noise
+(`-Wmissing-signatures`, `-Wunused-matches`, `-Wname-shadowing`,
+`-Wtype-defaults`, `-Wincomplete-patterns`/`-Wincomplete-uni-patterns` on
+ordinary `let`/`where` bindings, three `-Wcompat-unqualified-imports`, one
+`-Worphans` on a QuickCheck `Show (a -> b)` instance in `QCfuns.hs`) or
+forward-looking compat notices — none of them mark a place where behaviour
+was silently dropped the way `fail` was. **This closes out the sweep: the
+`MonadFail` fix already applied is the only instance of this discrepancy in
+the shipped package, and nothing else needs the same treatment.**
+
 ## A secondary, related discrepancy: how a reader is told to run the performance examples
 
 `Book/20.tex:1033-1038` tells the reader to compile the Chapter 20

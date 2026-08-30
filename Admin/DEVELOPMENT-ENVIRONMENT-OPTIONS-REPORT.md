@@ -113,6 +113,15 @@ CalcParseLib.hs`); worth knowing so a "the extension is broken, it's
 underlining code straight from the book" report isn't chased as an editor
 problem.
 
+**Released.** `ParseLib.hs`'s fix has since shipped as `Craft3e-0.2.0.3` on
+Hackage (see `Admin/RUNNING-HASKELL-OPTIONS-REPORT.md`), confirmed by
+re-downloading the package fresh via `cabal update && cabal get
+Craft3e-0.2.0.3`. This doesn't change anything about the caveat above — a
+reader typing the book's `MP`/`State` examples in by hand still hits the
+same live HLS squiggle regardless of which package version they have
+installed, since the gap is in the *book's printed text*, not in whichever
+`Craft3e` a reader's project happens to depend on.
+
 **Caveat, confirmed during testing for this report:** the version-tie
 described above means that if the GHC version visible to the extension has
 no matching prebuilt HLS binary — which normally only happens right after a

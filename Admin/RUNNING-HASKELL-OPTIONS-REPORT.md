@@ -12,9 +12,12 @@ this book will be revised.
 
 This report should be read alongside `Admin/CODE-COMPATIBILITY-REPORT.md`,
 which covers what needs to work (`Craft3e.cabal`, its dependencies, and the
-per-chapter modules) once a reader has *some* way to run GHC/GHCi. This
-report is about the layer underneath that: how they get GHC/GHCi in the
-first place.
+per-chapter modules) once a reader has *some* way to run GHC/GHCi, and
+`Admin/CODE-VS-BOOK-DISCREPANCIES-REPORT.md`, which covers the narrower but
+sharper case of a reader typing the book's own printed code in by hand
+rather than loading the shipped files (see the note under Option A below).
+This report is about the layer underneath both: how they get GHC/GHCi in
+the first place.
 
 The book's own workflow assumes a reader can start GHCi and `:load` a
 chapter file that pulls in sibling modules and packages like `QuickCheck`.
@@ -43,6 +46,25 @@ For anyone planning to work through more than a couple of isolated
 examples — which describes most readers of this book — a real local
 install is simply the least friction long-run, and it's what the book's
 existing "start GHCi and `:load` a chapter" instructions already assume.
+
+**A gap worth flagging, orthogonal to which environment option a reader
+picks:** every option in this report (A through F) ends up running a
+current GHC — 9.x, well past two class-hierarchy changes the book predates
+(the Applicative-Monad Proposal, 2015, and the MonadFail Proposal, 2019).
+This is invisible to a reader who runs `cabal repl` and `:load`s a shipped
+chapter file, because `Code/Craft3e`'s modules have already been quietly
+patched to compile under a modern GHC. It is *not* invisible to a reader
+who instead types one of Chapter 18's monad examples in by hand from the
+printed book — its `instance Monad (MP a) where fail s = MP none` (and the
+`State` monad instance right after it) would fail to compile on any of the
+environments this report sets up, with an error about `fail` not being a
+method of `Monad`, unrelated to anything about the environment itself. See
+`Admin/CODE-VS-BOOK-DISCREPANCIES-REPORT.md` for the full analysis and the
+already-fixed versions of both examples in `Code/Craft3e`. Not a reason to
+change any recommendation in this report — every option here still gets a
+reader to a working, current GHC exactly as intended — but worth knowing so
+a "why won't this compile, I copied it straight from the book" report from
+a reader isn't mistaken for an environment-setup problem.
 
 **Alternatives to GHCup for local install**, mentioned for completeness:
 a system package manager (Homebrew's `ghc`/`cabal-install` on macOS, `apt`

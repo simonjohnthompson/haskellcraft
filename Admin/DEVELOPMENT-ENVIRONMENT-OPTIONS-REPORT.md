@@ -15,6 +15,10 @@ findings:
 - `Admin/RUNNING-HASKELL-OPTIONS-REPORT.md` — how a reader gets GHC/cabal
   running in the first place (local GHCup install, Docker, Codespaces/
   Gitpod, browser playgrounds).
+- `Admin/CODE-VS-BOOK-DISCREPANCIES-REPORT.md` — specific places the book's
+  printed code no longer matches what actually compiles under a modern GHC
+  (see the note under Option 1 below for what this looks like through HLS
+  specifically).
 
 This report is one layer up: given GHC is available somehow, what should a
 reader actually type code *into*, and what live help (error highlighting,
@@ -91,6 +95,23 @@ it's needed. An alternative setting, `haskell.manageHLS: "PATH"`, instead
 uses whatever `haskell-language-server-wrapper` a reader already has on
 `PATH` — relevant if they're managing the toolchain themselves rather than
 letting the extension do it.
+
+**A related caveat, this one about the book's own text rather than the
+tooling:** the "Inline red/yellow squiggles... matching what `cabal
+build`/`ghci` would report, but live as you type" bullet above cuts both
+ways. It's exactly how a reader would first encounter the gap documented in
+`Admin/CODE-VS-BOOK-DISCREPANCIES-REPORT.md`: typing Chapter 18's printed
+`instance Monad (MP a) where fail s = MP none` into a new file would show a
+live squiggle under `fail` (`'fail' is not a (visible) method of class
+'Monad'`) the moment HLS finishes checking it, before the reader ever runs
+`cabal build`. That's not an HLS bug or a devcontainer misconfiguration — it's
+HLS correctly reporting that the book's printed code, transcribed exactly,
+no longer compiles under the Applicative-Monad Proposal (2015) and
+MonadFail Proposal (2019), both of which postdate the book. The already-
+working fix lives in `Code/Craft3e` (`ParseLib.hs`, `Calculator/
+CalcParseLib.hs`); worth knowing so a "the extension is broken, it's
+underlining code straight from the book" report isn't chased as an editor
+problem.
 
 **Caveat, confirmed during testing for this report:** the version-tie
 described above means that if the GHC version visible to the extension has

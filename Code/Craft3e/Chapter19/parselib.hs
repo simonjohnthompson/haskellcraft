@@ -123,8 +123,11 @@ data SParse a b = SParse (Parse a b)
 
 instance Monad (SParse a) where
   return x = SParse (succeed x)
-  (SParse pr) >>= f 
+  (SParse pr) >>= f
     = SParse (\st -> concat [ sparse (f a) rest | (a,rest) <- pr st ])
+
+instance MonadFail (SParse a) where
+  fail s   = SParse none
 
 instance Applicative (SParse a) where
   pure = return

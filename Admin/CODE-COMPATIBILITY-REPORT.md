@@ -12,6 +12,27 @@ very unlikely to change any of the findings below — the issues found are
 either long-settled language/library changes (10+ years old) or pre-existing
 source bugs.
 
+## Companion reports
+
+This report has since become the base layer for several others in `Admin/`,
+each building on it rather than duplicating it:
+
+- `Admin/RUNNING-HASKELL-OPTIONS-REPORT.md` — how a reader gets GHC/GHCi
+  running in the first place (GHCup, Docker, Codespaces/Gitpod, browser
+  playgrounds), one layer underneath the module/dependency questions this
+  report answers.
+- `Admin/DEVELOPMENT-ENVIRONMENT-OPTIONS-REPORT.md` — one layer above both:
+  what a reader edits code *in* (VS Code + HLS, Neovim/Emacs, terminal-only),
+  once GHC is available.
+- `Admin/CODE-VS-BOOK-DISCREPANCIES-REPORT.md` — a narrower, related
+  question this report's compile-only methodology didn't originally cover;
+  see "Update" immediately below.
+- `Admin/SOURCE-FORMAT-OPTIONS-REPORT.md` — a different axis entirely (what
+  format the book's own prose/typesetting should live in for a future
+  rewrite), which folds in the discrepancies report's finding as a
+  concrete argument for keeping code listings mechanically tied to
+  `Code/Craft3e` rather than hand-transcribed.
+
 ## Update
 
 Since this report was first written, `ParseLib.hs` and its stray duplicate

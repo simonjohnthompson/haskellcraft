@@ -78,6 +78,22 @@ present in the downloaded source. A reader on Option A who fetches the
 package the book's own way, rather than cloning `Code/Craft3e` directly,
 now gets the fix too.
 
+**Updated again, this time for package metadata rather than code.**
+`Craft3e-0.2.0.4` followed shortly after, correcting the package's own
+`.cabal` metadata: copyright now reads `(c) Simon Thompson` rather than
+Addison Wesley, `homepage` points at this project's actual GitHub Pages
+site rather than the long-dormant `haskellcraft.com`, and two Hackage-side
+`cabal check`/upload warnings (a missing `HUnit` upper bound, and
+trailing-zero upper bounds on `time`/`open-browser`) are cleared. One
+finding worth recording: Hackage's uploader hard-rejects any license that
+isn't OSI-approved — an initial attempt to set `license:
+CC-BY-NC-SA-4.0` (matching the book's own front-matter licensing) failed
+server-side with "Invalid package," since Creative Commons' NonCommercial
+clause isn't OSI-approved open source. `Craft3e`'s code license stays MIT;
+only the book's prose is CC BY-NC-SA 4.0. Confirmed live the same way as
+before: downloaded the published tarball directly from Hackage and checked
+its `Craft3e.cabal` and `LICENSE` match.
+
 **Alternatives to GHCup for local install**, mentioned for completeness:
 a system package manager (Homebrew's `ghc`/`cabal-install` on macOS, `apt`
 on Debian/Ubuntu, `choco`/`winget` on Windows) — usable, but versions lag

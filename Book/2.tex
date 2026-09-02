@@ -71,7 +71,7 @@ called \textbf{nested comments}\index{comment!nested}.
 
 The Glasgow Haskell Compiler (GHC)\index{Glasgow Haskell Compiler|see{GHC}}\index{GHC} is an industrial-strength compiler for Haskell. \textbf{GHC interactive (GHCi)} is an interactive interpreter based on GHC, which supports program development by allowing programmers to evaluate Haskell expressions interactively as they develop programs.
 
-The best, and easiest, way of working with Haskell is to install it on your own computer, and this you do using GHCup, \url{https://www.haskell.org/ghcup/}, as shown in Figure \ref{GHCup}.
+If you're learning Haskell in high school or college, or at work, your teachers or colleagues will have made sure it is available on the that computers you use. If you want to install it for yourself on a machine that you control, the best, and easiest, way of working doing that is to use GHCup, \url{https://www.haskell.org/ghcup/}.
 
 \begin{figure}[t] 
 \begin{center}
@@ -81,7 +81,7 @@ The best, and easiest, way of working with Haskell is to install it on your own 
 \label{GHCup}
 \end{figure}
 
-GHCup\index{GHCup} will install Haskell, as well as some other components including \texttt{cabal},\index{Cabal} a package for distributing Haskell code and libraries, and one mechanism that we use for distributing the code for the book; we come back to \texttt{cabal} in Chapter \ref{progLists}.
+GHCup\index{GHCup} will install Haskell, as well as some other components including \texttt{cabal},\index{Cabal} a package for distributing Haskell code and libraries, and one of the ways that you can access  the code for the book; we come back to \texttt{cabal} in Chapter \ref{progLists}.
 \index{downloading support materials} 
 
 Other ways of using Haskell -- such as using it online or in a browser -- can be found in Appendix \ref{OtherHS}; we discuss how to find out more about the functions and libraries in Haskell in Chapter \ref{progLists}. DOUBLE BACK TO THIS
@@ -101,7 +101,7 @@ Other ways of using Haskell -- such as using it online or in a browser -- can be
 
 In this text we describe the terminal-style interface to GHCi, illustrated in Figure
 \ref{GHCiSession},
-because this is common to Windows, Mac OS X and Linux. 
+because this is common to macOS, Linux and Windows WSL. 
 
 \subsection*{GHCi documentation}
 \index{GHCi!documentation}
@@ -119,28 +119,21 @@ and that includes information specifically about GHCi.
 
 \subsection*{Starting GHCi}
 
-To start GCHi on OS X and Linux, type \texttt{ghci}\minx{ghci}
-to the prompt in a terminal; to launch GHCi using a particular file, type
+To start GCHi in a terminal on macOS, Linux and WSL, type \texttt{ghci}\minx{ghci}
+to the prompt in a terminal. To launch GHCi using a particular file, change to the directory containing the file and type
 \texttt{ghci} followed by the name of the file in question, as in
 \begin{alltt}\minx{ghci}
 ghci Chapter2
 \end{alltt} 
-%On a Windows
-%system, GHCi is launched by choosing it from the appropriate place
-%on the Start menu; if you have the standard installation of the Haskell Platform it will be in the %Haskell Platform program group. Double clicking a Haskell file will open that file in GHCi.\index{GHCi!launch}\footnote{This assumes that the appropriate
-%registry entries have been made; we work here with the standard installation of
-%GHCi as discussed in Appendix \ref{OtherHS}.}
 Haskell scripts carry the extension \texttt{.hs}; only such files can be loaded, and their extensions
 can be omitted when they are loaded either when GHCi is launched or by a
 \texttt{:load}\index{load@\texttt{:load}} command within GHCi.
-
-
 
 \subsection*{Evaluating expressions in GHCi}
 \index{GHCi!expression evaluation}
 
 As we said in Section \ref{exprEval}, GHCi will evaluate
-expressions typed at the prompt. We see in Figure \ref{GHCiSessionMac} the
+expressions typed at the prompt. We see in Figure \ref{GHCiSession} the
 evaluation of \texttt{double (square 29)} to \texttt{1682}, like this
 \begin{alltt}
 \textsl{ghci>} double (square 29)

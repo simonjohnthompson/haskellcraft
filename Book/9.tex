@@ -775,16 +775,16 @@ section ask you to prove theorems concerning prelude functions.
 \beware{QuickCheck and properties over \texttt{[a]}}{
 If we test the QuickCheck property
 \begin{alltt}
-prop_reversePlusPlus :: Eq a => [a] -> [a] -> Bool\\
+prop\_reversePlusPlus :: Eq a => [a] -> [a] -> Bool\\
 \ \\
-prop_reversePlusPlus xs ys =\\
+prop\_reversePlusPlus xs ys =\\
 \hspace*{0.8cm}reverse (xs ++ ys) == reverse ys ++ reverse xs
 \end{alltt}
 we find that it holds. Fine, but if we check this property:
 \begin{alltt}
-prop_reversePlusPlusOops :: Eq a => [a] -> [a] -> Bool\\
+prop\_reversePlusPlusOops :: Eq a => [a] -> [a] -> Bool\\
 \ \\
-prop_reversePlusPlusOops xs ys =\\
+prop\_reversePlusPlusOops xs ys =\\
 \hspace*{0.8cm}reverse (xs ++ ys) == reverse xs ++ reverse ys
 \end{alltt}
 we find that this holds too! 
@@ -795,7 +795,7 @@ What is happening here? The problem is that when we check a generic property -- 
 \medskip
 In order to restore sanity, it is enough to change the properties to a suitable non-generic type, using a type declaration like this:
 \begin{alltt}
-prop_reversePlusPlusOops :: [Integer] -> [Integer] -> Bool
+prop\_reversePlusPlusOops :: [Integer] -> [Integer] -> Bool
 \end{alltt}
 }
 \end{figure}

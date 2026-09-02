@@ -1575,17 +1575,17 @@ lists. \blackbox
 \medskip
 Let's take the example of the property for \texttt{map} and \texttt{filter}, \texttt{(filter/map)} introduced on page \pageref{filterMap}:
 \begin{alltt}
-prop_mf p f = 
+prop\_mf p f =
 
 \ \ \ \ \bs{}xs -> (filter p . map f) xs == (map f . filter (p . f)) xs
 \end{alltt}
 We can check this for specific values of \texttt{p} and \texttt{f} like this
 \begin{alltt}
-\textsl{Prompt>} quickCheck (prop_mf (>0) (\bs{}x -> x*x))
+\textsl{Prompt>} quickCheck (prop\_mf (>0) (\bs{}x -> x*x))
 
 \textsl{+++ OK, passed 100 tests.}
 
-\textsl{Prompt>} quickCheck (prop_mf (>=0) (\bs{}x -> x*x*x))
+\textsl{Prompt>} quickCheck (prop\_mf (>=0) (\bs{}x -> x*x*x))
 
 \textsl{+++ OK, passed 100 tests.}
 \end{alltt}

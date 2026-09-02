@@ -1906,6 +1906,18 @@ def number_exercises(tex, stem):
     paragraph with a bold run-in number -- exactly how root.tex's
     \\labelenumi (\\sffamily\\bfseries \\theenumi, no trailing period)
     renders it in the real book.
+
+    Chapter 6 also has one \\begin{exercise}...\\end{exercise} (singular)
+    -- the bare \\newtheorem{exercise}{Exercise}[chapter] environment
+    itself, used directly for a single exercise embedded mid-narrative
+    rather than via the \\begin{exercises}/\\begin{exerciseone} list
+    wrapper. It shares the same "exercise" counter (confirmed against
+    the rebuilt PDF: this one prints as "Exercise 6.55", correctly
+    cumulative with the surrounding \\begin{exercises} blocks), but
+    root.tex's \\newtheorem default renders it as a run-in "Exercise
+    N.M" with no "Exercises" heading -- unlike the plural wrapper, which
+    prints "Exercises" once for the whole list and labels each item with
+    just its bare number.
     """
     if not stem.isdigit():
         return tex
@@ -1913,6 +1925,7 @@ def number_exercises(tex, stem):
     counter = [0]
 
     def replace(m):
+        kind = m.group(1)
         items = _split_top_level_items(m.group(2))
         parts = []
         for label, content in items:
@@ -1922,11 +1935,18 @@ def number_exercises(tex, stem):
                 parts.append(f"\\textbf{{{label}}} {content}" if label else content)
             else:
                 counter[0] += 1
-                parts.append(f"\\textbf{{{chapter_num}.{counter[0]}}} {content}")
+                num = f"{chapter_num}.{counter[0]}"
+                prefix = f"Exercise {num}" if kind == "exercise" else num
+                parts.append(f"\\textbf{{{prefix}}} {content}")
+        if kind == "exercise":
+            return "\n\n".join(parts)
         return "\\textbf{Exercises}\n\n" + "\n\n".join(parts)
 
     return re.sub(
-        r"\\begin\{(exercises|exerciseone)\}(.*?)\\end\{\1\}", replace, tex, flags=re.S
+        r"\\begin\{(exercises|exerciseone|exercise)\}(.*?)\\end\{\1\}",
+        replace,
+        tex,
+        flags=re.S,
     )
 
 

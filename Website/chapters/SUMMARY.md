@@ -6,7 +6,7 @@
 # Chapters
 
 - [Chapter 1: Introducing functional programming](1.md)
-- [Chapter 2: Getting started with Haskell and GHCi](2.md)
+- [Chapter 2: Getting started with Haskell programming](2.md)
 - [Chapter 3: Basic types and definitions](3.md)
 - [Chapter 4: Designing and writing programs](4.md)
 - [Chapter 5: Data types, tuples and lists](5.md)

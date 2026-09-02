@@ -67,3 +67,6 @@ Website/book/
 
 ## Generated report PDFs (rebuild with Admin/pdf/make-pdfs.sh):
 Admin/pdf/*.pdf
+
+## Locally-edited scratch file, not part of the tracked source:
+Code/Craft3e/svgOut.xml

@@ -81,7 +81,7 @@ The best, and easiest, way of working with Haskell is to install it on your own 
 \label{GHCup}
 \end{figure}
 
-GHCup will install Haskell, as well as some other components including \texttt{cabal},\index{Cabal} a package for distributing Haskell code and libraries, and one mechanism that we use for distributing the code for the book; we come back to \texttt{cabal} in Chapter \ref{progLists}.
+GHCup\index{GHCup} will install Haskell, as well as some other components including \texttt{cabal},\index{Cabal} a package for distributing Haskell code and libraries, and one mechanism that we use for distributing the code for the book; we come back to \texttt{cabal} in Chapter \ref{progLists}.
 \index{downloading support materials} 
 
 Other ways of using Haskell -- such as using it online or in a browser -- can be found in Appendix \ref{OtherHS}; we discuss how to find out more about the functions and libraries in Haskell in Chapter \ref{progLists}. DOUBLE BACK TO THIS
@@ -106,31 +106,30 @@ because this is common to Windows, Mac OS X and Linux.
 \subsection*{GHCi documentation}
 \index{GHCi!documentation}
 
-On Mac OS X documentation for GHCi and other systems is found at
-\begin{center}\index{GHCi!documentation}
-\url{file:///usr/share/doc/ghc/html/index.html}
+The GHCup webpage has documentation about `first steps' in getting started, covering \texttt{ghci} after a short introduction to the \texttt{ghc} command itself.
+\begin{center}\index{GHCup!first steps}
+\url{https://www.haskell.org/ghcup/steps/}
 \end{center} 
-Linux systems differ: for example, in Ubuntu 9.10 the path to the Haskell documentation is:
+The full documentation for the Glasgow Haskell Compiler is here
 \begin{center}\index{GHCi!documentation}
-\url{/usr/share/doc/ghc6-doc}
+\url{https://downloads.haskell.org/ghc/latest/docs/users_guide/}
 \end{center} 
-Links to the documentation are found in the Haskell Platform program group\index{Haskell Platform!program group on Windows} on Windows systems.
+and that includes information specifically about GHCi.
 
 
 \subsection*{Starting GHCi}
 
 To start GCHi on OS X and Linux, type \texttt{ghci}\minx{ghci}
-to the prompt; to launch GHCi using a particular file, type
+to the prompt in a terminal; to launch GHCi using a particular file, type
 \texttt{ghci} followed by the name of the file in question, as in
 \begin{alltt}\minx{ghci}
 ghci Chapter2
 \end{alltt} 
-On a Windows
-system, GHCi is launched by choosing it from the appropriate place
-on the Start menu; if you have the standard installation of the Haskell Platform it will be in the Haskell Platform program group. Double clicking a Haskell file will open that file in GHCi.\index{GHCi!launch}\footnote{This assumes that the appropriate
-registry entries have been made; we work here with the standard installation of
-GHCi as discussed in Appendix \ref{OtherHS}.}
-
+%On a Windows
+%system, GHCi is launched by choosing it from the appropriate place
+%on the Start menu; if you have the standard installation of the Haskell Platform it will be in the %Haskell Platform program group. Double clicking a Haskell file will open that file in GHCi.\index{GHCi!launch}\footnote{This assumes that the appropriate
+%registry entries have been made; we work here with the standard installation of
+%GHCi as discussed in Appendix \ref{OtherHS}.}
 Haskell scripts carry the extension \texttt{.hs}; only such files can be loaded, and their extensions
 can be omitted when they are loaded either when GHCi is launched or by a
 \texttt{:load}\index{load@\texttt{:load}} command within GHCi.
@@ -144,26 +143,26 @@ As we said in Section \ref{exprEval}, GHCi will evaluate
 expressions typed at the prompt. We see in Figure \ref{GHCiSessionMac} the
 evaluation of \texttt{double (square 29)} to \texttt{1682}, like this
 \begin{alltt}
-\textsl{*Chapter2>} double (square 29)
+\textsl{ghci>} double (square 29)
 \textsl{1682}
-\textsl{*Chapter2>}
+\textsl{ghci>}
 \end{alltt}
 where we have indicated the machine output by using a slanted font; user input appears
-in unslanted form. The \textbf{prompt}\index{prompt} here, \texttt{\textsl{*Chapter2>}}, will be explained in
-Section \ref{introModules} below.\minx{*Chapter2>}
+in unslanted form. The \textbf{prompt}\index{prompt} here, \texttt{\textsl{ghci>}}, will be explained in
+Section \ref{introModules} below.\minx{ghci>}
 As can be seen from the examples, we can evaluate expressions which use
 the definitions in the current script. In this case it is \texttt{Chapter2.hs}.
 
 One of the advantages of the GHCi interface is that it is easy to
 experiment with functions, trying different evaluations simply by typing
 the expressions at the keyboard. If we want to evaluate a complex
-expression, we could add it to the program, as in
+expression, we could add it to the program, as in this 
 definition
 \begin{alltt}
 cube :: Integer -> Integer
 cube n = n*n*n
 \end{alltt}
-but we can also input these definitions directly into GHCi by prefacing them with the keyword \texttt{let}, as seen in Figure \ref{GHCiSessionMac}. Of course, this definition will be lost when we close GHCi, so if we want to keep a record of it, then we should add it to a Haskell module as well.
+but we can also input these definitions directly into GHCi by prefacing them with the keyword \texttt{let}, as seen in Figure \ref{GHCiSession}. Of course, this definition will be lost when we close GHCi, so if we want to keep a record of it, then we should add it to a Haskell module as well.
 
 \newlength{\colwidth}
 \setlength{\colwidth}{\textwidth}
@@ -225,7 +224,8 @@ and then
 In this way the editor is still open on the file should it need further
 modification.
 
-Alternatively some editors allow GHCi to be called from within the editor, as a part of the Haskell mode for the editor. A popular Haskell editor is emacs, with variants such as Aquamacs for Mac OS X.\index{emacs, Haskell mode for}\index{Aquamacs|see{emacs}} These editors will provide facilities such as syntax highlighting, and embedded evaluation. In Haskell mode for emacs, \texttt{\^\-C \^\-B} opens GHCi and \texttt{\^\-C \^\-L} (re)loads the current module in GHCi.
+Typically, though, development today is usually inside an Integrated Development Environment, or IDE,  such as Visual Studio Code (VS Code)\index{VS Code}. IDEs combines editing with processing and running programs, as well as interacting with repositories, such as github, refactoring and other kinds of software tooling.
+%Alternatively some editors allow GHCi to be called from within the editor, as a part of the Haskell mode for the editor. A popular Haskell editor is emacs, with variants such as Aquamacs for Mac OS X.\index{emacs, Haskell mode for}\index{Aquamacs|see{emacs}} These editors will provide facilities such as syntax highlighting, and embedded evaluation. In Haskell mode for emacs, \texttt{\^\-C \^\-B} opens GHCi and \texttt{\^\-C \^\-L} (re)loads the current module in GHCi.
 
 
 

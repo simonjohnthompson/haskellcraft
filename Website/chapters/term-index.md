@@ -66,7 +66,6 @@ Index
 - **application** — see *function application*
 - **application operator ($)** — [Ch. 11](11.md#ix-11-application-operator)
   - and composition — [Ch. 11](11.md#ix-11-application-operator-and-composition)
-- **Aquamacs** — see *emacs*
 - **argument** — [Ch. 1](1.md#ix-1-argument), [Glossary](glossary.md#ix-glossary-argument)
   - order of arguments — [Ch. 11](11.md#ix-11-argument-order-of-arguments)
   - tuple — [Ch. 5](5.md#ix-5-argument-tuple)
@@ -272,7 +271,6 @@ Index
 - **editors for Haskell** — [Other implementations](otherHs.md#ix-otherHs-editors-for-haskell)
 - **Electric Aunt Jemima** — see *Jemima, Electric Aunt*
 - **`elem`** — [Operators](opsTable.md#ix-opsTable-elem)
-- **emacs, Haskell mode for** — [Ch. 2](2.md#ix-2-emacs-haskell-mode-for)
 - **enumerated type** — [Ch. 4](4.md#ix-4-enumerated-type), [Ch. 5](5.md#ix-5-enumerated-type), [Glossary](glossary.md#ix-glossary-enumerated-type)
 - **equality** — [Ch. 3](3.md#ix-3-equality), [Ch. 13](13.md#ix-13-equality), [Ch. 17](17.md#ix-17-equality)
   - infinite lists — [Ch. 17](17.md#ix-17-equality-infinite-lists)
@@ -415,8 +413,9 @@ Index
   - expression evaluation — [Ch. 2](2.md#ix-2-ghci-expression-evaluation)
   - first session — [Ch. 2](2.md#ix-2-ghci-first-session)
   - help — [Ch. 2](2.md#ix-2-ghci-help)
-  - launch — [Ch. 2](2.md#ix-2-ghci-launch)
   - understanding error messages — [Ch. 3](3.md)
+- **GHCup** — [Ch. 2](2.md#ix-2-ghcup)
+  - first steps — [Ch. 2](2.md#ix-2-ghcup-first-steps)
 - **Glasgow Haskell Compiler** — see *GHC*
 - **graph** — [Ch. 16](16.md#ix-16-graph)
   - path in — [Ch. 16](16.md#ix-16-graph-path-in)
@@ -445,7 +444,6 @@ Index
   - and GHC Haskell — [Ch. 13](13.md#ix-13-haskell-2010-and-ghc-haskell)
   - classes diagram — [Ch. 13](13.md#ix-13-haskell-2010-classes-diagram)
 - **Haskell Platform** — [Ch. 1](1.md#ix-1-haskell-platform), [Ch. 6](6.md#ix-6-haskell-platform), [Other implementations](otherHs.md#ix-otherHs-haskell-platform)
-  - program group on Windows — [Ch. 2](2.md#ix-2-haskell-platform-program-group-on-windows)
 - **+Haskell Stores+** — [Ch. 6](6.md)
 - **haskell.org** — [Ch. 1](1.md#ix-1-haskell-org)
 - **Hayoo!** — [Ch. 6](6.md#ix-6-hayoo)
@@ -1022,6 +1020,7 @@ Index
   - free — [Ch. 9](9.md#ix-9-variable-free)
   - type — [Ch. 6](6.md#ix-6-variable-type)
 - **visibility of definitions** — [Ch. 15](15.md#ix-15-visibility-of-definitions)
+- **VS Code** — [Ch. 2](2.md#ix-2-vs-code)
 
 ### W
 

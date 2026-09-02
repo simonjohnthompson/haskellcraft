@@ -20,7 +20,7 @@
 # still shows up in root.log and in root.pdf simply not being produced/
 # updated.
 
-.PHONY: all clean
+.PHONY: all clean check
 
 all: root.pdf
 
@@ -30,6 +30,21 @@ root.pdf: $(wildcard *.tex) big.bib
 	-makeindex root
 	-pdflatex -interaction=nonstopmode root.tex
 	-pdflatex -interaction=nonstopmode root.tex
+
+# Fails if root.log contains a real LaTeX error (as opposed to the benign
+# exit-1-on-clean-run quirk above). Plain `grep`, without LC_ALL=C, can
+# silently match nothing on this log under some locales -- root.log is
+# pdflatex's own transcript, not always clean UTF-8 -- so force the C
+# locale here.
+check: root.pdf
+	@errs="$$(LC_ALL=C grep -an 'Undefined control sequence\|! LaTeX Error\|^!\|Missing \$$\|math environment\|Runaway argument' root.log)"; \
+	if [ -n "$$errs" ]; then \
+		echo "$$errs"; \
+		echo "LaTeX errors found in root.log (see above)."; \
+		exit 1; \
+	else \
+		echo "root.log is clean -- no LaTeX errors found."; \
+	fi
 
 clean:
 	rm -f *.aux *.bbl *.blg *.idx *.ilg *.ind *.log *.out *.toc

@@ -2,10 +2,12 @@
 %\begin{document}\input{defs0}\input{miradefs}
 
 
-\chapter{Getting started with Haskell and GHCi}
+\chapter{Getting started with Haskell programming}
 \label{getStart}
 \chapstart
 
+\medskip
+COME BACK TO INTRO
 
 Chapter \ref{intro} introduced the foundations of functional programming in Haskell. 
 We are now ready to use GHCi to do some practical programming, and we introduce it here.
@@ -13,8 +15,7 @@ We are now ready to use GHCi to do some practical programming, and we introduce 
 
 In beginning to program we will also learn the basics of the Haskell module 
 system, under which programs can be written in multiple, interdependent files, 
-and which can use the  
-`built-in' functions in the prelude and libraries. 
+and which can use the `built-in' functions in the prelude and libraries. 
 
 Our programming
 examples will concentrate on using the \texttt{Picture} example
@@ -41,7 +42,7 @@ result from typing something incorrect into GHCi.
 We begin the chapter by giving a first Haskell program or
 \textbf{script}\index{script}, which consists of the numerical examples from
 Chapter \ref{intro}. This is the file
-\texttt{FirstScript.hs}, shown in Figure \ref{FirstScript}. Haskell scripts  are stored in files with the \textbf{extension}\index{extension}
+\texttt{FirstScript.hs}, shown in Figure \ref{FirstScript}. Haskell scripts are stored in files with the \textbf{extension}\index{extension}
 `\texttt{.hs}'.\index{hs@\texttt{.hs}}
 
 
@@ -53,9 +54,8 @@ A \textbf{comment}\index{comment} in a script
 is a piece of information of value to a human reader rather than to a computer.
 It might contain an informal explanation of how a function works,
 how it should or should not be used, the overall design philosophy of a library and so on.
- Everything in a program file is
-interpreted as
-program text, {\em except\/} where it is explicitly indicated that it is a
+Everything in a program file is interpreted as
+program text, \emph{except} where it is explicitly indicated that it is a
 comment. 
 
 Comments are indicated in two ways. The symbol
@@ -71,25 +71,28 @@ called \textbf{nested comments}\index{comment!nested}.
 
 The Glasgow Haskell Compiler (GHC)\index{Glasgow Haskell Compiler|see{GHC}}\index{GHC} is an industrial-strength compiler for Haskell. \textbf{GHC interactive (GHCi)} is an interactive interpreter based on GHC, which supports program development by allowing programmers to evaluate Haskell expressions interactively as they develop programs.
 
-\begin{wrapfigure}[8]{l}{0pt}
-%\begin{figure}[h]
-\
-\includegraphics{Pictures/Platform.png}
-%\end{figure}
-\end{wrapfigure}
-\noindent
-GHC and GHCi are available stand alone, but they also come as part of the \textbf{Haskell Platform}\index{Haskell Platform}. In addition to GHC and GHCi, this contains a selection of standard libraries and tools for Haskell. Included in the tools is \texttt{cabal},\index{Cabal} a package for distributing Haskell code and libraries, and which we use for distributing the code for the book; we come back to  \texttt{cabal} in Chapter \ref{progLists}.
+The best, and easiest, way of working with Haskell is to install it on your own computer, and this you do using GHCup, \url{https://www.haskell.org/ghcup/}, as shown in Figure \ref{GHCup}.
+
+\begin{figure}[t] 
+\begin{center}
+\includegraphics[width=12cm]{Pictures/GHCup.png}
+\end{center} 
+\caption{The GHCup homepage}
+\label{GHCup}
+\end{figure}
+
+GHCup will install Haskell, as well as some other components and GHCi are available stand alone, but they also come as part of the \textbf{Haskell Platform}\index{Haskell Platform}. In addition to GHC and GHCi, this contains a selection of standard libraries and tools for Haskell. Included in the tools is \texttt{cabal},\index{Cabal} a package for distributing Haskell code and libraries, and which we use for distributing the code for the book; we come back to  \texttt{cabal} in Chapter \ref{progLists}.
 \index{downloading support materials} The platform also includes tools for interfacing with programs written in other languages, as well as \texttt{haddock} for documentation generation.
 
 \medskip
 \noindent
 The libraries included with the Haskell Platform give comprehensive support for practical programming in Haskell. The 
 home page for the platform is here:\index{Haskell Platform!homepage}
-\begin{center}\texttt{
+\begin{center}\url{
 http://hackage.haskell.org/platform/}
 \end{center}
 and full details of the libraries in the platform are found at\index{Haskell Platform!libraries in}
-\begin{center}\texttt{
+\begin{center}\url{
 http://hackage.haskell.org/platform/contents.html}
 \end{center}
 Further
@@ -128,11 +131,11 @@ Windows-style interface to the GHCi commands.
 
 On Mac OS X documentation for GHCi and other systems is found at
 \begin{center}\index{GHCi!documentation}
-\texttt{file:///usr/share/doc/ghc/html/index.html}
+\url{file:///usr/share/doc/ghc/html/index.html}
 \end{center} 
 Linux systems differ: for example, in Ubuntu 9.10 the path to the Haskell documentation is:
 \begin{center}\index{GHCi!documentation}
-\texttt{/usr/share/doc/ghc6-doc}
+\url{/usr/share/doc/ghc6-doc}
 \end{center} 
 Links to the documentation are found in the Haskell Platform program group\index{Haskell Platform!program group on Windows} on Windows systems.
 

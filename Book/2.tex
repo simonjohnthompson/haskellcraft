@@ -81,38 +81,18 @@ The best, and easiest, way of working with Haskell is to install it on your own 
 \label{GHCup}
 \end{figure}
 
-GHCup will install Haskell, as well as some other components and GHCi are available stand alone, but they also come as part of the \textbf{Haskell Platform}\index{Haskell Platform}. In addition to GHC and GHCi, this contains a selection of standard libraries and tools for Haskell. Included in the tools is \texttt{cabal},\index{Cabal} a package for distributing Haskell code and libraries, and which we use for distributing the code for the book; we come back to  \texttt{cabal} in Chapter \ref{progLists}.
-\index{downloading support materials} The platform also includes tools for interfacing with programs written in other languages, as well as \texttt{haddock} for documentation generation.
+GHCup will install Haskell, as well as some other components including \texttt{cabal},\index{Cabal} a package for distributing Haskell code and libraries, and one mechanism that we use for distributing the code for the book; we come back to \texttt{cabal} in Chapter \ref{progLists}.
+\index{downloading support materials} 
 
-\medskip
-\noindent
-The libraries included with the Haskell Platform give comprehensive support for practical programming in Haskell. The 
-home page for the platform is here:\index{Haskell Platform!homepage}
-\begin{center}\url{
-http://hackage.haskell.org/platform/}
-\end{center}
-and full details of the libraries in the platform are found at\index{Haskell Platform!libraries in}
-\begin{center}\url{
-http://hackage.haskell.org/platform/contents.html}
-\end{center}
-Further
-information about downloading and installing the Haskell Platform may be found in Appendix \ref{OtherHS}; we discuss how to find out more about the functions and libraries in the Haskell Platform in Chapter \ref{progLists}.
+Other ways of using Haskell -- such as using it online or in a browser -- can be found in Appendix \ref{OtherHS}; we discuss how to find out more about the functions and libraries in Haskell in Chapter \ref{progLists}. DOUBLE BACK TO THIS
 
 
 \begin{figure}[t] 
 \begin{center}
-\includegraphics[width=12cm]{Pictures/GHCi-MacOSX.png}
+\includegraphics[width=12cm]{Pictures/ghci-terminal.png}
 \end{center} 
-\caption{A GHCi session in Mac OS X}
-\label{GHCiSessionMac}
-\end{figure}
-
-\begin{figure}[t] 
-\begin{center}
-\includegraphics[width=12cm]{Pictures/WinGHCi-screenshot.png}
-\end{center} 
-\caption{A WinGHCi session in Windows XP}
-\label{WinGHCiSession}
+\caption{A GHCi terminal session}
+\label{GHCiSession}
 \end{figure}
 
 
@@ -120,11 +100,8 @@ information about downloading and installing the Haskell Platform may be found i
 
 
 In this text we describe the terminal-style interface to GHCi, illustrated in Figure
-\ref{GHCiSessionMac},
-because this is common to Windows, Mac OS X and Linux. Once they have understood
-how GHCi itself works, experienced
-PC users should have little difficulty in using the WinGHCi system, shown in Figure \ref{WinGHCiSession}, which gives a
-Windows-style interface to the GHCi commands.
+\ref{GHCiSession},
+because this is common to Windows, Mac OS X and Linux. 
 
 \subsection*{GHCi documentation}
 \index{GHCi!documentation}

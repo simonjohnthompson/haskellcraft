@@ -408,14 +408,11 @@ To use \texttt{PicturesSVG.hs}, open GHCi on this module like this:
 \begin{alltt}\minx{ghci}
 ghci PicturesSVG.hs
 \end{alltt}
-and in your web browser of choice\footnote{Both Firefox and Google Chrome work with SVG on all platforms; Safari on Mac OS X works apart from \texttt{invertColour}. Internet Explorer 8 doesn't support SVG, but IE9 is predicted to.} open the file \texttt{refresh.html} in the same directory.\index{SVG!display in browser}
-
-\noindent
-To show a picture in the browser, evaluate it using \texttt{render} as in 
+To show a picture in the browser, evaluate it using \texttt{render} as in \index{SVG!display in browser}
 \begin{alltt}
 render (horse `beside` (flipV horse))
 \end{alltt}
-This will give a browser display as shown in Figure \ref{svgpix}, page \pageref{svgpix}. The image in the browser will update automatically; if you would prefer to do this manually, use the file \texttt{showPic.html} instead.
+This will give a browser display as shown in Figure \ref{svgpix}, page \pageref{svgpix}. The image in the browser will update automatically when you call \texttt{render} on another picture; if you would prefer to do this manually, use the file \texttt{showPic.html} instead.
 
 \item
 To use the `ASCII art' version, run

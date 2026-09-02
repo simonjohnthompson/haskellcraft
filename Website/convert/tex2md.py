@@ -1854,6 +1854,82 @@ def escape_bare_underscores_in_texttt(text):
     return text
 
 
+def _split_top_level_items(body):
+    """Split the contents of a \\begin{exercises}/\\begin{exerciseone}
+    block into (label, content) pairs, one per \\item, where label is
+    None for a normal numbered exercise, or the (possibly empty) text of
+    an explicit \\item[label] override (root.tex Chapter 12's exercises
+    open with \\item[] of introductory prose that isn't itself a
+    numbered exercise -- LaTeX's \\item[...] form skips the counter step
+    that \\item alone triggers via \\theenumi, so it must not consume a
+    number here either).
+
+    Splits only on \\item at environment-nesting depth 0: several
+    chapters' exercises contain a nested itemize/titemize sub-list (its
+    own \\item's), which must not be mistaken for new exercises.
+    """
+    marks = []
+    depth = 0
+    for m in re.finditer(r"\\begin\{[a-zA-Z*]+\}|\\end\{[a-zA-Z*]+\}|\\item\b", body):
+        text = m.group()
+        if text.startswith(r"\begin"):
+            depth += 1
+        elif text.startswith(r"\end"):
+            depth -= 1
+        elif depth == 0:
+            marks.append(m)
+    if not marks:
+        return [(None, body)]
+    items = []
+    n = len(body)
+    for idx, m in enumerate(marks):
+        after = m.end()
+        label = None
+        if after < n and body[after] == "[":
+            close = body.find("]", after)
+            label = body[after + 1:close]
+            after = close + 1
+        end = marks[idx + 1].start() if idx + 1 < len(marks) else n
+        items.append((label, body[after:end]))
+    return items
+
+
+def number_exercises(tex, stem):
+    """Restore the book's cumulative-within-chapter exercise numbering
+    (Exercise N.M, the Mth exercise of chapter N -- root.tex:
+    \\newtheorem{exercise}{Exercise}[chapter], reset only at each
+    \\chapter, not at each \\begin{exercises} block) which the previous
+    plain \\begin{enumerate} conversion lost -- pandoc/CommonMark ordered
+    lists only support literal integers, and (more visibly) restart
+    from 1 at every \\begin{exercises}, of which a chapter can have
+    several. Instead of a list, render each exercise as its own
+    paragraph with a bold run-in number -- exactly how root.tex's
+    \\labelenumi (\\sffamily\\bfseries \\theenumi, no trailing period)
+    renders it in the real book.
+    """
+    if not stem.isdigit():
+        return tex
+    chapter_num = int(stem)
+    counter = [0]
+
+    def replace(m):
+        items = _split_top_level_items(m.group(2))
+        parts = []
+        for label, content in items:
+            content = content.strip()
+            if label is not None:
+                label = label.strip()
+                parts.append(f"\\textbf{{{label}}} {content}" if label else content)
+            else:
+                counter[0] += 1
+                parts.append(f"\\textbf{{{chapter_num}.{counter[0]}}} {content}")
+        return "\\textbf{Exercises}\n\n" + "\n\n".join(parts)
+
+    return re.sub(
+        r"\\begin\{(exercises|exerciseone)\}(.*?)\\end\{\1\}", replace, tex, flags=re.S
+    )
+
+
 def preprocess(tex, stem):
     # Must run before anything else touches \index{...} -- see
     # mark_first_index_occurrences's docstring (it has to see each
@@ -2198,8 +2274,7 @@ def preprocess(tex, stem):
     tex = re.sub(r"\\end\{titemize\}", r"\\end{itemize}", tex)
     tex = re.sub(r"\\begin\{summary\}", r"\\section*{Summary}", tex)
     tex = re.sub(r"\\end\{summary\}", r"", tex)
-    tex = re.sub(r"\\begin\{(?:exercises|exerciseone)\}", r"\\textbf{Exercises}\n\\begin{enumerate}", tex)
-    tex = re.sub(r"\\end\{(?:exercises|exerciseone)\}", r"\\end{enumerate}", tex)
+    tex = number_exercises(tex, stem)
 
     # \begin{wrapfigure}[lines]{placement}{width} ... \end{wrapfigure}: the
     # real wrapfig package (root.tex \usepackage{wrapfig}), for a figure

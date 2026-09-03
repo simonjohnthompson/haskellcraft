@@ -33,8 +33,6 @@ References
 
 <a id="Hackage"></a>Hackage, “The HackageDB”, 2010. Available at <http://hackage.haskell.org/>.
 
-<a id="HaskellPlatform"></a>Haskell Platform, “The Haskell Platform”, 2010. Available at <http://hackage.haskell.org/platform/>.
-
 <a id="gentle98"></a>Paul Hudak, Joseph H. Fasel, and John Peterson, “A gentle introduction to Haskell”, 2000.
 
 <a id="HuthAndRyan"></a>Michael Huth and Mark Ryan, *Logic in Computer Science: modelling and reasoning about systems (second edition)*, Cambridge University Press, 2004.

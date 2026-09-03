@@ -239,7 +239,7 @@ inspiration to designers of a number of functional languages.
 The best place to find out about everything to do with Haskell -- including the language definition itself, implementations, libraries, resources, mailing lists, news and Haskell jobs -- is the \texttt{haskell.org} website:
 \begin{center}
 \index{Web site!for Haskell}\index{haskell.org}
-\texttt{http://www.haskell.org/}
+\url{https://www.haskell.org/}
 \end{center}
 There are various implementations of Haskell; in this 
 text we shall use \textbf{GHCi}\index{GHCi} \citeyear{GHCi}. `GHCi' is an abbreviation for `Glasgow Haskell Compiler interactive': work on the compiler was started when Simon Peyton Jones and Simon Marlow were at Glasgow University; they are now both at Microsoft  Research in Cambridge.
@@ -255,15 +255,14 @@ different implementations of Haskell can be found in Appendix
 \ref{OtherHS}, and a full description of all of them is available at the \texttt{haskell.org} page.
 
 
-GHCi comes as a part of the \textbf{Haskell Platform} \cite{HaskellPlatform},\index{Haskell Platform} a standard distribution of the compiler and a selection of commonly-used libraries. Other libraries are available from an extensive online database, \textbf{HackageDB}\index{HackageDB} \cite{Hackage}. The \textbf{Cabal}\index{Cabal} \cite{Cabal} packaging and distribution infrastructure, which comes as part of the Haskell Platform, makes it easy to download and install these libraries. We describe how to work with the interactive version of GHC in the next chapter, and  how to use Hackage and Cabal in Chapter \ref{progLists}.
+GHCi is installed, together with the \textbf{Cabal}\index{Cabal} \cite{Cabal} build tool, using \textbf{GHCup}\index{GHCup}, \url{https://www.haskell.org/ghcup/}, the toolchain installer that \texttt{haskell.org} itself recommends; we describe how to install it in Chapter \ref{getStart}. Libraries beyond those that come with GHC are available from an extensive online database, \textbf{HackageDB}\index{HackageDB} \cite{Hackage}, and Cabal makes it easy to download and install them: we describe how to work with the interactive version of GHC in the next chapter, and how to use Hackage and Cabal in Chapter \ref{progLists}.
 
 All the programs and examples used in the text can be downloaded as the \texttt{Craft3e} package from Cabal and from the website for this book,
 \begin{center}
-\texttt{\label{bookWeb}
-http://www.haskellcraft.com/
-}
+\label{bookWeb}
+\url{http://www.haskellcraft.com/}
 \end{center}\minx{www.haskellcraft.com}\index{website}
-This site also pulls together a collection of resources, further reading and other background materials for this text. The site will also keep track of how the book can be used with later versions of the Haskell Platform.
+This site also pulls together a collection of resources, further reading and other background materials for this text.
 
 \section{Expressions and evaluation}
 \label{exprEval}

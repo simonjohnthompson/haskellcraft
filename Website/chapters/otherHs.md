@@ -5,7 +5,7 @@ Haskell practicalities {#OtherHS}
 
 <a id="ix-otherHs-haskell-platform"></a>
 
-[Getting started with Haskell programming](2.md#getStart) covered the recommended way to get going with Haskell: installing GHC, `cabal` and the Haskell Language Server using GHCup, and then obtaining the code for this book from either Hackage or GitHub. This appendix covers the alternatives: other ways to install Haskell locally, and -- often more useful for a reader who just wants to try something out first -- several ways of running Haskell *without* installing anything at all.
+[Getting started with Haskell programming](2.md#getStart) covered the recommended way to get going with Haskell: installing GHC, `cabal` and the Haskell Language Server using GHCup, and then obtaining the code for this book from either Hackage or GitHub. This appendix[^1] covers the alternatives: other ways to install Haskell locally, and -- often more useful for a reader who just wants to try something out first -- several ways of running Haskell *without* installing anything at all.
 
 ### Installing Haskell locally {#installing-haskell-locally .unnumbered}
 
@@ -57,8 +57,6 @@ An overview of the main commands of GHCi can be found in [Principal GHCi command
 
 <a id="ix-otherHs-editors-for-haskell"></a>
 
-As discussed in [Getting started with Haskell programming](2.md#getStart), Visual Studio Code together with the Haskell Language Server (HLS) is a good default choice: it is free, cross-platform, and provides type checking, refactoring and other IDE features once the `haskell.haskell` extension is installed. Several other editors have long-standing Haskell support, and remain popular with readers who prefer a terminal-based workflow: emacs, via its Haskell mode, <https://github.com/haskell/haskell-mode>; and vim, via <https://github.com/neovimhaskell/haskell-vim>. An overview of editor support more generally can be found at
+As discussed in [Getting started with Haskell programming](2.md#getStart), Visual Studio Code together with the Haskell Language Server (HLS) is a good default choice: it is free, cross-platform, and provides type checking, refactoring and other IDE features once the `haskell.haskell` extension is installed. Several other editors have long-standing Haskell support, and remain popular with readers who prefer a terminal-based workflow: emacs, via its Haskell mode, <https://github.com/haskell/haskell-mode>; and vim, via <https://github.com/neovimhaskell/haskell-vim>. An overview of editor support more generally can be found at <https://wiki.haskell.org/Editors>.
 
-```haskell
-https://wiki.haskell.org/Editors
-```
+[^1]: This appendix was drafted with assistance from Claude Code v2.1.236 (Claude Sonnet 5), Anthropic, 2026.

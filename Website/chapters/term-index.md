@@ -404,7 +404,6 @@ Index
   - languages within — [Ch. 19](19.md#ix-19-ghc-languages-within)
   - performance measurement — [Ch. 20](20.md#ix-20-ghc-performance-measurement)
 - **GHCi** — [Ch. 1](1.md#ix-1-ghci), [Ch. 2](2.md#ix-2-ghci)
-  - a GHCi session — [Ch. 2](2.md#ix-2-ghci-a-ghci-session)
   - commands — [Ch. 2](2.md#ix-2-ghci-commands)
     - shortened form — [Ch. 2](2.md#ix-2-ghci-commands-shortened-form)
   - documentation — [Ch. 2](2.md#ix-2-ghci-documentation), [Ch. 6](6.md#ix-6-ghci-documentation), [Other implementations](otherHs.md#ix-otherHs-ghci-documentation)
@@ -413,6 +412,7 @@ Index
   - expression evaluation — [Ch. 2](2.md#ix-2-ghci-expression-evaluation)
   - first session — [Ch. 2](2.md#ix-2-ghci-first-session)
   - help — [Ch. 2](2.md#ix-2-ghci-help)
+  - modules in — [Ch. 2](2.md#ix-2-ghci-modules-in)
   - understanding error messages — [Ch. 3](3.md)
 - **GHCup** — [Ch. 2](2.md#ix-2-ghcup)
   - first steps — [Ch. 2](2.md#ix-2-ghcup-first-steps)
@@ -431,6 +431,7 @@ Index
 
 ### H
 
+- **Hackage** — [Ch. 2](2.md#ix-2-hackage)
 - **HackageDB** — [Ch. 1](1.md#ix-1-hackagedb), [Ch. 6](6.md#ix-6-hackagedb)
 - **Haddock** — [Ch. 6](6.md#ix-6-haddock)
 - **Hamming numbers** — [Ch. 17](17.md#ix-17-hamming-numbers)
@@ -443,6 +444,7 @@ Index
 - **Haskell 2010** — [Ch. 6](6.md#ix-6-haskell-2010), [Ch. 21](21.md#ix-21-haskell-2010)
   - and GHC Haskell — [Ch. 13](13.md#ix-13-haskell-2010-and-ghc-haskell)
   - classes diagram — [Ch. 13](13.md#ix-13-haskell-2010-classes-diagram)
+- **Haskell Language Server** — [Ch. 2](2.md#ix-2-haskell-language-server)
 - **Haskell Platform** — [Ch. 1](1.md#ix-1-haskell-platform), [Ch. 6](6.md#ix-6-haskell-platform), [Other implementations](otherHs.md#ix-otherHs-haskell-platform)
 - **+Haskell Stores+** — [Ch. 6](6.md)
 - **haskell.org** — [Ch. 1](1.md#ix-1-haskell-org)
@@ -452,6 +454,7 @@ Index
   - graphics — [Ch. 12](12.md#ix-12-higher-order-function-graphics)
   - proofs — [Ch. 11](11.md#ix-11-higher-order-function-proofs)
   - QuickCheck — [Ch. 11](11.md#ix-11-higher-order-function-quickcheck)
+- **HLS** — [Ch. 2](2.md#ix-2-hls)
 - **Hoogle** — [Ch. 6](6.md#ix-6-hoogle)
 - **.hs** — [Ch. 2](2.md#ix-2-hs)
 - **Huffman codes** — [Ch. 15](15.md#ix-15-huffman-codes), [Ch. 20](20.md#ix-20-huffman-codes)
@@ -1020,7 +1023,6 @@ Index
   - free — [Ch. 9](9.md#ix-9-variable-free)
   - type — [Ch. 6](6.md#ix-6-variable-type)
 - **visibility of definitions** — [Ch. 15](15.md#ix-15-visibility-of-definitions)
-- **VS Code** — [Ch. 2](2.md#ix-2-vs-code)
 
 ### W
 

@@ -3,8 +3,6 @@ Haskell practicalities {#OtherHS}
 
 <a id="ix-otherHs-haskell-implementations"></a>
 
-<a id="ix-otherHs-haskell-platform"></a>
-
 [Getting started with Haskell programming](2.md#getStart) covered the recommended way to get going with Haskell: installing GHC, `cabal` and the Haskell Language Server using GHCup, and then obtaining the code for this book from either Hackage or GitHub. This appendix[^1] covers the alternatives: other ways to install Haskell locally, and -- often more useful for a reader who just wants to try something out first -- several ways of running Haskell *without* installing anything at all.
 
 ### Installing Haskell locally {#installing-haskell-locally .unnumbered}

@@ -448,7 +448,7 @@ Index
   - and GHC Haskell — [Ch. 13](13.md#ix-13-haskell-2010-and-ghc-haskell)
   - classes diagram — [Ch. 13](13.md#ix-13-haskell-2010-classes-diagram)
 - **Haskell Language Server** — [Ch. 2](2.md#ix-2-haskell-language-server)
-- **Haskell Platform** — [Ch. 1](1.md#ix-1-haskell-platform), [Other implementations](otherHs.md#ix-otherHs-haskell-platform)
+- **Haskell Platform** — [Ch. 1](1.md#ix-1-haskell-platform)
 - **+Haskell Stores+** — [Ch. 6](6.md)
 - **haskell.org** — [Ch. 1](1.md#ix-1-haskell-org)
 - **higher-order function** — [Ch. 10](10.md#ix-10-higher-order-function), [Ch. 11](11.md#ix-11-higher-order-function), [Appendix](appendix1.md#ix-appendix1-higher-order-function), [Glossary](glossary.md#ix-glossary-higher-order-function)

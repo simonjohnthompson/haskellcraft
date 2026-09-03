@@ -7,22 +7,19 @@
 \chapstart
 
 \medskip
-COME BACK TO INTRO
-
-Chapter \ref{intro} introduced the foundations of functional programming in Haskell. 
+hapter \ref{intro} introduced the foundations of functional programming in Haskell. 
 We are now ready to use GHCi to do some practical programming, and we introduce it here.
-
 
 In beginning to program we will also learn the basics of the Haskell module 
 system, under which programs can be written in multiple, interdependent files, 
 and which can use the `built-in' functions in the prelude and libraries. 
-
 Our programming
 examples will concentrate on using the \texttt{Picture} example
 introduced in Chapter \ref{intro} as well as some simple numerical
 examples. 
+
 In support of this we will look at how to get hold of the programs and
-other background materials for the book, as well as how to obtain and install GHCi as a part of the Haskell Platform.
+other background materials for the book from Hackage using Cabal, as well as how to obtain and install GHCi using GHCup. We will explore how to develop single-module programs using \texttt{ghci} as well as using \texttt{cabal repl} for more complex, multiple module projects.
 
 We conclude by briefly surveying the kinds of error message that can
 result from typing something incorrect into GHCi. 
@@ -69,7 +66,7 @@ called \textbf{nested comments}\index{comment!nested}.
 \section{Using Haskell in practice}
 \index{GHCi|(}
 
-The Glasgow Haskell Compiler (GHC)\index{Glasgow Haskell Compiler|see{GHC}}\index{GHC} is an industrial-strength compiler for Haskell. \textbf{GHC interactive (GHCi)} is an interactive interpreter based on GHC, which supports program development by allowing programmers to evaluate Haskell expressions interactively as they develop programs.
+The Glasgow Haskell Compiler (GHC)\index{Glasgow Haskell Compiler|see{GHC}}\index{GHC} is an industrial-strength compiler for Haskell. \textbf{GHC interactive (GHCi)} is an interactive interpreter based on GHC, which provides programmers with a Haskell \textbf{repl}, which successively \emph{reads} an expression, \emph{evaluates} it, \emph{prints} the result, and finally \emph{loops} back to the start. This is a great way to start programming, as it allows you to try out your ideas and experiment with definitions in the process of developing a program.
 
 If you're learning Haskell in high school or college, or at work, your teachers or colleagues will have made sure it is available on the that computers you use. If you want to install it for yourself on a machine that you control, the best, and easiest, way of working doing that is to use GHCup, \url{https://www.haskell.org/ghcup/}.
 
@@ -83,18 +80,16 @@ If you're learning Haskell in high school or college, or at work, your teachers 
 
 GHCup\index{GHCup} will install GHC, as well as some other components including \texttt{cabal},\index{Cabal} which is a package for distributing Haskell code and libraries, and one of the ways that you can access the code for the book;\index{downloading support materials}. If asked to select what to download, include \texttt{cabal}, and if you want to use Haskell within an IDE like VS Code, include the Haskell Language Server (HLS)\index{Haskell Language Server}\index{HLS} too. Also, you should follow the GCHup default of installing the \emph{recommended} versions of these programs.
 
-
-
-Why should HLS be included? Development today is usually inside an Integrated Develop-
-ment Environment, or IDE, such as Visual Studio Code (VS Code). IDEs combines
+Why should you consider using HLS? Development today is usually inside an Integrated Development Environment, or IDE, such as Visual Studio Code (VS Code). IDEs combines
 editing with processing and running programs, as well as interacting with reposito-
 ries, such as github, refactoring and other kinds of software tooling. To use Haskell most effectively within an IDE you will need to use the Haskell Language Server (HLS), which provides a rich enhancement of the editing functions of the IDE including type checking, refactoring,  integration with repositories and other support for software development.
 
-We will come back to \texttt{cabal} and HLS when we discuss multi-file projects BELOW. ADD.
-We come back to \texttt{cabal} in Chapter \ref{progLists}. CHECK THIS
+We will come back to \texttt{cabal} and HLS when we discuss multi-file projects in Section \ref{multipleModuleProgs} and again when we discuss how to find out more about the functions and libraries in Haskell in Chapter \ref{progLists}.
+
+
 
  
-Other ways of using Haskell -- such as using it online or in a browser -- can be found in Appendix \ref{OtherHS}; we discuss how to find out more about the functions and libraries in Haskell in Chapter \ref{progLists}. DOUBLE BACK TO THIS
+Other ways of using Haskell -- such as using it online or in a browser -- can be found in Appendix \ref{OtherHS}.
 
 
 \begin{figure}[t] 
@@ -156,7 +151,7 @@ Section \ref{introModules} below.\minx{ghci>}
 As can be seen from the examples, we can evaluate expressions which use
 the definitions in the current script. In this case it is \texttt{Chapter2.hs}.
 
-One of the advantages of the GHCi interface is that it is easy to
+One of the advantages of the GHCi repl interface is that it is easy to
 experiment with functions, trying different evaluations simply by typing
 the expressions at the keyboard. If we want to evaluate a complex
 expression, we could add it to the program, as in this 
@@ -326,10 +321,7 @@ the language.
 As well as the standard libraries, there is a wealth of 
 contributed libraries that support property-based testing, concurrency, functional animations and so forth; we will introduce the libraries that we need as we go along.
 These libraries are available on \emph{Hackage},\index{Hackage} \url{https://hackage.haskell.org}, the main online package repository for Haskell, using the Cabal installation system.  
-We will say more about this once we have introduced Haskell
-modules, which we do now.
-
-ADD CROSS REF Chapter \ref{progLists} for details????
+We will say something more about Cabal in Section \ref{multipleModuleProgs} and give an overview of more Haskell modules and libraries in Chapter \ref{progLists}.
 
 \section{Modules}
 \label{introModules}
@@ -339,7 +331,7 @@ ADD CROSS REF Chapter \ref{progLists} for details????
 \begin{center}
 \includegraphics[width=4in]{Pictures/GHCiLibPrel.pdf}
 \end{center} \index{GHCi!modules in}
-\caption{GHCi, Prelude and other modules}
+\caption{GHCi, the Prelude and other modules}
 \label{GHCiPreludeModules}
 \end{figure}
  
@@ -393,10 +385,51 @@ from the standard libraries, which are found in the same directory as the
 standard prelude\index{standard libraries!location of}. The user interacts with GHCi, providing
 expressions to evaluate and other commands and receiving the results of
 the evaluations.
+\index{modules!introduction|)}
 
+In the next section we look at how to work with multiple-module projects in GHCi, including the code for this text.
+
+\section{Working with multiple-module projects}
+\label{multipleModuleProgs}
+\index{modules!multiple-module projects}
+
+As we saw in the previous section, Haskell projects can be built from multiple modules, using the import and export mechanism. In this section we look at how projects can be downloaded and used; in particular how we can make sure that we're able to resolve all the dependencies of a particular project. We will see this in action with the Haskell package for this book, \texttt{Craft3e}.\index{Hackage!\texttt{Craft3e}}
+
+Haskell projects, most of which consist of multiple modules, can be found on the Haskell Package Manager site, Hackage\index{Hackage}, and downloaded using Cabal\index{Cabal}. These projects themselves can depend on other packages, and this dependency and other \emph{project metadata} is contained in a \texttt{.cabal} file in the home directory of the package. The \texttt{.cabal} file summarises this information in a machine-readable format, allowing GHC to load all the dependencies of the project.
+
+\subsection*{Working with \texttt{Craft3e}}
+
+The code for this text is available on Hackage at 
+\begin{center}
+\url{https://hackage.haskell.org/package/Craft3e}
+\end{center}
+To download this to your machine type \texttt{cabal unpack Craft3e}. This will install the code for the book in a folder under \texttt{.cabal} in your home directory: the folder will be named \texttt{Craft3e-<version>}, where \texttt{<version>} is replaced by the current version number, \texttt{0.2.0.4} at the time of writing (2026-09-03).
+
+Alternatively, if you are familiar with git and github, you can obtain the code from the github repository 
+\begin{center}
+\url{https://github.com/simonjohnthompson/haskellcraft}
+\end{center}
+by cloning the repository. As well as the code, this repository contains the source code for the book itself, and other miscellaneous material.
+
+Whichever way you obtain the project, to work with the project, first change directory into the direcory \texttt{Craft3e} (if you cloned the project from github) or \texttt{Craft3e-<version>} if you used \texttt{cabal unpack}. In either case you can then first run
+\begin{alltt}
+cabal build  
+\end{alltt} 
+which will install all the code that the book dependeds on; you just need to do this once, after obtaining the \texttt{Craft3e} project. Then to interact with the code in the project type
+\begin{alltt}
+cabal repl  
+\end{alltt} 
+This gives you a \texttt{ghci} prompt, but to GHC with all the dependencies available. You can work with ghci in the usual way.  The first time that you run \texttt{cabal repl} after obtaining the project may take time to complete, as the system installs dependencies: don't worry, this won't be a problem the next time you use it. 
+
+Any new modules, such as \texttt{MyNewModule.hs} that you create \emph{within or below the Craft3e directory} will also have these dependencies available. These can be loaded with \texttt{:l MyNewModule}, and reloaded with \texttt{:r}, in the usual way.
+
+If you choose to use an IDE such as VS Code your should open the Craft3e folder using the \textbf{Open Folder} command in the \textbf{File} menu. This will ensure that dependencies are visible, and the built-in terminal will be opened in the same directory. You can then use the Cabal commands just as they are described above.  VS Code is enhanced with HLS using the \texttt{haskell.haskell} extension, which is documented and downloadable from here:
+\begin{center}
+  \url{https://marketplace.visualstudio.com/items?itemName=haskell.haskell}
+\end{center}
 The next section revisits the picture example of Chapter
 \ref{intro}, which is used to give a practical illustration of modules.
-\index{modules!introduction|)}
+
 
 \begin{figure}[p]
 \begin{alltt}\minx{Picture}

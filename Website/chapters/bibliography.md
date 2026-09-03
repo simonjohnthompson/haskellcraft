@@ -47,7 +47,7 @@ References
 
 <a id="advancedFP2"></a>John Launchbury, Erik Meijer, and Tim Sheard (eds.), *Advanced Functional Programming*, Springer-Verlag, Lecture Notes in Computer Science, 1129, 1996.
 
-<a id="learnYou"></a>Miran Lipovača, “Learn You a Haskell for Great Good!”, 2010. Available from <http://learnyouahaskell.com/>.
+<a id="learnYou"></a>Miran Lipovača, “Learn You a Haskell for Great Good!”, 2010. Available from <https://learnyouahaskell.github.io/>.
 
 <a id="haskell2010"></a>Simon Marlow (ed.), *Haskell 2010 Language Report*, 2010. <http://www.haskell.org/definition/haskell2010.pdf>.
 

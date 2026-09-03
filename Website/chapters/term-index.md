@@ -432,6 +432,7 @@ Index
 ### H
 
 - **Hackage** — [Ch. 2](2.md#ix-2-hackage)
+  - Craft3e — [Ch. 2](2.md#ix-2-hackage-craft3e)
 - **HackageDB** — [Ch. 1](1.md#ix-1-hackagedb), [Ch. 6](6.md#ix-6-hackagedb)
 - **Haddock** — [Ch. 6](6.md#ix-6-haddock)
 - **Hamming numbers** — [Ch. 17](17.md#ix-17-hamming-numbers)
@@ -602,6 +603,7 @@ Index
   - interface documentation — [Ch. 15](15.md#ix-15-modules-interface-documentation)
   - introduction — [Ch. 2](2.md#ix-2-modules-introduction)
   - local name on import — [Ch. 15](15.md#ix-15-modules-local-name-on-import)
+  - multiple-module projects — [Ch. 2](2.md#ix-2-modules-multiple-module-projects)
   - structure diagram — [Ch. 15](15.md#ix-15-modules-structure-diagram)
 - **monad** — [Ch. 18](18.md#ix-18-monad), [Appendix](appendix1.md#ix-appendix1-monad), [Glossary](glossary.md#ix-glossary-monad)
   - advantages of monads — [Ch. 18](18.md#ix-18-monad-advantages-of-monads)

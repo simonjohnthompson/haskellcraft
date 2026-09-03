@@ -364,10 +364,7 @@ module Foreign.Ptr
 Combined with Cabal\index{Cabal}, this gives a straightforward way to download and maintain sets of Haskell libraries. Cabal has facilities for package developers and maintainers too, but we confine ourselves to user-facing features here.
 
 \medskip
-\textbf{Packages} have a globally unique \textbf{package name} and a \textbf{version number}, such as \texttt{mypackage-1.4.2}. Each package will \textbf{expose} some of the Haskell modules it contains. Crucially, the package will state which other packages it depends on, typically in as general as possible a way: a dependency such as \texttt{base >=4.14 \&\& <5} lets the package use any version of \texttt{base} in that range. Further details of how packages are described is available at the Hackage website,
-\begin{alltt}
-https://hackage.haskell.org/
-\end{alltt}
+\textbf{Packages} have a globally unique \textbf{package name} and a \textbf{version number}, such as \texttt{mypackage-1.4.2}. Each package will \textbf{expose} some of the Haskell modules it contains. Crucially, the package will state which other packages it depends on, typically in as general as possible a way: a dependency such as \texttt{base >=4.14 \&\& <5} lets the package use any version of \texttt{base} in that range. Further details of how packages are described is available at the Hackage website, \url{https://hackage.haskell.org/}.
 A typical package description page on Hackage is shown in Figure \ref{HackagePic}.
 }
 \end{figure}
@@ -393,10 +390,7 @@ For working with packages more generally these further commands are useful.
 \item{\mbox{\texttt{ghc-pkg list}}}\minx{ghc-pkg}
 \\List all the packages currently visible to GHC.
 \end{description}
-Full documentation for Cabal is available at
-\begin{alltt}
-https://cabal.readthedocs.io/
-\end{alltt}
+Full documentation for Cabal is available at \url{https://cabal.readthedocs.io/}.
 }
 \end{figure}
 
@@ -492,22 +486,11 @@ Once GHC is installed via GHCup\index{GHCup}, documentation for the compiler and
 \item[Libraries]\index{documentation!libraries}
 Haddock documentation for the libraries that ship with GHC -- \texttt{base}, \texttt{containers}, \texttt{bytestring} and so on -- is hosted on Hackage alongside everything else; see \textbf{Hackage}, below.
 \item[Prelude]\index{documentation!prelude}
-In particular, documentation for the \texttt{Prelude}, including descriptions of and examples for many of the functions, is part of the documentation for the \texttt{base} package, and is available directly at
-\begin{alltt}
-https://hackage.haskell.org/package/base/docs/Prelude.html
-\end{alltt}
-which always points to the documentation for whichever version of \texttt{base} ships with the current release of GHC.
+In particular, documentation for the \texttt{Prelude}, including descriptions of and examples for many of the functions, is part of the documentation for the \texttt{base} package, and is available directly at \url{https://hackage.haskell.org/package/base/docs/Prelude.html}, which always points to the documentation for whichever version of \texttt{base} ships with the current release of GHC.
 \item[Hackage]\index{documentation!Hackage}
-Haddock documentation is available for the great majority of packages on Hackage. This is accessible from
-\begin{alltt}
-https://hackage.haskell.org/package/
-\end{alltt}
-which is listed by category, but also searchable. A typical package page is shown in Figure \ref{HackagePic}: documentation for the modules making up the package is linked from the list of modules below the \textbf{Modules} header, towards the bottom of the page; an example is shown in Figure \ref{Haddock}.
+Haddock documentation is available for the great majority of packages on Hackage. This is accessible from \url{https://hackage.haskell.org/package/}, which is listed by category, but also searchable. A typical package page is shown in Figure \ref{HackagePic}: documentation for the modules making up the package is linked from the list of modules below the \textbf{Modules} header, towards the bottom of the page; an example is shown in Figure \ref{Haddock}.
 \item[Hoogle search]\label{hoogle}\index{documentation!Hoogle}\index{Hoogle}
-Hoogle allows you to search many of the standard and Hackage libraries: what is cool about Hoogle is that you can \textbf{search by type} as well as by name. Narrowing down a search by type can lead you very quickly to your answer, or at least eliminate a lot of ``noise'' in a search.
-\begin{alltt}
-https://hoogle.haskell.org/
-\end{alltt}
+Hoogle allows you to search many of the standard and Hackage libraries: what is cool about Hoogle is that you can \textbf{search by type} as well as by name. Narrowing down a search by type can lead you very quickly to your answer, or at least eliminate a lot of ``noise'' in a search: \url{https://hoogle.haskell.org/}.
 See Figure \ref{Hoogle} for example results. Be aware, though, that Hoogle doesn't cover every package on Hackage. A general web search -- even using a type signature as the search text -- is also often surprisingly effective.
 \item[GHCi]\index{documentation!GHCi}\index{GHCi!documentation}
 Once you have asked to \texttt{import} a module (\texttt{Foo}, say) into GHCi you can then find out the types of all its exported functions using the GHCi command

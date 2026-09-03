@@ -22,13 +22,12 @@ docker run -it haskell:9.6 ghci
 This gives a disposable GHC, \texttt{cabal} and Stack installation inside a container, with no risk of it clashing with anything else already on the machine.
 
 \subsection*{Running Haskell with nothing installed}
-\index{Codespaces}\index{Gitpod}
+\index{Codespaces}
 
-For a reader who wants to try the book's actual code -- including its multi-module structure and dependencies such as \texttt{QuickCheck} -- without installing anything, the best option is a cloud development environment. This book's GitHub repository includes a \emph{dev container} configuration which builds a ready-to-use GHC, \texttt{cabal} and HLS environment with the code for the book already built. It can be used in a few ways:
+For a reader who wants to try the book's actual code -- including its multi-module structure and dependencies such as \texttt{QuickCheck} -- without installing anything, the best option is a cloud development environment. This book's GitHub repository includes a \emph{dev container} configuration which builds a ready-to-use GHC, \texttt{cabal} and HLS environment with the code for the book already built. It can be used in a couple of ways:
 \begin{itemize}
 \item \textbf{GitHub Codespaces}\index{Codespaces}: on the repository's GitHub page, \url{https://github.com/simonjohnthompson/haskellcraft}, click \textbf{Code}, then the \textbf{Codespaces} tab, then \textbf{Create codespace on main}. This opens a full, browser-based copy of VS Code, already connected to a virtual machine with Haskell installed; GitHub gives every personal account a free monthly quota of Codespaces hours.
-\item \textbf{Gitpod}\index{Gitpod} reads the same configuration file, and can be used by visiting \url{https://gitpod.io/#https://github.com/simonjohnthompson/haskellcraft}.
-\item With Docker and VS Code's \textbf{Dev Containers} extension installed locally, opening a clone of the repository and choosing \textbf{Reopen in Container} uses the same configuration, without needing either service above.
+\item With Docker and VS Code's \textbf{Dev Containers} extension installed locally, opening a clone of the repository and choosing \textbf{Reopen in Container} uses the same configuration, without needing a cloud service at all.
 \end{itemize}
 In each case, once the container has finished building -- the first time takes a few minutes, so watch for the ``Running postCreateCommand'' notification to complete -- opening a terminal and typing \texttt{cabal repl} gives a working \texttt{ghci} prompt with all of the book's code and dependencies available, exactly as described in Section \ref{multipleModuleProgs}; opening a \texttt{.hs} file gives the usual IDE features through HLS.
 

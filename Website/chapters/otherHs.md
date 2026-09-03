@@ -23,15 +23,11 @@ This gives a disposable GHC, `cabal` and Stack installation inside a container, 
 
 <a id="ix-otherHs-codespaces"></a>
 
-<a id="ix-otherHs-gitpod"></a>
-
-For a reader who wants to try the book's actual code -- including its multi-module structure and dependencies such as `QuickCheck` -- without installing anything, the best option is a cloud development environment. This book's GitHub repository includes a *dev container* configuration which builds a ready-to-use GHC, `cabal` and HLS environment with the code for the book already built. It can be used in a few ways:
+For a reader who wants to try the book's actual code -- including its multi-module structure and dependencies such as `QuickCheck` -- without installing anything, the best option is a cloud development environment. This book's GitHub repository includes a *dev container* configuration which builds a ready-to-use GHC, `cabal` and HLS environment with the code for the book already built. It can be used in a couple of ways:
 
 -   **GitHub Codespaces**: on the repository's GitHub page, <https://github.com/simonjohnthompson/haskellcraft>, click **Code**, then the **Codespaces** tab, then **Create codespace on main**. This opens a full, browser-based copy of VS Code, already connected to a virtual machine with Haskell installed; GitHub gives every personal account a free monthly quota of Codespaces hours.
 
--   **Gitpod** reads the same configuration file, and can be used by visiting <https://gitpod.io/#https://github.com/simonjohnthompson/haskellcraft>.
-
--   With Docker and VS Code's **Dev Containers** extension installed locally, opening a clone of the repository and choosing **Reopen in Container** uses the same configuration, without needing either service above.
+-   With Docker and VS Code's **Dev Containers** extension installed locally, opening a clone of the repository and choosing **Reopen in Container** uses the same configuration, without needing a cloud service at all.
 
 In each case, once the container has finished building -- the first time takes a few minutes, so watch for the "Running postCreateCommand" notification to complete -- opening a terminal and typing `cabal repl` gives a working `ghci` prompt with all of the book's code and dependencies available, exactly as described in [Working with multiple-module projects](2.md#multipleModuleProgs); opening a `.hs` file gives the usual IDE features through HLS.
 

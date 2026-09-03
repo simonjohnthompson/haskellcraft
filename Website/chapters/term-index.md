@@ -417,7 +417,6 @@ Index
   - understanding error messages — [Ch. 3](3.md)
 - **GHCup** — [Ch. 1](1.md#ix-1-ghcup), [Ch. 2](2.md#ix-2-ghcup), [Ch. 6](6.md#ix-6-ghcup), [Other implementations](otherHs.md#ix-otherHs-ghcup)
   - first steps — [Ch. 2](2.md#ix-2-ghcup-first-steps)
-- **Gitpod** — [Other implementations](otherHs.md#ix-otherHs-gitpod)
 - **Glasgow Haskell Compiler** — see *GHC*
 - **graph** — [Ch. 16](16.md#ix-16-graph)
   - path in — [Ch. 16](16.md#ix-16-graph-path-in)

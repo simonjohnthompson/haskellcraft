@@ -1,0 +1,31 @@
+name: Build book PDF
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "Book/**"
+      - ".github/workflows/build-book-pdf.yml"
+  pull_request:
+    paths:
+      - "Book/**"
+      - ".github/workflows/build-book-pdf.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: texlive/texlive:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build PDF and check for LaTeX errors/warnings
+        working-directory: Book
+        run: make check
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: root.pdf
+          path: Book/root.pdf

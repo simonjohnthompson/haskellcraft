@@ -32,18 +32,33 @@ root.pdf: $(wildcard *.tex) big.bib
 	-pdflatex -interaction=nonstopmode root.tex
 
 # Fails if root.log contains a real LaTeX error (as opposed to the benign
-# exit-1-on-clean-run quirk above). Plain `grep`, without LC_ALL=C, can
-# silently match nothing on this log under some locales -- root.log is
-# pdflatex's own transcript, not always clean UTF-8 -- so force the C
-# locale here.
+# exit-1-on-clean-run quirk above), or a genuine LaTeX/package warning
+# (undefined reference/citation, multiply-defined label, etc). Plain
+# `grep`, without LC_ALL=C, can silently match nothing on this log under
+# some locales -- root.log is pdflatex's own transcript, not always clean
+# UTF-8 -- so force the C locale here.
+#
+# Overfull/Underfull hbox/vbox notices are deliberately NOT treated as
+# errors here: they're routine typesetting-density notices (currently
+# ~450 of them), not a sign anything is wrong, and are present in any
+# large LaTeX book of this kind. "Float too large for page by <1pt" is
+# excluded for the same reason -- two pre-existing, sub-hundredth-inch
+# float overflows (root.log lines ~2347, ~4259) with no visible effect on
+# the printed page; fixing them would mean touching figure geometry
+# across a finished 644-page book for no visible benefit.
 check: root.pdf
 	@errs="$$(LC_ALL=C grep -an 'Undefined control sequence\|! LaTeX Error\|^!\|Missing \$$\|math environment\|Runaway argument' root.log)"; \
+	warns="$$(LC_ALL=C grep -an 'LaTeX Warning:\|Package .* Warning' root.log | grep -v 'Float too large for page by')"; \
 	if [ -n "$$errs" ]; then \
 		echo "$$errs"; \
 		echo "LaTeX errors found in root.log (see above)."; \
 		exit 1; \
+	elif [ -n "$$warns" ]; then \
+		echo "$$warns"; \
+		echo "LaTeX warnings found in root.log (see above)."; \
+		exit 1; \
 	else \
-		echo "root.log is clean -- no LaTeX errors found."; \
+		echo "root.log is clean -- no LaTeX errors or warnings found."; \
 	fi
 
 clean:

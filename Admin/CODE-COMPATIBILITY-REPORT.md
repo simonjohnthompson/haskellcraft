@@ -119,6 +119,44 @@ directly and checking its `Craft3e.cabal`/`LICENSE`.
 
 Every other finding below is unaffected and still accurate.
 
+## Update 2 (2026-09-04)
+
+The five remaining Part 1 fixes below — `SolutionsSet.hs`, `Solutions7.hs`,
+`Solutions12.hs`, `Chapter19/Solutions19.hs`, `SolutionsParsing.hs` — have
+now been applied directly to `Code/Craft3e` and confirmed loading cleanly
+via `cabal repl`. The tables below are left as originally written (they
+still correctly describe the underlying issues) but each fixed row is
+annotated **— fixed**.
+
+Fixing `Solutions12.hs`'s `Word` ambiguity surfaced two further,
+previously-undocumented errors underneath it — the same
+error-masks-another-error pattern this report already noted for
+`Solutions18.hs`/`SolutionsSet.hs` above:
+
+- **A pre-existing bug, not a GHC-evolution issue**: three uses of `<*>`
+  (in `plus`, `digString`, `fraction`) were actually meant to be Chapter
+  12's own regex-sequencing operator `<++>` — `<*>` isn't defined anywhere
+  reachable from this file at all, on any GHC version. Fixed by replacing
+  all three with `<++>`.
+- **A genuine, previously-unrecorded GHC-evolution issue**: `majority`'s
+  intentionally-unfinished `major = undef` stub (`undef = undef`, a
+  self-referential placeholder) becomes `Couldn't match ... arising from a
+  use of 'null'` / ambiguous `Foldable` instance under current GHC, because
+  `null` was generalised from `[a] -> Bool` to `Foldable t => t a -> Bool`
+  by the Foldable/Traversable-in-Prelude proposal (`base-4.8`, 2014) — the
+  same release as the Applicative-Monad Proposal. Pre-2014, `null`'s
+  list-only type alone pinned `major`'s type down; today nothing does.
+  Fixed by annotating the stub: `major = undef :: [Chapter8.Move]` (needing
+  a new `import qualified Chapter8 (Move)`, since the unqualified import
+  already hides `Move` to avoid a clash with `Chapter4`'s own `Move`, used
+  for RPS).
+
+Confirmed via `cabal build` (whole package, zero errors) and `cabal repl`
++ `:load` for each of the five files individually. See
+`Code/Craft3e/Solutions12.hs`, `Solutions7.hs`, `SolutionsSet.hs`,
+`SolutionsParsing.hs`, `Chapter19/Solutions19.hs` for the current fixed
+source.
+
 ## Headline finding
 
 **The book's main chapter code is already clean.** All 20 chapters' primary
@@ -170,7 +208,7 @@ in the form currently in the repository.
 
 | File | Problem | Minimal fix |
 |---|---|---|
-| `SolutionsSet.hs:114-116` | In `makeSet`'s `where`-clause, the guards of `remDups (x:y:xs)` are indented *less* than the clause head, prematurely closing the layout block: `\| x < y = ...` sits at column 9, `remDups (x:y:xs)` at column 11. | Re-indent the two guard lines to at least column 11, e.g. align them under `remDups (x:y:xs)`. |
+| `SolutionsSet.hs:114-116` — **fixed** | In `makeSet`'s `where`-clause, the guards of `remDups (x:y:xs)` are indented *less* than the clause head, prematurely closing the layout block: `\| x < y = ...` sits at column 9, `remDups (x:y:xs)` at column 11. | Re-indent the two guard lines to at least column 11, e.g. align them under `remDups (x:y:xs)`. |
 | `IO/TreeState.hs:29-33` | In the `let` inside `(State st) >>= f`, the second binding `(State trans) = f y` is indented *less* than the first (`(newTab,y) = st tab`), so the `let` block closes early. | Indent `(State trans) = f y` to the same column as `(newTab,y) = st tab`. |
 | `IO/DoTest.hs:26-28` | In `putNtimes`'s `else do putStrLn str`, the next `do`-statement `putNtimes (n-1) str` is indented *less* than `putStrLn str` (which sets the block's column), so only one statement remains in the block and the parser then rejects the leftover text. | Indent `putNtimes (n-1) str` to the same column as `putStrLn str`. |
 
@@ -181,13 +219,13 @@ one-line or few-line fix, no rewrite required.
 
 | File | Problem | Root cause | Minimal fix |
 |---|---|---|---|
-| `Solutions7.hs:435` (cascades to `Solutions8.hs`, which imports it) | `Ambiguous occurrence 'Word'` | `Chapter7.hs` defines its own pedagogical `type Word = String`; `Word` was later added to the standard `Prelude` (as the unsigned machine-word numeric type) after this book's `Word` type was written. `Solutions7.hs` imports `Chapter7` and `Prelude` unqualified without hiding either's `Word`. | Add `Word` to the existing `Prelude hiding (...)` list at the top of `Solutions7.hs` (or hide it from the `Chapter7` import instead). |
-| `Solutions12.hs` | Same `Ambiguous occurrence 'Word'`, this time between `Index.hs`'s `type Word = String` and `Prelude.Word` | Same cause as above; `Solutions12.hs`'s own `import Prelude hiding (succ,lines)` doesn't hide `Word`. | Add `Word` to that hiding list. |
-| `Chapter19/Solutions19.hs` | `Ambiguous occurrence '<*>'` | `Chapter19/RegExp.hs` defines its own regex-sequencing operator `(<*>)`. `<*>` was later made a `Prelude`-exported method of `Applicative` (the Applicative-Monad Proposal, GHC 7.10/2015). `Solutions19.hs` imports `RegExp` and (implicitly) all of `Prelude` without hiding either's `<*>`. | Add `import Prelude hiding ((<*>))`, or `import RegExp hiding ((<*>))`, to `Solutions19.hs`. |
+| `Solutions7.hs:435` (cascades to `Solutions8.hs`, which imports it) — **fixed** | `Ambiguous occurrence 'Word'` | `Chapter7.hs` defines its own pedagogical `type Word = String`; `Word` was later added to the standard `Prelude` (as the unsigned machine-word numeric type) after this book's `Word` type was written. `Solutions7.hs` imports `Chapter7` and `Prelude` unqualified without hiding either's `Word`. | Add `Word` to the existing `Prelude hiding (...)` list at the top of `Solutions7.hs` (or hide it from the `Chapter7` import instead). |
+| `Solutions12.hs` — **fixed** (see "Update 2" above for two further masked bugs found while fixing this one) | Same `Ambiguous occurrence 'Word'`, this time between `Index.hs`'s `type Word = String` and `Prelude.Word` | Same cause as above; `Solutions12.hs`'s own `import Prelude hiding (succ,lines)` doesn't hide `Word`. | Add `Word` to that hiding list. |
+| `Chapter19/Solutions19.hs` — **fixed** | `Ambiguous occurrence '<*>'` | `Chapter19/RegExp.hs` defines its own regex-sequencing operator `(<*>)`. `<*>` was later made a `Prelude`-exported method of `Applicative` (the Applicative-Monad Proposal, GHC 7.10/2015). `Solutions19.hs` imports `RegExp` and (implicitly) all of `Prelude` without hiding either's `<*>`. | Add `import Prelude hiding ((<*>))`, or `import RegExp hiding ((<*>))`, to `Solutions19.hs`. |
 | `IO/TreeId.hs` | `No instance for (Applicative Id)` | Same Applicative-Monad Proposal: since GHC 7.10, every `Monad` instance requires a corresponding `Applicative` instance; `instance Monad Id` here has none. | Add `instance Functor Id where fmap f (Id x) = Id (f x)` and `instance Applicative Id where pure = Id; Id f <*> Id x = Id (f x)` above the existing `instance Monad Id`. |
 | `Solutions18.hs` (Solution 18.22) — **fixed** | `No instance for (Applicative Mlist)` | Same Applicative-Monad Proposal; `instance Monad Mlist` here had none. | Added `instance Applicative Mlist where pure = return; (<*>) = ap` and `instance Functor Mlist where fmap = liftM`, plus `import Control.Monad (liftM, ap)`. |
 | `IO/MonadIO.hs:10` | `Could not find module 'IO'` | `import IO` refers to the pre-Haskell-2010 monolithic `IO` compatibility module, removed from `base` long ago. | Change to `import System.IO`. |
-| `SolutionsParsing.hs:120` | `Parse error in pattern: n + 1` | `nTimes (n+1) p = ...` uses an "n+k pattern", a Haskell 98 feature dropped from the language in the Haskell 2010 report (GHC keeps it only behind the now-off-by-default `NPlusKPatterns` extension, still available in GHC 9.6.7). | Either add `{-# LANGUAGE NPlusKPatterns #-}` at the top of the file, or (preferable for an introductory text, since the extension is obscure and non-standard today) rewrite as a guard: `nTimes n p \| n > 0 = (p >*> nTimes (n-1) p) \`build\` (uncurry (:))` with a base case `nTimes 0 p = succeed []` already present. |
+| `SolutionsParsing.hs:120` — **fixed** | `Parse error in pattern: n + 1` | `nTimes (n+1) p = ...` uses an "n+k pattern", a Haskell 98 feature dropped from the language in the Haskell 2010 report (GHC keeps it only behind the now-off-by-default `NPlusKPatterns` extension, still available in GHC 9.6.7). | Either add `{-# LANGUAGE NPlusKPatterns #-}` at the top of the file, or (preferable for an introductory text, since the extension is obscure and non-standard today) rewrite as a guard: `nTimes n p \| n > 0 = (p >*> nTimes (n-1) p) \`build\` (uncurry (:))` with a base case `nTimes 0 p = succeed []` already present. |
 | `Chapter19/PositionedImages.hs:12` | `Could not load module 'Data.Map' — hidden package 'containers'` | `containers` is a GHC boot library but is *not* automatically exposed the way `base` is; it must be a declared dependency. | Add `containers` to `build-depends` in `Craft3e.cabal` if this file is kept (see "orphaned" note below — recommend dropping it instead). |
 
 Two more files (`IO/DoTest.hs`, `IO/MonadIO.hs`, `IO/TreeId.hs`,
@@ -232,10 +270,11 @@ All of `Chapter1.hs`–`Chapter20.hs` (including the `Chapter15`, `Chapter16`,
 `Chapter19`, `Chapter20`, `Calculator` and `Simulation` sub-modules),
 `ParseLib.hs`, `ParsingBasics.hs`, `Pictures.hs`, `PicturesSVG.hs`, `Set.hs`,
 `Relation.hs`, `Index.hs`, `RPS.hs`, `UseMonads.hs`, `FirstScript.hs`,
-`UsePictures.hs`, and 14 of the 17 top-level `SolutionsN.hs` files
-(`Solutions2,3,4,5,6,9,10,11,13,14_1,14_2,17,20` and, since the fix noted
-under "Update" above, `Solutions18`, plus `Chapter15/Solutions15.hs`,
-`Chapter16/Solutions16.hs`) load without error.
+`UsePictures.hs`, and, as of the fixes under "Update" and "Update 2" above,
+all 17 of the top-level `SolutionsN.hs` files (`Solutions2,3,4,5,6,7,9,10,
+11,12,13,14_1,14_2,17,18,20`, `SolutionsSet`, `SolutionsParsing`), plus
+`Chapter15/Solutions15.hs`, `Chapter16/Solutions16.hs`, and
+`Chapter19/Solutions19.hs`, now load without error.
 
 ## Part 2: Delivering module dependencies to readers
 

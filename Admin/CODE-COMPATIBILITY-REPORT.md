@@ -257,11 +257,15 @@ from the module list despite being co-located with files that are (`Foo.hs`,
   listed in `Code/Craft3e/LISTING` (that file's own `Test.hs` entry is a
   different, legitimate file under `./Chapter15:`, left untouched) before
   deleting both; `cabal build` confirmed clean afterwards.
-- **`Chapter19/parselib.hs`** — byte-for-byte identical to the top-level
-  `ParseLib.hs` (confirmed via `diff`, still true after both files' shared
-  `MonadFail` fix, see "Update" above), both declaring `module ParseLib`. A
-  stray duplicate; this is *why* it's excluded from `exposed-modules` (cabal
-  would reject two same-named modules in one package).
+- **`Chapter19/parselib.hs`** — **removed 2026-09-04.** Was byte-for-byte
+  identical to the top-level `ParseLib.hs` (confirmed via `diff`, still true
+  after both files' shared `MonadFail` fix, see "Update" above), both
+  declaring `module ParseLib` — a stray duplicate, which is *why* it was
+  excluded from `exposed-modules` (cabal would reject two same-named
+  modules in one package). Confirmed unreferenced in `Craft3e.cabal` and
+  `Book/*.tex` before deleting; `cabal build` and `:load
+  Chapter19/Solutions19` (which depends on `ParseLib`) both confirmed clean
+  afterwards.
 
 If the intent is a minimal, coherent reader-facing package, these five files
 could simply be dropped from what's shipped. If they should be kept for

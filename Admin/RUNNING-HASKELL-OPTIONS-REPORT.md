@@ -118,7 +118,7 @@ download for Docker itself), so it's not the best *first* recommendation for
 this book's actual target reader, but worth listing as a clean alternative,
 and it's the natural base for the cloud dev environment option below.
 
-## Option C — Cloud dev environments (GitHub Codespaces / Gitpod) — implemented
+## Option C — Cloud dev environments (GitHub Codespaces) — implemented
 
 These give a reader a full Linux VM with GHC already configured, reachable
 through the browser (or through VS Code talking to that VM) — no local
@@ -139,12 +139,20 @@ and opening a `.hs` file gets live diagnostics/hover via HLS — see
 `Admin/DEVELOPMENT-ENVIRONMENT-OPTIONS-REPORT.md` for the full editor/IDE
 picture. A reader:
 
+**Correction (2026-09-04): Gitpod is no longer an option.** This section
+originally listed Gitpod alongside GitHub Codespaces as a second way to
+launch the same `devcontainer.json`. Gitpod Classic — the `gitpod.io/#
+<repo-url>` instant-workspace product this relied on — was sunset in
+October 2025; the company's successor product, "Ona," is a materially
+different offering, not a drop-in replacement, so it isn't listed here as
+an equivalent. `otherHs.tex` was already updated to drop its own Gitpod
+mention for the same reason. GitHub Codespaces and local Dev Containers
+(both below) are unaffected and remain fully working.
+
 - **GitHub Codespaces**: on the repo's GitHub page, "Code" → "Codespaces" →
   "Create codespace on main". Lands in a browser-based VS Code with GHC,
   cabal, and the `Craft3e` package already built. GitHub gives every
   personal account a free monthly quota of Codespaces hours.
-- **Gitpod**: reads the same `devcontainer.json`; open via a
-  `gitpod.io/#<repo-url>` link.
 - **VS Code locally, no Haskell install at all**: with Docker and the "Dev
   Containers" extension, "Reopen in Container" on the cloned repo uses the
   same config.
@@ -345,7 +353,7 @@ experience with the real dependencies available — but it requires
 maintaining a Binder-compatible environment definition alongside the
 existing `Craft3e.cabal`, cold starts are slow (often several minutes while
 Binder builds or fetches the image), and idle sessions are recycled.
-Given Option C (Codespaces/Gitpod) achieves a very similar "zero install,
+Given Option C (Codespaces) achieves a very similar "zero install,
 real environment" outcome with a simpler, more standard piece of
 configuration (a devcontainer, vs. a parallel notebook-oriented build), this
 report doesn't recommend pursuing both — Option C is the better use of
@@ -357,7 +365,7 @@ whoever's time would go into adding either.
 |---|---|---|---|
 | A. GHCup | Yes (once) | Yes, fully | None — already works |
 | B. Docker `haskell` image | Docker only | Yes, fully | None — already works |
-| C. Codespaces / Gitpod | None | Yes, fully | Done — `.devcontainer/` added, confirmed end-to-end in a live Codespace (build, repl, and HLS) |
+| C. Codespaces | None | Yes, fully | Done — `.devcontainer/` added, confirmed end-to-end in a live Codespace (build, repl, and HLS) |
 | D. play.haskell.org / similar | None | No — single file, uncertain packages | None |
 | E. GHC-in-browser (Wasm) | None | Not yet — no external packages | None today; future potential |
 | F. IHaskell + Binder | None | Yes, but slow cold start | Larger: maintain notebook build |
@@ -367,7 +375,7 @@ instructions, exactly as today, since it's what the rest of this project's
 tooling (and the companion compatibility report) already assumes and tests
 against. **Mention Option B (Docker)** as a one-line alternative for readers
 who'd rather not touch their system Haskell install at all. **Option C (a
-Codespaces/Gitpod devcontainer) is now available and confirmed working
+Codespaces devcontainer) is now available and confirmed working
 end-to-end in a live Codespace** — including HLS's in-editor
 diagnostics/hover, not just `cabal build`/`cabal repl` — as the "try the
 real thing with nothing installed" path; it's the only zero-install option

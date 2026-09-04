@@ -7,8 +7,9 @@
 --                                                                      --
 --------------------------------------------------------------------------
 
-import IO   -- not good enough! isEOF not implemented properly 
-        -- in Hugs 1.4 yet!
+module MonadIO where
+
+import System.IO
 
 --------------------------------------------------------------------------
 --  To read a line                          --
@@ -91,13 +92,8 @@ while test oper
 
 --------------------------------------------------------------------------
 --      Testing for the end of input                    --
---      isEOF :: IO Bool                    --
---      This version uses the NONSTANDARD hugsIsEOF for IO.hs       --
---  It's not clear how you use this interactively; I remember now   --
---  that C I/O is peculiar!                     --
+--      isEOF :: IO Bool, from System.IO                 --
 --------------------------------------------------------------------------
-
-isEOF = hugsIsEOF
 
 --------------------------------------------------------------------------
 --  Copy lines until end of file.                   --

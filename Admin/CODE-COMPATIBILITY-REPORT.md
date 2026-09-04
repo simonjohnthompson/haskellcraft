@@ -157,6 +157,46 @@ Confirmed via `cabal build` (whole package, zero errors) and `cabal repl`
 `SolutionsParsing.hs`, `Chapter19/Solutions19.hs` for the current fixed
 source.
 
+## Update 3 (2026-09-04)
+
+Two decisions on the "files that look orphaned" set below (`IO/`,
+`Foo.hs`, `Test.hs`, `Chapter19/parselib.hs`) have since been made and
+acted on, superseding this report's original "recommend excluding from
+delivery" stance for some of them:
+
+- **`Foo.hs`, `Test.hs`, `Chapter19/parselib.hs` — removed.** Confirmed
+  unreferenced anywhere (`Book/*.tex`, `Craft3e.cabal`, any other `.hs`
+  file, `Code/Craft3e/LISTING`) before deleting; `cabal build` and
+  `:load Chapter19/Solutions19` (which depends on `ParseLib`, the file
+  `parselib.hs` duplicated) both confirmed clean afterwards.
+- **The four `IO/` files — kept and fixed, not removed**, at the
+  project owner's explicit request (`TreeId.hs`/`TreeState.hs` are early
+  drafts of ideas that ended up properly written in `Chapter18.hs`, but
+  are being kept for their own sake regardless). All four now compile
+  cleanly under `ghc -fno-code` (checked individually, since `IO/` still
+  isn't in `Craft3e.cabal`'s `hs-source-dirs` and isn't part of this
+  package build):
+  - `IO/DoTest.hs`: the pre-existing indentation bug (1a below) fixed.
+  - `IO/MonadIO.hs`: `import IO` → `import System.IO` (1b below) —
+    which surfaced a second, previously-masked error underneath: the
+    file's own `isEOF = hugsIsEOF` (a workaround for a 1990s Hugs
+    limitation the file's own comment already flagged as "NONSTANDARD")
+    now clashes with `System.IO`'s real, standard `isEOF :: IO Bool`.
+    Fixed by deleting the local `isEOF` binding entirely and letting
+    `System.IO.isEOF` — the modern equivalent of what the workaround was
+    reaching for — be used directly.
+  - `IO/TreeId.hs`, `IO/TreeState.hs`: the missing `Applicative`/
+    `Functor` instances (1b below) added, in the same
+    `pure = return; (<*>) = ap` / `fmap = liftM` form used everywhere
+    else this gap appears in the package (`ParseLib.hs`,
+    `Calculator/CalcParseLib.hs`, `Chapter18.hs`, `Solutions18.hs`).
+    Both now produce only the same benign `-Wnoncanonical-monad-instances`
+    warning every other fixed instance in this package already carries.
+  - All four also gained an explicit `module <Name> where` header (none
+    had one before, so GHC defaulted each to `module Main`, meaning they
+    could never be `:load`ed together in one GHCi session — see the note
+    below "1b" about this).
+
 ## Headline finding
 
 **The book's main chapter code is already clean.** All 20 chapters' primary
@@ -209,8 +249,8 @@ in the form currently in the repository.
 | File | Problem | Minimal fix |
 |---|---|---|
 | `SolutionsSet.hs:114-116` — **fixed** | In `makeSet`'s `where`-clause, the guards of `remDups (x:y:xs)` are indented *less* than the clause head, prematurely closing the layout block: `\| x < y = ...` sits at column 9, `remDups (x:y:xs)` at column 11. | Re-indent the two guard lines to at least column 11, e.g. align them under `remDups (x:y:xs)`. |
-| `IO/TreeState.hs:29-33` | In the `let` inside `(State st) >>= f`, the second binding `(State trans) = f y` is indented *less* than the first (`(newTab,y) = st tab`), so the `let` block closes early. | Indent `(State trans) = f y` to the same column as `(newTab,y) = st tab`. |
-| `IO/DoTest.hs:26-28` | In `putNtimes`'s `else do putStrLn str`, the next `do`-statement `putNtimes (n-1) str` is indented *less* than `putStrLn str` (which sets the block's column), so only one statement remains in the block and the parser then rejects the leftover text. | Indent `putNtimes (n-1) str` to the same column as `putStrLn str`. |
+| `IO/TreeState.hs:29-33` — **fixed** | In the `let` inside `(State st) >>= f`, the second binding `(State trans) = f y` is indented *less* than the first (`(newTab,y) = st tab`), so the `let` block closes early. | Indent `(State trans) = f y` to the same column as `(newTab,y) = st tab`. |
+| `IO/DoTest.hs:26-28` — **fixed** | In `putNtimes`'s `else do putStrLn str`, the next `do`-statement `putNtimes (n-1) str` is indented *less* than `putStrLn str` (which sets the block's column), so only one statement remains in the block and the parser then rejects the leftover text. | Indent `putNtimes (n-1) str` to the same column as `putStrLn str`. |
 
 ### 1b. Real GHC/library evolution since 2011
 
@@ -222,9 +262,9 @@ one-line or few-line fix, no rewrite required.
 | `Solutions7.hs:435` (cascades to `Solutions8.hs`, which imports it) — **fixed** | `Ambiguous occurrence 'Word'` | `Chapter7.hs` defines its own pedagogical `type Word = String`; `Word` was later added to the standard `Prelude` (as the unsigned machine-word numeric type) after this book's `Word` type was written. `Solutions7.hs` imports `Chapter7` and `Prelude` unqualified without hiding either's `Word`. | Add `Word` to the existing `Prelude hiding (...)` list at the top of `Solutions7.hs` (or hide it from the `Chapter7` import instead). |
 | `Solutions12.hs` — **fixed** (see "Update 2" above for two further masked bugs found while fixing this one) | Same `Ambiguous occurrence 'Word'`, this time between `Index.hs`'s `type Word = String` and `Prelude.Word` | Same cause as above; `Solutions12.hs`'s own `import Prelude hiding (succ,lines)` doesn't hide `Word`. | Add `Word` to that hiding list. |
 | `Chapter19/Solutions19.hs` — **fixed** | `Ambiguous occurrence '<*>'` | `Chapter19/RegExp.hs` defines its own regex-sequencing operator `(<*>)`. `<*>` was later made a `Prelude`-exported method of `Applicative` (the Applicative-Monad Proposal, GHC 7.10/2015). `Solutions19.hs` imports `RegExp` and (implicitly) all of `Prelude` without hiding either's `<*>`. | Add `import Prelude hiding ((<*>))`, or `import RegExp hiding ((<*>))`, to `Solutions19.hs`. |
-| `IO/TreeId.hs` | `No instance for (Applicative Id)` | Same Applicative-Monad Proposal: since GHC 7.10, every `Monad` instance requires a corresponding `Applicative` instance; `instance Monad Id` here has none. | Add `instance Functor Id where fmap f (Id x) = Id (f x)` and `instance Applicative Id where pure = Id; Id f <*> Id x = Id (f x)` above the existing `instance Monad Id`. |
+| `IO/TreeId.hs` — **fixed** | `No instance for (Applicative Id)` | Same Applicative-Monad Proposal: since GHC 7.10, every `Monad` instance requires a corresponding `Applicative` instance; `instance Monad Id` here has none. | Added `instance Applicative Id where pure = return; (<*>) = ap` and `instance Functor Id where fmap = liftM` (the package's standard form for this fix, rather than the bespoke `Id f <*> Id x = Id (f x)` originally suggested here). |
 | `Solutions18.hs` (Solution 18.22) — **fixed** | `No instance for (Applicative Mlist)` | Same Applicative-Monad Proposal; `instance Monad Mlist` here had none. | Added `instance Applicative Mlist where pure = return; (<*>) = ap` and `instance Functor Mlist where fmap = liftM`, plus `import Control.Monad (liftM, ap)`. |
-| `IO/MonadIO.hs:10` | `Could not find module 'IO'` | `import IO` refers to the pre-Haskell-2010 monolithic `IO` compatibility module, removed from `base` long ago. | Change to `import System.IO`. |
+| `IO/MonadIO.hs:10` — **fixed** | `Could not find module 'IO'` | `import IO` refers to the pre-Haskell-2010 monolithic `IO` compatibility module, removed from `base` long ago. | Changed to `import System.IO`; see "Update 3" above for the second, masked error (`isEOF`/`hugsIsEOF`) this uncovered. |
 | `SolutionsParsing.hs:120` — **fixed** | `Parse error in pattern: n + 1` | `nTimes (n+1) p = ...` uses an "n+k pattern", a Haskell 98 feature dropped from the language in the Haskell 2010 report (GHC keeps it only behind the now-off-by-default `NPlusKPatterns` extension, still available in GHC 9.6.7). | Either add `{-# LANGUAGE NPlusKPatterns #-}` at the top of the file, or (preferable for an introductory text, since the extension is obscure and non-standard today) rewrite as a guard: `nTimes n p \| n > 0 = (p >*> nTimes (n-1) p) \`build\` (uncurry (:))` with a base case `nTimes 0 p = succeed []` already present. |
 | `Chapter19/PositionedImages.hs:12` | `Could not load module 'Data.Map' — hidden package 'containers'` | `containers` is a GHC boot library but is *not* automatically exposed the way `base` is; it must be a declared dependency. | Add `containers` to `build-depends` in `Craft3e.cabal` if this file is kept (see "orphaned" note below — recommend dropping it instead). |
 
@@ -236,7 +276,7 @@ them alone, but means they can never be loaded together in one GHCi session
 the package. If kept, each should get an explicit header matching its
 filename (`module DoTest where`, `module MonadIO where`, etc).
 
-### Files that look orphaned (recommend excluding from what's delivered to readers, rather than fixing)
+### Files that look orphaned (originally recommended excluding rather than fixing; see "Update 3" for what was actually decided)
 
 None of these are referenced anywhere in `Book/*.tex`, and none are in
 `Craft3e.cabal`'s `exposed-modules` — they sit in directories the `.cabal`
@@ -245,10 +285,14 @@ from the module list despite being co-located with files that are (`Foo.hs`,
 `Chapter19/parselib.hs`).
 
 - **`IO/DoTest.hs`, `IO/MonadIO.hs`, `IO/TreeId.hs`, `IO/TreeState.hs`** —
-  the `IO/` directory isn't even on the cabal package's `hs-source-dirs`.
-  `TreeId.hs`/`TreeState.hs` look like earlier drafts of ideas that ended up
-  properly written (with correct `Applicative` instances) inside
-  `Chapter18.hs`. Nothing in the book text points a reader at this folder.
+  **kept and fixed, not excluded, 2026-09-04** (see "Update 3" above), at
+  the project owner's explicit request; still outside the cabal package
+  (`IO/` isn't on `hs-source-dirs`) and still not pointed at from anywhere
+  in the book text, so this remains accurate as a description of their
+  *reachability*, just not as a recommendation to drop them.
+  `TreeId.hs`/`TreeState.hs` still look like earlier drafts of ideas that
+  ended up properly written (with correct `Applicative` instances) inside
+  `Chapter18.hs` — kept anyway, per the same request.
 - **`Foo.hs`, `Test.hs`** — **removed 2026-09-04.** No header comment, no
   chapter/exercise attribution (compare to every real solutions file,
   which opens with a `-- Solutions to Exercises N.N` banner); read as the
@@ -267,10 +311,12 @@ from the module list despite being co-located with files that are (`Foo.hs`,
   Chapter19/Solutions19` (which depends on `ParseLib`) both confirmed clean
   afterwards.
 
-If the intent is a minimal, coherent reader-facing package, these five files
-could simply be dropped from what's shipped. If they should be kept for
-completeness, `PositionedImages.hs`'s one-line `containers` fix and the
-`IO/` files' fixes above are all that's needed.
+**Resolved 2026-09-04** (see "Update 3" above): `Foo.hs`, `Test.hs` and
+`Chapter19/parselib.hs` were dropped; the four `IO/` files were kept and
+fixed instead, at the project owner's explicit request.
+`Chapter19/PositionedImages.hs` is the one file from this section not yet
+acted on either way — it would still need the one-line `containers`
+`build-depends` fix (or to be dropped) if it's ever brought into scope.
 
 ### Files confirmed clean, no action needed
 

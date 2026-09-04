@@ -6,7 +6,10 @@
 --                                                                      --
 --------------------------------------------------------------------------
 
+module TreeId where
+
 import Prelude
+import Control.Monad (liftM, ap)
 
 --------------------------------------------------------------------------
 --       Type of trees                          --
@@ -49,6 +52,13 @@ data Id t = Id t
 instance Monad Id where
   return         = Id
   (>>=) (Id x) f = f x
+
+instance Applicative Id where
+  pure = return
+  (<*>) = ap
+
+instance Functor Id where
+  fmap = liftM
 
 extract :: Id t -> t
 extract (Id x) = x

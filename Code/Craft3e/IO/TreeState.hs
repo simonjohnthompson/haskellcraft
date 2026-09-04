@@ -6,7 +6,10 @@
 --                                                                      --
 --------------------------------------------------------------------------
 
+module TreeState where
+
 import Prelude hiding (lookup)
+import Control.Monad (liftM, ap)
 
 --------------------------------------------------------------------------
 --       Type of trees                          --
@@ -25,12 +28,19 @@ type Table a = [a]
 
 instance Monad (State a) where
   return x = State (\tab -> (tab,x))
-  (State st) >>= f 
-    = State (\tab -> let 
-              (newTab,y) = st tab
-          (State trans) = f y 
+  (State st) >>= f
+    = State (\tab -> let
+              (newTab,y)    = st tab
+              (State trans) = f y
               in
               trans newTab)
+
+instance Applicative (State a) where
+  pure = return
+  (<*>) = ap
+
+instance Functor (State a) where
+  fmap = liftM
 
 extract :: State a b -> b
 

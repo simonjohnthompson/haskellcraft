@@ -1,6 +1,7 @@
 -- (c) Addison-Wesley, 1996-2010.
 --  DOtest.lhs
 
+module DoTest where
 
 test1 :: IO ()
 
@@ -22,10 +23,10 @@ put4times str
 putNtimes :: Int -> String -> IO ()
 
 putNtimes n str
-  = if n <= 1 
+  = if n <= 1
        then putStrLn str
        else do putStrLn str
-           putNtimes (n-1) str
+               putNtimes (n-1) str
 
 read2lines :: IO ()
 

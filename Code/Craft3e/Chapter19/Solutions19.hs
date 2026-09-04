@@ -10,7 +10,8 @@
 
 module Solutions19 where
 
-import RegExp 
+import Prelude hiding ((<*>))
+import RegExp
 import ParseLib
 import Data.Char (isLower)
 import Test.QuickCheck

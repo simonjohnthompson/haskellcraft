@@ -112,8 +112,8 @@ makeSet = Set . remDups . sort
           where
           remDups []     = []
           remDups [x]    = [x]
-          remDups (x:y:xs) 
-        | x < y     = x : remDups (y:xs)
+          remDups (x:y:xs)
+            | x < y     = x : remDups (y:xs)
             | otherwise = remDups (y:xs)
 
 mapSet :: Ord b => (a -> b) -> Set a -> Set b

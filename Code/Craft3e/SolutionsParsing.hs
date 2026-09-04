@@ -116,8 +116,8 @@ optional p = (succeed [])
 -- A given number of objects.
 
 nTimes :: Int -> Parse a b -> Parse a [b]
-nTimes 0 p     = succeed []
-nTimes (n+1) p = (p >*> nTimes n p) `build` (uncurry (:))
+nTimes 0 p        = succeed []
+nTimes n p | n > 0 = (p >*> nTimes (n-1) p) `build` (uncurry (:))
 
 --  
 -- A parser for expressions                 

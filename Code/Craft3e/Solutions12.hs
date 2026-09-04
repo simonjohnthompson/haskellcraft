@@ -10,13 +10,14 @@
 
 module Solutions12 where
 
-import Prelude hiding (succ,lines)
+import Prelude hiding (succ,lines,Word)
 import Chapter12 hiding (printPicture,splits,plus,succ)
 import Pictures
 import Test.QuickCheck
 import Solutions11 (uncurry3)
 import Chapter4                   -- for RPS
 import Chapter8 hiding (Move(..)) -- for RPS
+import qualified Chapter8 (Move)
 import Chapter11 (mapFuns)
 import Index
 import qualified Chapter7
@@ -158,8 +159,8 @@ majority :: [Strategy] -> Strategy
 majority strs
   = \moves -> let 
                outcomes = mapFuns strs moves
-               major    = undef  
-              in 
+               major    = undef :: [Chapter8.Move]
+              in
                if null major 
                  then randomStrategy moves
                  else head major
@@ -219,7 +220,7 @@ option e = e ||| epsilon
 
 plus :: RegExp -> RegExp
 
-plus e = e <*> star e
+plus e = e <++> star e
 
 --
 -- Solution 12.17
@@ -238,14 +239,14 @@ range lo hi str
 
 digString :: RegExp
 
-digString = (range '1' '9' <*> (star (range '0' '9'))) ||| char '0'
+digString = (range '1' '9' <++> (star (range '0' '9'))) ||| char '0'
 
 -- following the decimal point is either 0 or digit string ending
 -- with non-zero.
 
 fraction :: RegExp
 
-fraction = digString <*> char '.' <*> (((star (range '0' '9')) <*> range '1' '9') ||| char '0') 
+fraction = digString <++> char '.' <++> (((star (range '0' '9')) <++> range '1' '9') ||| char '0')
 
 --
 -- Solution 12.18

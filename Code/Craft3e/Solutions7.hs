@@ -13,7 +13,7 @@ module Solutions7 where
 import Test.QuickCheck
 import Chapter7 hiding (head,tail,zip,dropLine,concat)
 import Chapter5 (digits)
-import Prelude hiding (product,and,or,(++),reverse,unzip,take,drop,zip3,sum)
+import Prelude hiding (product,and,or,(++),reverse,unzip,take,drop,zip3,sum,Word)
 import qualified Prelude
 import Data.Char
 

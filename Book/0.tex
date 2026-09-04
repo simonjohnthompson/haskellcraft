@@ -3,12 +3,28 @@
 %\begin{document}\input{defs0}\input{miradefs}\setcounter{chapter}{-1}\setcounter{page}{1}
 
 
+
 \chapter*{Preface}
 \markboth{Preface}{Preface}
 \addcontentsline{toc}{chapter}{Preface}
 \chapstart
 \label{preface}
 
+
+\beware{Online edition}{
+This is a substantially revised version of the third edition (2011) 
+of \emph{Haskell: the Craft of Functional Programming} bringing the book up to date with changes 
+in Haskell and its infrastructure: implementations, editor support, discussion channels etc. More 
+substantially it is now available online, and is freely available under a Creative Commons licence.
+
+\medskip\noindent
+In common with the times, the revision was assisted by LLM: specifically Claude Code v2.1.236 (Claude Sonnet 5) from Anthropic. The LLM provided guidance on the upgrade, including advice on changes to the ecosystem, as well as programming the infrastructure for translation from LaTeX input to mdBook output, running the code in github codespaces etc. It also provided substantial rewrites to Section \ref{HaskellLibs} and Appendix \ref{OtherHS}, and smaller corrections throughout.
+
+\medskip\noindent
+This is a work in progress. In particular Chapter \ref{actions} is still being revised.
+} % end beware
+
+\bigskip\noindent
 Computer technology changes with frightening speed; 
 the fundamentals, however, remain remarkably static. The architecture of
 the standard computer is hardly changed from the machines which were built half a
@@ -400,8 +416,8 @@ Finally I thank my family for their support, understanding and encouragement whi
 {\raggedleft
 \bigskip
 \noindent
-{\em Simon Thompson\\
-Canterbury, December 2010\\}
+\emph{Simon Thompson}\\
+\emph{Canterbury, December 2010}\\
 }
 
 %\end{document}

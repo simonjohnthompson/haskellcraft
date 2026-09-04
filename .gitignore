@@ -52,6 +52,11 @@ dist/
 dist-newstyle/
 *.hi
 *.o
+
+## Stray linked binary: Chapter15/Main.hs is part of the library's
+## exposed-modules (it has its own `main`), and `cabal build` links it
+## straight into the source tree rather than dist-newstyle/.
+Code/Craft3e/Chapter15/Main
 cabal.project.local~
 .ghc.environment.*
 

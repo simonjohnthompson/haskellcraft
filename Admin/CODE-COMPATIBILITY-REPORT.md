@@ -249,10 +249,14 @@ from the module list despite being co-located with files that are (`Foo.hs`,
   `TreeId.hs`/`TreeState.hs` look like earlier drafts of ideas that ended up
   properly written (with correct `Applicative` instances) inside
   `Chapter18.hs`. Nothing in the book text points a reader at this folder.
-- **`Foo.hs`, `Test.hs`** — no header comment, no chapter/exercise
-  attribution (compare to every real solutions file, which opens with a
-  `-- Solutions to Exercises N.N` banner); read as the author's own
-  scratch/experimentation files.
+- **`Foo.hs`, `Test.hs`** — **removed 2026-09-04.** No header comment, no
+  chapter/exercise attribution (compare to every real solutions file,
+  which opens with a `-- Solutions to Exercises N.N` banner); read as the
+  author's own scratch/experimentation files. Confirmed unreferenced
+  anywhere in `Book/*.tex`, not imported by any other `.hs` file, and not
+  listed in `Code/Craft3e/LISTING` (that file's own `Test.hs` entry is a
+  different, legitimate file under `./Chapter15:`, left untouched) before
+  deleting both; `cabal build` confirmed clean afterwards.
 - **`Chapter19/parselib.hs`** — byte-for-byte identical to the top-level
   `ParseLib.hs` (confirmed via `diff`, still true after both files' shared
   `MonadFail` fix, see "Update" above), both declaring `module ParseLib`. A

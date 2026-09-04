@@ -228,23 +228,44 @@ was silently dropped the way `fail` was. **This closes out the sweep: the
 `MonadFail` fix already applied is the only instance of this discrepancy in
 the shipped package, and nothing else needs the same treatment.**
 
-## A secondary, related discrepancy: how a reader is told to run the performance examples
+## A secondary, related discrepancy: how a reader is told to run the performance examples — fixed 2026-09-04
 
-`Book/20.tex:1033-1038` tells the reader to compile the Chapter 20
-performance examples directly with `ghc`, producing `a.out`, which is then
+`Book/20.tex:1033-1038` told the reader to compile the Chapter 20
+performance examples directly with `ghc`, producing `a.out`, which was then
 renamed by hand to `perfI.out`, `perfIA.out`, `perfIS.out`. The shipped
 package instead defines these as three cabal `executable` stanzas
 (`performanceI`, `performanceIA`, `performanceIS` in `Craft3e.cabal`), built
-via `cabal build` and installed under cabal's own naming. This isn't a code
+via `cabal build` and installed under cabal's own naming. This wasn't a code
 bug — the executables *do* build (once `craft3e patches/0002-...patch`'s
 `build-depends: base, Craft3e` was added to each stanza; without it `cabal
-build` fails with "Could not load module 'Prelude'") — but it means a reader
+build` fails with "Could not load module 'Prelude'") — but it meant a reader
 following the book's literal instructions ("run `ghc`, look for `a.out`")
-won't find what the book describes, because the packaging built on top of
-the book's code took over that workflow rather than mirroring it. Worth a
-one-line note in any reader-facing errata, distinct in kind from the
-Monad/Applicative issue above (this one is about packaging instructions, not
-about code that no longer compiles).
+wouldn't find what the book described, because the packaging built on top of
+the book's code took over that workflow rather than mirroring it.
+
+Fixing this properly surfaced a second, previously-undocumented bug in the
+same area: even a reader who correctly used `cabal build`/`cabal run`
+instead of `ghc` would then hit `performanceI: Most RTS options are
+disabled. Link with -rtsopts to enable them.` the moment they tried the
+book's own `+RTS -K100000000 -sstderr -RTS` example — confirmed directly by
+building and running the unmodified executables — because none of the three
+`executable` stanzas in `Craft3e.cabal` set `-rtsopts`. Without it, the
+`+RTS`/`-RTS` flags the book explicitly teaches (`sstderr`, `-K<size>`) are
+silently rejected at runtime by any cabal-built binary, regardless of how a
+reader got there.
+
+**Fixed**: `Craft3e.cabal`'s three `performanceI`/`performanceIA`/
+`performanceIS` stanzas now each carry `ghc-options: -rtsopts`, confirmed
+directly (`+RTS -K100000000 -sstderr -RTS` now runs and produces the same
+shape of report the book's Figures \ref{perfIreport}/\ref{perfISreport}
+show). `Book/20.tex`'s prose was rewritten to describe the actual
+`cabal build performanceI performanceIA performanceIS` / `cabal run
+performanceI -- +RTS ...` workflow, replacing the `ghc Main.hs` → `a.out` →
+rename instructions and the `./perfI.out`/`./perfIS.out` invocations
+throughout the section (including the later `\texttt{perfIA.out}`/
+`\texttt{perfIS.out}` prose references). Confirmed via `make check` (clean,
+same 644-page count) and regenerating `Website/chapters/20.md` via
+`tex2md.py` (clean `mdbook build`, no warnings).
 
 ## What is *not* a discrepancy
 

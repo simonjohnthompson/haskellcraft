@@ -120,6 +120,7 @@ executable performanceI
   main-is:     PerformanceI.hs
   hs-source-dirs: ./Chapter20
   default-language: Haskell2010
+  ghc-options: -rtsopts
   build-depends:
     base >= 4 && < 5,
     Craft3e
@@ -129,6 +130,7 @@ executable performanceIA
   main-is:     PerformanceIA.hs
   hs-source-dirs: ./Chapter20
   default-language: Haskell2010
+  ghc-options: -rtsopts
   build-depends:
     base >= 4 && < 5,
     Craft3e
@@ -137,6 +139,7 @@ executable performanceIS
   main-is:     PerformanceIS.hs
   hs-source-dirs: ./Chapter20
   default-language: Haskell2010
+  ghc-options: -rtsopts
   build-depends:
     base >= 4 && < 5,
     Craft3e

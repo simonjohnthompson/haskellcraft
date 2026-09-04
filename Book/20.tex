@@ -969,7 +969,7 @@ accIS n m s
 
 \begin{figure}[t]
 \begin{alltt}
-./perfI.out +RTS -K100000000 -sstderr 
+cabal run performanceI -- +RTS -K100000000 -sstderr
 500000500000
      150,145,752 bytes allocated in the heap
       63,269,576 bytes copied during GC
@@ -998,7 +998,7 @@ accIS n m s
 
 \begin{figure}[t]
 \begin{alltt}
-./perfIS.out +RTS -K100000000 -sstderr 
+cabal run performanceIS -- +RTS -K100000000 -sstderr
 500000500000
      126,083,156 bytes allocated in the heap
           27,444 bytes copied during GC
@@ -1030,12 +1030,11 @@ accIS n m s
 \index{performance!measurement in GHC|(}
 \index{GHC!performance measurement|(}
 
-We can get detailed performance information by \emph{compiling} programs using \texttt{ghc} and passing the right parameters to the executable program. For the simple examples here, we define the expressions we are interested in Figure \ref{sumDefs}.
-This file is compiled using
+We can get detailed performance information by \emph{compiling} programs using \texttt{cabal} and passing the right parameters to the resulting executable. For the simple examples here, we define the expressions we are interested in Figure \ref{sumDefs}; the three variants -- \texttt{PerformanceI.hs}, \texttt{PerformanceIA.hs} and \texttt{PerformanceIS.hs}, in \texttt{Code/Craft3e/Chapter20} -- are already declared as three separate executables in \texttt{Craft3e.cabal}. Building all three, from the \texttt{Code/Craft3e} directory, is a single command:
 \begin{alltt}
-ghc Main.hs
+cabal build performanceI performanceIA performanceIS
 \end{alltt}
-and generates the executable file \texttt{a.out}, which we rename \texttt{perfI.out}, \texttt{perfIA.out} and \texttt{perfIS.out} to distinsguish the three different variants of the \texttt{main} program.
+which produces three executables, \texttt{performanceI}, \texttt{performanceIA} and \texttt{performanceIS}, one for each variant of the \texttt{main} program -- no renaming needed, since \texttt{cabal} already gives each its own name.
 
 In the module we see three definitions of functions to sum integer ranges: \texttt{sumI}, a standard fold from the right, \texttt{sumIA}, a (lazy) fold from the left, and \texttt{sumIS} a \emph{strict} fold from the left. 
 
@@ -1046,7 +1045,7 @@ Use `+RTS -Ksize -RTS' to increase it.
 \end{alltt}
 The brackets \texttt{+RTS ...\ -RTS} are used to pass parameters to the Haskell \emph{runtime system}. We can increase the stack size and gather post-mortem information using the flag \texttt{-sstderr} like this: 
 \begin{alltt}
-./perfI.out +RTS -K100000000 -sstderr -RTS
+cabal run performanceI -- +RTS -K100000000 -sstderr -RTS
 \end{alltt}
 The report this produces is shown in Figure \ref{perfIreport}, which we explain now.
 \begin{titemize}
@@ -1054,7 +1053,7 @@ The report this produces is shown in Figure \ref{perfIreport}, which we explain 
 The first block of information explains how much memory has been used by the computation, and it is clear from this that the maximum space used -- the \emph{residency} -- is high.
 \item
 In the middle block we see the time devoted to various parts of the computation. \texttt{INIT} and \texttt{EXIT} explain the time to start and clean up, but the interesting results are \texttt{MUT} the \emph{mutation} time -- that is time actually computing -- and \texttt{GC}, which is time dealing with storage: recycling information that is not used, and copying information that is still in use. We can see from this that of the total time, 89.6\% is in \texttt{GC}, so we're doing something wrong here. \end{titemize}
-The performance of \texttt{perfIA.out} is twice as bad (!), but for \texttt{perfIS.out}, as shown in  Figure \ref{perfISreport}, we see something much better. How do the two reports compare?
+The performance of \texttt{performanceIA} is twice as bad (!), but for \texttt{performanceIS}, as shown in  Figure \ref{perfISreport}, we see something much better. How do the two reports compare?
 \begin{titemize}
 \item
 The mutation time for the two computations is similar for the two: 0.22 seconds for \texttt{sumI} and 0.16 for \texttt{sumIA}.

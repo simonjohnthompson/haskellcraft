@@ -14,18 +14,14 @@ This appendix\footnote{This appendix was drafted with assistance from Claude Cod
 \subsection*{Problem solving}
 \label{ProbSolving}
 
-At the University of Kent we have tried to incorporate more explicit advice about problem solving strategies into our programming teaching, based on Polya's classic \emph{How to Solve It}. Two handouts developed for this are available online: \emph{How To Program It}, \url{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/HowToProgIt.html} (PDF: \url{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/howToProgIt.pdf}), which discusses general strategies for writing small-scale programs; and \emph{Programming It In Haskell}, \url{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/ProgInHaskell.html} (PDF: \url{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/progInHaskell.pdf}), which shows how these ideas are used in writing small- to medium-size Haskell programs. The approach is also described in the paper \emph{A problem solving approach in teaching functional programming} \url{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/ProbSolvInHas.ps.gz}, published in the proceedings of the First International Conference on Declarative Programming Languages in Education.
+At the University of Kent we have tried to incorporate more explicit advice about problem solving strategies into our programming teaching, based on Polya's classic \emph{How to Solve It}. Two handouts developed for this are available online: \href{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/HowToProgIt.html}{\emph{How To Program It}} (also as a \href{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/howToProgIt.pdf}{PDF}), which discusses general strategies for writing small-scale programs; and \href{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/ProgInHaskell.html}{\emph{Programming It In Haskell}} (also as a \href{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/progInHaskell.pdf}{PDF}), which shows how these ideas are used in writing small- to medium-size Haskell programs. The approach is also described in the paper \href{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/ProbSolvInHas.ps.gz}{\emph{A problem solving approach in teaching functional programming}}, published in the proceedings of the First International Conference on Declarative Programming Languages in Education.
 
 The next section works through a larger-scale example, recognising palindromes, applying this approach in detail.
 
 \subsection*{Recognising palindromes}
 \label{Palindromes}
 
-This section is a worked example of the problem solving process, applied to writing a Haskell function which recognises palindromes -- strings which read the same backwards and forwards, such as
-
-\begin{center}
-\emph{``Madam I'm Adam.''}
-\end{center}
+This section is a worked example of the problem solving process, applied to writing a Haskell function which recognises palindromes -- strings which read the same backwards and forwards, such as \emph{``Madam I'm Adam.''}
 
 \subsubsection*{Understanding the problem}
 
@@ -144,7 +140,7 @@ isCap ch = 'A' <= ch && ch <= 'Z'
 
 \subsubsection*{Conclusion}
 
-This example shows how the problem solving approach applies in Haskell, and how it can help you get started on a problem which at first looks more complicated than it turns out to be. An executable version of the program is available at \url{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/Palin.hs}.
+This example shows how the problem solving approach applies in Haskell, and how it can help you get started on a problem which at first looks more complicated than it turns out to be. An \href{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/Palin.hs}{executable version of the program} is available online.
 
 \subsection*{Minesweeper}
 \label{MinesweeperApp}
@@ -181,6 +177,6 @@ An earlier, graphical interface to the same game, built using a now-defunct Hask
 
 Regular expressions are patterns used to describe the lexical parts of languages, such as numbers and identifiers, as discussed in Chapter \ref{dsls}. Strings matching a regular expression can be detected by a non-deterministic finite automaton (NFA), which can in turn be transformed into a (more efficiently implementable) deterministic finite automaton (DFA), and from there into an optimal DFA.
 
-A fuller account of this material, including the Haskell implementation, is given in the paper \emph{Regular expressions and automata using Haskell} \url{http://www.cs.kent.ac.uk/people/staff/sjt/craft2e/regExp.pdf}. It begins with the definition of regular expressions and how strings are matched against them, giving a first Haskell treatment; after describing an abstract data type of sets, it defines non-deterministic finite automata and their Haskell implementation, shows how to build an NFA corresponding to a regular expression, and how such a machine can be optimised -- first by making it deterministic, then by minimising the state space of the resulting DFA. It concludes with a discussion of regular definitions, and shows how recognisers for strings matching them can be built. The material illustrates many features of Haskell, including polymorphism (the states of an NFA can be represented by objects of any type), modularisation (the system is split across a number of modules), higher-order functions (used, for example, in finding the limits of iterative processes), and type classes, among other features. The accompanying Haskell libraries are available as \url{http://www.cs.kent.ac.uk/people/staff/sjt/craft2e/regExp.tar.gz}.
+A fuller account of this material, including the Haskell implementation, is given in the paper \href{https://link.springer.com/chapter/10.1007/BFb0033853}{\emph{Regular expressions and automata using Haskell}}. It begins with the definition of regular expressions and how strings are matched against them, giving a first Haskell treatment; after describing an abstract data type of sets, it defines non-deterministic finite automata and their Haskell implementation, shows how to build an NFA corresponding to a regular expression, and how such a machine can be optimised -- first by making it deterministic, then by minimising the state space of the resulting DFA. It concludes with a discussion of regular definitions, and shows how recognisers for strings matching them can be built. The material illustrates many features of Haskell, including polymorphism (the states of an NFA can be represented by objects of any type), modularisation (the system is split across a number of modules), higher-order functions (used, for example, in finding the limits of iterative processes), and type classes, among other features. The \href{http://www.cs.kent.ac.uk/people/staff/sjt/craft2e/regExp.tar.gz}{accompanying Haskell libraries} are also available.
 
 \index{problem solving|)}

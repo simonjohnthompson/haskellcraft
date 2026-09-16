@@ -103,3 +103,11 @@
 % Indexing
 
 \newcommand{\minx}[1]{\index{#1@{\ttfamily{}#1}}}
+
+% A minimal \href, since the book doesn't load hyperref: makes an external
+% URL clickable in the PDF (via raw pdfTeX link-annotation primitives)
+% without a visible URL string. Only seen by the real pdflatex build --
+% the website conversion pipeline (tex2md.py) converts each chapter
+% standalone, without \input-ing this file, so pandoc falls back to its
+% own built-in, and equally correct, handling of \href.
+\newcommand{\href}[2]{\pdfstartlink user{/Subtype/Link/Border[0 0 0]/A<</Subtype/URI/URI(#1)>>}#2\pdfendlink}

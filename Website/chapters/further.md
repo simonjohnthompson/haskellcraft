@@ -155,7 +155,7 @@ isCap ch = 'A' <= ch && ch <= 'Z'
 
 #### Conclusion {#conclusion .unnumbered}
 
-This example shows how the problem solving approach applies in Haskell, and how it can help you get started on a problem which at first looks more complicated than it turns out to be. An [executable version of the program](http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/Palin.hs) is available online.
+This example shows how the problem solving approach applies in Haskell, and how it can help you get started on a problem which at first looks more complicated than it turns out to be. An executable version of the program, <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Palindromes/Palin.hs" target="_blank" rel="noopener noreferrer">`Palin.hs`</a>, is included with the `Craft3e` code in `Palindromes/` (see [Working with multiple-module projects](2.md#multipleModuleProgs) for how to obtain and build the code for this book).
 
 ### Minesweeper {#MinesweeperApp .unnumbered}
 
@@ -178,17 +178,17 @@ t7b          Transitive automatic from 7b
 
 These commands should not be followed by a newline. The successive versions are:
 
-- `Minesweeper.hs`: a simple interface -- input a row and column character to uncover a square; run `playGrid`.
+- <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper.hs" target="_blank" rel="noopener noreferrer">`Minesweeper.hs`</a>: a simple interface -- input a row and column character to uncover a square; run `playGrid`.
 
-- `Minesweeper2.hs`: implements `q`, `s`, `m`, `u`, `r`. To play, run `playGame m n` where `m` is the number of mines and `n` the size of the (square) board.
+- <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper2.hs" target="_blank" rel="noopener noreferrer">`Minesweeper2.hs`</a>: implements `q`, `s`, `m`, `u`, `r`. To play, run `playGame m n` where `m` is the number of mines and `n` the size of the (square) board.
 
-- `Minesweeper3.hs`: adds `a` and `t` to the commands above. Played the same way as `Minesweeper2`.
+- <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper3.hs" target="_blank" rel="noopener noreferrer">`Minesweeper3.hs`</a>: adds `a` and `t` to the commands above. Played the same way as `Minesweeper2`.
 
-- `Minesweeper4.hs`: adds `h`. Played the same way as `Minesweeper2`.
+- <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper4.hs" target="_blank" rel="noopener noreferrer">`Minesweeper4.hs`</a>: adds `h`. Played the same way as `Minesweeper2`.
 
-- `Minesweeper5.hs`: a further refinement of `Minesweeper4`, played the same way.
+- <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper5.hs" target="_blank" rel="noopener noreferrer">`Minesweeper5.hs`</a>: a further refinement of `Minesweeper4`, played the same way.
 
-- `MineRandom.hs`: generates a random starting grid, for use with the versions above.
+- <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/MineRandom.hs" target="_blank" rel="noopener noreferrer">`MineRandom.hs`</a>: generates a random starting grid, for use with the versions above.
 
 An earlier, graphical interface to the same game, built using a now-defunct Haskell graphics library and tested only under Hugs on Windows, is also kept in the repository, in `Minesweeper/Graphical/` (`GraphicMine.hs` through `GraphicMine4.hs`), though it is not currently part of the buildable `Craft3e` package.
 

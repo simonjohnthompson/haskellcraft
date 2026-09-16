@@ -140,7 +140,7 @@ isCap ch = 'A' <= ch && ch <= 'Z'
 
 \subsubsection*{Conclusion}
 
-This example shows how the problem solving approach applies in Haskell, and how it can help you get started on a problem which at first looks more complicated than it turns out to be. An \href{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/Palin.hs}{executable version of the program} is available online.
+This example shows how the problem solving approach applies in Haskell, and how it can help you get started on a problem which at first looks more complicated than it turns out to be. An executable version of the program, \codelink{https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Palindromes/Palin.hs}{\texttt{Palin.hs}}, is included with the \texttt{Craft3e} code in \texttt{Palindromes/} (see Section \ref{multipleModuleProgs} for how to obtain and build the code for this book).
 
 \subsection*{Minesweeper}
 \label{MinesweeperApp}
@@ -161,12 +161,12 @@ t7b          Transitive automatic from 7b
 \end{alltt}
 These commands should not be followed by a newline. The successive versions are:
 \begin{itemize}
-\item \texttt{Minesweeper.hs}: a simple interface -- input a row and column character to uncover a square; run \texttt{playGrid}.
-\item \texttt{Minesweeper2.hs}: implements \texttt{q}, \texttt{s}, \texttt{m}, \texttt{u}, \texttt{r}. To play, run \texttt{playGame m n} where \texttt{m} is the number of mines and \texttt{n} the size of the (square) board.
-\item \texttt{Minesweeper3.hs}: adds \texttt{a} and \texttt{t} to the commands above. Played the same way as \texttt{Minesweeper2}.
-\item \texttt{Minesweeper4.hs}: adds \texttt{h}. Played the same way as \texttt{Minesweeper2}.
-\item \texttt{Minesweeper5.hs}: a further refinement of \texttt{Minesweeper4}, played the same way.
-\item \texttt{MineRandom.hs}: generates a random starting grid, for use with the versions above.
+\item \codelink{https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper.hs}{\texttt{Minesweeper.hs}}: a simple interface -- input a row and column character to uncover a square; run \texttt{playGrid}.
+\item \codelink{https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper2.hs}{\texttt{Minesweeper2.hs}}: implements \texttt{q}, \texttt{s}, \texttt{m}, \texttt{u}, \texttt{r}. To play, run \texttt{playGame m n} where \texttt{m} is the number of mines and \texttt{n} the size of the (square) board.
+\item \codelink{https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper3.hs}{\texttt{Minesweeper3.hs}}: adds \texttt{a} and \texttt{t} to the commands above. Played the same way as \texttt{Minesweeper2}.
+\item \codelink{https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper4.hs}{\texttt{Minesweeper4.hs}}: adds \texttt{h}. Played the same way as \texttt{Minesweeper2}.
+\item \codelink{https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper5.hs}{\texttt{Minesweeper5.hs}}: a further refinement of \texttt{Minesweeper4}, played the same way.
+\item \codelink{https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/MineRandom.hs}{\texttt{MineRandom.hs}}: generates a random starting grid, for use with the versions above.
 \end{itemize}
 
 An earlier, graphical interface to the same game, built using a now-defunct Haskell graphics library and tested only under Hugs on Windows, is also kept in the repository, in \texttt{Minesweeper/Graphical/} (\texttt{GraphicMine.hs} through \texttt{GraphicMine4.hs}), though it is not currently part of the buildable \texttt{Craft3e} package.

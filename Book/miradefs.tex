@@ -110,4 +110,10 @@
 % the website conversion pipeline (tex2md.py) converts each chapter
 % standalone, without \input-ing this file, so pandoc falls back to its
 % own built-in, and equally correct, handling of \href.
-\newcommand{\href}[2]{\pdfstartlink user{/Subtype/Link/Border[0 0 0]/A<</Subtype/URI/URI(#1)>>}#2\pdfendlink}
+\newcommand{\href}[2]{\leavevmode\pdfstartlink user{/Subtype/Link/Border[0 0 0]/A<</Subtype/URI/URI(#1)>>}#2\pdfendlink}
+
+% A link to a source file in the book's GitHub repository: a plain \href
+% for the PDF, but the website conversion pipeline (tex2md.py) recognises
+% \codelink specifically and renders it to open in a new browser tab,
+% since following it means leaving the page you're reading to browse code.
+\newcommand{\codelink}[2]{\href{#1}{#2}}

@@ -120,8 +120,9 @@ library
     Minesweeper4
     Minesweeper5
     MineRandom
+    Palin
 
-  hs-source-dirs: . ./Calculator ./Chapter15 ./Chapter16 ./Chapter19 ./Simulation  ./Chapter20 ./Minesweeper
+  hs-source-dirs: . ./Calculator ./Chapter15 ./Chapter16 ./Chapter19 ./Simulation  ./Chapter20 ./Minesweeper ./Palindromes
 
 executable performanceI
   main-is:     PerformanceI.hs

@@ -2275,6 +2275,13 @@ def preprocess(tex, stem):
     tex = strip_balanced_macro(tex, "citeyear", lambda arg: f"XCITEYEAROPEN{arg}XCITECLOSE")
     tex = strip_balanced_macro(tex, "cite", lambda arg: f"XCITEOPEN{arg}XCITECLOSE")
 
+    # \codelink{url}{text} (see miradefs.tex) -> a sentinel wrapping the
+    # link text, so Pandoc still applies its normal formatting to that
+    # text (e.g. \texttt{Palin.hs} -> `Palin.hs`) -- only the surrounding
+    # markers are resolved afterwards, in postprocess(), into a raw HTML
+    # anchor that opens in a new tab.
+    tex = strip_two_arg_macro(tex, "codelink", lambda url, txt: f"CODELINKOPEN{url}CODELINKMID{txt}CODELINKCLOSE")
+
     # Book-specific glyphs/commands with no args.
     tex = tex.replace(r"\step", "~>")
     tex = tex.replace(r"\chapstart", "")
@@ -2556,6 +2563,16 @@ def postprocess(md: str, current_file: str) -> str:
         target = "" if info["file"] == current_file else info["file"]
         return f"[{info['text']}]({target}#{name})"
     md = re.sub(r"XREFOPEN([A-Za-z0-9_\-]+)XREFCLOSE", _resolve_ref, md)
+
+    # \codelink{url}{text} -> CODELINKOPEN...CODELINKMID...CODELINKCLOSE
+    # sentinel (see preprocess()) -> a raw HTML anchor that opens in a new
+    # tab, now that Pandoc has already formatted the link text itself.
+    md = re.sub(
+        r"CODELINKOPEN(.*?)CODELINKMID(.*?)CODELINKCLOSE",
+        r'<a href="\1" target="_blank" rel="noopener noreferrer">\2</a>',
+        md,
+        flags=re.DOTALL,
+    )
 
     # \cite{a,b}/\citeyear{x} -> XCITE(YEAR)OPEN...XCITECLOSE sentinels
     # (see preprocess()) -> links into bibliography.md, one per key,

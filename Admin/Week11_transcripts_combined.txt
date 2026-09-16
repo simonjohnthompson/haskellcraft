@@ -1,0 +1,192 @@
+Introduction to functional programming in Haskell
+Week 11: Abstraction, Functor, Applicative, Monads, Foldable
+Simon Thompson -- https://www.youtube.com/playlist?list=PLqu19-ygE4ocMda7XgriK0BHL8vmlyKPU
+Transcript type: YouTube auto-generated captions (ASR), copy-edited for readability,
+with spoken operators rendered as symbols (>>=, <*>, [], etc.)
+========================================================================
+
+Contents
+  1. Abstraction
+  2. Functor
+  3. Applicative
+  4. Monads
+  5. Monads and computation
+  6. Foldable
+  7. Week 11 summary
+
+------------------------------------------------------------------------
+1. Abstraction
+   https://www.youtube.com/watch?v=B1zHc5QtBNY
+------------------------------------------------------------------------
+
+In this block, I want to talk about abstraction and the way it is reflected in some of the standard type classes of Haskell. If you remember, we talked about abstraction as a question of spotting a pattern — maybe in some data, or maybe in a computation — and representing it directly as an object, as something in the language: an artifact in the language. We talked about spotting the pattern of mapping along a list: taking a function and applying that function f to every element of the list. And we also saw the idea of folding: taking a function which combines all the elements of a list.
+
+We saw that this embodied primitive recursion, so we could define all sorts of things by means of that fold. But if we just look back to mapping, we're saying: map f to every element of the list. But you could just think, well, map could just be apply f to every element in the data structure. And maybe we can think of mapping across data structures other than lists.
+
+In a similar way, we could think of combining all the elements in a data structure using a function, using an operator. So can we think of types that might be mappable, types that might be foldable? The way that we do that is by representing it in a type class, and that's what we're going to do in the next few segments. We're going to look at the type classes of Functor and Applicative, and then we'll move on to Monad, which is really where all this discussion began — how we represent computation inside our Haskell type system.
+
+Okay, let's get started.
+
+------------------------------------------------------------------------
+2. Functor
+   https://www.youtube.com/watch?v=s7vUod9_AM0
+------------------------------------------------------------------------
+
+If you remember, a few blocks back we began to look at the type classes built into Haskell, and we looked mainly at the numeric type classes and some of the simpler ones, like Eq and Ord. What I want to do in this section is look at what we didn't look at then, namely the type classes at the bottom of the diagram — the ones that represent mappable and foldable. Building on top of mappable we get Applicative, and we get the idea of Monads, and I'll talk about each of those type classes, except Traversable, in segments to come.
+
+In this block I want to introduce a piece of terminology. Before I talk about mappable types, let's talk about a functor as a function taking types to types. For example, Maybe is a function: it takes the type Int to the type Maybe Int, which is the type of maybe-integers. Similarly, we can build trees of a particular type — that's applying the tree functor to a particular type like Int or Bool.
+
+Similarly, you can think of list formation as a functor: it takes a type like Bool to the type of lists of Bool. So functors are these things that take types to types. And often many of these type functions — these functors — are mappable. So if we've produced something like a list of Bool, we can turn that list of Bool into a list of Int by taking a function that turns Bools into Ints and applying it to each element of the list.
+
+So let's reflect that in a type class definition. What we say here is: class Functor g. So for g to be in this type class, g must be a functor — a function from types to types. What do we have to do?
+
+We have to have a thing called fmap, which, given a function from A to B and something of type g A, gives us back something of type g B — where, for example, g is the list type. This is just the familiar map function that you see on the left. But what we do in general is traverse the data structure, typically recursively, and apply f to anything of type A that we find, and that's how we declare an instance of the Functor type class. So we know the definition for lists — but what are these other types?
+
+Well, one example is the Maybe type. You remember the Maybe type? There are two constructors: one is Nothing, and the other is Just a. So it essentially says you either get something of type A, or you get nothing.
+
+And what does fmap do over that type? Well, if we apply fmap f to Nothing, we get Nothing. Whereas if we apply fmap f to Just x, f can be applied to x and return Just (f x), which is of type Maybe B. We start off with something of type Maybe A, so x is of type A; we finish up with Just (f x), which is of type Maybe B.
+
+So it's taken something of type Maybe A to something of type Maybe B. Okay, a bit more complicated: we can do a similar thing for a binary tree. We can map across all the objects of type A inside a tree — remember, here's the type of the tree on the left.
+
+It's either a leaf, or it's a node with a left subtree, a value of type A, and a right subtree. What do we do to apply f to everything of type A in the tree? Well, if we apply fmap f to a leaf, we get a leaf. If we apply fmap f to a node, we recursively apply fmap f to the left subtree t1 and the right subtree t2, but we apply f to that value x of type A sitting at the node, and that gives us a value of type B.
+
+So that runs through, and you can see we have mapped here. The tree is a complicated structure, but at each internal node there's a value of type A, and what we've done is apply f to transform that to something of type B. And of course, we shouldn't forget lists themselves — we write the list type constructor as [].
+
+Here I'm defining an instance for that: fmap f on the empty list is the empty list, and fmap f on (x:xs) is f x : fmap f xs. In other words, fmap is map over lists. There are many more examples, but these are the most important ones, I think.
+
+So with things like trees you can map every element of type A to something of type B; with the Maybe type you can transform the one element; and so on. So that's one of the simplest structural type classes — it allows us to uniformly transform things of type A into things of type B across an arbitrary, or very different, range of data structures.
+
+------------------------------------------------------------------------
+3. Applicative
+   https://www.youtube.com/watch?v=pJf3q37uxbo
+------------------------------------------------------------------------
+
+Now, you won't be surprised to learn that there are ways of generalizing what we've just talked about for Functor, and one way of doing it is to build what's called the Applicative type class. Applicative takes the idea of the way we moved from map to zipWith. If you remember, with zipWith we had two lists and a two-argument function, and we applied that function to corresponding elements of the lists — took corresponding elements, applied the function to those pairs, and built a list of the answers we found.
+
+So we traverse the data structures simultaneously and apply f to anything of type A and B we can find, and you can see that's generalized to this liftA2 function you see here. We have a function A -> B -> C, and it takes a g A and a g B and gives us a g C — just as zipWith took a list of A and a list of B and gave us back a list of C. So we're concentrating on this function; we'll talk about one of the other functions in a few slides' time. Okay.
+
+So obviously, because I've talked about this generalizing zipWith, we can think of writing an instance of Applicative for lists. But what else can we do? Oh, and by the way, Applicative builds on Functor, so we only look at Applicative for type functions g which are already functors. Well, the Maybe type again comes in.
+
+Suppose we're lifting a function f. We take two arguments of type Maybe A. Well, if we have a Just x and a Just y, we can apply f to x and y and return Just (f x y). In every other case, we don't have something of both types A and B, so we just return Nothing.
+
+So if both the values are defined — both values are not Nothing — we can produce a result; otherwise, we just produce Nothing. We can also do this for trees, so here we have the case — I've put the leaf cases first.
+
+If you've got a leaf on the left, there are no values on the left-hand side; if you've got a leaf on the right, there are no values on the right-hand side. So in both those cases, we return a leaf. And in the node case, we have two nodes — we have a value x of type A and a value y of type B.
+
+So we can apply f to those, giving us f x y of type C. Then, on the left, we recursively apply liftA2 f to t1 and s1, the left subtrees; and on the right we apply it to t2 and s2, the right subtrees. So only in the case where there are corresponding values of type A and B are we able to apply f — otherwise we simply return a leaf.
+
+We can also define it in another way — this is the <*> operator — which says we can think of applying a structure of functions to a structure of arguments. So we traverse the function data structure and the argument data structure, and we apply a function that we find to an element of type A that we find. Let's see how those definitions work out. In the case of Maybe, if we have Just f and Just x, we can return Just (f x); otherwise we return Nothing. In the case of a tree, if we have a node on both sides — so there'll be a function on the left-hand side and a value on the right-hand side — we can apply the function to the value, make that the value at the new node, and recursively apply that same operation to the left subtrees T1 and S1 and the right subtrees T2 and S2.
+
+So that's the way this other Applicative operation works — it's a sort of applicative application, if you like: applying a structure of functions to a structure of argument values. Now, for lists, we'll see there are two ways we can define lists as an instance of Applicative. We can traverse the data structures simultaneously, applying functions to arguments, or we can traverse the data structures not simultaneously, just pulling arguments and functions out willy-nilly and then returning the result.
+
+So in the first case — the one presented first — we run along the lists in lock step: we take the first element, which is a function, and the first element, which is an argument, apply the function to the argument, and then recurse. But in the other instance of Applicative, we take every possible function from the list of functions and every possible argument from the list of arguments, and apply each function to each argument. So that combination takes all possible pairings of values from the first list and the second. So which is the correct one? Well, the answer is that the one that fits better with what we want to say later is the second one, and it's the basis on which we build our explanation of how lists are a monad.
+
+And that's what we're going to talk about in the next segment: what monads are, and how they're defined in Haskell.
+
+------------------------------------------------------------------------
+4. Monads
+   https://www.youtube.com/watch?v=TB72Yn_mdKE
+------------------------------------------------------------------------
+
+In this segment, we'll look at the Monad type class, which is used, among other things, to help us deal with IO and other kinds of side-effecting computations, or general computations, in Haskell. When Haskell was first designed, there were a number of competing ways of dealing with IO — some inherited from other languages, and some new ones were prototyped — but the approach that had the most traction was the one using what are called monads. That's what we're going to look at here.
+
+Now, monads are somewhat controversial. You'll find lots of different videos introducing monads, each with its own particular approach — you could say this one is yet another. Some people say they're overly mathematical; others say they're straightforward. What I hope I can do here is give you an explanation that is intuitive and straightforward, and that helps you understand what is perhaps a not-so-familiar, not-so-comprehensible operation called bind.
+
+I'll explain that in terms of something a bit more straightforward: a generalized function composition. But I'm jumping ahead of myself a bit there — let's get started with the basics. So what is something of type IO A? IO is an instance of the Monad type class.
+
+It's the instance that allows us to do IO from Haskell. What it is, is a type of computations, if you like — representations of IO programs. Something of type IO A is something that does some side effects and yields a result of type A.
+
+Now the types IO A and A are different — they're not the same. Elements from A can be used in the IO A world: a pure integer can be used in a program which does all sorts of side effects and produces an integer. But there isn't a way of converting an IO A back to a plain A. The nice thing is that there is a way of sequencing computations that do side effects, and that's the idea behind monads.
+
+So the class and the definition of the Monad class — it builds on top of Applicative, hence the descriptions of Applicative we've already had, with descriptions and examples. There are two operations in Monad. One is return, which takes something of type A to something of type M A — it moves something from the pure world into the computational world; in the case of IO, it allows you to use a pure value inside a computation. But we also have the operator bind (>>=), which takes something of type M A and a function A -> M B, and gives us back an M B.
+
+I want to explain a related function called fish (>=>), and then explain bind in terms of that, because I think that gives a more intuitive explanation than going directly into bind. So let's do that now. This operator, fish (>=>), is a generalized function composition. Here's the type: it takes something of type C -> M A and something of type A -> M B, and gives us something of type C -> M B.
+
+You can think of a function C -> M A as being a function C -> A that has side effects. Here I've illustrated that with a function arrow that has a cloud attached — those are the side effects going on when you apply that function. We can have a similar function A -> M B that also has side effects. This operator, fish (>=>), takes the output from the first side-effecting function and pipes it into the input of the next one. So putting those two functions together, we get a function C -> M B.
+
+So if we think of a function from something to a monad type M as a generalized function, then this is the generalized way we do function composition — composing side-effecting functions together using this operator. Now, this operator, fish, is closely related to the operator bind. As I've explained, fish is a generalized composition that sequences functions with side effects. You can think of bind in the same way.
+
+It's a generalized application that applies a side-effecting function to a side-effecting value. What I'm going to show you now is that you can define each of these in terms of the other. Let's have a look at fish first — here's a definition of fish using bind. We want to sequence together the functions f and g, which have side effects.
+
+How do we do that? Well, we return a function that takes x of type C. What's the result of that? Remember, f expects a value of type C, so we apply f to x.
+
+That gives us something of type M A. Then we can bind that value and use it in g — bind takes the result of a side-effecting function and passes it into another side-effecting function. So, straightforwardly, we apply f to x, bind that value into g, and that's the result of our overall function C -> M B. Going in the other direction, suppose we want to define bind in terms of function composition.
+
+What we do is compose with a function that has a constant value v. Suppose we've got the value v of type M A. Then we compose g with the constant function () -> v. Composing those two functions together gives us a function () -> M B.
+
+Then we apply that whole function to (), and that gives us something of type M B. So you can think of fish (>=>) as a generalized composition and bind (>>=) as a generalized application — it takes a monadic value and a pure function returning a monadic value, and gives you back a monadic value of the function's result type. So that explains the functions in the Monad type class.
+
+What we'll do next is look at some instances of that type class beyond just IO.
+
+------------------------------------------------------------------------
+5. Monads and computation
+   https://www.youtube.com/watch?v=CU1iYIzP0uc
+------------------------------------------------------------------------
+
+Now I've talked about IO as being one kind of computation — it does side effects. But we can think of other type-forming operations, other functors, as computations themselves. We can think of Maybe A as a computation that might give us a result, or might give an error, and we've been using it like that in what we've done earlier in the course.
+
+We can think of lists of A as computations with multiple results of type A — they could represent a nondeterministic program where we collect all the possible results into a list. We could also think of the state monad: these are computations which return an A, but in the background there's a state of type B that is modified. So in the first case, the side effect is that you might not get a result; in the second case, it's the side effect of having multiple results.
+
+The third is that you've got a state being manipulated. But these are all different kinds of computation, if you like, and they all have the property that you can turn an ordinary value into a value of that type, and that you can sequence those computations together in a sensible way — and that's what we do by defining the >>= operator, which is sometimes called bind (I'll explain why in a couple of slides' time). So what about the Monad instance for the Maybe type? Well, return x — we just apply Just. So return x is the thing that converts us from type A to type Maybe A.
+
+We just apply Just. Now, what about applying bind, >>=? Suppose the first thing returns Just x. Then we apply f to that x, to give f x. And in the second case, where the M A is Nothing, we simply return Nothing.
+
+So what that does is apply f if there is a value to apply it to; otherwise it returns Nothing. In the case of lists, what do we do? How do we inject an element into the list type? We just have the singleton list. Now, what about the case where we have a list of results and this function f to apply — what do we do?
+
+Well, we apply f to everything in that list, and each of those answers will be a list. So we concatenate that list of lists into a single list — we do a map followed by a concat, or, if you like, we can define it as a list comprehension: we choose an element x from the list xs, and we choose an element z from the list we get by applying f to x.
+
+So it's equally well defined — those two definitions are equivalent. It's a way of thinking of the list monad as a multiple computation: we have multiple arguments, and when we apply f we get multiple results, so we have to deal with those two levels of multiplicity. We map to get a list of lists, and then concatenate that list of lists to get a list containing all the possible answers of the overall computation. Now, obviously the IO type has a return and a bind too, but those are built in.
+
+So I'm not giving you those definitions here. Now, why do we call this operator bind? We'll see what happens here, and it also lets us explain what goes on in do notation. Let's look at this simple example in the middle, on the right-hand side of the slide. We've got a do block where we have some monadic computation returning r.
+
+We get the r value from that, and then we do a computation involving r. What's that shorthand for? It's shorthand for: the monadic computation returning r, bind, and then the function taking r into that computation involving r. So do notation is another way of writing the binding of r to the result of the first part of the computation. What we do in the un-sugared notation, where we don't have do, is have an expression returning r and bind that to a function, lambda r, which then does the computation that involves r.
+
+So behind do notation — where I've rather waved my hands about how it works — is this definition, where we replace binding to r with passing to a function; and if the first computation doesn't return anything, we simply sequence with the constant function of doing whatever comes next. So underneath do notation is this bind, >>=, operation. As I explained earlier, I find the best way of understanding that is to think of it as a way of sequencing together functions that do side effects. Now, there's quite a lot of stuff in there — I haven't talked about the state monad, for example, which you can find information about in the book.
+
+But I guess the crucial thing to understand here is the notion of a monad as a form of computation. I think the examples of lists and of Maybe are quite evocative — a computation that may not give you an answer, a computation that could give you multiple answers — and you can see how bind is defined in those cases to do exactly what you'd expect. In the case of the state monad, what you do is perform some computation in the first function, and then use the result and the updated state when you invoke the second function — you thread the state through those two computations.
+
+That's how bind works in that case. Okay, that's a high-level summary of Monad, but I think the insight of a generalization of function composition, and thinking of these as general computations with side effects, should give you the intuition behind what we've been doing with the IO monad earlier in the—
+
+[Transcript ends here; the source video's auto-captions stop mid-sentence.]
+
+------------------------------------------------------------------------
+6. Foldable
+   https://www.youtube.com/watch?v=J9-W6xJNG_E
+------------------------------------------------------------------------
+
+Finally, we can get back to something we saw when we first started looking at GHCi. We saw that you can ask GHCi for the type of a function, and when we started looking at lists, we saw that the length function on a list in fact involves the Foldable type class — it says you can apply length to anything that's an instance of Foldable. Let's try to understand what's going on with Foldable.
+
+The idea is that Foldable embodies the fact that you can fold elements together, in the way that we do with list recursion. So, for example, here foldr takes two parameters: the function which embodies the recursion step — a function from A -> B -> B — and the value that's the starting value, B; and it folds together a list of A into a single B. Here you see the definition of the length function: it takes the particular value in the list and the length so far, n, and adds one to it for that extra node in the list, and you start off with the value zero. So this is how we define the Foldable type class — we say what you have to do for a type function T to be in the Foldable class.
+
+You have to have a foldr function, which takes things of type T A, the recursion function, and the starting value, and gives back a B. Obviously the list type is an instance of Foldable just by the traditional definition of foldr, but there are other things we can do as well. Maybe is also an instance of the Foldable class — what do we do there?
+
+Well, if we have Nothing, we return the value a, the starting value. Otherwise, if we have Just x, we have a single value of the data type, and folding that with g and a, we apply g to x and a. You can see that if Nothing were represented as an empty list, and Just x as a singleton list, this is exactly the definition we'd have for those two. So you can see it's a generalization of folding. Let's look at something a bit more interesting: we can take the type of binary trees, Tree a, where a tree is either empty or a node with a left subtree, a value of type A, and a right subtree, and we can fold over that — you can see the definition down here.
+
+So we're folding with a function f and the starting value z, and on an empty tree we return the starting value z. But more interestingly, what do we do on a node with a left subtree L, a value, and a right subtree R? The answer is: we fold over the left subtree, with the initial value being the fold over the rest of the tree — that is, the fold over the right subtree, with the value v included as well. So it's f v applied to foldr of the right subtree.
+
+Let's see what folding over a tree looks like. In GHCi we can ask for the length of a tree — this is a tree with three nodes, and we get the answer that it is of length three. We could also ask for the sum of that tree, and we get the answer 11.
+
+Or indeed, we could do a fold ourselves: we could foldr with the list constructor (:) and the empty list, and apply that to this tree. What would you expect that to do? Yes, you're probably right — what that does is turn the tree into a list.
+
+It flattens the tree, and you can see it's traversing the tree from left to right — first through the left subtree, then the value, then the right subtree. Okay, going back to our slides — we've seen that we can take non-trivial data structures, things other than lists, and fold over them. In fact, derived instances of Foldable are allowed too.
+
+If you derive Foldable for the tree type, you'll get the definition you see here. But I've only just touched the surface of what's going on with the Foldable type class — there's comprehensive coverage of the way laziness and strictness interact with folding, and also infinite corecursion. The documentation for Data.Foldable, the module that contains all these definitions, is the place to look; it has a very nice exposition of examples and the various different approaches you might use to folding to produce different kinds of recursion. And of course, that's just the start — there are type classes such as Traversable, and monoids and semigroups, and so on. There isn't space or time to look at those in this course, but if you look in the wikibook you'll find abundant information about them.
+
+Now, as I'm perhaps beginning to hint here, Haskell has become a complicated language. There are large numbers of extensions to the type system, and large libraries, and that's a good thing — it allows us to build things quickly. But it can mean that if we use, particularly, cutting-edge features — like type-level values, or some approaches to lenses — it can make code harder to read, and, more worryingly, harder to maintain. If libraries come and go, if libraries change, it can be difficult if code was written two or three years ago using a cutting-edge library and that library is no longer maintained.
+
+It can be very difficult to maintain the codebase itself. So some of us, I think, would argue for a more modest Haskell — would argue that, if you're using Haskell, don't use every new feature, don't use every new library. Think about the simplest way, at least to start with, of expressing what you want to do, and only make it more complicated when you really find the need to. In particular, that applies to generalization and abstraction: write the simplest version first, and then, if you can see a useful generalization, do that later on.
+
+But don't over-generalize without knowing why you're doing it.
+
+------------------------------------------------------------------------
+7. Week 11 summary
+   https://www.youtube.com/watch?v=IzTvAkWqzCM
+------------------------------------------------------------------------
+
+Let me summarize the key messages of block 11. The block led up to a discussion of monads, and monads are a model of computations that do something else too — they're not just pure functions, which is how Haskell normally works. So it's a way of modelling, within a pure world, things which do side effects, perhaps raise an error, or have multiple results. Now, how can we deal with those within this pure world?
+
+The answer is that we can build complicated computations by sequencing together simpler ones, and that's what the operations bind (>>=) and do give us. They allow us to fit together these kinds of special computations, such as IO or non-deterministic computations with multiple results, and build large computations from simpler ones. Then, in the case of an IO computation, we can run that and actually do real IO in the GHCi interpreter, for example. Now, monads, we saw, are built on top of Functor and Applicative, so if you're in a monad, you also have the capabilities of those type classes.
+
+So you get things like map, and a zipWith-like function. We also saw that there are other classes, including Foldable, that do some generalization. A lot of these classes have been built on generalizing — Functor is built on generalizing map, for example, from lists. Foldable generalizes fold over lists to other suitable types, where you can combine all the elements together. There are many more type classes in Haskell.
+
+I'm not going to treat them here, but there are plenty of resources, including the wikibook on Haskell, where you can find a multitude of information about them [transcript unclear at this point — source captions read "Close"].

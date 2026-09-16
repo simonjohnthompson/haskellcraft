@@ -2,11 +2,11 @@
 
 <a id="ix-projects-project-ideas"></a>
 
-In this appendix[^1] we give some ideas for extended Haskell projects, building on what we have covered here. Most of the projects can be implemented using what you have learned in this text, but many would gain from using libraries on the Hackage site. The projects are also discussed in more detail in the online supplement to the text, which appears at <https://www.haskellcraft.com/>.
+In this appendix[^1] we give some ideas for extended Haskell projects, building on what we have covered here. Most of the projects can be implemented using what you have learned in this text, but many would gain from using libraries on the Hackage site.
 
 ### Problem solving {#problem-solving .unnumbered}
 
-We give some general advice about problem solving at <https://www.haskellcraft.com/craft3e/Prob_solving.html>, and apply it to the example of palindromes at <https://www.haskellcraft.com/craft3e/Palindromes.html>.
+We give some general advice about problem solving, and apply it to the example of palindromes, in Appendix [Problem solving and further examples](further.md#further).
 
 ### Games and puzzles {#games-and-puzzles .unnumbered}
 
@@ -24,7 +24,7 @@ A third problem is to *provide assistance* to a human solver: can you give hints
 
 #### Minesweeper {#minesweeper .unnumbered}
 
-The minesweeper program requires the player to uncover mines in a minefield without setting any of them off, when the player is given the count of mines on squares adjacent to each uncovered square. Many games are available online to provide examples, and we provide one approach to the solution at <https://www.haskellcraft.com/craft3e/Minesweeper.html>.
+The minesweeper program requires the player to uncover mines in a minefield without setting any of them off, when the player is given the count of mines on squares adjacent to each uncovered square. Many games are available online to provide examples, and we provide one approach to the solution in Appendix [Problem solving and further examples](further.md#further).
 
 One problem is to re-implement one of these *interactive games*: it could use \"text graphics\", specifying the square to uncover by giving its coordinates, or could work interactively in a graphics system or browser.
 
@@ -94,7 +94,7 @@ What is the best way to get the result that you want? On the basis of historical
 
 ### Finite-state machines {#finite-state-machines .unnumbered}
 
-One of the fundamental abstractions in computer science is the *finite-state machine* (FSM) ([Aho et al. 2006](bibliography.md#dragon2ed)). We saw earlier that we can write recognisers for regular expressions, but more efficient implementations are given by deriving NFAs from regular expressions, and then (minimal) DFAs from those NFAs. We cover some of this at <https://www.haskellcraft.com/craft3e/Reg_exps.html>.
+One of the fundamental abstractions in computer science is the *finite-state machine* (FSM) ([Aho et al. 2006](bibliography.md#dragon2ed)). We saw earlier that we can write recognisers for regular expressions, but more efficient implementations are given by deriving NFAs from regular expressions, and then (minimal) DFAs from those NFAs. We cover some of this in Appendix [Problem solving and further examples](further.md#further).
 
 #### Conversion chain {#conversion-chain .unnumbered}
 

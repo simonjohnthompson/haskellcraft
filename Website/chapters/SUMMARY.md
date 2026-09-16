@@ -35,6 +35,7 @@
 - [Appendix D: Haskell practicalities](otherHs.md)
 - [Appendix E: GHCi errors](errors.md)
 - [Appendix F: Project ideas](projects.md)
+- [Appendix G: Problem solving and further examples](further.md)
 
 ---
 

@@ -377,7 +377,7 @@ SUBSCRIPT_SHORTHANDS = _load_subscript_shorthands()
 # The order root.tex \includes them in -- also the book's own chapter
 # numbering (0 is the intro; the back matter has no chapter number).
 CHAPTER_STEMS = [str(i) for i in range(0, 22)] + [
-    "appendix1", "glossary", "opsTable", "otherHs", "errors", "projects",
+    "appendix1", "glossary", "opsTable", "otherHs", "errors", "projects", "further",
 ]
 
 
@@ -1066,6 +1066,7 @@ CHAPTER_SHORT_LABELS = {str(i): f"Ch. {i}" for i in range(0, 22)}
 CHAPTER_SHORT_LABELS.update({
     "appendix1": "Appendix", "glossary": "Glossary", "opsTable": "Operators",
     "otherHs": "Other implementations", "errors": "Errors", "projects": "Projects",
+    "further": "Problem solving",
 })
 
 

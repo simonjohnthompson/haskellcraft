@@ -1,0 +1,186 @@
+%\documentclass{book}\usepackage{sjtfonts}\usepackage{includegraphics}\usepackage{alltt}\usepackage{latexsym}
+%\usepackage{array}\usepackage{multicol}
+%\begin{document}\input{defs0}\input{miradefs}\appendix
+
+
+%\minitocoptionfalse
+\chapter{Problem solving and further examples}
+\label{further}
+\index{problem solving|(}
+\normalfont\normalsize
+
+This appendix\footnote{This appendix was drafted with assistance from Claude Code v2.1.236 (Claude Sonnet 5), Anthropic, 2026.} collects material that used to live on the companion website for this book: general advice on problem solving, a worked example of the design process applied to recognising palindromes, background on the Minesweeper implementations that accompany the \texttt{Craft3e} code, and a note on the regular-expressions and automata material referred to in Appendix \ref{projects}.
+
+\subsection*{Problem solving}
+\label{ProbSolving}
+
+At the University of Kent we have tried to incorporate more explicit advice about problem solving strategies into our programming teaching, based on Polya's classic \emph{How to Solve It}. Two handouts developed for this are available online: \emph{How To Program It}, \url{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/HowToProgIt.html} (PDF: \url{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/howToProgIt.pdf}), which discusses general strategies for writing small-scale programs; and \emph{Programming It In Haskell}, \url{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/ProgInHaskell.html} (PDF: \url{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/progInHaskell.pdf}), which shows how these ideas are used in writing small- to medium-size Haskell programs. The approach is also described in the paper \emph{A problem solving approach in teaching functional programming} \url{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/ProbSolvInHas.ps.gz}, published in the proceedings of the First International Conference on Declarative Programming Languages in Education.
+
+The next section works through a larger-scale example, recognising palindromes, applying this approach in detail.
+
+\subsection*{Recognising palindromes}
+\label{Palindromes}
+
+This section is a worked example of the problem solving process, applied to writing a Haskell function which recognises palindromes -- strings which read the same backwards and forwards, such as
+
+\begin{center}
+\emph{``Madam I'm Adam.''}
+\end{center}
+
+\subsubsection*{Understanding the problem}
+
+The first stage of the problem solving process is to work out exactly what the problem is. A palindrome is a string of text which reads the same backwards and forwards, if
+\begin{itemize}
+\item
+we disregard the punctuation (punctuation marks and spaces) in the string; and
+\item
+we disregard the case (upper or lower) of the letters in the string.
+\end{itemize}
+
+At this stage we can already say something about the Haskell function we are going to write. We will call it \texttt{palin}. What is its type? It takes the string we are checking as its argument, and the result of the test is a Boolean, so
+\begin{alltt}
+palin :: String -> Bool
+\end{alltt}
+
+\subsubsection*{Starting the design}
+
+Now that we know what we are aiming at, we can design a solution. A number of strategies help here, including looking for related problems, functions we already know which we might use, and trying to break the problem into parts we can solve separately. The palindrome problem breaks into two parts: disregard the punctuation and case, and then reverse the string and compare it with its original form.
+
+We can solve these two separately. Suppose that the string \texttt{st} contains no punctuation and is already in lower case; then we just need the second part:
+\begin{alltt}
+palin st = (reverse st == st)
+\end{alltt}
+which reverses the string \texttt{(reverse st)} and compares it with the original \texttt{(... == st)}. This leaves us needing to solve the problem of reversing a string:
+\begin{alltt}
+reverse :: String -> String
+\end{alltt}
+
+To solve the whole problem, we need to do the same, but to a string which has had its punctuation and case disregarded:
+\begin{alltt}
+palin st = (reverse st' == st')
+           where
+           st' = disregard st
+\end{alltt}
+where the function which disregards punctuation and case is
+\begin{alltt}
+disregard :: String -> String
+\end{alltt}
+
+\subsubsection*{Carrying on}
+
+Our problem has now been broken down into two simpler problems: defining \texttt{reverse} and \texttt{disregard}.
+
+To reverse a string, which is a list of characters (\texttt{[Char]}), we define the function from scratch (setting aside that it is already in the standard prelude). We can think this through in stages, left-hand side first:
+\begin{alltt}
+reverse :: String -> String
+
+reverse []     = ...
+reverse (a:st) = ...
+\end{alltt}
+which are the two cases of an empty string, and a non-empty string whose first element is \texttt{a} and whose remainder (or tail) is \texttt{st}.
+
+An empty string reversed is empty:
+\begin{alltt}
+reverse []     = []
+\end{alltt}
+while in the general case we can be guided by an example. In this sort of definition we define \texttt{reverse (a:st)} using \texttt{reverse st}. Take the example \texttt{"door"}. Reversing the tail gives \texttt{"roo"}, and we get what we want by sticking \texttt{"d"} on the end. So,
+\begin{alltt}
+reverse (a:st) = reverse st ++ [a]
+\end{alltt}
+where \texttt{++} joins together two strings and \texttt{[a]} is the string made up of the single character \texttt{a}.
+
+The final problem is to define \texttt{disregard}, which as we saw above consists of two parts: removing punctuation, and changing capital letters to lower case. We can solve these separately, with
+\begin{alltt}
+remove :: String -> String
+change :: String -> String
+\end{alltt}
+We build \texttt{disregard} by applying these in turn: either \texttt{disregard st = remove (change st)} or \texttt{disregard st = change (remove st)}. Here is an example of reflecting on our design without having implemented either function: we choose the latter, since under this definition we only need to change those characters which remain in the string. This lets us write the definition more concisely still, as the composition
+\begin{alltt}
+disregard = change . remove
+\end{alltt}
+first applying \texttt{remove}, and then applying \texttt{change} to the result.
+
+\subsubsection*{The last steps}
+
+It remains to define \texttt{remove} and \texttt{change}. The former follows the familiar recursion pattern over a list:
+\begin{alltt}
+remove :: String -> String
+
+remove []     = []
+remove (a:st) = ...
+\end{alltt}
+In the \texttt{(a:st)} case there are two possibilities, depending on whether \texttt{a} is a punctuation character or not; if it is not, \texttt{a} goes into the result, and in both cases the remainder comes from removing punctuation from \texttt{st}:
+\begin{alltt}
+remove (a:st)
+  | notPunct a = a : remove st
+  | otherwise  =     remove st
+\end{alltt}
+where we can decide whether we have punctuation with, for instance,
+\begin{alltt}
+notPunct :: Char -> Bool
+notPunct ch = isAlpha ch || isDigit ch
+\end{alltt}
+that is, that we have either a letter or a digit.
+
+Finally, \texttt{change} affects each character in the list in turn:
+\begin{alltt}
+change :: String -> String
+
+change []     = []
+change (a:st) = convert a : change st
+\end{alltt}
+where
+\begin{alltt}
+convert :: Char -> Char
+convert ch
+  | isCap ch  = decode (code ch + offset)
+  | otherwise = ch
+    where
+    offset = code 'a' - code 'A'
+
+isCap :: Char -> Bool
+isCap ch = 'A' <= ch && ch <= 'Z'
+\end{alltt}
+
+\subsubsection*{Conclusion}
+
+This example shows how the problem solving approach applies in Haskell, and how it can help you get started on a problem which at first looks more complicated than it turns out to be. An executable version of the program is available at \url{http://www.cs.kent.ac.uk/people/staff/sjt/Haskell_craft/Palin.hs}.
+
+\subsection*{Minesweeper}
+\label{MinesweeperApp}
+\index{Minesweeper}
+
+Minesweeper is a long-lived and popular computer game, with a great many implementations. The game is played on a rectangular board divided into a number of squares, beneath some of which lie mines. Clicking on a mine loses the game; otherwise the square is cleared and the number of mines on adjacent squares is shown -- and if the square has no adjacent mines, the whole mine-free region containing it is uncovered. The player wins once all the mines are marked and every other square is cleared.
+
+A series of text-interface Haskell implementations of Minesweeper, originally written in 2002 and used as a case study for refactoring Haskell programs, are included with the \texttt{Craft3e} code in \texttt{Minesweeper/} (see Section \ref{multipleModuleProgs} for how to obtain and build the code for this book). The commands used in the textual versions are:
+\begin{alltt}
+q            Quit
+h            Help information
+m7b          Mark position 7b
+u7b          Unmark position 7b
+r7b          Reveal position 7b
+s7b          Show equations at 7b
+a7b          Automatic turn at 7b
+t7b          Transitive automatic from 7b
+\end{alltt}
+These commands should not be followed by a newline. The successive versions are:
+\begin{itemize}
+\item \texttt{Minesweeper.hs}: a simple interface -- input a row and column character to uncover a square; run \texttt{playGrid}.
+\item \texttt{Minesweeper2.hs}: implements \texttt{q}, \texttt{s}, \texttt{m}, \texttt{u}, \texttt{r}. To play, run \texttt{playGame m n} where \texttt{m} is the number of mines and \texttt{n} the size of the (square) board.
+\item \texttt{Minesweeper3.hs}: adds \texttt{a} and \texttt{t} to the commands above. Played the same way as \texttt{Minesweeper2}.
+\item \texttt{Minesweeper4.hs}: adds \texttt{h}. Played the same way as \texttt{Minesweeper2}.
+\item \texttt{Minesweeper5.hs}: a further refinement of \texttt{Minesweeper4}, played the same way.
+\item \texttt{MineRandom.hs}: generates a random starting grid, for use with the versions above.
+\end{itemize}
+
+An earlier, graphical interface to the same game, built using a now-defunct Haskell graphics library and tested only under Hugs on Windows, is also kept in the repository, in \texttt{Minesweeper/Graphical/} (\texttt{GraphicMine.hs} through \texttt{GraphicMine4.hs}), though it is not currently part of the buildable \texttt{Craft3e} package.
+
+\subsection*{Regular expressions and automata}
+\label{RegExpsApp}
+\index{regular expression!further reading}
+
+Regular expressions are patterns used to describe the lexical parts of languages, such as numbers and identifiers, as discussed in Chapter \ref{dsls}. Strings matching a regular expression can be detected by a non-deterministic finite automaton (NFA), which can in turn be transformed into a (more efficiently implementable) deterministic finite automaton (DFA), and from there into an optimal DFA.
+
+A fuller account of this material, including the Haskell implementation, is given in the paper \emph{Regular expressions and automata using Haskell} \url{http://www.cs.kent.ac.uk/people/staff/sjt/craft2e/regExp.pdf}. It begins with the definition of regular expressions and how strings are matched against them, giving a first Haskell treatment; after describing an abstract data type of sets, it defines non-deterministic finite automata and their Haskell implementation, shows how to build an NFA corresponding to a regular expression, and how such a machine can be optimised -- first by making it deterministic, then by minimising the state space of the resulting DFA. It concludes with a discussion of regular definitions, and shows how recognisers for strings matching them can be built. The material illustrates many features of Haskell, including polymorphism (the states of an NFA can be represented by objects of any type), modularisation (the system is split across a number of modules), higher-order functions (used, for example, in finding the limits of iterative processes), and type classes, among other features. The accompanying Haskell libraries are available as \url{http://www.cs.kent.ac.uk/people/staff/sjt/craft2e/regExp.tar.gz}.
+
+\index{problem solving|)}

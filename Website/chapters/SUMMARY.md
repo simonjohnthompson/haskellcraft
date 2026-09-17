@@ -22,10 +22,11 @@
 - [Chapter 15: Case study: Huffman codes](15.md)
 - [Chapter 16: Abstract data types](16.md)
 - [Chapter 17: Lazy programming](17.md)
-- [Chapter 18: Programming with monads](18.md)
-- [Chapter 19: Domain-Specific Languages](19.md)
-- [Chapter 20: Time and space behaviour](20.md)
-- [Chapter 21: Conclusion](21.md)
+- [Chapter 18: I/O programming](18.md)
+- [Chapter 19: Abstraction: functors, monads and folding](18.5.md)
+- [Chapter 20: Domain-Specific Languages](19.md)
+- [Chapter 21: Time and space behaviour](20.md)
+- [Chapter 22: Conclusion](21.md)
 
 # Appendices
 

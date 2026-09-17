@@ -2550,6 +2550,31 @@ def postprocess(md: str, current_file: str) -> str:
     )
     md = re.sub(r"\[\]\{#([A-Za-z0-9_.\-]+)\}", r'<a id="\1"></a>', md)
 
+    # \begin{center}...\end{center} becomes a Pandoc fenced Div, "::: center"
+    # / (matching number of colons, 3+, chosen by Pandoc to out-run any
+    # colon run already inside the content) / ":::" -- also not plain
+    # CommonMark, so mdBook's renderer (pulldown-cmark) left it as literal
+    # "::: center"/":::" text sitting either side of the (correctly
+    # rendered) content. Almost every use in the book is a bare
+    # \includegraphics, which by this point has already become a
+    # self-centering <figure> (see the "Images with no caption" pass
+    # below/above -- .content figure has text-align:center in custom.css),
+    # making the wrapper redundant; the rare non-image case (e.g. Chapter
+    # 21's a centered table) can't be wrapped in a real <div> either,
+    # since CommonMark treats a line starting with a block HTML tag as a
+    # raw HTML block that swallows every line verbatim up to the next
+    # blank line -- feeding a Markdown table through that would leave it
+    # as literal pipe-and-dash text instead of rendering as a table (the
+    # same hazard noted for <figure> above). So simply drop the fence
+    # lines and keep the content exactly as Pandoc already rendered it,
+    # rather than risk breaking non-image content to preserve centering.
+    md = re.sub(
+        r"^(:{3,}) center\s*\n(.*?)\n\1[ \t]*$",
+        r"\2",
+        md,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+
     # \ref{X} -> XREFOPENxXREFCLOSE sentinel (see preprocess()) -> a real
     # link, now that we know both this file's own name and (from the
     # book-wide LABEL_MAP) which file X's anchor actually lives in.

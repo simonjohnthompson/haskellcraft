@@ -359,7 +359,7 @@ In general, it will not be possible to predict the behaviour of even the simples
 
 If we were to implement this imperatively, we would probably keep in a variable the last random number generated, and at each request for a number we would update this store. We can see the infinite list as supplying *all the values that the variable will take* as a single structure; we therefore do not need to keep the state, and hence have an **abstraction** from the imperative view.
 
-We have seen in [Monads: languages for functional programming](18.5.md#monadFP) that there has been recent important work on integrating side-effecting programs into a functional system by a monadic approach.
+We have seen in [Monads: languages for functional programming](19.md#monadFP) that there has been recent important work on integrating side-effecting programs into a functional system by a monadic approach.
 
 ## Conclusion {#conclusion .unnumbered}
 

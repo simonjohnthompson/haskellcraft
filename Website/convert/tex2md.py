@@ -376,26 +376,9 @@ SUBSCRIPT_SHORTHANDS = _load_subscript_shorthands()
 
 # The order root.tex \includes them in -- also the book's own chapter
 # numbering (0 is the intro; the back matter has no chapter number).
-CHAPTER_STEMS = [str(i) for i in range(0, 19)] + ["18.5"] + [str(i) for i in range(19, 22)] + [
+CHAPTER_STEMS = [str(i) for i in range(0, 23)] + [
     "appendix1", "glossary", "opsTable", "otherHs", "errors", "projects", "further",
 ]
-
-
-def _book_chapter_number(stem):
-    """The chapter's real 1-based number as printed in the book, i.e. its
-    position among the numbered-chapter stems (CHAPTER_STEMS[1:appendix
-    _start]) -- NOT int(stem), which broke once "18.5" (a non-integer
-    stem, inserted between chapters 18 and 19) pushed every later
-    chapter's real number one past its filename (stem "19" is chapter 20,
-    and so on). Returns 0 for stem "0" (the unnumbered preface, which
-    still sorts before chapter 1) and None for appendix/back-matter
-    stems, which have no chapter number at all.
-    """
-    if stem == "0":
-        return 0
-    appendix_start = CHAPTER_STEMS.index("appendix1")
-    numbered = CHAPTER_STEMS[1:appendix_start]
-    return numbered.index(stem) + 1 if stem in numbered else None
 
 
 # Bare zero-argument symbol/logic macros that show up inside code listings
@@ -1079,10 +1062,7 @@ def format_bib_entry(key):
 # Short link labels for the back-of-book index (a term can rack up dozens
 # of chapter mentions -- "1, 2, 15" reads far better than the full title
 # repeated every time).
-CHAPTER_SHORT_LABELS = {
-    stem: f"Ch. {_book_chapter_number(stem)}"
-    for stem in CHAPTER_STEMS if _book_chapter_number(stem) is not None
-}
+CHAPTER_SHORT_LABELS = {str(i): f"Ch. {i}" for i in range(0, 23)}
 CHAPTER_SHORT_LABELS.update({
     "appendix1": "Appendix", "glossary": "Glossary", "opsTable": "Operators",
     "otherHs": "Other implementations", "errors": "Errors", "projects": "Projects",
@@ -1376,8 +1356,7 @@ def _render_index_node(sort_key, node, depth):
 
 
 def _chapter_sort_key(stem):
-    num = _book_chapter_number(stem)
-    return (0, num) if num is not None else (1, CHAPTER_STEMS.index(stem))
+    return (0, int(stem)) if stem.isdigit() else (1, CHAPTER_STEMS.index(stem))
 
 
 def build_index_page(out_dir: Path):
@@ -1436,7 +1415,7 @@ def _numbered_chapter_labels():
         if stem == "0":
             label = title
         elif i < appendix_start:
-            label = f"Chapter {_book_chapter_number(stem)}: {title}"
+            label = f"Chapter {stem}: {title}"
         else:
             letter = chr(ord("A") + (i - appendix_start))
             label = f"Appendix {letter}: {title}"
@@ -1941,9 +1920,9 @@ def number_exercises(tex, stem):
     prints "Exercises" once for the whole list and labels each item with
     just its bare number.
     """
-    chapter_num = _book_chapter_number(stem)
-    if chapter_num is None:
+    if not stem.isdigit():
         return tex
+    chapter_num = int(stem)
     counter = [0]
 
     def replace(m):
@@ -2564,12 +2543,12 @@ def postprocess(md: str, current_file: str) -> str:
     # marker character here too, alongside "-"/"*"/"+"/a numeral.
     md = re.sub(
         r"^([ \t>]*(?:[-*+:][ \t]+|\d+[.)][ \t]+)?)"
-        r"::: \{#([A-Za-z0-9_\-]+)\}\n[ \t>]*:::[ \t]*$",
+        r"::: \{#([A-Za-z0-9_.\-]+)\}\n[ \t>]*:::[ \t]*$",
         r'\1<a id="\2"></a>',
         md,
         flags=re.MULTILINE,
     )
-    md = re.sub(r"\[\]\{#([A-Za-z0-9_\-]+)\}", r'<a id="\1"></a>', md)
+    md = re.sub(r"\[\]\{#([A-Za-z0-9_.\-]+)\}", r'<a id="\1"></a>', md)
 
     # \ref{X} -> XREFOPENxXREFCLOSE sentinel (see preprocess()) -> a real
     # link, now that we know both this file's own name and (from the

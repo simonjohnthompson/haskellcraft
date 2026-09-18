@@ -1,4 +1,4 @@
--- (c) Addison-Wesley, 1996-2010.
+-- (c) Simon Thompson, 1996-2010.
 --  DOtest.lhs
 
 module DoTest where

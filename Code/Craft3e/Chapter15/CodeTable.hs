@@ -4,7 +4,7 @@
 --                              
 --         Converting a Huffman tree to a ord table.            
 --                              
---         (c) Addison-Wesley, 1996-2011.                   
+--         (c) Simon Thompson, 1996-2011.                   
 --                              
 -------------------------------------------------------------------------
 

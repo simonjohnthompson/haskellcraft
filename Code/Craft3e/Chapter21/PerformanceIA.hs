@@ -2,7 +2,7 @@
 --
 --  Haskell: The Craft of Functional Programming
 --  Simon Thompson
---  (c) Addison-Wesley, 1996-2011.
+--  (c) Simon Thompson, 1996-2011.
 --
 --  PerformanceIA.hs
 --

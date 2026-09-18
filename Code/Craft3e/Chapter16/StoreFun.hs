@@ -4,7 +4,7 @@
 --  
 --         An abstract data type of stores of integers, implemented as functions.
 --                                  
---         (c) Addison-Wesley, 1996-2011.                   
+--         (c) Simon Thompson, 1996-2011.                   
 --  
 -------------------------------------------------------------------------
 

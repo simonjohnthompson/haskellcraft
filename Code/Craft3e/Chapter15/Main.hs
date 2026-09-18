@@ -4,7 +4,7 @@
 --
 --  The main module of the Huffman example
 --
---  (c) Addison-Wesley, 1996-2011.
+--  (c) Simon Thompson, 1996-2011.
 --
 -------------------------------------------------------------------------
 

@@ -3,7 +3,7 @@
 --  FirstEd.hs Using Monads for I/O                 --
 --  Haskell 1.4 version                     --
 --                                                                      --
---  (c) Addison-Wesley, 1996-2010.                  --
+--  (c) Simon Thompson, 1996-2010.                  --
 --                                                                      --
 --------------------------------------------------------------------------
 

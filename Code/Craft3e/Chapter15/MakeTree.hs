@@ -4,7 +4,7 @@
 --                              
 --         Turn a frequency table into a Huffman tree           
 --                              
---         (c) Addison-Wesley, 1996-2011.                   
+--         (c) Simon Thompson, 1996-2011.                   
 --                          
 -------------------------------------------------------------------------
 

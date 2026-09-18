@@ -5,7 +5,7 @@
 --         Calculating the frequencies of words in a text, used in  
 --         Huffman coding.                          
 --                              
---         (c) Addison-Wesley, 1996-2011.                   
+--         (c) Simon Thompson, 1996-2011.                   
 --                              
 -------------------------------------------------------------------------
 

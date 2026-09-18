@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------
 --  Haskell: The Craft of Functional Programming
 --  Simon Thompson
---  (c) Addison-Wesley, 1996-2010.
+--  (c) Simon Thompson, 1996-2010.
 --
 --  Pictures.hs
 -- 

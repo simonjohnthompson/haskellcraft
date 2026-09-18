@@ -4,7 +4,7 @@
 --  
 --         Using the abstract data type Store of stores of integers.        
 --                                  
---         (c) Addison-Wesley, 1996-2011.                   
+--         (c) Simon Thompson, 1996-2011.                   
 --  
 -------------------------------------------------------------------------
 

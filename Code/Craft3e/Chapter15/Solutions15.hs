@@ -2,7 +2,7 @@
 --
 --  Haskell: The Craft of Functional Programming
 --  Simon Thompson
---  (c) Addison-Wesley, 2011.
+--  (c) Simon Thompson, 2011.
 -- 
 --  Solutions15
 --

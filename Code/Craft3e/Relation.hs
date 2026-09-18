@@ -4,7 +4,7 @@
 --
 --         Building Relations and Graphs on top of the Set ADT.         
 --  
---         (c) Addison-Welsey, 1996-2011.                   
+--         (c) Simon Thompson, 1996-2011.                   
 --        
 ---------------------------------------------------------------------------
                 

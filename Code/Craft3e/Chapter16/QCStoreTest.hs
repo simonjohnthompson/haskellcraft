@@ -3,7 +3,7 @@
 --         QCStoreTest.hs   
 --  
 --         QuickCheck tests for stores.                         --                                  
---         (c) Addison-Wesley, 1996-2011.                   
+--         (c) Simon Thompson, 1996-2011.                   
 --  
 -------------------------------------------------------------------------
 

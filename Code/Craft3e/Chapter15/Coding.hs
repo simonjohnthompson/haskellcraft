@@ -5,7 +5,7 @@
 --         Huffman coding in Haskell.                   
 --         The top-level functions for coding and decoding.     
 --                              
---         (c) Addison-Wesley, 1996-2011.                   
+--         (c) Simon Thompson, 1996-2011.                   
 --  
 -------------------------------------------------------------------------
 

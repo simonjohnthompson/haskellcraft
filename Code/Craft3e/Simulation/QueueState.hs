@@ -2,7 +2,7 @@
 -- 
 --  Haskell: The Craft of Functional Programming, 3e
 --  Simon Thompson
---  (c) Addison-Wesley, 1996-2011.
+--  (c) Simon Thompson, 1996-2011.
 --
 --  The queue ADT: its signature is given in comments in the module
 --  header.

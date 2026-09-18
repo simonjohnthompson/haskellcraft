@@ -1,7 +1,7 @@
 
 -- 	Haskell: The Craft of Functional Programming
 -- 	Simon Thompson
--- 	(c) Addison-Wesley, 1999.
+-- 	(c) Simon Thompson, 1999.
 
 -- 	Chapter 13
 

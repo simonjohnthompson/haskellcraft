@@ -5,7 +5,7 @@
 --         An abstract data type of queues, implemnted as two lists, with
 --         new elements added at the beginning of the second list.      
 --                                  
---         (c) Addison-Wesley, 1996-2011.                   
+--         (c) Simon Thompson, 1996-2011.                   
 --  
 -------------------------------------------------------------------------             
 

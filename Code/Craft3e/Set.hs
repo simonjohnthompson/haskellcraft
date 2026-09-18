@@ -4,7 +4,7 @@
 --
 --         ADT of sets, implemented as ordered lists without repetitions.   
 --  
---         (c) Addison-Welsey, 1996-2011.                   
+--         (c) Simon Thompson, 1996-2011.                   
 --        
 ---------------------------------------------------------------------------
 

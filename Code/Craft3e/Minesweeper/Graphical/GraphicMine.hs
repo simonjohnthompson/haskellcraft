@@ -26,6 +26,8 @@ module GraphicMine where
 import Graphics.Gloss hiding ( Point )
 import Graphics.Gloss.Interface.Pure.Game hiding ( Point )
 import System.Random ( StdGen, newStdGen, random )
+import System.Exit ( exitSuccess )
+import System.IO.Unsafe ( unsafePerformIO )
 
 import MineRandom ( randomGridDyn )
 import Minesweeper5
@@ -109,10 +111,10 @@ boardH w = fromIntegral (wSize w) * cellSize
 statusText :: World -> String
 statusText w
   = case wStatus w of
-      Won     -> "You win!  Press N for a new game."
-      Lost    -> "Boom!  Press N for a new game."
+      Won     -> "You win!  Press N for a new game, Esc to quit."
+      Lost    -> "Boom!  Press N for a new game, Esc to quit."
       Playing -> show (wMines w) ++
-                 " mines.  Click: reveal   Right-click: flag   N: new game   A: assist"
+                 " mines.  Click: reveal   Right-click: flag   N: new game   A: assist   Esc: quit"
 
 renderCell :: World -> Int -> Int -> Picture
 
@@ -120,7 +122,7 @@ renderCell w row col
   = translate x y (pictures (box : maybe [] (:[]) label))
     where
     x = - boardW w / 2 + (fromIntegral col + 0.5) * cellSize
-    y =   boardH w / 2 - headerHeight - (fromIntegral row + 0.5) * cellSize
+    y =   boardH w / 2 - headerHeight / 2 - (fromIntegral row + 0.5) * cellSize
 
     point    = (row, col)
     revealed = wShowing w !!! point
@@ -164,6 +166,8 @@ countColour n
 
 handleEvent :: Event -> World -> World
 
+handleEvent (EventKey (SpecialKey KeyEsc) Down _ _) _
+  = unsafePerformIO exitSuccess
 handleEvent (EventKey (Char 'n') Down _ _) w
   = newGame w
 handleEvent (EventKey (Char 'N') Down _ _) w
@@ -188,7 +192,7 @@ cellAt w (mx, my)
     where
     size = wSize w
     col  = floor ((mx + boardW w / 2) / cellSize)
-    row  = floor ((boardH w / 2 - headerHeight - my) / cellSize)
+    row  = floor ((boardH w / 2 - headerHeight / 2 - my) / cellSize)
 
 -- Revealing a cell: losing if it's a mine, otherwise uncovering its
 -- closure of neighbouring zero-count cells, exactly as playGameGrid

@@ -169,7 +169,7 @@ These commands should not be followed by a newline. The successive versions are:
 \item \codelink{https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/MineRandom.hs}{\texttt{MineRandom.hs}}: generates a random starting grid, for use with the versions above.
 \end{itemize}
 
-An earlier, graphical interface to the same game, built using a now-defunct Haskell graphics library and tested only under Hugs on Windows, is also kept in the repository, in \texttt{Minesweeper/Graphical/} (\texttt{GraphicMine.hs} through \texttt{GraphicMine4.hs}), though it is not currently part of the buildable \texttt{Craft3e} package.
+A graphical interface to the same game is also kept in the repository, in \codelink{https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Graphical/GraphicMine.hs}{\texttt{Minesweeper/Graphical/GraphicMine.hs}}. An earlier version of this file, built using a Haskell graphics library that no longer exists, has been rewritten to use the actively-maintained \texttt{gloss} package instead: click a cell to reveal it, right-click to flag it, and press \texttt{n} for a new game or \texttt{a} for a deduction assist. Run it with \texttt{cabal run minesweeperGraphical}, the one part of the \texttt{Craft3e} package that isn't pulled in by an ordinary \texttt{cabal install Craft3e}, since it depends on \texttt{gloss} and the OpenGL/GLUT libraries it in turn needs.
 
 \subsection*{Regular expressions and automata}
 \label{RegExpsApp}

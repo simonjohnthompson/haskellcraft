@@ -67,17 +67,17 @@ If we apply \texttt{fmap f} to \texttt{Nothing}, we get \texttt{Nothing}. Wherea
 We can do a similar thing for a binary tree. We can map across all the objects of type \texttt{a} inside a tree — remember, here's the type of the tree.
 \begin{alltt}
 data Tree a =
-   Leaf |
-   Node (Tree a) a (Tree a)
+   Nil |
+   Node a (Tree a) (Tree a)
 \end{alltt}
-An element of this type is either a leaf, or it's a node with a left subtree, a value of type \texttt{a}, and a right subtree. What do we do to apply \texttt{f} to everything of type \texttt{a} in the tree? 
+An element of this type is either empty, \texttt{Nil}, or it's a node with a value of type \texttt{a}, a left subtree, and a right subtree. (This is the same \texttt{Tree} type we use later in the chapter, in Section \ref{monadicTrees}.) What do we do to apply \texttt{f} to everything of type \texttt{a} in the tree?
 \begin{alltt}
 instance Functor Tree where
-  fmap f Leaf  = Leaf
-  fmap f (Node t1 x t2) = 
-       Node (fmap f t1) (f x) (fmap f t2)
+  fmap f Nil  = Nil
+  fmap f (Node x t1 t2) =
+       Node (f x) (fmap f t1) (fmap f t2)
 \end{alltt}
-If we apply \texttt{fmap f} to a \texttt{Leaf}, we get a \texttt{Leaf}; if we apply \texttt{fmap f} to a \texttt{Node}, we recursively apply \texttt{fmap f} to the left subtree \texttt{t1} and the right subtree \texttt{t2}, and we apply \texttt{f} to the value \texttt{x} of type \texttt{a} sitting at the node, and that gives us a value of type \texttt{b}. In summary, a tree is a complicated structure, but at each internal node there is a value of type \texttt{a}, and what we have done is to apply \texttt{f} to transform that to something of type \texttt{b}. 
+If we apply \texttt{fmap f} to \texttt{Nil}, we get \texttt{Nil}; if we apply \texttt{fmap f} to a \texttt{Node}, we recursively apply \texttt{fmap f} to the left subtree \texttt{t1} and the right subtree \texttt{t2}, and we apply \texttt{f} to the value \texttt{x} of type \texttt{a} sitting at the node, and that gives us a value of type \texttt{b}. In summary, a tree is a complicated structure, but at each internal node there is a value of type \texttt{a}, and what we have done is to apply \texttt{f} to transform that to something of type \texttt{b}.
 
 Of course, we shouldn't forget lists themselves — we write the list type constructor as \texttt{[]}.
 \begin{alltt}
@@ -143,19 +143,19 @@ Suppose we're lifting a function \texttt{f}. We take two arguments of type \text
 We can also define an instance for trees. 
 \begin{alltt}
 instance Applicative Tree where
-  pure x = Node Leaf x Leaf
+  pure x = Node x Nil Nil
 
-  liftA2 f Leaf _ = Leaf
-  liftA2 f _ Leaf = Leaf
-  liftA2 f (Node t1 x t2) (Node s1 y s2) =
-    Node (liftA2 f t1 s1)
-         f x y
+  liftA2 f Nil _ = Nil
+  liftA2 f _ Nil = Nil
+  liftA2 f (Node x t1 t2) (Node y s1 s2) =
+    Node (f x y)
+         (liftA2 f t1 s1)
          (liftA2 f t2 s2)
 \end{alltt}
-Let's look at the \texttt{Leaf} cases first.
-If you've got a \texttt{Leaf} on the left, there are no values on the left-hand side; if you've got a \texttt{Leaf} on the right, there are no values on the right-hand side. So in both those cases, we return a \texttt{Leaf}. 
+Let's look at the \texttt{Nil} cases first.
+If you've got \texttt{Nil} on the left, there are no values on the left-hand side; if you've got \texttt{Nil} on the right, there are no values on the right-hand side. So in both those cases, we return \texttt{Nil}.
 
-What about the remaining case, where we have two \texttt{Node}s — we have a value \texttt{x} of type \texttt{a} and a value \texttt{y} of type \texttt{b}? We can apply \texttt{f} to those, giving us \texttt{f x y} of type \texttt{c}. Then, on the left, we recursively apply \texttt{liftA2 f} to \texttt{t1} and \texttt{s1}, the left subtrees; and on the right we apply it to \texttt{t2} and \texttt{s2}, the right subtrees. So only in the case where there are corresponding values of type \texttt{a} and \texttt{b} are we able to apply \texttt{f} — otherwise we simply return a \texttt{Leaf}. (This definition is by analogy with \texttt{zipWith}; is there also a definition analogous to \texttt{zipAll}?)
+What about the remaining case, where we have two \texttt{Node}s — we have a value \texttt{x} of type \texttt{a} and a value \texttt{y} of type \texttt{b}? We can apply \texttt{f} to those, giving us \texttt{f x y} of type \texttt{c}. Then, on the left, we recursively apply \texttt{liftA2 f} to \texttt{t1} and \texttt{s1}, the left subtrees; and on the right we apply it to \texttt{t2} and \texttt{s2}, the right subtrees. So only in the case where there are corresponding values of type \texttt{a} and \texttt{b} are we able to apply \texttt{f} — otherwise we simply return \texttt{Nil}. (This definition is by analogy with \texttt{zipWith}; is there also a definition analogous to \texttt{zipAll}?)
 
 We can also define instances in another way — defining the \texttt{<*>} operator — which says we can think of applying a structure of functions to a structure of arguments: we traverse the function data structure and the argument data structure, and we apply a function that we find to an element of type \texttt{a} that we find. Let's see how those definitions work out. In the case of \texttt{Maybe}, if we have \texttt{Just f} and \texttt{Just x}, we can return \texttt{Just (f x)}; otherwise we return \texttt{Nothing}. 
 \begin{alltt}

@@ -122,25 +122,31 @@ both at once.
 
 ## Recommendations
 
-1. **Immediate, zero-cost fix**: when regenerating any chapter by hand,
+1. ~~**Immediate, zero-cost fix**: when regenerating any chapter by hand,
    run `tex2md.py` with `/usr/local/bin` ahead of `/opt/homebrew/bin` on
-   `$PATH` (e.g. `PATH=/usr/local/bin:$PATH python3 tex2md.py ...`) to keep
-   using the proven-compatible Pandoc 2.7.3 until a deliberate decision is
-   made to move off it. This is what should be done for any one-off chapter
-   edit in the meantime, matching today's `0.md`/`2.md` fixes.
-2. **Medium-term decision** (not done here — needs your call): either (a)
-   formally adopt 2.7.3 as the pinned version — worth documenting
-   somewhere durable, since the binary itself is an unmanaged, ageing
-   relic on one machine — or (b) update `tex2md.py`'s figure/table
-   post-processing to also recognise Pandoc 3.11's HTML output shape, then
-   do one deliberate full-corpus regeneration, checking rendered output
-   before committing. Given `brew` has already moved on to 3.11, and a
-   2019-era x86_64 binary won't be around forever, (b) is the more durable
-   fix, but is real work, not a drive-by change.
-3. **While doing that regeneration pass**, also pick up the eight stale
-   `19→20`/`20→21` cross-references above — same trigger (files not
-   regenerated since an unrelated source change), same fix (regenerate),
-   worth doing together.
+   `$PATH`...~~ **Done** (commit `5a63daa`): `tex2md.py` now resolves an
+   explicit `/usr/local/bin/pandoc` itself (falling back to bare `pandoc`
+   on `$PATH` if that's absent) rather than trusting `$PATH` order, and
+   warns loudly on stderr if the resolved binary isn't 2.7.x. No more
+   `$PATH` gymnastics needed at the call site; verified it reproduces
+   `Website/chapters/6.md` byte-for-byte unchanged. This is the "pin to
+   2.7.3" half of option (a) below — the eight stale cross-references this
+   report found were also fixed (commit `3eab103`) using this same pinned
+   binary.
+2. **Medium-term decision** (still open — needs your call): either (a)
+   treat the pin above as the final answer, accepting that
+   `/usr/local/bin/pandoc` (2.7.3, 2019) is a required, if unmanaged and
+   ageing, dependency of this repo — or (b) update `tex2md.py`'s
+   figure/table post-processing to also recognise Pandoc 3.11's HTML
+   output shape, then do one deliberate full-corpus regeneration off the
+   Homebrew binary, checking rendered output before committing. Given
+   `brew` has already moved on to 3.11, and a 2019-era x86_64 binary won't
+   be around forever, (b) is the more durable fix, but is real work, not a
+   drive-by change.
+3. ~~**While doing that regeneration pass**, also pick up the eight stale
+   `19→20`/`20→21` cross-references above...~~ **Done** (commit `3eab103`,
+   ahead of the medium-term decision in (2) — these were cheap enough to
+   fix immediately using the newly-pinned binary rather than waiting).
 4. **Low-priority hygiene**: delete the dead `~/.cabal/bin/pandoc` (2010,
    32-bit, can't execute) — it's currently harmless because the shell
    skips unexecutable PATH entries, but it's misleading clutter for anyone

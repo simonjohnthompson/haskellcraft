@@ -33,7 +33,7 @@ foldr g s (x:xs) = g x (foldr g s xs)
 \end{alltt}
 We saw that this pattern embodied primitive recursion, so we could define all sorts of functions over lists by means of that fold. Just as we did with \texttt{map}, we could think of combining all the elements in a data structure using a function, using an operator. 
 
-So can we think of types that might be \emph{``mappable''}, types that might be \emph{``foldable}. The way that we do that is by representing it in a type class, and that's what we're going to do in this chapter. We're going to look at the type classes of \texttt{Functor} and \texttt{Applicative}, and then we'll move on to \texttt{Monad}, which is really where all this discussion began — how we represent computation inside our Haskell type system.
+So can we think of types that might be \emph{``mappable''}, types that might be \emph{``foldable''}. The way that we do that is by representing it in a type class, and that's what we're going to do in this chapter. We're going to look at the type classes of \texttt{Functor} and \texttt{Applicative}, and then we'll move on to \texttt{Monad}, which is really where all this discussion began — how we represent computation inside our Haskell type system.
 
 \section{The \texttt{Functor} class}
 
@@ -384,7 +384,7 @@ The sequencing given by \texttt{>>=} should be irrelevant of the way
 that expressions are bracketed.
 \end{itemize}
 The laws are much clearer when stated in terms of a derived operator,
-\texttt{>=>}, prnounced `fish', that is defined in \texttt{Control.Monad}:
+\texttt{>=>}, pronounced `fish', that is defined in \texttt{Control.Monad}:
 \index{\symbol{62}\symbol{64}\symbol{62}@\texttt{\symbol{62}\symbol{64}\symbol{62}}}
 \begin{alltt}
 (>=>) :: Monad m => (a -> m b) ->
@@ -644,6 +644,70 @@ approaches.
 Show that the type functions \texttt{(a,a)}, \texttt{([a],[a])} and \texttt{Tree a} are instances of \texttt{Functor}.
 
 \end{exercises}
+
+\section{Folding over data: \texttt{Foldable}}
+\minx{Foldable}
+\label{foldable}
+
+Finally, we can get back to something we saw when we first started looking at GHCi. We saw that you can ask GHCi for the type of a function, and when we started looking at lists, we saw that the \texttt{length}\minx{length} function on a list in fact involves the \texttt{Foldable} type class — it says you can apply length to anything that's an instance of \texttt{Foldable}. 
+\begin{alltt}
+ghci> :type length
+length :: Foldable t => t a -> Int
+\end{alltt}
+Let's try to understand what's going on with \texttt{Foldable}. 
+The idea is that \texttt{Foldable} embodies the fact that you can fold elements together, in the way that we do with list recursion. So, for example, here \texttt{foldr} takes two parameters: the function which embodies the recursion step — a function of type \texttt{a -> b -> b} — and the value that's the starting value, of type \texttt{b}; and it folds together a \texttt{[a]} into a single \texttt{b}. 
+\begin{alltt}
+foldr :: (a -> b -> b) -> b -> [a] -> b
+length = foldr (\bs{}\_ n -> n+1) 0
+\end{alltt}
+Here you see the definition of the \texttt{length} function: it takes the particular value in the list and the length so far, \texttt{n}, and adds one to it for that extra node in the list, and it starts off with the value zero. 
+
+This is how we define the \texttt{Foldable} type class — we say what you have to do for a type function \texttt{t} to be in the \texttt{Foldable} class.
+\begin{alltt}
+class Foldable t where
+  foldr :: (a -> b -> b) -> b -> t a -> b
+  -- see :info Foldable for rest of the API
+\end{alltt}
+You have to have a \texttt{foldr} function, which takes things of type \texttt{t a}, the recursion function, and the starting value, and gives back a \texttt{b}. Obviously the list type is an instance of \texttt{Foldable} just by the traditional definition of \texttt{foldr}, but there are other things we can do as well. \texttt{Maybe} is also an instance of the \texttt{Foldable} class — what do we do there?
+\begin{alltt}
+instance Foldable Maybe where
+  foldr g a Nothing  = a
+  foldr g a (Just x) = g x a
+\end{alltt}
+Well, if we have \texttt{Nothing}, we return the value \texttt{a}, the starting value. Otherwise, if we have \texttt{Just x}, we have a single value of the data type, and folding that with \texttt{g} and \texttt{a}, we apply \texttt{g} to \texttt{x} and \texttt{a}. You can see that if \texttt{Nothing} were represented as an empty list, and \texttt{Just x} as a singleton list, this is exactly the definition we'd have for those two using \texttt{foldr} over lists. So you can see it's a special case of folding over lists.
+
+Let's look at something a bit more interesting: we can take the type of binary trees, \texttt{Tree a}, where a tree is either \texttt{Nil} or a \texttt{Node} with a value of type \texttt{a}, a left subtree \texttt{l},  and a right subtree \texttt{r}, and we can fold over that:
+\begin{alltt}
+instance Foldable Tree where
+  foldr f z Nil          = z
+  foldr f z (Node v l r) = foldr f (f v (foldr f z r)) l
+\end{alltt}
+So we're folding with a function \texttt{f} and the starting value \texttt{z}, and on a \texttt{Nil} tree we return the starting value \texttt{z}. But more interestingly, what do we do on a node with a value \texttt{v}, a left subtree \texttt{l},  and a right subtree \texttt{r}? The answer is: we fold over the left subtree, with the initial value being the fold over the rest of the tree — that is, the fold over the right subtree, with the value \texttt{v} included as well. So it's \texttt{f v} applied to foldr of the right subtree.
+Let's see what folding over a tree looks like.
+\begin{alltt}
+ghci> exT = Node 3 (Node 6 Nil Nil) (Node 2 Nil Nil)
+ghci> length exT
+3
+ghci> sum exT
+11
+\end{alltt}
+In GHCi we can ask for the length of a tree — in this case a tree with three nodes, and we get the answer that it is of length three. We could also ask for the sum of that tree, and we get the answer 11.
+
+Or indeed, we could explicitly define a fold ourselves: 
+\begin{alltt}
+ghci> (foldr (:) []) exT
+[6,3,2]
+\end{alltt}
+As you can see, this turns the tree into a list by ``flattening'' it.
+It flattens the tree, and you can see it's traversing the tree from left to right — first through the left subtree, then the value, then the right subtree. We've seen that we can take non-trivial data structures, things other than lists, and fold over them; in fact, GHC can also derive a \texttt{Foldable} instance automatically, with the \texttt{DeriveFoldable} extension. That derived instance won't, in general, match a hand-written one like ours: it folds over the fields in the order they're declared in the constructor, so for \texttt{Node a (Tree a) (Tree a)} it would visit the value, then the left subtree, then the right subtree, rather than the left-to-right traversal we defined by hand above.
+
+But I've only just touched the surface of what's going on with the \texttt{Foldable} type class — there's comprehensive coverage of the way laziness and strictness interact with folding, and also infinite corecursion. The documentation for \texttt{Data.Foldable}, the module that contains all these definitions, is the place to look; it has a very nice exposition of examples and the various different approaches you might use to folding to produce different kinds of recursion, including discussion of laziness and infinite ``corecursions''. And that's just the start — there are type classes such as \texttt{Traversable}, and \texttt{Monoid} and \texttt{Semigroup}, and so on. There isn't space or time to look at those in this course, but if you look in the Haskell wiki\footnote{\url{wiki.haskell.org/Foldable_and_Traversable}} you'll find abundant information about them.
+
+Now, as I'm perhaps beginning to hint here, Haskell has become a complicated language. There are large numbers of extensions to the type system, and large libraries, and that's a good thing — it allows us to build things quickly. But it can mean that if we use, particularly, cutting-edge features — like type-level values, or some approaches to lenses — it can make code harder to read, and, more worryingly, harder to maintain. If libraries come and go, if libraries change, it can be difficult if code was written two or three years ago using a cutting-edge library and that library is no longer maintained.
+
+It can be very difficult to maintain the codebase itself. So some of us, I think, would argue for a more \emph{modest Haskell} — would argue that, if you're using Haskell, don't use every new feature, don't use every new library. Think about the simplest way, at least to start with, of expressing what you want to do, and only make it more complicated when you really find the need to. In particular, that applies to generalization and abstraction: write the simplest version first, and then, if you can see a useful generalization, do that later on.
+
+But don't over-generalize without knowing why you're doing it.
 
 \section{Example: monadic computation over trees}
 \index{monad!trees}

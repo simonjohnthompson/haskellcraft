@@ -179,6 +179,24 @@ instance Functor (State a) where
   fmap = liftM
 
 
+-- Folding over data: the Foldable class
+-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+--  class Foldable t where
+--    foldr :: (a -> b -> b) -> b -> t a -> b
+--    -- see :info Foldable for rest of the API
+
+-- Foldable Maybe is already an instance in the standard libraries, so
+-- this is given as a comment.
+
+--  instance Foldable Maybe where
+--    foldr g a Nothing  = a
+--    foldr g a (Just x) = g x a
+
+-- The Foldable instance for the tree type is given as real code once
+-- that type has been declared, below.
+
+
 -- Example: Monadic computation over trees
 -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -206,6 +224,17 @@ instance Applicative Tree where
   liftA2 f _ Nil = Nil
   liftA2 f (Node x t1 t2) (Node y s1 s2)
     = Node (f x y) (liftA2 f t1 s1) (liftA2 f t2 s2)
+
+-- Tree as an instance of Foldable: folding f over every value stored
+-- at a node, traversing the left subtree, then the node's own value,
+-- then the right subtree (an in-order traversal).
+
+instance Foldable Tree where
+  foldr f z Nil            = z
+  foldr f z (Node x t1 t2) = foldr f (f x (foldr f z t2)) t1
+
+exT :: Tree Integer
+exT = Node 3 (Node 6 Nil Nil) (Node 2 Nil Nil)
 
 -- Summing a tree of integers
 

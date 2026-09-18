@@ -21,8 +21,8 @@ Index
 
 - **>*>** — [Ch. 17](17.md), [Operators](opsTable.md#ix-opsTable-sf17c6f)
 - **>.>** — [Ch. 11](11.md), [Operators](opsTable.md#ix-opsTable-sb9031d)
+- **>=>** — [Ch. 19](19.md#ix-19-sfe2f89)
 - **>>=** — [Ch. 19](19.md#ix-19-sc8beaa), [Operators](opsTable.md#ix-opsTable-sc8beaa)
-- **>@>** — [Ch. 19](19.md#ix-19-se36849)
 
 ### A
 

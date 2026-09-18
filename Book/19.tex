@@ -443,7 +443,6 @@ This type class adds a function marking that a computation has failed, \texttt{f
 class Monad m => MonadFail m where
   fail   :: String -> m a
 \end{alltt}
-\item
 The value \texttt{fail} \texttt{s} corresponds to a computation which
 \textbf{fails}, giving the error message \texttt{s}. \index{monad!failure in (\texttt{fail})}
 

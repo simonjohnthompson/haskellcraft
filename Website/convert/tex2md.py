@@ -9,7 +9,7 @@ paths).
 Usage:
     python3 tex2md.py <output-dir> <chapter.tex> [<chapter.tex> ...]
 
-Requires pandoc on PATH. Figures referenced from Pictures/*.pdf need to be
+Requires pandoc. Figures referenced from Pictures/*.pdf need to be
 converted to web-friendly images separately (e.g. via `sips` on macOS or
 `pdftoppm`/`pdftocairo` from poppler) -- this script only rewrites the
 Markdown to point at Pictures/<name>.png, it doesn't render them.
@@ -21,6 +21,42 @@ import sys
 from pathlib import Path
 
 BOOK_DIR = Path(__file__).resolve().parent.parent.parent / "Book"
+
+# Pandoc pin -- see Admin/PANDOC-VERSION-DRIFT-REPORT.md. The postprocessing
+# below (checkbox-zoom image wrapping in particular) was built against, and
+# only tested against, Pandoc 2.7.3's output shape. A much newer Pandoc
+# (confirmed: 3.11) renders any figure/table containing an embedded
+# \label/\index as raw HTML instead of plain Markdown, which that
+# postprocessing doesn't recognise -- it silently no-ops instead of
+# raising, so the failure mode is a quietly degraded chapter, not an
+# error. Pin to an explicit, known-2.7.3 binary rather than trusting bare
+# "pandoc" on $PATH, which stopped being safe the moment a newer Homebrew
+# pandoc landed earlier in $PATH than this one. Update this path (and the
+# version check in _check_pandoc_version) once postprocess() has actually
+# been updated to handle a newer Pandoc's output.
+_PINNED_PANDOC = "/usr/local/bin/pandoc"
+PANDOC_BIN = _PINNED_PANDOC if Path(_PINNED_PANDOC).exists() else "pandoc"
+
+
+def _check_pandoc_version():
+    """Warn, rather than silently regenerate degraded output, if PANDOC_BIN
+    isn't the 2.7.x this script's postprocessing was built against. Runs
+    once per invocation, not once per chapter.
+    """
+    try:
+        result = subprocess.run(
+            [PANDOC_BIN, "--version"], capture_output=True, text=True
+        )
+        first_line = result.stdout.splitlines()[0] if result.stdout else ""
+    except FileNotFoundError:
+        first_line = ""
+    if not first_line.startswith("pandoc 2.7"):
+        print(
+            f"warning: using {PANDOC_BIN!r} ({first_line or 'not found'}), "
+            "not the pinned Pandoc 2.7.3 -- figure/table postprocessing "
+            "may silently fail to apply. See Admin/PANDOC-VERSION-DRIFT-REPORT.md.",
+            file=sys.stderr,
+        )
 
 
 def _find_matching_brace(s, open_pos):
@@ -2425,7 +2461,7 @@ def convert_chapter(src_path: Path, out_dir: Path):
     out_md = out_dir / (src_path.stem + ".md")
     result = subprocess.run(
         [
-            "pandoc",
+            PANDOC_BIN,
             "-f", "latex",
             # -simple_tables-multiline_tables-grid_tables forces pipe_tables
             # (left enabled) for every table: pandoc's own dash-delimited
@@ -2846,6 +2882,7 @@ def build_bibliography_page(out_dir: Path):
 
 
 if __name__ == "__main__":
+    _check_pandoc_version()
     out_dir = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path(".").resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     for chapter in sys.argv[2:]:

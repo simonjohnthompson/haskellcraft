@@ -4,11 +4,11 @@
 --  Simon Thompson
 --  (c) Addison-Wesley, 2011.
 -- 
---  Solutions19
+--  Solutions20
 --
 ------------------------------------------------------------------------------
 
-module Solutions19 where
+module Solutions20 where
 
 import Prelude hiding ((<*>))
 import RegExp

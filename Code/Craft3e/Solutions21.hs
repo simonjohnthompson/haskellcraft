@@ -4,11 +4,11 @@
 --  Simon Thompson
 --  (c) Addison-Wesley, 2011.
 -- 
---  Solutions20
+--  Solutions21
 --
 ------------------------------------------------------------------------------
 
-module Solutions20 where
+module Solutions21 where
 
 import Data.List
 

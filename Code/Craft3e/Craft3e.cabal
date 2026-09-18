@@ -1,6 +1,6 @@
 cabal-version: 2.2
 name: Craft3e
-version: 0.2.0.4
+version: 0.2.0.5
 license: MIT
 license-file: LICENSE
 copyright: (c) Simon Thompson
@@ -56,8 +56,9 @@ library
     Chapter14_2
     Chapter17
     Chapter18
+    Chapter19
     Chapter2
-    Chapter20
+    Chapter21
     Chapter3
     Chapter4
     Chapter5
@@ -122,11 +123,11 @@ library
     MineRandom
     Palin
 
-  hs-source-dirs: . ./Calculator ./Chapter15 ./Chapter16 ./Chapter19 ./Simulation  ./Chapter20 ./Minesweeper ./Palindromes
+  hs-source-dirs: . ./Calculator ./Chapter15 ./Chapter16 ./Chapter20 ./Simulation  ./Chapter21 ./Minesweeper ./Palindromes
 
 executable performanceI
   main-is:     PerformanceI.hs
-  hs-source-dirs: ./Chapter20
+  hs-source-dirs: ./Chapter21
   default-language: Haskell2010
   ghc-options: -rtsopts
   build-depends:
@@ -136,7 +137,7 @@ executable performanceI
 
 executable performanceIA
   main-is:     PerformanceIA.hs
-  hs-source-dirs: ./Chapter20
+  hs-source-dirs: ./Chapter21
   default-language: Haskell2010
   ghc-options: -rtsopts
   build-depends:
@@ -145,7 +146,7 @@ executable performanceIA
 
 executable performanceIS
   main-is:     PerformanceIS.hs
-  hs-source-dirs: ./Chapter20
+  hs-source-dirs: ./Chapter21
   default-language: Haskell2010
   ghc-options: -rtsopts
   build-depends:

@@ -3,12 +3,12 @@
 --  Simon Thompson
 --  (c) Addison-Wesley, 1996-2010.
 
---  Chapter 20
+--  Chapter 21
 
 -- Time and space behaviour
 -- ^^^^^^^^^^^^^^^^^^^^^^^^
 
-module Chapter20 where
+module Chapter21 where
 
 import Prelude hiding (map)
 

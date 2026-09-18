@@ -50,7 +50,7 @@ getLines'
 --
 
 -- Id is obviouos if look at the Kleisli form.
--- Lists: f>@>g is concat . map g . f
+-- Lists: f>=>g is concat . map g . f
 
 {-
 compos f g = concat . map g . f

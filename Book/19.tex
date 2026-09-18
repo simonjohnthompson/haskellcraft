@@ -9,7 +9,7 @@
 
 This chapter introduces some of the key abstractions of the Haskell type / class system, central to which is the notion of a \textbf{monad}. A monad provides the infrastructure for sequencing and naming used in the \texttt{do} notation, and we will show instances of the \texttt{Monad} class for lists, the \texttt{Maybe} type, a parsing monad and more. Before we do that we also introduce the \texttt{Functor} and \texttt{Applicative} classes on which \texttt{Monad} is built.
 
-The chapter then looks again at I/O in Haskell, particularly focussing on the \texttt{do} notation which we can use to write all sorts of different programs, including ones that manipulate state, that non-deterministically return more than one result, as well as programs that may fail, or raise exceptions. 
+The chapter then looks again at I/O in Haskell, particularly focussing on the \texttt{do} notation which we can use to write all sorts of different programs, including ones that manipulate state, that non-deterministically return more than one result, or indeed none, as well as programs that may fail, or raise exceptions. 
 
 As well as looking at these definitions, we will program a number of examples, showing how a monadic style, using \texttt{do}, makes programs more readable and flexible.
 Each instance of a monad gives a `little language' for writing programs, and we'll come back to look at this in detail in the next chapter.
@@ -292,7 +292,7 @@ The \texttt{IO} types give one kind of program which we can describe with the \t
 \item
 programs that are \emph{non-deterministic}: we can think of these as programs which return a collection of results, as a list, say;
 \item
-programs that might \emph{fail} to give any answer at all;
+programs that might give no answer at all;
 \item
 programs that work by manipulating a \emph{state}: that is programs that have variables in the sense of imperative languages like Java and C;
 \item
@@ -306,7 +306,7 @@ class Monad m where
 \end{alltt}
 Once we have an instance of this class we can use the \texttt{do} notation over the type. 
 
-Let's look at the example of programs that might fail, second in the list of examples above. We looked at these in Section \ref{progErrs} where we saw that the \texttt{Maybe} type was a good model for values including a potential failure:
+Let's look at the example of programs that might might give no answer, the second in the list of examples above. We looked at these in Section \ref{progErrs} where we saw that the \texttt{Maybe} type was a good model for values including a potentially absent result:
 \begin{alltt}\minx{Maybe}\index{monad!\texttt{Maybe}}
 data Maybe a = Nothing | Just a
 \end{alltt}
@@ -345,19 +345,18 @@ In the next section we fill in some of the formalities about monads, but this la
 Why is this type class called `monad'? The name originates in category theory, which was used by Eugenio Moggi to build mathematical models of different kinds of computations. However, that doesn't mean that you need to learn category theory to use them, any more than you need to understand the intricacies of modern microprocessors to use your computer! Understanding that the \texttt{do} notation gives sequencing and binding (or naming) is all you need to understand to get started.}
 
 \subsection*{Monads, formally}
-\index{monad!definition}\minx{>>}\minx{fail}
+\index{monad!definition}\minx{>>}
 
 \index{\symbol{62}\symbol{62}\symbol{61}@\texttt{\symbol{62}\symbol{62}\symbol{61}}}
 \minx{return}
 A monad is a family of types \texttt{m a}, based on a polymorphic type
-constructor \texttt{m}, with functions \texttt{return}, \texttt{(>>=)},
-\texttt{(>>)}, and \texttt{fail}:
+constructor \texttt{m}, with functions \texttt{return}, \texttt{(>>=)} and
+\texttt{(>>)}:
 \begin{alltt}
 class Monad m where
   (>>=)  :: m a -> (a -> m b) -> m b
   return :: a -> m a
   (>>)   :: m a -> m b -> m b
-  fail   :: String -> m a
 \end{alltt}
 This is an example of a \textbf{class}, whose instances are
 \textbf{type constructors} -- that is functions which build types from
@@ -365,18 +364,16 @@ types -- rather than types. Examples of type constructors are `list',
 written \texttt{[]} in Haskell, 
 and \texttt{IO} as we have seen already.
 
-The definition of \texttt{Monad} also contains default declarations for \texttt{>>} and \texttt{fail}:
+The definition of \texttt{Monad} also contains a default declaration for \texttt{>>}:
 \begin{alltt}
 m >> k = m >>= \bs{}\_ -> k 
-fail s = error s
 \end{alltt}
 From this definition it can be seen that \texttt{>>} acts like \texttt{>>=}, except that the value
 returned by the first argument is discarded rather than being passed to the second argument.
 
 In order properly to be a monad, the functions \texttt{return} and \texttt{(>>=)}
-and the value \texttt{zero}
 should have some simple properties. Informally we can state the requirements
-as follows.
+like this:
 \begin{itemize}
 \item
 The operation \texttt{return x} should simply return the value
@@ -385,19 +382,16 @@ or output in the case of the \texttt{IO} monad.
 \item
 The sequencing given by \texttt{>>=} should be irrelevant of the way
 that expressions are bracketed.
-\item
-The value \texttt{fail} \texttt{s} corresponds to a computation which
-\textbf{fails}, giving the error message \texttt{s}. \index{monad!failure in (\texttt{fail})}
 \end{itemize}
 The laws are much clearer when stated in terms of a derived operator,
-\texttt{>@>}.
+\texttt{>=>}, prnounced `fish', that is defined in \texttt{Control.Monad}:
 \index{\symbol{62}\symbol{64}\symbol{62}@\texttt{\symbol{62}\symbol{64}\symbol{62}}}
 \begin{alltt}
-(>@>) :: Monad m => (a -> m b) ->
+(>=>) :: Monad m => (a -> m b) ->
                     (b -> m c) ->
                     (a -> m c)
 
-f >@> g = \bs{x} -> (f x) >>= g
+f >=> g = \bs{x} -> (f x) >>= g
 \end{alltt} 
 This operator generalizes function composition\footnote{In category theory, this
 operation is called \textbf{Kleisli composition}\index{Kleisli composition}.} \index{function composition}
@@ -416,14 +410,14 @@ Note also that \texttt{return} is of this shape, as its type is
 Now we can state formally the rules that the operations of
 a monad should satisfy. \index{monad!properties}
 First,
-\texttt{return} is an \textbf{identity}\index{identity} for the operator \texttt{>@>}:
+\texttt{return} is an \textbf{identity}\index{identity} for the operator \texttt{>=>}:
 \begin{alltt}
-return >@> f = f\hfill(M1)
-f >@> return = f\hfill(M2)
+return >=> f = f\hfill(M1)
+f >=> return = f\hfill(M2)
 \end{alltt}
-and the operator \texttt{>@>} should be \textbf{associative}:\index{associativity}
+and the operator \texttt{>=>} should be \textbf{associative}:\index{associativity}
 \begin{alltt}
-(f >@> g) >@> h = f >@> (g >@> h)\hfill (M3)
+(f >=> g) >=> h = f >=> (g >=> h)\hfill (M3)
 \end{alltt}
 The derived sequencing operator, \texttt{>>}\minx{>>}, is also associative.
 
@@ -443,11 +437,37 @@ do \{ x <- m; return x \}   =  m
 and the third is implicit in the fact that the \texttt{do}
 construct is associative.
 
+\subsection*{Adding failure, \texttt{MonadFail}}
+This type class adds a function marking that a computation has failed, \texttt{fail}, to an existing monad.
+\begin{alltt}\minx{MonadFail}\minx{fail}
+class Monad m => MonadFail m where
+  fail   :: String -> m a
+\end{alltt}
+\item
+The value \texttt{fail} \texttt{s} corresponds to a computation which
+\textbf{fails}, giving the error message \texttt{s}. \index{monad!failure in (\texttt{fail})}
+
+The definition of \texttt{MonadFail} also contains a default declaration for \texttt{fail}
+\begin{alltt}
+fail s = error s
+\end{alltt}
+
+\begin{exercises}
+ 
+
+\item
+Show that lists and the \texttt{Maybe} type are instances of \texttt{MonadFail}. Hint: in both cases the \texttt{String} argument is ignored.
+
+\item
+Once a computation has failed, it cannot be ``unfailed'' as it were. As a law this is expressed as \texttt{fail s >>= f  =  fail s}. Show that this rule holds for the instances of \texttt{MonadFail} that you defined in the previous exercise.
+
+
+\end{exercises}
 
 \subsection*{Some more examples}
 \index{monad!examples}
 
-Now we have seen the definition of what it means to be a monad, we look at some more examples of monads in Haskell.
+Now we have seen the definition of what it means to be a monad, with or without failure, we look at some more examples of monads in Haskell.
 
 
 
@@ -465,9 +485,11 @@ newtype MP a b = MP \{ mp :: (Parse a b) \}
 
 instance Monad (MP a) where
   return x = MP (succeed x)
-  fail s   = MP none
   (MP pr) >>= f 
     = MP (\bs{st} -> concat [ mp (f x) rest | (x,rest) <- pr st ])
+
+instance MonadFail (MP a) where
+  fail s   = MP none
 \end{alltt}
 The crux of the definition of \texttt{(>>=)} is like that of
 \texttt{(>*>)} -- a parse is done by one parser, \texttt{pr}, and the remains of the
@@ -572,7 +594,7 @@ that for all \texttt{f} and \texttt{g}
 \begin{alltt}
 fmap (f.g) = fmap f . fmap g\hfill(M4)
 \end{alltt}
-In fact, \texttt{fmap} is defined over a wider set of types that monads, and it is the function that characterises the \texttt{Functor}\minx{Functor} class:
+In fact, \texttt{fmap} is defined over a wider set of types that monads, and it is the function that characterises the \texttt{Functor}\minx{Functor} class that we saw earlier:
 \begin{alltt}
 class Functor f where
   fmap :: (a -> b) -> f a -> f b

@@ -105,15 +105,19 @@ addOneInt'
 --  class Monad m where
 --    (>>=)  :: m a -> (a -> m b) -> m b
 --    return :: a -> m a
---    fail   :: String -> m a
 
--- Kelisli composition for monadic functions.
+-- Adding failure: the MonadFail class
 
--- (>@>) :: Monad m => (a -> m b) ->
+--  class Monad m => MonadFail m where
+--    fail :: String -> m a
+
+-- Kleisli composition for monadic functions.
+
+-- (>=>) :: Monad m => (a -> m b) ->
 --                     (b -> m c) ->
 --                     (a -> m c)
 
--- f >@> g = \ x -> (f x) >>= g
+-- f >=> g = \ x -> (f x) >>= g
 
 
 -- Some examples of monads

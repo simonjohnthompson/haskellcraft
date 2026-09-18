@@ -51,8 +51,9 @@ class Monad m => MonadFail m where
                                   -- automatically, whether declared or not
 ```
 
-The book's own printed definition (`Book/18.tex:652-668`, Chapter 18,
-"Programming with monads", section "Monads, formally") is:
+The book's own printed definition (`Book/19.tex:356-361`, Chapter 19,
+"Abstraction: functors, monads and folding", section "Monads: languages
+for functional programming", subsection "Monads, formally") is:
 
 ```
 class Monad m where
@@ -68,7 +69,7 @@ type with a `Monad` instance automatically got a working (if crude) `fail`
 via the default; a refutable pattern in a `do`-block over that type failed
 at *run time* with `error`. Post-2019, a type with no explicit `MonadFail`
 instance has *no* `fail` at all — the same code is now a *compile-time*
-type error. The book's claim (`Book/18.tex:685-686`) that "the value `fail
+type error. The book's claim (`Book/19.tex:389-390`) that "the value `fail
 s` corresponds to a computation which fails, giving the error message `s`"
 is still true of types that define `MonadFail`, but is no longer a property
 every monad has for free.
@@ -85,9 +86,9 @@ cabal package.
 
 | Book example | Book location | Shipped file | What the shipped file has that the book doesn't |
 |---|---|---|---|
-| The parsing monad, type `MP` | `Book/18.tex:757-767` | `ParseLib.hs:124-140` (as `SParse`) | `instance Applicative`/`instance Functor` added; `fail` moved into a separate `instance MonadFail` (fixed — see below) |
+| The parsing monad, type `MP` | `Book/19.tex:464-470` | `ParseLib.hs:124-140` (as `SParse`) | `instance Applicative`/`instance Functor` added; `fail` moved into a separate `instance MonadFail` (fixed — see below) |
 | The parsing monad, same type, second copy | *(same book text — the calculator section reuses it)* | `Calculator/CalcParseLib.hs:126-141` (also `SParse`) | `instance Applicative`/`instance Functor` added; `fail` **kept**, moved into a separate `instance MonadFail` |
-| The state monad, type `State` | `Book/18.tex:1094-1129` | `Chapter18.hs:210-233` | `instance Applicative`/`instance Functor` added; no `fail` was ever defined here, so no `MonadFail` question arises |
+| The state monad, type `State` | `Book/19.tex:812-834` | `Chapter19.hs:155-175` | `instance Applicative`/`instance Functor` added; no `fail` was ever defined here, so no `MonadFail` question arises |
 
 The `MP`/`SParse` row was, until this report prompted a one-line fix, the
 interesting one: **the same monad, presented once in the book, exists as two
@@ -98,7 +99,7 @@ in how they were patched.**
 
 `ParseLib.hs` originally had `instance Applicative`/`instance Functor` added
 for `SParse` but no `MonadFail (SParse a)` instance — the book's `fail s =
-MP none` (`Book/18.tex:764`) had been silently dropped rather than moved.
+MP none` (`Book/19.tex:468`) had been silently dropped rather than moved.
 Since this report was first written, that gap has been closed to bring this
 copy in line with `Calculator/CalcParseLib.hs`:
 
@@ -128,14 +129,15 @@ those warnings are expected and benign).
 **Released.** This fix has since shipped to Hackage as `Craft3e-0.2.0.3` —
 the version bump was made specifically because `ParseLib.hs` is the one
 copy of this fix that actually reaches `cabal sdist` (`Solutions18.hs`
-doesn't, and `Chapter19/parselib.hs`'s identical copy rides along as inert,
-uncompiled source either way; see `Admin/CODE-COMPATIBILITY-REPORT.md`'s
-"Released" note for the full detail). Confirmed live by running
+doesn't; see `Admin/CODE-COMPATIBILITY-REPORT.md`'s "Released" note for the
+full detail — that note's other copy of this fix, `Chapter19/parselib.hs`,
+was a stray duplicate of `ParseLib.hs` and has since been deleted from the
+tree entirely, so it no longer factors in). Confirmed live by running
 `cabal update && cabal get Craft3e-0.2.0.3` fresh and checking the
 downloaded `ParseLib.hs` for the `instance MonadFail (SParse a)` above. A
 reader who fetches the package the book's own documented way
 (`cabal unpack Craft3e`) now gets this fix, independent of whether or when
-`Book/18.tex`'s prose itself is ever updated to match.
+`Book/19.tex`'s prose itself is ever updated to match.
 
 A related footnote to the licensing discussion elsewhere in this project:
 a follow-up release, `Craft3e-0.2.0.4`, attempted to align the package's
@@ -175,10 +177,10 @@ character, the closer of the two to what the book describes — only the
 `instance MonadFail` wrapper is new. This was the pattern `ParseLib.hs` was
 brought in line with, above; the two copies now match.
 
-### `Chapter18.hs` — `State` monad, `Applicative`/`Functor` added, nothing else changes
+### `Chapter19.hs` — `State` monad, `Applicative`/`Functor` added, nothing else changes
 
 ```haskell
--- Chapter18.hs:217-233
+-- Chapter19.hs:159-175
 instance Monad (State a) where
   return x = State (\tab -> (tab,x))
   (State st) >>= f
@@ -196,7 +198,7 @@ instance Functor (State a) where
   fmap = liftM
 ```
 
-The book's version (`Book/18.tex:1108-1129`) is exactly the `instance Monad`
+The book's version (`Book/19.tex:812-834`) is exactly the `instance Monad`
 block above, verbatim, with no `Applicative`/`Functor` block at all — and no
 `fail` either, so the MonadFail split doesn't apply here. This is the
 cleanest of the three cases: purely an *addition* the book doesn't show, not
@@ -204,7 +206,7 @@ a behaviour change.
 
 ## Sweep: no further gaps of this kind in the exposed modules
 
-After fixing `ParseLib.hs`'s dropped `fail` (and its duplicate,
+After fixing `ParseLib.hs`'s dropped `fail` (and its now-deleted duplicate,
 `Chapter19/parselib.hs`), the rest of `Craft3e.cabal`'s `exposed-modules`
 were swept for the same class of issue, two ways: an exhaustive `grep` for
 `instance Monad`/`Applicative`/`Functor`/`MonadFail` across all of
@@ -212,7 +214,7 @@ were swept for the same class of issue, two ways: an exhaustive `grep` for
 -Wcompat"` (478 warnings, triaged by category).
 
 The three instances catalogued above — `ParseLib.hs`'s `SParse`,
-`Calculator/CalcParseLib.hs`'s `SParse`, `Chapter18.hs`'s `State` — are the
+`Calculator/CalcParseLib.hs`'s `SParse`, `Chapter19.hs`'s `State` — are the
 **entire set** of custom `Monad` instances anywhere in the package's
 exposed modules; there is no fourth one. A parallel check for the
 analogous `Semigroup`-became-a-superclass-of-`Monoid` split (`base-4.11`,
@@ -287,7 +289,7 @@ scope:
   They're real compile failures a curious reader could hit by loading those
   files, but they are not discrepancies between the book's *text* and the
   package, because the book never shows that code in the first place.
-- `IO/TreeState.hs` is a near-duplicate, unpatched draft of the `Chapter18.hs`
+- `IO/TreeState.hs` is a near-duplicate, unpatched draft of the `Chapter19.hs`
   `State` monad example (same `Applicative`/`Functor` gap, plus an unrelated
   indentation bug) — but it too sits outside `hs-source-dirs` and outside
   `exposed-modules`, so it's an artifact of the source tree, not something a
@@ -296,7 +298,7 @@ scope:
 ## Recommendation
 
 If the book text is revised for a new edition, the one substantive update
-needed to keep Chapter 18 accurate is: introduce `Applicative` (and
+needed to keep Chapter 19 accurate is: introduce `Applicative` (and
 `Functor`) as a documented prerequisite of `Monad`, show the `Applicative`
 instance alongside each `instance Monad` example rather than omitting it,
 and split `fail` out into a short note on `MonadFail` (ideally right where

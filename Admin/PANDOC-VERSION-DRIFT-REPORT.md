@@ -133,16 +133,87 @@ both at once.
    2.7.3" half of option (a) below — the eight stale cross-references this
    report found were also fixed (commit `3eab103`) using this same pinned
    binary.
-2. **Medium-term decision** (still open — needs your call): either (a)
-   treat the pin above as the final answer, accepting that
-   `/usr/local/bin/pandoc` (2.7.3, 2019) is a required, if unmanaged and
-   ageing, dependency of this repo — or (b) update `tex2md.py`'s
-   figure/table post-processing to also recognise Pandoc 3.11's HTML
-   output shape, then do one deliberate full-corpus regeneration off the
-   Homebrew binary, checking rendered output before committing. Given
-   `brew` has already moved on to 3.11, and a 2019-era x86_64 binary won't
-   be around forever, (b) is the more durable fix, but is real work, not a
-   drive-by change.
+2. ~~**Medium-term decision**: either (a) treat the pin above as the final
+   answer... or (b) update `tex2md.py`'s figure/table post-processing to
+   also recognise Pandoc 3.11's HTML output shape, then do one deliberate
+   full-corpus regeneration off the Homebrew binary.~~ **Decided: (a), stay
+   pinned to 2.7.3.** See "Why (a), not (b)" and "Is the 2.7.3 pin durable
+   long-term?" below for the reasoning.
+
+### Why (a), not (b)
+
+Investigating (b) turned up more scope than this report first estimated.
+Pandoc 3.11 doesn't just re-render figures/tables with an embedded
+`\label`/`\index` as raw HTML — it does that for **any**
+`\begin{figure}...\end{figure}` containing one, including this book's
+`\beware{...}` aside boxes (rendered as blockquotes via a bare
+`\begin{figure}` wrapper), which are neither an image nor a table. Under
+3.11, a `\beware` box's *entire contents* — including any Haskell code
+sample inside it — comes out as Pandoc's own syntax-highlighted raw HTML
+(`<pre class="sourceCode haskell"><span class="fu">...</span>`) instead of
+a plain ` ```haskell ` fenced block. Across the 8 flagged chapters, roughly
+half of the affected `<figure>` blocks are this kind, not images or
+tables. Making (b) work properly means reversing Pandoc's HTML
+syntax-highlighter output back into plain code blocks wherever it
+happens to sit inside an aside box, on top of the already-scoped
+figure/table work — real, multi-session engineering, not the point release
+this report originally sized it as. Given (a) carries no live-site risk
+(see below), that work isn't worth it right now.
+
+### Is the 2.7.3 pin durable long-term?
+
+Nothing forces an upgrade: `deploy-book.yml` (the CI that builds and
+publishes the live site) only runs `mdbook build` against the
+already-committed `Website/chapters/*.md` files — it never invokes
+`tex2md.py` or Pandoc. Pandoc only runs when someone manually regenerates
+a chapter from `.tex` on a dev machine, so there's no security-patch
+cadence or CI mandate pushing an upgrade, and the pin can sit unchanged
+indefinitely with zero live-site risk. Missing Pandoc 3.x features is a
+hypothetical concern, not a known one — every chapter in the corpus
+regenerates byte-identical (or near-identical, modulo the already-fixed
+cross-refs) under 2.7.3, so there's no evidence today that 2.7.3 is
+mishandling anything the book actually needs.
+
+The real, if bounded, cost is durability of one unmanaged binary on one
+machine:
+
+- `/usr/local/bin/pandoc` is a 2019 x86_64 build, not tracked by any
+  package manager this repo knows about. **Checked (19 Sep 2026): the
+  exact release is still available** — Pandoc's GitHub release
+  [2.7.3](https://github.com/jgm/pandoc/releases/tag/2.7.3) still hosts
+  the original `pandoc-2.7.3-macOS.pkg` (matching the installed binary
+  exactly), and the source is still on Hackage (`cabal get pandoc-2.7.3`
+  works today). So if this binary is ever lost, it can be re-fetched
+  as-is — no re-porting needed, just re-running the original 2019
+  installer.
+- It depends on Rosetta 2 continuing to run x86_64 binaries on Apple
+  Silicon. Apple has kept extending Rosetta 2's support for years with no
+  announced end date, but hasn't committed to "forever" — a real, if
+  long-tail, risk.
+- **Checked whether a native-arm64 rebuild is a viable fallback if Rosetta
+  support ever erodes: not a quick one, but not obviously hopeless
+  either.** Building pandoc 2.7.3's own source (from Hackage) against a
+  period-correct 2019 dependency graph, using a genuinely native arm64
+  GHC (worth noting: the `ghcup`-installed GHC already on this machine
+  turned out to itself be an x86_64 binary running under Rosetta, despite
+  this being an Apple Silicon Mac — swapped in Homebrew's native arm64
+  GHC 9.14.1 instead), got substantial progress: it compiled cleanly past
+  one real bug (`HsYAML-0.1.2.0`, a transitive, LaTeX-irrelevant
+  dependency used only for YAML frontmatter, missing an import that a
+  newer `mtl` no longer papers over — a one-line fix), then hit a second,
+  deeper one in `blaze-builder-0.4.1.0` (part of the HTML-writer path):
+  GHC's own representation of 32-bit words at the primitive-op level
+  changed sometime in the last six years (`Word32#` is now a distinct
+  type from `Word#`), breaking a hand-written bit-shift helper — real
+  bit-rot in a six-year-old dependency, not a version-bounds annoyance,
+  and fixing it means editing low-level primop calls rather than
+  relaxing a constraint. Stopped there rather than continuing to chase
+  further such issues (`hslua`'s C/Lua FFI bindings, not yet reached, are
+  a likely next one) — **decided not worth pursuing further right now**,
+  since nothing today requires it. The upshot: a native-arm64 pandoc 2.7.3
+  is plausible with enough forward-porting effort, but it's a real
+  project for if/when Rosetta 2 support actually erodes, not a five-minute
+  fallback to have ready today.
 3. ~~**While doing that regeneration pass**, also pick up the eight stale
    `19→20`/`20→21` cross-references above...~~ **Done** (commit `3eab103`,
    ahead of the medium-term decision in (2) — these were cheap enough to

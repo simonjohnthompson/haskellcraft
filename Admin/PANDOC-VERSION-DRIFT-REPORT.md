@@ -147,7 +147,8 @@ both at once.
    `19→20`/`20→21` cross-references above...~~ **Done** (commit `3eab103`,
    ahead of the medium-term decision in (2) — these were cheap enough to
    fix immediately using the newly-pinned binary rather than waiting).
-4. **Low-priority hygiene**: delete the dead `~/.cabal/bin/pandoc` (2010,
-   32-bit, can't execute) — it's currently harmless because the shell
-   skips unexecutable PATH entries, but it's misleading clutter for anyone
-   debugging a `pandoc`-related PATH issue in the future.
+4. ~~**Low-priority hygiene**: delete the dead `~/.cabal/bin/pandoc` (2010,
+   32-bit, can't execute)...~~ **Done**: removed from this machine
+   (`~/.cabal/bin/pandoc`, outside the repo, so no commit applies).
+   `which -a pandoc` now lists only `/opt/homebrew/bin/pandoc` (3.11) and
+   `/usr/local/bin/pandoc` (2.7.3, the one `tex2md.py` pins to).

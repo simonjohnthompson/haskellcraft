@@ -12,18 +12,57 @@ chapters normalised for consistency) is archived in full at
 
 This file tracks only what's still open.
 
-## Open issue: is the 2.7.3 pin durable long-term?
+## Why we can't just move to the latest Pandoc
 
 `tex2md.py` (`Website/convert/tex2md.py`) resolves an explicit
 `/usr/local/bin/pandoc` itself (commit `5a63daa`), falling back to bare
 `pandoc` on `$PATH` if that's absent, and warns loudly on stderr if the
-resolved binary isn't 2.7.x. **Decided: stay pinned to 2.7.3** rather
-than move to a newer Pandoc — see the archived report's "Why (a), not
-(b)" for the reasoning (recognising Pandoc 3.x's HTML output shape
-properly, and reversing its syntax highlighting back to plain code
-blocks, would have been real multi-session engineering; the one part of
-that scope that mattered in practice — the `\beware` figure wrapper —
-got a cheaper, narrower fix instead, and is now resolved).
+resolved binary isn't 2.7.x. This isn't inertia — a real regression
+blocks moving to Pandoc 3.x (checked directly against 3.11) today.
+
+The root cause (see the archived report for the full derivation):
+Pandoc 3.x's Markdown writer can only degrade a LaTeX `\begin{figure}`
+to plain Markdown when its content is a **bare image with no float
+placement argument**. Anything else — a placement argument like `[t]`
+on an otherwise-bare image, a genuine table (`\begin{tabular}`) inside
+the figure, or any other content (code listing, blockquote) — makes it
+fall back to raw, un-styled HTML instead, and for anything containing
+Haskell source, to Pandoc's own syntax-highlighted HTML in place of a
+plain ` ```haskell ` fenced block. This session fixed the one instance
+of that we'd actually hit in practice — the book's `\beware` aside boxes
+— by unwrapping their figure wrapper in preprocessing before Pandoc ever
+sees it (cheap, and now resolved: `rawblockquote` count is 0 corpus-wide
+under a fresh 3.11 regeneration, checked 20 Sep 2026). But re-checking
+the whole corpus against 3.11 after that fix shows real, unaddressed
+exposure remains:
+
+- **Bare-image figures using a `[t]`/`[b]`/etc. placement argument** —
+  15 chapters would lose click-to-zoom on at least one figure under 3.11
+  (`1`, `2`, `3`, `6`, `9`, `11`, `13`, `14`, `15`, `16`, `17`, `19`,
+  `20`, `21`, `22`). This one's cheap to fix the same way the `\beware`
+  case was (strip the placement argument in preprocessing — it's
+  meaningless outside a real LaTeX float) but hasn't been done, since
+  nothing forces the issue while the pin holds.
+- **Genuine tables nested inside a `\begin{figure}`** — `2.md`, `3.md`
+  and `6.md` have at least one each. Stripping a placement argument
+  doesn't help here; fixing it under 3.x means either restructuring the
+  `.tex` source to pull the table out of its figure (losing the caption/
+  float for the *printed* book) or teaching `tex2md.py` to convert
+  Pandoc's raw `<table>` HTML back into a clean pipe table.
+- **Figures wrapping a direct Haskell code listing that isn't a
+  `\beware` box** (e.g. Chapter 20's "Simple data types" figure) — the
+  same syntax-highlighted-raw-HTML problem `\beware` boxes had, but the
+  `unwrap_bare_beware_figures` fix only recognises the `\beware` shape
+  specifically. Not yet scoped in detail; likely fixable the same way
+  (unwrap before Pandoc sees it) but not counted or verified.
+
+None of this is urgent — see below, it costs nothing to leave the pin in
+place — but it's the concrete reason "just upgrade Pandoc" isn't a
+five-minute change: three distinct content shapes would all need their
+own fix (two of them still undone) before a 3.x regeneration of the
+whole corpus would be safe.
+
+## Is the 2.7.3 pin durable long-term?
 
 Nothing forces an upgrade: `deploy-book.yml` (the CI that builds and
 publishes the live site) only runs `mdbook build` against the

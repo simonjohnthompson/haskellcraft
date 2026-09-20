@@ -1569,8 +1569,7 @@ transformation in the case of finite lists; it holds, in fact, for all
 lists. \blackbox
 
 \begin{figure}[t]\index{QuickCheck!and higher-order functions}\index{higher-order function!QuickCheck}
-\beware{QuickCheck and higher-order functions}
-{\label{QChofs}We've already seen that QuickCheck is a very good way of checking whether particular properties hold for functions that we define. QuickCheck works by generating random test  data and checking whether properties hold at these values. While generating data is not entirely straightforward for structured types like lists and algebraic types, it can be done. Generating random functions is more difficult, and isn't supported ``out of the box'' by QuickCheck: for it to work we need to be able to ``show'' functions. We examine how to do this, and so how to use QuickCheck to test properties involving higher-order functions, in Chapter \ref{dsls}. In the meantime we look at how to check properties for given functions and randomly-generated lists.
+\beware{QuickCheck and higher-order functions}{\label{QChofs}We've already seen that QuickCheck is a very good way of checking whether particular properties hold for functions that we define. QuickCheck works by generating random test  data and checking whether properties hold at these values. While generating data is not entirely straightforward for structured types like lists and algebraic types, it can be done. Generating random functions is more difficult, and isn't supported ``out of the box'' by QuickCheck: for it to work we need to be able to ``show'' functions. We examine how to do this, and so how to use QuickCheck to test properties involving higher-order functions, in Chapter \ref{dsls}. In the meantime we look at how to check properties for given functions and randomly-generated lists.
 
 \medskip
 Let's take the example of the property for \texttt{map} and \texttt{filter}, \texttt{(filter/map)} introduced on page \pageref{filterMap}:

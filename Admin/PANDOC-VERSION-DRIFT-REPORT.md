@@ -174,7 +174,7 @@ both at once.
 While implementing the `\beware`-wrapper fix above, one of `11.tex`'s
 `\beware` calls turned out to already be broken, independent of pandoc
 version or the figure wrapper. `Book/11.tex`'s "QuickCheck and
-higher-order functions" box is written as:
+higher-order functions" box was written as:
 
 ```
 \beware{QuickCheck and higher-order functions}
@@ -184,14 +184,28 @@ higher-order functions" box is written as:
 — a newline between `\beware`'s two argument groups. `tex2md.py`'s
 `strip_two_arg_macro` (and `unwrap_bare_beware_figures`, which shares the
 same brace-matching logic) requires the second `{` to immediately follow
-the first `}`; when it doesn't, the whole `\beware` call is left
-unconverted rather than becoming a blockquote. Confirmed: the phrase
-"QuickCheck and higher-order functions" does not appear anywhere in the
-live `Website/chapters/11.md` — this box's entire title and content are
-silently missing from the site today, unrelated to the pandoc-version
-issue and not fixed by anything in this report. Worth its own fix (either
-relax the two-arg matching to allow whitespace/newlines between groups,
-or just close up the newline in `11.tex` itself), but out of scope here.
+the first `}`; when it doesn't, the whole call is left unconverted.
+Concretely: pandoc still treated `\beware{title}` as an unknown macro
+whose single following brace group it swallows and discards (the same
+"unknown macro swallows its argument" failure mode noted elsewhere in
+this file), so the *title* ("QuickCheck and higher-order functions")
+was silently dropped from the live site, while the second, syntactically
+separate `{...}` group happened to still render as plain, unindented
+paragraph text below it rather than as a proper blockquote — not "the
+whole box missing" as first thought here, but visibly wrong regardless:
+no bold title, no indentation, no visual distinction from surrounding
+prose.
+
+~~Worth its own fix (either relax the two-arg matching to allow
+whitespace/newlines between groups, or just close up the newline in
+`11.tex` itself)~~ **Done**: closed up the newline in `Book/11.tex`
+directly (the simpler, lower-blast-radius fix — `strip_two_arg_macro` is
+shared by several other macro substitutions, so leaving it strict and
+fixing the one malformed call site avoids loosening a check the other
+call sites may be relying on). Regenerated `Website/chapters/11.md`
+under the pinned 2.7.3 binary; the box now renders as a proper
+blockquote with its title, both code samples, and the `QChofs` anchor
+intact.
 
 ## Recommendations
 

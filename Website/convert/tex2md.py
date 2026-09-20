@@ -145,6 +145,76 @@ def strip_three_arg_macro(text, macro, fmt):
     return text
 
 
+def unwrap_bare_beware_figures(tex):
+    r"""\begin{figure}[...]\beware{title}{content}\end{figure} -- used at
+    37 of the book's 66 \beware call sites (the other 29 call \beware
+    bare, with no figure wrapper, and already convert cleanly), added by
+    hand around specific instances purely to get LaTeX float placement in
+    the printed book. Pandoc's markdown writer can only degrade a Figure
+    block to plain Markdown when its sole content is a bare image; any
+    other content -- here, \beware's own blockquote -- forces a raw HTML
+    fallback, and for \beware specifically that means any Haskell code
+    inside it comes out as Pandoc's own syntax-highlighted HTML instead
+    of a plain ```haskell``` fenced block. Stripping the \begin{figure}
+    wrapper here (only when \beware, plus optionally a few leading
+    \index{} calls -- or, since this runs after
+    mark_first_index_occurrences() has already turned most of those into
+    \hypertarget{id}{} calls, leading \hypertarget{...}{...} calls too --
+    is the wrapper's sole content; anything else inside is left
+    untouched) brings these sites in line with the ones that already
+    convert cleanly. Only touches the in-memory text handed to Pandoc:
+    the real .tex source and the printed book's own float placement are
+    untouched.
+    """
+    begin_pat = re.compile(r"\\begin\{figure\}(?:\[[^\]\n]*\])?")
+    out = []
+    pos = 0
+    while True:
+        m = begin_pat.search(tex, pos)
+        if not m:
+            out.append(tex[pos:])
+            break
+
+        scan = m.end()
+        while True:
+            ws = re.match(r"\s*", tex[scan:])
+            scan += ws.end()
+            lead = re.match(r"\\(?:index|hypertarget)\{", tex[scan:])
+            if not lead:
+                break
+            close = _find_matching_brace(tex, scan + lead.end() - 1)
+            if lead.group().startswith(r"\hypertarget"):
+                if close >= len(tex) or tex[close] != "{":
+                    break  # malformed; stop skipping, let \beware check fail below
+                close = _find_matching_brace(tex, close)
+            scan = close
+
+        bw = re.match(r"\\beware\{", tex[scan:])
+        if not bw:
+            out.append(tex[pos:m.end()])
+            pos = m.end()
+            continue
+
+        close1 = _find_matching_brace(tex, scan + bw.end() - 1)
+        if close1 >= len(tex) or tex[close1] != "{":
+            out.append(tex[pos:m.end()])  # malformed \beware; leave alone
+            pos = m.end()
+            continue
+        close2 = _find_matching_brace(tex, close1)
+
+        # allow a trailing "% end beware"-style comment before \end{figure}
+        tail = re.match(r"[ \t]*(?:%[^\n]*)?\s*\\end\{figure\}", tex[close2:])
+        if not tail:
+            out.append(tex[pos:m.end()])  # figure has other content too
+            pos = m.end()
+            continue
+
+        out.append(tex[pos:m.start()])
+        out.append(tex[m.end():close2])  # keep any leading \index/\hypertarget calls
+        pos = close2 + tail.end()
+    return "".join(out)
+
+
 def wrap_bare_font_switches(tex):
     """\\mi (defs0.tex: \\newcommand{\\mi}{\\mytt}, \\newfont{\\mytt}
     {cmtt10} -- the Computer Modern Typewriter font) and \\ttfamily
@@ -2381,6 +2451,17 @@ def preprocess(tex, stem):
     tex = re.sub(r"\\end\{example\}", "", tex)
     tex = strip_balanced_macro(tex, "subexample*", lambda arg: r"\textbf{%s} " % arg)
     tex = strip_balanced_macro(tex, "subsubexample*", lambda arg: "\n\n" + r"\textbf{%s}" % arg + "\n\n")
+
+    # \begin{figure}[...]\beware{...}{...}\end{figure} -- a \begin{figure}
+    # wrapper added by hand around 37 of the book's \beware call sites
+    # purely for the printed book's float placement. Left in place, it
+    # makes Pandoc 3.x (not the 2.7.3 this pipeline is pinned to, but
+    # worth guarding against regardless -- see
+    # Admin/PANDOC-VERSION-DRIFT-REPORT.md) emit the \beware box, Haskell
+    # code and all, as raw syntax-highlighted HTML instead of a plain
+    # blockquote with a ```haskell``` fenced block. Unwrap it before the
+    # \beware substitution below ever sees it.
+    tex = unwrap_bare_beware_figures(tex)
 
     # \beware{title}{content} (miradefs.tex: a colorbox-and-parbox
     # callout/warning box) -- used 78+ times across nearly every chapter

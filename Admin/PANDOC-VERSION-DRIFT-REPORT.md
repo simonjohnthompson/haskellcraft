@@ -54,18 +54,67 @@ output:
    (`===`/`---` underlines) for levels 1–2; 3.11 emits ATX (`#`/`##`)
    throughout. Cosmetically different, functionally identical — mdBook's
    CommonMark renderer accepts both. **Harmless.**
-2. **Figures and tables containing an embedded `\label`/`\index`** — 2.7.3
-   emits plain Markdown image syntax (which `tex2md.py`'s
-   `_sized_thumbnail()` post-processing, around line 2658, then wraps in
-   the site's click-to-zoom `checkbox-label`/`img-wrapper` HTML) and clean
-   GFM pipe-tables. 3.11 instead emits a raw `<figure><embed
-   src="..."/><div id="...">...</div>...</figure>` HTML block and, for the
-   same reason, a raw `<table>` instead of a pipe table. `tex2md.py`'s
-   post-processing pattern-matches 2.7.3's plain-Markdown shape and simply
-   doesn't fire against 3.11's HTML shape. **Not harmless**: regenerating
-   any affected chapter under 3.11 silently drops the zoom-on-click
-   behaviour from every such figure and replaces a clean pipe table with
-   unstyled raw HTML.
+2. **Figures whose content isn't a bare image, and any figure using a
+   float-placement argument** — 2.7.3 emits plain Markdown image syntax
+   (which `tex2md.py`'s `_sized_thumbnail()` post-processing, around line
+   2658, then wraps in the site's click-to-zoom `checkbox-label`/
+   `img-wrapper` HTML) and clean GFM pipe-tables. 3.11 instead emits a raw
+   `<figure><embed src="..."/><div id="...">...</div>...</figure>` HTML
+   block and, for the same reason, a raw `<table>` instead of a pipe
+   table. `tex2md.py`'s post-processing pattern-matches 2.7.3's
+   plain-Markdown shape and simply doesn't fire against 3.11's HTML shape.
+   **Not harmless**: regenerating any affected chapter under 3.11 silently
+   drops the zoom-on-click behaviour from every such figure and replaces a
+   clean pipe table with unstyled raw HTML.
+
+   **Correction (20 Sep 2026):** this was originally attributed to an
+   embedded `\label`/`\index` inside the figure/table. Empirical testing
+   with minimal `.tex` fragments through both binaries (varying one thing
+   at a time) shows that's wrong — `\label`/`\index` make no difference to
+   the output in any case tested. The real triggers, independent of
+   label/index, are:
+   - A `\begin{figure}[t]` (or `[b]`/`[h]`/etc.) **placement argument**,
+     when the figure's content is a bare image — 3.11 records the
+     argument as a `data-latex-placement` attribute it can't express in
+     plain Markdown image syntax alongside the id, so it falls back to
+     raw HTML. A bare `\begin{figure}` with no placement argument stays
+     as plain Markdown under 3.11 even when labelled.
+   - A `\begin{tabular}` **nested inside** `\begin{figure}` — always
+     raw `<table>` under 3.11, with or without a label or placement
+     argument.
+   - A `\begin{quote}` **nested inside** `\begin{figure}` (i.e. every
+     `\beware` box, which is wrapped in a figure purely for float
+     placement) — always raw HTML under 3.11, with or without a label or
+     placement argument. This is what turns fenced ` ```haskell ` blocks
+     inside `\beware` boxes into raw syntax-highlighted HTML spans.
+
+   Practical upshot: stripping the `[t]`/`[b]`/etc. placement argument
+   from `\begin{figure}[...]` in preprocessing (it's meaningless outside a
+   real LaTeX float) would fix the plain-image case under 3.11, cheaply
+   and with no cross-referencing risk. It would not touch the table or
+   `\beware` cases, which stay exactly the multi-session engineering
+   problem described in "Why (a), not (b)" below. Removing `\label`/
+   `\index` from figures/tables — a mitigation this correction was
+   prompted by considering — would fix none of the three triggers above
+   and would break `\ref{}` cross-referencing throughout the book, so it
+   was not pursued.
+
+   **Update (20 Sep 2026): the `\beware` case is now fixed, cheaply.**
+   `\beware{title}{content}` is wrapped in `\begin{figure}[...]` by hand
+   at 37 of its 66 call sites (the other 29 already call `\beware` bare
+   and convert cleanly) purely to get the printed book's float placement
+   — the wrapper carries no meaning for the website conversion at all.
+   `tex2md.py`'s `preprocess()` now has a new `unwrap_bare_beware_figures`
+   step, run just before the existing `\beware` substitution, that
+   strips exactly that wrapper (only when `\beware`, plus any leading
+   `\index`/`\hypertarget` calls, is its sole content — anything else
+   inside a figure is left alone) before Pandoc ever sees it. Verified:
+   byte-identical regeneration of the whole corpus under the pinned 2.7.3
+   binary (no regression), and zero raw-HTML `\beware` boxes left under
+   3.11 across every previously-affected chapter. This does **not**
+   touch the plain-image-with-placement-argument case or the
+   table-in-figure case above — those are unaffected and still the
+   reason the 2.7.3 pin remains the right call for now.
 
 ## Chapters affected
 
@@ -120,6 +169,30 @@ but it is a different root cause from everything else in this report and
 is called out here only because the same regeneration pass would resolve
 both at once.
 
+## A third, unrelated bug found along the way
+
+While implementing the `\beware`-wrapper fix above, one of `11.tex`'s
+`\beware` calls turned out to already be broken, independent of pandoc
+version or the figure wrapper. `Book/11.tex`'s "QuickCheck and
+higher-order functions" box is written as:
+
+```
+\beware{QuickCheck and higher-order functions}
+{\label{QChofs}We...
+```
+
+— a newline between `\beware`'s two argument groups. `tex2md.py`'s
+`strip_two_arg_macro` (and `unwrap_bare_beware_figures`, which shares the
+same brace-matching logic) requires the second `{` to immediately follow
+the first `}`; when it doesn't, the whole `\beware` call is left
+unconverted rather than becoming a blockquote. Confirmed: the phrase
+"QuickCheck and higher-order functions" does not appear anywhere in the
+live `Website/chapters/11.md` — this box's entire title and content are
+silently missing from the site today, unrelated to the pandoc-version
+issue and not fixed by anything in this report. Worth its own fix (either
+relax the two-arg matching to allow whitespace/newlines between groups,
+or just close up the newline in `11.tex` itself), but out of scope here.
+
 ## Recommendations
 
 1. ~~**Immediate, zero-cost fix**: when regenerating any chapter by hand,
@@ -143,11 +216,14 @@ both at once.
 ### Why (a), not (b)
 
 Investigating (b) turned up more scope than this report first estimated.
-Pandoc 3.11 doesn't just re-render figures/tables with an embedded
-`\label`/`\index` as raw HTML — it does that for **any**
-`\begin{figure}...\end{figure}` containing one, including this book's
-`\beware{...}` aside boxes (rendered as blockquotes via a bare
-`\begin{figure}` wrapper), which are neither an image nor a table. Under
+Pandoc 3.11 doesn't just re-render figures/tables containing a
+`\begin{tabular}` as raw HTML — it does that for **any**
+`\begin{figure}...\end{figure}` whose content isn't a bare image,
+including this book's `\beware{...}` aside boxes (rendered as
+blockquotes via a bare `\begin{figure}` wrapper), which are neither an
+image nor a table (see the correction under "What Pandoc 3.11 does
+differently" above — `\label`/`\index` were never the actual trigger).
+Under
 3.11, a `\beware` box's *entire contents* — including any Haskell code
 sample inside it — comes out as Pandoc's own syntax-highlighted raw HTML
 (`<pre class="sourceCode haskell"><span class="fu">...</span>`) instead of

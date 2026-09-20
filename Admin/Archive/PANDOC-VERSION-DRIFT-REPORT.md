@@ -248,9 +248,17 @@ multi-session engineering. In the end this report's own investigation
 found a cheaper, narrower fix for the `\beware` case specifically
 (unwrapping the figure before Pandoc ever sees it, rather than teaching
 `tex2md.py` to parse 3.11's HTML afterwards) — see "Full resolution".
-The plain-image-with-placement-argument and genuine table-in-figure
-cases were never hit in practice (see below), so no further work went
-into them.
+
+**Correction:** an earlier version of this paragraph claimed the
+plain-image-with-placement-argument and genuine table-in-figure cases
+"were never hit in practice." That was wrong, and contradicted by this
+report's own "Chapters affected" table above, which already listed
+several of them. What's true is narrower: they're not hit on the
+*currently pinned* 2.7.3 binary, so they carry no live-site risk today
+— but a straight move to Pandoc 3.x would still hit real, unaddressed
+exposure in both categories. See
+`Admin/PANDOC-VERSION-DRIFT-REPORT.md`'s "Why we can't just move to the
+latest Pandoc" for the current, verified count.
 
 3. ~~**While doing that regeneration pass**, also pick up the eight stale
    `19→20`/`20→21` cross-references above...~~ **Done** (commit `3eab103`,

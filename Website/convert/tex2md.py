@@ -215,6 +215,44 @@ def unwrap_bare_beware_figures(tex):
     return "".join(out)
 
 
+def merge_footnotemark_footnotetext(tex):
+    r"""\caption{...\protect\footnotemark} paired with a later
+    \footnotetext{...} -- used once in the book (Book/13.tex's Wikimedia
+    image-attribution footnote on the "Haskell Base classes" figure),
+    split this way because \caption is a moving argument and a plain
+    \footnote{} directly inside it breaks the real LaTeX build (see
+    commit 5159fdf). That split is required for the printed book, but
+    Pandoc -- 2.7.3 and 3.11 alike, confirmed by direct test -- silently
+    drops both halves outright, losing the attribution entirely rather
+    than just mis-rendering it. Since the real .tex source can't change,
+    fix it here instead: merge \footnotemark and its nearest following
+    \footnotetext{...} back into one \footnote{...} in the text handed to
+    Pandoc, which it (and any Markdown writer) understands natively.
+    """
+    mark_pattern = re.compile(r"(?:\\protect)?\\footnotemark\b")
+    edits = []
+    for m in mark_pattern.finditer(tex):
+        ft = re.search(r"\\footnotetext\{", tex[m.end():])
+        if not ft:
+            continue
+        ft_open = m.end() + ft.end() - 1
+        ft_close = _find_matching_brace(tex, ft_open)
+        content = tex[ft_open + 1:ft_close - 1]
+        edits.append((m.start(), m.end(), r"\footnote{%s}" % content))
+        edits.append((m.end() + ft.start(), ft_close, ""))
+    if not edits:
+        return tex
+    edits.sort()
+    out = []
+    pos = 0
+    for start, end, repl in edits:
+        out.append(tex[pos:start])
+        out.append(repl)
+        pos = end
+    out.append(tex[pos:])
+    return "".join(out)
+
+
 def wrap_bare_font_switches(tex):
     """\\mi (defs0.tex: \\newcommand{\\mi}{\\mytt}, \\newfont{\\mytt}
     {cmtt10} -- the Computer Modern Typewriter font) and \\ttfamily
@@ -2084,6 +2122,11 @@ def preprocess(tex, stem):
         r"\2\n\1",
         tex,
     )
+
+    # Must run before anything else touches \caption content -- a
+    # \footnotemark left inside \caption{...} until later passes look at
+    # it is just an unrecognised macro to them, same as it is to Pandoc.
+    tex = merge_footnotemark_footnotetext(tex)
 
     # Must run before anything else touches \caption/\label -- see
     # hoist_labels_out_of_captions's docstring (Chapter 6's \label{horsePos}

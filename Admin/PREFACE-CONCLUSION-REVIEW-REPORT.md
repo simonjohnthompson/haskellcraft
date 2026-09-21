@@ -191,7 +191,12 @@ a "where these ideas show up today" addition.
    working group's new Report-revision effort. Also fixed the dated
    Erlang/F# examples in the same Preface paragraph (`Book/0.tex:54`)
    while there. Live in both the PDF and website.
-2. Add the Haskell Foundation mention.
+2. ~~Add the Haskell Foundation mention.~~ **Done** — added as a fourth
+   paragraph to the Preface's "Haskell and GHCi" section (`Book/0.tex`),
+   ending with the "revised Haskell 2010 Report" sentence moved down
+   from the end of the second paragraph. Live in both the PDF and
+   website. (This placed it in the Preface rather than Chapter 22's
+   "Haskell on the web" section as originally suggested — Simon's call.)
 3. ~~Draft and insert the "What is new in this online edition?"
    section.~~ **Done** — inserted into `Book/0.tex` (before "What has
    changed from the second edition?"), merged with a second bullet list

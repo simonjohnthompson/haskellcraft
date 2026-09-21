@@ -3434,16 +3434,26 @@ def postprocess(md: str, current_file: str) -> str:
     # in a <figure> isn't an option -- CommonMark never re-parses
     # markdown inside a raw HTML block, so a <figure> wrapped around the
     # table's own pipe-table markdown would corrupt it into literal
-    # text instead of a real <table>. A definition list's own body
-    # marker uses three spaces after the colon (":   text", see the
-    # hypertarget-anchor handling above); pandoc's table caption always
-    # uses exactly one, so the two never collide. Pandoc 3.x (not the
-    # pinned 2.7.3, but harmless to also guard against) puts the id in a
-    # trailing `{#X ...}` attribute here instead of the `[]{label="X"}`
-    # span already handled above -- extract it the same way _id_attr
-    # does for images.
-    def _table_caption_to_figcaption(m):
-        text = m.group(1)
+    # text instead of a real <table>. Pandoc 3.x (not the pinned 2.7.3,
+    # but harmless to also guard against) puts the id in a trailing
+    # `{#X ...}` attribute here instead of the `[]{label="X"}` span
+    # already handled above -- extract it the same way _id_attr does
+    # for images.
+    #
+    # A definition list's own body ("Term\n\n:   Definition...", see the
+    # hypertarget-anchor handling above) can look identical to this --
+    # confirmed directly: under the pinned 2.7.3 the two markers are
+    # unambiguous (three spaces after the colon for a definition, one
+    # for a table caption), but Pandoc 3.11 uses one space for *both*,
+    # so spacing alone can no longer tell them apart, and treating every
+    # "``: text``" line as a table caption regenerated a real
+    # \begin{description} list (Chapter 6's reading-list) as a stray
+    # <figcaption> in a fresh 3.11 test regeneration. Disambiguate
+    # structurally instead, independent of either pandoc version's
+    # whitespace convention: a table caption is always the line right
+    # after the table's own last pipe-delimited row (blank lines
+    # allowed in between); a definition list's body never is.
+    def _table_caption_to_figcaption(text):
         am = re.search(r'\{#([A-Za-z0-9_:.\-]+)[^{}]*\}\s*$', text)
         anchor = ""
         if am:
@@ -3451,7 +3461,21 @@ def postprocess(md: str, current_file: str) -> str:
             text = text[:am.start()].rstrip()
         text = re.sub(r"`([^`]*)`", r"<code>\1</code>", text)
         return "<figcaption>" + text + "</figcaption>" + anchor
-    md = re.sub(r"^: (\S.*)$", _table_caption_to_figcaption, md, flags=re.MULTILINE)
+
+    def _fix_table_captions(text):
+        lines = text.split("\n")
+        for i, line in enumerate(lines):
+            cm = re.match(r"^: (\S.*)$", line)
+            if not cm:
+                continue
+            j = i - 1
+            while j >= 0 and not lines[j].strip():
+                j -= 1
+            prev = lines[j].strip() if j >= 0 else ""
+            if prev.startswith("|") and prev.endswith("|"):
+                lines[i] = _table_caption_to_figcaption(cm.group(1))
+        return "\n".join(lines)
+    md = _fix_table_captions(md)
 
     # Bare \includegraphics (no \caption) gets pandoc's placeholder alt
     # text "image" -> drop it so html/mdx writers don't turn it into a

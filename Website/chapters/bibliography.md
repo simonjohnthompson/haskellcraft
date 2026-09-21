@@ -1,19 +1,27 @@
 References
 ==========
 
+<a id="strAndInterp"></a>Harold Abelson, Gerald Jay Sussman, and Julie Sussman, *The Structure and Interpretation of Computer Programs*, MIT Press, 1996.
+
 <a id="dragon2ed"></a>Alfred V. Aho, Monica S. Lam, Ravi Sethi, and Jeffrey D. Ullman, *Compilers: Principles, Techniques, and Tools*, Addison Wesley, 2006.
 
 <a id="hpfp"></a>Christopher Allen and Julie Moronuki, *Haskell Programming from First Principles*, 2016. Available from <https://haskellbook.com/>.
 
+<a id="mlCritique"></a>Andrew Appel, “A critique of Standard ML”, *Journal of Functional Programming*, 3, 1993.
+
 <a id="progErlang"></a>Joe Armstrong, *Programming Erlang: Software for a Concurrent World*, The Pragmatic Bookshelf, 2007.
 
 <a id="paradise"></a>Lennart Augustsson, Howard Mansell, and Ganesh Sittampalam, “Paradise: a two-stage DSL embedded in Haskell”, In *ICFP '08*, 225--228, ACM, 2008.
+
+<a id="backus"></a>John Backus, “Can programming be liberated from the Von Neumann style?”, *cacm*, 21, 1978.
 
 <a id="LandOfLisp"></a>Conrad Barski, *Land of Lisp: Learn to Program in Lisp, One Game at a Time!*, Nostarch Press, 2010.
 
 <a id="winningWays"></a>Elwyn R. Berlekamp, John H. Conway, and Richard K. Guy, *Winning Ways for Your Mathematical Plays*, A K Peters/CRC Press, 2001.
 
 <a id="BirdPearls"></a>Richard Bird, *Pearls of Functional Algorithm Design*, Cambridge University Press, 2010.
+
+<a id="AoP"></a>Richard Bird and Oege de Moor, *Algebra of Programming*, Prentice-Hall, 1997.
 
 <a id="lava"></a>Per Bjesse, Koen Claessen, Mary Sheeran, and Satnam Singh, “Lava: hardware design in Haskell”, In *ICFP '98*, 174--184, ACM, 1998.
 
@@ -31,6 +39,8 @@ References
 
 <a id="conwayGames"></a>John Horton Conway, *On Numbers and Games*, A K Peters/CRC Press, 2002.
 
+<a id="cormen"></a>Thomas H. Cormen, Charles E. Leiserson, and Ronald L. Rivest, *Introduction to Algorithms*, MIT Press, 1990.
+
 <a id="Elixir"></a>Elixir, “Elixir”, 2026. Available at <https://elixir-lang.org/>.
 
 <a id="Elm"></a>Elm, “Elm”, 2026. Available at <https://elm-lang.org/>.
@@ -39,7 +49,13 @@ References
 
 <a id="typeSafeSharing"></a>Andy Gill, “Type-safe observable sharing in Haskell”, In *Haskell '09*, 117--128, ACM, 2009.
 
+<a id="gordon-book"></a>Andrew J. Gordon, *Functional Programming and Input/Output*, Cambridge University Press, 1994.
+
 <a id="Hackage"></a>Hackage, “The HackageDB”, 2010. Available at <http://hackage.haskell.org/>.
+
+<a id="fple95"></a>Pieter Hartel and Rinus Plasmeijer (eds.), *Functional Programming Languages in Education (FPLE)*, Springer-Verlag, Lecture Notes in Computer Science, 1022, 1995.
+
+<a id="stateArtFP"></a>Pieter Hartel and Rinus Plasmeijer, “Special issue on state-of-the-art applications of pure functional programming languages”, *Journal of Functional Programming*, 5, 1995.
 
 <a id="gentle98"></a>Paul Hudak, Joseph H. Fasel, and John Peterson, “A gentle introduction to Haskell”, 2000.
 
@@ -51,6 +67,8 @@ References
 
 <a id="advancedFP6"></a>Pieter Koopman, Rinus Plasmeijer, and Doaitse Swierstra (eds.), *Advanced Functional Programming*, Springer-Verlag, Lecture Notes in Computer Science, 5832, 2008.
 
+<a id="extTypes"></a>Konstantin L\"aufer, “Type Classes with Existential Types”, *Journal of Functional Programming*, 6, 1996.
+
 <a id="orc"></a>John Launchbury and Trevor Elliott, “Concurrent Orchestration in Haskell”, In *Haskell '10*, 79--90, ACM, 2010.
 
 <a id="advancedFP2"></a>John Launchbury, Erik Meijer, and Tim Sheard (eds.), *Advanced Functional Programming*, Springer-Verlag, Lecture Notes in Computer Science, 1129, 1996.
@@ -61,7 +79,15 @@ References
 
 <a id="defsml"></a>Robin Milner, Mads Tofte, and Robert Harper, *The Definition of Standard ML*, MIT Press, 1990.
 
+<a id="defsml2e"></a>Robin Milner, Mads Tofte, Robert Harper, and David MacQueen, *The Definition of Standard ML*, MIT Press, 1997.
+
 <a id="realWorldHaskell"></a>Bryan O'Sullivan, Don Stewart, and John Goerzen, *Real World Haskell*, O'Reilly, 2008.
+
+<a id="okasakiBook"></a>Chris Okasaki, *Purely Functional Data Structures*, Cambridge University Press, 1998.
+
+<a id="logicandcomp"></a>Laurence C. Paulson, *Logic and Computation --- Interactive proof with Cambridge LCF*, Cambridge University Press, 1987.
+
+<a id="workingml2e"></a>Laurence C. Paulson, *ML for the Working Programmer*, Cambridge University Press, 1996.
 
 <a id="pj"></a>Simon Peyton Jones, *The Implementation of Functional Programming Languages*, Prentice Hall, 1987.
 
@@ -70,6 +96,8 @@ References
 <a id="pj-lester"></a>Simon Peyton Jones and David Lester, *Implementing functional languages*, Prentice Hall, 1992.
 
 <a id="PureScript"></a>PureScript, “PureScript”, 2026. Available at <https://www.purescript.org/>.
+
+<a id="applicsFP"></a>Colin Runciman and David Wakeling (eds.), *Applications of functional programming*, UCL Press, 1995.
 
 <a id="Rust"></a>Rust, “The Rust Programming Language”, 2026. Available at <https://www.rust-lang.org/>.
 
@@ -82,6 +110,8 @@ References
 <a id="advancedFP3"></a>S. Doaitse Swierstra, Pedro R. Henriques, and Jose N. Oliveira (eds.), *Advanced Functional Programming*, Springer-Verlag, Lecture Notes in Computer Science, 1608, 1998.
 
 <a id="miraCraft"></a>Simon Thompson, *Miranda: The Craft of Functional Programming*, Addison Wesley, 1995.
+
+<a id="sjtProofFP"></a>Simon Thompson, “Proof”, In *Research Directions in Parallel Functional Programming*, Springer Verlag, 1999.
 
 <a id="mira"></a>David A. Turner, “An Overview of Miranda”, *SIGPLAN Notices*, 21, 1986.
 

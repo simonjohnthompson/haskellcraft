@@ -3132,10 +3132,20 @@ def preprocess(tex, stem):
     # reads naturally and the link itself shows it's a cross-reference.
     tex = re.sub(r"\b(?:Chapters?|Sections?|Figures?|Tables?)[\s~]*(?=XREFOPEN)", "", tex)
 
-    # \cite{a,b}/\citeyear{x} -> a sentinel resolved once the bibliography
-    # page exists to link against (build_bibliography_page(), called from
-    # __main__ after every chapter's been converted).
+    # \cite{a,b}/\citeyear{x}/\citeN{x}/\shortcite{a,b} (chicago.sty) -> a
+    # sentinel resolved once the bibliography page exists to link against
+    # (build_bibliography_page(), called from __main__ after every
+    # chapter's been converted). Left unhandled, these are unknown macros
+    # to Pandoc, which silently swallows both the macro and its braced
+    # argument -- not just dropping the citation's formatting but the
+    # citation itself, with no trace in the output. \shortcite renders
+    # the same as \cite here since format_citation_authors() already
+    # always uses chicago.sty's short ("Surname") author form; \citeN is
+    # its own sentinel since it's textual ("Author (Year)") rather than
+    # parenthetical.
     tex = strip_balanced_macro(tex, "citeyear", lambda arg: f"XCITEYEAROPEN{arg}XCITECLOSE")
+    tex = strip_balanced_macro(tex, "citeN", lambda arg: f"XCITENOPEN{arg}XCITECLOSE")
+    tex = strip_balanced_macro(tex, "shortcite", lambda arg: f"XCITEOPEN{arg}XCITECLOSE")
     tex = strip_balanced_macro(tex, "cite", lambda arg: f"XCITEOPEN{arg}XCITECLOSE")
 
     # \codelink{url}{text} (see miradefs.tex) -> a sentinel wrapping the
@@ -3646,6 +3656,32 @@ def postprocess(md: str, current_file: str) -> str:
         lambda m: _resolve_cite(m, year_only=False), md,
     )
 
+    # \citeN{a,b} -> XCITENOPEN...XCITECLOSE sentinel (see preprocess())
+    # -> "Surname (Year)", textual rather than parenthetical (chicago.sty
+    # uses this form when the citation is the subject of a sentence, e.g.
+    # "... for which Smith (1990) provides an introduction"), so -- unlike
+    # \cite/\citeyear/\shortcite above -- there's no outer pair of parens
+    # around the whole thing, just around each citation's own year.
+    def _resolve_citeN(m):
+        parts = []
+        for key in m.group(1).split(","):
+            key = key.strip()
+            entry = BIB_ENTRIES.get(key)
+            if not entry:
+                parts.append(f"[{key}](bibliography.md#{key})")
+                continue
+            f = entry["fields"]
+            year = clean_bib_text(f.get("year", "n.d."))
+            who = f.get("author") or f.get("editor")
+            author_text = format_citation_authors(who) if who else key
+            text = f"{author_text} ({year})"
+            parts.append(f"[{text}](bibliography.md#{key})")
+        return "; ".join(parts)
+    md = re.sub(
+        r"XCITENOPEN([A-Za-z0-9_,\-]+)XCITECLOSE",
+        _resolve_citeN, md,
+    )
+
     # Pandoc's [text]{.underline} bracketed-span syntax isn't plain
     # CommonMark and can trip up MDX-based site generators -> plain HTML.
     md = re.sub(r"\[([^\[\]]*)\]\{\.underline\}", r"<u>\1</u>", md)
@@ -3954,11 +3990,11 @@ def postprocess(md: str, current_file: str) -> str:
 
 
 def build_cited_keys():
-    """Every key actually used in a \\cite/\\citeyear somewhere in the
-    book, so the reference list doesn't include big.bib's ~5000 unused
-    entries."""
+    """Every key actually used in a \\cite/\\citeyear/\\citeN/\\shortcite
+    somewhere in the book, so the reference list doesn't include
+    big.bib's ~5000 unused entries."""
     keys = set()
-    pattern = re.compile(r"\\cite(?:year)?\{([^{}]+)\}")
+    pattern = re.compile(r"\\(?:shortcite|cite(?:year|N)?)\{([^{}]+)\}")
     for stem in CHAPTER_STEMS:
         path = BOOK_DIR / f"{stem}.tex"
         if not path.exists():

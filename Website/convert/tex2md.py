@@ -3438,6 +3438,20 @@ def _fix_duplicate_image_caption_footnote(md):
 def postprocess(md: str, current_file: str) -> str:
     md = _fix_duplicate_image_caption_footnote(md)
 
+    # Pandoc represents a hard line break (real LaTeX's own \\) as a
+    # literal trailing "\" at the end of a line, which CommonMark's
+    # hard-break rule only recognizes when *more* text follows on the
+    # next line -- there's nothing to break *to* when it's the last
+    # line of its own paragraph (a \\ right before the enclosing
+    # environment/group closes, e.g. the Preface's sign-off,
+    # "\emph{Simon Thompson}\\\n\emph{Canterbury, December
+    # 2010}\\\n}" -- the second \\ has no following line), so
+    # pulldown-cmark just renders it as a literal backslash character
+    # instead, confirmed live on the real site (reported directly:
+    # "December 2010\" in the rendered Preface). Drop a trailing "\"
+    # immediately followed by a blank line or the end of the file.
+    md = re.sub(r"\\(?=\n[ \t]*(?:\n|\Z))|\\\Z", "", md)
+
     # \minted{haskell} makes pandoc emit ``` {.haskell} (its own attribute
     # syntax) -- normalize to the plain ```haskell info-string that GitHub
     # /Docusaurus/mdBook/VitePress's highlighters all key off of. Handles

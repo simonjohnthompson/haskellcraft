@@ -134,7 +134,11 @@ expected; GHC evolved instead through extensions, now curated into
 `GHC2021` / `GHC2024` "language editions"; and a Report revision effort
 has just begun.
 
-### 2. The "next few years" prediction (line 205) is itself now 15 years stale
+### 2. ~~The "next few years" prediction (line 205) is itself now 15 years stale~~ **Done**
+
+Added two paragraphs after line 205 in `Book/22.tex`, scoring the third
+edition's 2011 multicore/type-system predictions from 2026 and naming
+what's new since. Live in both the PDF and website.
 
 It is framed as a retrospective on the *second* edition's 1998-9
 predictions, so a natural, in-keeping move is to add a short coda scoring
@@ -146,7 +150,10 @@ today's reader:
   reads oddly now that the industry is a lot more excited about
   GPUs/accelerators.
 - Type-system prediction: also vindicated, concretely — `LinearTypes`
-  landed in GHC 9.0+, directly continuing that thread.
+  landed in GHC 9.0+, directly continuing that thread. (Also added, at
+  Simon's request: a note on type-level programming's continued
+  progress via type families/kind polymorphism/`singletons`, and that
+  full Dependent Haskell itself remains unshipped.)
 - Worth naming since 2011: real production use at genuine scale
   (Cardano/Plutus for smart contracts; fintech deployments at Standard
   Chartered and others); the rise of effect systems (`effectful`,

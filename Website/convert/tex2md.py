@@ -215,6 +215,95 @@ def unwrap_bare_beware_figures(tex):
     return "".join(out)
 
 
+def unwrap_bare_code_listing_figures(tex):
+    r"""\begin{figure}[...]...\begin{alltt}...\end{alltt}...\end{figure} --
+    a plain Haskell code listing (or, twice in Chapter 1/6, ASCII-art
+    "pictures" drawn with \begin{alltt}) wrapped in \begin{figure} purely
+    for the printed book's float placement, the same "figure added by
+    hand around otherwise-plain content" pattern as \beware
+    (unwrap_bare_beware_figures) and a genuine table
+    (convert_table_figures_to_table_env). 26 instances across 9 chapters
+    (1, 2, 6, 14, 15, 16, 17, 20, 21), every one with its own
+    \caption{...}\label{...} -- this was wrongly believed already fixed
+    in an earlier version of Admin/PANDOC-VERSION-DRIFT-REPORT.md ("no
+    longer shows up in the fallback scan"); it wasn't, that scan just
+    didn't check for this failure shape.
+
+    Unlike \beware, this doesn't need to validate the figure's *entire*
+    content -- just strip the \begin{figure}(bracket)?/\end{figure}
+    tokens themselves and leave everything between them completely
+    untouched, however it's arranged (a wrapping \begin{center}, leading
+    \index{}/\hypertarget{}/\minx{} decorators, a \vspace{}/\vspace*{}
+    before or after the caption, a trailing \index{} after the label --
+    every one of these shapes occurs somewhere in the corpus). Two
+    things confirmed by direct testing make this safe without that
+    validation:
+    - A bare \begin{center} (no \begin{figure} around it) wrapping
+      non-image content already renders as plain Markdown under *both*
+      pandoc versions -- 2.7.3 drops it outright, 3.11 emits a
+      "::: center ... :::" fenced Div that postprocess() already
+      unwraps (see its own comment, "the rare non-image case (e.g.
+      Chapter 21's a centered table)"). So the wrapping \begin{center}
+      some of these figures have doesn't need touching either.
+    - \vspace{}/\vspace*{} is an unrecognized macro with a single
+      braced argument -- confirmed by fragment test, pandoc silently
+      drops the whole thing, the same as every other such macro handled
+      elsewhere in this file by simply not needing to be recognized.
+    - The caption's own \label{X} is only ever kept as a real \label by
+      _label_replacement when it's *primary* (find_primary_heading_
+      labels), which requires \label to immediately follow a literal
+      \caption{ token -- but mark_non_image_captions has already
+      replaced every one of these captions with plain CAPTIONSENTINEL
+      text by the time that runs (it's one of the very first things
+      preprocess() does), so the adjacency is already broken and the
+      label falls through to \hypertarget regardless of whether the
+      figure wrapper is still there. Confirmed against the *already
+      live* site: Chapter 2's "FirstScript.hs" example caption already
+      renders this way today, with a separate <a id="FirstScript">
+      anchor, not a real \label -- unwrapping the figure here changes
+      nothing about that.
+
+    Must run after mark_non_image_captions, for exactly that reason --
+    the caption needs to already be sentinel-protected before its
+    figure wrapper comes off, or a bare \caption{...} outside any float
+    is just an unrecognized macro to pandoc and vanishes outright (the
+    same failure mark_non_image_captions exists to prevent). Must run
+    before the \begin{alltt} -> \begin{minted}{haskell} conversion,
+    since it looks for the literal \begin{alltt} spelling. Only touches
+    the in-memory text handed to Pandoc; the real .tex source's
+    \begin{figure} (needed for the printed book's own float placement)
+    is untouched.
+    """
+    fig_re = re.compile(r"\\begin\{figure\}(?:\[[^\]\n]*\])?")
+    end_fig_re = re.compile(r"\\end\{figure\}")
+    out = []
+    pos = 0
+    while True:
+        m = fig_re.search(tex, pos)
+        if not m:
+            out.append(tex[pos:])
+            break
+        end_m = end_fig_re.search(tex, m.end())
+        if not end_m:
+            out.append(tex[pos:])
+            break
+        body = tex[m.end():end_m.start()]
+        eligible = (
+            len(re.findall(r"\\begin\{alltt\}", body)) == 1
+            and r"\includegraphics" not in body
+            and r"\beware" not in body
+            and r"\begin{tabular}" not in body
+            and r"\begin{tabular*}" not in body
+        )
+        out.append(tex[pos:m.start()])
+        if eligible:
+            out.append(body)  # drop just the \begin{figure}/\end{figure} tokens
+        else:
+            out.append(tex[m.start():end_m.end()])
+        pos = end_m.end()
+    return "".join(out)
+
+
 def unwrap_center_around_image(tex):
     r"""\begin{figure}...\begin{center}\includegraphics[...]{...}
     \end{center}...\end{figure} -- a plain centering wrapper used all
@@ -244,15 +333,19 @@ def unwrap_center_around_image(tex):
       own Figure-block handling doesn't apply to protect against outside
       an actual \begin{figure}.
     - Only unwraps when the center's content, once whitespace is
-      trimmed, is one \includegraphics call optionally followed by the
-      figure's own \caption{...} and then \label{...} (Chapter 20's
-      "Positioned images" figure is the book's only instance of the
-      latter shape: caption and label sit inside the \begin{center}
-      rather than after it) -- anything else inside (a second image,
-      other text) is left untouched. Confirmed by fragment test: pandoc
-      treats \caption/\label the same whether they're inside or outside
-      the \begin{center}, so this is exactly as safe as the bare-image
-      case.
+      trimmed, is one or more \includegraphics calls -- consecutive
+      side-by-side images sharing one caption, book convention for a
+      "before/after" or multi-diagram figure (e.g. Chapter 16's 3- and
+      4-image search-tree diagrams, Chapter 19's tree-transformation
+      before/after pair), separated by \hfill or \hspace*{...}/
+      \hspace{...} -- optionally followed by the figure's own
+      \caption{...} and then \label{...} (Chapter 20's "Positioned
+      images" figure is the book's only instance of the latter shape:
+      caption and label sit inside the \begin{center} rather than after
+      it) -- anything else inside (other text) is left untouched.
+      Confirmed by fragment test: pandoc treats \caption/\label the
+      same whether they're inside or outside the \begin{center}, so
+      this is exactly as safe as the single-image case.
 
     Within those bounds this is confirmed a true no-op against the
     pinned 2.7.3 (every such figure in the corpus converts identically
@@ -299,13 +392,27 @@ def unwrap_center_around_image(tex):
             continue
         body_end = body_start + end_m.start()
 
-        img_m = re.match(r"\s*\\includegraphics(?:\[[^\]\n]*\])?\{", tex[body_start:body_end])
+        img_re = re.compile(r"\s*\\includegraphics(?:\[[^\]\n]*\])?\{")
+        sep_re = re.compile(r"\s*(?:\\hfill|\\hspace\*?\{[^{}]*\})")
+
+        img_m = img_re.match(tex[body_start:body_end])
         if not img_m:
             out.append(tex[pos:m.end()])
             pos = m.end()
             continue
-        open_brace = body_start + img_m.end() - 1
-        close = _find_matching_brace(tex, open_brace)
+        close = body_start + img_m.end() - 1
+        close = _find_matching_brace(tex, close)
+
+        while True:
+            sep_m = sep_re.match(tex[close:body_end])
+            if not sep_m:
+                break
+            after_sep = close + sep_m.end()
+            img_m2 = img_re.match(tex[after_sep:body_end])
+            if not img_m2:
+                break
+            close = after_sep + img_m2.end() - 1
+            close = _find_matching_brace(tex, close)
 
         cap_m = re.match(r"\s*\\caption\{", tex[close:body_end])
         if cap_m:
@@ -325,41 +432,195 @@ def unwrap_center_around_image(tex):
     return "".join(out)
 
 
+def split_multi_image_figures(tex):
+    r"""\begin{figure}...N \includegraphics calls (separated by \hfill or
+    \hspace*{...}/\hspace{...}), sharing one \caption{...}\label{...}...
+    \end{figure} -- side-by-side "before/after" or multi-diagram figures
+    (Chapter 16's 3- and 4-image search-tree diagrams, Chapter 19's
+    tree-transformation before/after pair; the book's only 3 instances).
+    unwrap_center_around_image already strips these three figures'
+    wrapping \begin{center} (it tolerates multiple images too), but
+    that alone isn't enough: confirmed by direct fragment test against
+    Pandoc 3.11, even a completely bare, wrapper-free multi-image
+    \begin{figure} still degrades to raw HTML -- unlike a placement
+    argument or a \begin{center} wrapper, this isn't something removing
+    a wrapper can fix. Pandoc's writer only has a plain-Markdown
+    representation for a Figure block holding *one* image.
+
+    The fix: split one N-image \begin{figure} into N separate
+    \begin{figure} blocks, each with just one image and the *same*
+    \caption{...}\label{...} repeated. Confirmed by fragment test that
+    this round-trips correctly: pandoc emits N adjacent plain
+    ![]()-image lines (each tagged, under 2.7.3, with its own "fig:"
+    side-by-side marker -- 3.11 drops that marker but the images are
+    otherwise identical), and postprocess()'s own pair_re merge pass
+    (see its docstring, "N images placed side by side sharing one
+    caption") already exists specifically to recombine a run of
+    adjacent same-caption images back into one <figure> -- which is
+    exactly what it does today for the *unsplit* 2.7.3 case already, so
+    this is squarely in the shape that logic was built to expect,
+    now also reachable under 3.11.
+
+    Deliberately conservative: only splits when the whole figure body,
+    after any leading \index{}/\hypertarget{} decorators, is *exactly*
+    "image (separator image)+ \caption{...}\label{...}" with nothing
+    else at all -- confirmed against the corpus that all 3 real
+    instances match this exactly (no trailing \index{}, no \vspace{}),
+    so there's no need to guess how those would interact with a split.
+    Must run after unwrap_center_around_image, which is what clears the
+    \begin{center} wrapper these three otherwise have.
+    """
+    fig_re = re.compile(r"\\begin\{figure\}(?:\[[^\]\n]*\])?")
+    end_fig_re = re.compile(r"\\end\{figure\}")
+    img_re = re.compile(r"\\includegraphics(?:\[[^\]\n]*\])?\{[^{}]*\}")
+    sep_re = re.compile(r"\s*(?:\\hfill|\\hspace\*?\{[^{}]*\})\s*")
+    out = []
+    pos = 0
+    while True:
+        m = fig_re.search(tex, pos)
+        if not m:
+            out.append(tex[pos:])
+            break
+        end_m = end_fig_re.search(tex, m.end())
+        if not end_m:
+            out.append(tex[pos:])
+            break
+        body = tex[m.end():end_m.start()]
+
+        scan = 0
+        while True:
+            ws = re.match(r"\s*", body[scan:])
+            scan += ws.end()
+            lead = re.match(r"\\(?:index|hypertarget)\{", body[scan:])
+            if not lead:
+                break
+            close = _find_matching_brace(body, scan + lead.end() - 1)
+            if lead.group().startswith(r"\hypertarget"):
+                if close >= len(body) or body[close] != "{":
+                    break
+                close = _find_matching_brace(body, close)
+            scan = close
+        decorators = body[:scan]
+        rest = body[scan:]
+
+        images = []
+        im = img_re.match(rest)
+        eligible = bool(im)
+        cursor = im.end() if im else 0
+        if im:
+            images.append(im.group(0))
+            while True:
+                sm = sep_re.match(rest[cursor:])
+                if not sm:
+                    break
+                after = cursor + sm.end()
+                im2 = img_re.match(rest[after:])
+                if not im2:
+                    break
+                images.append(im2.group(0))
+                cursor = after + im2.end()
+            eligible = len(images) >= 2
+
+        caption_label = None
+        if eligible:
+            cap_m = re.match(r"\s*\\caption\{", rest[cursor:])
+            if cap_m:
+                cap_start = cursor + cap_m.start()
+                close1 = _find_matching_brace(rest, cursor + cap_m.end() - 1)
+                lbl_m = re.match(r"\s*\\label\{", rest[close1:])
+                if lbl_m:
+                    close2 = _find_matching_brace(rest, close1 + lbl_m.end() - 1)
+                    if not rest[close2:].strip():
+                        caption_label = rest[cap_start:close2]
+            eligible = caption_label is not None
+
+        out.append(tex[pos:m.start()])
+        if eligible:
+            pieces = [
+                r"\begin{figure}" + decorators + img + "\n" + caption_label + r"\end{figure}"
+                for img in images
+            ]
+            out.append("\n".join(pieces))
+        else:
+            out.append(tex[m.start():end_m.end()])
+        pos = end_m.end()
+    return "".join(out)
+
+
 def hoist_hypertargets_out_of_figures(tex):
     r"""A run of \hypertarget{X}{} calls sitting directly before a figure's
-    own \end{figure} -- almost always a first-occurrence \index{} entry
-    (mark_first_index_occurrences) trailing right after the figure's
-    \label{}/\caption{}, e.g. Chapter 11's \label{plmb}\index{plumbing}
-    -- is, on its own, enough extra content to make Pandoc 3.x's
-    Markdown writer fall back to raw HTML for the whole figure instead
-    of a plain ![]() image, the same "bare image with nothing else" rule
-    as strip_figure_placement_args/unwrap_center_around_image/
-    _label_replacement (confirmed directly against Pandoc 3.11). Unlike
-    a \label, which pandoc can attach as a real {#id} attribute, a
-    \hypertarget has nowhere to attach -- it's only ever rendered as its
-    own separate anchor, so its exact position doesn't matter. Move any
-    such *trailing* hypertarget out to right after \end{figure} instead
-    of leaving it inside, where its only effect (under 2.7.3 too, though
-    harmlessly there) is to make the figure's content non-bare.
+    own \end{figure}, or directly before its \caption{...} -- almost
+    always a first-occurrence \index{} entry (mark_first_index_
+    occurrences) landing right next to the figure's \label{}/\caption{},
+    e.g. Chapter 11's \label{plmb}\index{plumbing} (trailing case) or
+    Chapter 2's GHCiPreludeModules figure, \end{center} \index{GHCi!
+    modules in}\caption{...} (before-caption case) -- is, on its own,
+    enough extra content to make Pandoc 3.x's Markdown writer fall back
+    to raw HTML for the whole figure instead of a plain ![]() image, the
+    same "bare image with nothing else" rule as strip_figure_placement_
+    args/unwrap_center_around_image/_label_replacement (confirmed
+    directly against Pandoc 3.11). Unlike a \label, which pandoc can
+    attach as a real {#id} attribute, a \hypertarget has nowhere to
+    attach -- it's only ever rendered as its own separate anchor, so its
+    exact position doesn't matter. Move it out to right after
+    \end{figure} (trailing case) or past the \caption{...} (and a
+    \label{...} immediately following it, if present -- before-caption
+    case) instead of leaving it where it forces the figure non-bare;
+    under 2.7.3 leaving it in place is harmless, since that version
+    doesn't have this restriction.
 
-    Deliberately narrow: only a run immediately before \end{figure}
-    (modulo whitespace), never one anywhere else in the figure. A
-    hypertarget can also sit deep inside a figure's own content -- e.g.
-    Chapter 2's GHCi-commands table (one of this book's few genuine
-    tables nested in a figure, already documented as a separate,
-    unfixed issue in Admin/PANDOC-VERSION-DRIFT-REPORT.md), which plants
-    one next to almost every row for that row's own index entry.
-    Hoisting *those* out to the end would silently detach each anchor
-    from the specific row it's meant to mark -- a real regression to
-    today's pinned-2.7.3 output, confirmed by a full-corpus diff catching
-    it when this function first tried to sweep up every hypertarget in
-    the figure rather than just the trailing run.
+    Deliberately narrow: only a run immediately before \end{figure} or
+    immediately before \caption{ (modulo whitespace), never one
+    anywhere else in the figure. A hypertarget can also sit deep inside
+    a figure's own content -- e.g. Chapter 2's GHCi-commands table (one
+    of this book's few genuine tables nested in a figure, already
+    documented as a separate, unfixed issue in
+    Admin/PANDOC-VERSION-DRIFT-REPORT.md), which plants one next to
+    almost every row for that row's own index entry. Hoisting *those*
+    out would silently detach each anchor from the specific row it's
+    meant to mark -- a real regression to today's pinned-2.7.3 output,
+    confirmed by a full-corpus diff catching it when this function
+    first tried to sweep up every hypertarget in the figure rather than
+    just the trailing run.
     """
-    return re.sub(
-        r"((?:\\hypertarget\{[^{}]*\}\{\}\s*)+)\\end\{figure\}",
-        lambda m: r"\end{figure}" + "".join(re.findall(r"\\hypertarget\{[^{}]*\}\{\}", m.group(1))),
-        tex,
-    )
+    def _hoist_trailing(t):
+        return re.sub(
+            r"((?:\\hypertarget\{[^{}]*\}\{\}\s*)+)\\end\{figure\}",
+            lambda m: r"\end{figure}" + "".join(re.findall(r"\\hypertarget\{[^{}]*\}\{\}", m.group(1))),
+            t,
+        )
+    tex = _hoist_trailing(tex)
+
+    ht_run = re.compile(r"(?:\\hypertarget\{[^{}]*\}\{\}\s*)+")
+    cap_re = re.compile(r"\\caption\{")
+    out = []
+    pos = 0
+    while True:
+        m = ht_run.search(tex, pos)
+        if not m:
+            out.append(tex[pos:])
+            break
+        cm = cap_re.match(tex, m.end())
+        if not cm:
+            out.append(tex[pos:m.end()])
+            pos = m.end()
+            continue
+        close = _find_matching_brace(tex, cm.end() - 1)
+        lbl_m = re.match(r"\s*\\label\{", tex[close:])
+        if lbl_m:
+            close = _find_matching_brace(tex, close + lbl_m.end() - 1)
+        targets = "".join(re.findall(r"\\hypertarget\{[^{}]*\}\{\}", m.group(0)))
+        out.append(tex[pos:m.start()])
+        out.append(tex[m.end():close])
+        out.append(targets)
+        pos = close
+    tex = "".join(out)
+
+    # A before-caption hoist can land a hypertarget right before
+    # \end{figure} (Chapter 2's case: the caption is immediately
+    # followed by \label{...}, itself immediately followed by
+    # \end{figure}) -- run the trailing pass again to catch that.
+    return _hoist_trailing(tex)
 
 
 def move_hypertargets_off_table_row_starts(tex):
@@ -2414,6 +2675,12 @@ def preprocess(tex, stem):
     tex = convert_table_figures_to_table_env(tex)
 
     tex = mark_non_image_captions(tex)
+
+    # Must run after mark_non_image_captions and before the
+    # \begin{alltt} -> \begin{minted}{haskell} conversion below -- see
+    # unwrap_bare_code_listing_figures's docstring.
+    tex = unwrap_bare_code_listing_figures(tex)
+
     tex = convert_description_item_braces(tex)
     # Must run before wrap_bare_font_switches below: a >{\ttfamily} column
     # decorator's \ttfamily would otherwise be seen as a bare mid-text
@@ -2809,6 +3076,12 @@ def preprocess(tex, stem):
     # necessary as, the placement-argument strip just above: in practice
     # every placement-argument figure in this book is also center-wrapped.
     tex = unwrap_center_around_image(tex)
+
+    # N side-by-side images sharing one caption -- see
+    # split_multi_image_figures's docstring. Must run after
+    # unwrap_center_around_image just above, which is what clears these
+    # three figures' wrapping \begin{center}.
+    tex = split_multi_image_figures(tex)
 
     # \begin{figure}[...]\beware{...}{...}\end{figure} -- a \begin{figure}
     # wrapper added by hand around 37 of the book's \beware call sites

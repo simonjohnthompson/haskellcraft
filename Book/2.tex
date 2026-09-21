@@ -68,7 +68,7 @@ called \textbf{nested comments}\index{comment!nested}.
 
 The Glasgow Haskell Compiler (GHC)\index{Glasgow Haskell Compiler|see{GHC}}\index{GHC} is an industrial-strength compiler for Haskell. \textbf{GHC interactive (GHCi)} is an interactive interpreter based on GHC, which provides programmers with a Haskell \textbf{repl}, which successively \emph{reads} an expression, \emph{evaluates} it, \emph{prints} the result, and finally \emph{loops} back to the start. This is a great way to start programming, as it allows you to try out your ideas and experiment with definitions in the process of developing a program.
 
-If you're learning Haskell in high school or college, or at work, your teachers or colleagues will have made sure it is available on the computers you use. If you want to install it for yourself on a machine that you control, the best, and easiest, way of working doing that is to use GHCup, \url{https://www.haskell.org/ghcup/}.
+If you're learning Haskell in high school or college, or at work, your teachers or colleagues will have made sure it is available on the computers you use. If you want to install it for yourself on a machine that you control, the best, and easiest, way of working doing that is to use \href{https://www.haskell.org/ghcup/}{GHCup}.
 
 \begin{figure}[t] 
 \begin{center}
@@ -111,15 +111,8 @@ because this is common to macOS, Linux and Windows WSL.
 \subsection*{GHCi documentation}
 \index{GHCi!documentation}
 
-The GHCup webpage has documentation about `first steps' in getting started, covering \texttt{ghci} after a short introduction to the \texttt{ghc} command itself.
-\begin{center}\index{GHCup!first steps}
-\url{https://www.haskell.org/ghcup/steps/}
-\end{center} 
-The full documentation for the Glasgow Haskell Compiler is here
-\begin{center}\index{GHCi!documentation}
-\url{https://downloads.haskell.org/ghc/latest/docs/users_guide/}
-\end{center} 
-and that includes information specifically about GHCi.
+The GHCup webpage has \href{https://www.haskell.org/ghcup/steps/}{documentation about `first steps'}\index{GHCup!first steps} in getting started, covering \texttt{ghci} after a short introduction to the \texttt{ghc} command itself.
+The \href{https://downloads.haskell.org/ghc/latest/docs/users_guide/}{full documentation for the Glasgow Haskell Compiler}\index{GHCi!documentation} includes information specifically about GHCi, too.
 
 
 \subsection*{Starting GHCi}
@@ -320,7 +313,7 @@ the language.
 
 As well as the standard libraries, there is a wealth of 
 contributed libraries that support property-based testing, concurrency, functional animations and so forth; we will introduce the libraries that we need as we go along.
-These libraries are available on \emph{Hackage},\index{Hackage} \url{https://hackage.haskell.org}, the main online package repository for Haskell, using the Cabal installation system.  
+These libraries are available on \href{https://hackage.haskell.org}{\emph{Hackage}},\index{Hackage} the main online package repository for Haskell, using the Cabal installation system.
 We will say something more about Cabal in Section \ref{multipleModuleProgs} and give an overview of more Haskell modules and libraries in Chapter \ref{progLists}.
 
 \section{Modules}
@@ -399,17 +392,10 @@ Haskell projects, most of which consist of multiple modules, can be found on the
 
 \subsection*{Working with \texttt{Craft3e}}
 
-The code for this text is available on Hackage at 
-\begin{center}
-\url{https://hackage.haskell.org/package/Craft3e}
-\end{center}
+The code for this text is available \href{https://hackage.haskell.org/package/Craft3e}{on Hackage}.
 To download this to your machine type \texttt{cabal unpack Craft3e}. This will install the code for the book in a folder under \texttt{.cabal} in your home directory: the folder will be named \texttt{Craft3e-<version>}, where \texttt{<version>} is replaced by the current version number, \texttt{0.2.0.4} at the time of writing (2026-09-03).
 
-Alternatively, if you are familiar with git and github, you can obtain the code from the github repository 
-\begin{center}
-\url{https://github.com/simonjohnthompson/haskellcraft}
-\end{center}
-by cloning the repository. As well as the code, this repository contains the source code for the book itself, and other miscellaneous material.
+Alternatively, if you are familiar with git and github, you can obtain the code from the \href{https://github.com/simonjohnthompson/haskellcraft}{github repository} by cloning it. As well as the code, this repository contains the source code for the book itself, and other miscellaneous material.
 
 Whichever way you obtain the project, to work with the project, first change directory into the directory \texttt{Craft3e} (if you cloned the project from github) or \texttt{Craft3e-<version>} if you used \texttt{cabal unpack}. In either case you can then first run
 \begin{alltt}
@@ -423,10 +409,7 @@ This gives you a \texttt{ghci} prompt, but this time connected to GHC with all t
 
 Any new modules, such as \texttt{MyNewModule.hs} that you create \emph{within or below the Craft3e directory} will also have these dependencies available. These can be loaded with \texttt{:l MyNewModule}, and reloaded with \texttt{:r}, in the usual way.
 
-If you choose to use an IDE such as VS Code you should open the Craft3e folder using the \textbf{Open Folder} command in the \textbf{File} menu. This will ensure that dependencies are visible, and the built-in terminal will be opened in the same directory. You can then use the Cabal commands just as they are described above.  VS Code is enhanced with HLS using the \texttt{haskell.haskell} extension, which is documented and downloadable from here:
-\begin{center}
-  \url{https://marketplace.visualstudio.com/items?itemName=haskell.haskell}
-\end{center}
+If you choose to use an IDE such as VS Code you should open the Craft3e folder using the \textbf{Open Folder} command in the \textbf{File} menu. This will ensure that dependencies are visible, and the built-in terminal will be opened in the same directory. You can then use the Cabal commands just as they are described above.  VS Code is enhanced with HLS using the \texttt{haskell.haskell} extension, which is documented and \href{https://marketplace.visualstudio.com/items?itemName=haskell.haskell}{downloadable from the VS Code Marketplace}.
 The next section revisits the picture example of Chapter
 \ref{intro}, which is used to give a practical illustration of modules.
 

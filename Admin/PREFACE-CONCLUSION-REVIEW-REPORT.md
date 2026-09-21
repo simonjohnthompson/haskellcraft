@@ -54,13 +54,19 @@ reading the `.tex` files and the project's own git history.
   ([State of Haskell 2025](https://discourse.haskell.org/t/state-of-haskell-2025-results/13755)),
   and now the language-report effort above. Probably best placed in
   Chapter 22's "Haskell on the web" section rather than the Preface.
-- The "why learn Haskell" bullet list (lines 39-55) still leads with
+- ~~The "why learn Haskell" bullet list (lines 39-55) still leads with
   Xmonad and Cryptol. Both remain true but are quiet, 2010-era examples.
   A more resonant 2026 example: Cardano's Plutus smart-contract platform
   is built on Haskell at real production scale
   ([Cardano docs](https://docs.cardano.org/developer-resources/smart-contracts/plutus)),
   alongside a number of fintech users (Standard Chartered, Mercury, and
-  others). Optional polish, not a correctness fix.
+  others). Optional polish, not a correctness fix.~~ **Done** — kept
+  Xmonad/Cryptol and appended a sentence to the same bullet in
+  `Book/0.tex` naming Standard Chartered (multi-million-line Haskell
+  dialect powering its Markets division), Mercury (Haskell-backed
+  fintech processing hundreds of billions/year), and Plutus, each
+  re-verified via web search before adding. Live in both the PDF and
+  website.
 
 ### Draft "What is new in this online edition?" section
 

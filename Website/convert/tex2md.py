@@ -362,6 +362,57 @@ def hoist_hypertargets_out_of_figures(tex):
     )
 
 
+def move_hypertargets_off_table_row_starts(tex):
+    r"""A \hypertarget{X}{} sitting right after a table row's \\ (or
+    \\[len]) separator -- e.g. Chapter 3's special-characters table
+    (\begin{mytable}, \\[3pt]\index{tab (...)}, one per row) -- ends up,
+    positionally, as the very *first* thing in the *next* row's first
+    cell. Confirmed directly by fragment test: a hypertarget as the
+    first content of a table cell makes pandoc treat it as its own
+    block-level Div rather than an inline Span, *regardless* of what
+    follows it or whether whitespace separates them. tex2md.py invokes
+    pandoc with grid/multiline/simple tables all disabled (only pipe
+    tables), and a pipe table can't represent a cell with block-level
+    content at all -- pandoc has nowhere else to fall back to but raw
+    HTML for the *entire* table.
+
+    The fix confirmed by the same fragment test: a hypertarget anywhere
+    else in the cell (in particular, right after some real inline
+    content instead of before it) stays a normal inline span. Since its
+    exact position doesn't matter semantically, move a row-leading
+    hypertarget run to right after the next bit of real content in that
+    same cell (up to the following "&" or the next row's own "\\")
+    instead of before it -- stopping only at an actual "&"/"\\", not
+    just any single backslash, since cell content routinely contains
+    other backslash commands of its own (\verb+\+, \texttt{...}, ...)
+    that must stay put, not be mistaken for a row/cell boundary.
+
+    A hypertarget in the very *last* row has no following row to swap
+    with -- there, it's the same "trailing before an end token" shape
+    already handled for figures (see hoist_hypertargets_out_of_figures):
+    hoist it out to just after \end{tabular} instead.
+
+    Scoped to inside \begin{tabular}/\begin{tabular*} blocks only --
+    this is a table-cell-parsing quirk specific to pandoc's table
+    reader, not a general "hypertarget at the start of a paragraph"
+    rule (prose elsewhere in the book already has plenty of these with
+    no issue).
+    """
+    trailing_re = re.compile(r"((?:\\hypertarget\{[^{}]*\}\{\}\s*)+)(\\end\{tabular\*?\})")
+    row_re = re.compile(
+        r"(\\\\(?:\[[^\]\n]*\])?[ \t]*\n?[ \t]*)"
+        r"((?:\\hypertarget\{[^{}]*\}\{\}[ \t]*\n?[ \t]*)+)"
+        r"((?:(?!&|\\\\)[\s\S])+)"
+    )
+    def _fix_table(m):
+        block = trailing_re.sub(
+            lambda tm: tm.group(2) + "".join(re.findall(r"\\hypertarget\{[^{}]*\}\{\}", tm.group(1))),
+            m.group(0),
+        )
+        return row_re.sub(r"\1\3\2", block)
+    return re.sub(r"\\begin\{tabular\*?\}.*?\\end\{tabular\*?\}", _fix_table, tex, flags=re.DOTALL)
+
+
 def strip_figure_placement_args(tex):
     r"""\begin{figure}[t]/[b]/[htbp]/etc. -- the placement argument only
     matters to real LaTeX's own float algorithm in the printed book. Left
@@ -950,6 +1001,64 @@ def swap_label_before_caption(text):
         out.append(text[pos:m.start()])
         out.append(r"\caption{" + caption_inner + "}" + r"\label{%s}" % m.group(1))
         pos = j
+    return "".join(out)
+
+
+def convert_table_figures_to_table_env(tex):
+    r"""Three figures in the book (Chapters 2, 3, 6 -- the book's only
+    \begin{figure} blocks wrapping a \begin{tabular}/\begin{tabular*}
+    with no \includegraphics) are genuine tables, wrapped in
+    \begin{figure} purely so LaTeX would float them in the printed
+    book. \begin{figure} is the wrong environment for them on the web
+    in two ways at once: Pandoc's LaTeX reader only recognizes
+    \caption{...} inside a \begin{figure} for the single-bare-image
+    case (see mark_non_image_captions -- these three are exactly the
+    "once, a table" case its docstring mentions, currently rescued via
+    a sentinel), and Pandoc 3.x's Markdown writer can't degrade a
+    non-image Figure block to plain Markdown at all, forcing the same
+    raw-HTML fallback as every other figure issue in this file.
+
+    \begin{table} sidesteps both: confirmed by direct fragment test
+    against both the pinned 2.7.3 and Pandoc 3.11, a \begin{table}
+    wrapping the same tabular content plus \caption{...}\label{...}
+    parses the caption/label correctly *without* any sentinel, and
+    renders as a genuine plain-Markdown table with a
+    ": Caption {#id}" caption line under it -- no raw HTML, in either
+    Pandoc version (postprocess() converts that caption line into this
+    pipeline's usual <figure>/<figcaption> convention). Any placement
+    argument (\begin{figure}[t]) is dropped outright rather than
+    carried over -- meaningless on the web either way, same reasoning
+    as strip_figure_placement_args.
+
+    Run before mark_non_image_captions: once a block's environment is
+    swapped here, mark_non_image_captions's own \begin{figure} search no
+    longer matches it, so there's no need to special-case these three
+    there too. Only touches the in-memory text handed to Pandoc; the
+    real .tex source's \begin{figure} (needed for the printed book's own
+    float placement) is untouched. Figure environments never nest in
+    this book (checked book-wide, see mark_non_image_captions), so plain
+    start/end string search is safe.
+    """
+    out = []
+    pos = 0
+    fig_re = re.compile(r"\\begin\{figure\}(?:\[[^\]\n]*\])?")
+    end_fig_re = re.compile(r"\\end\{figure\}")
+    while True:
+        m = fig_re.search(tex, pos)
+        if not m:
+            out.append(tex[pos:])
+            break
+        end_m = end_fig_re.search(tex, m.end())
+        if not end_m:
+            out.append(tex[pos:])
+            break
+        out.append(tex[pos:m.start()])
+        block = tex[m.start():end_m.end()]
+        if r"\includegraphics" not in block and re.search(r"\\begin\{tabular\*?\}", block):
+            block = fig_re.sub(r"\\begin{table}", block, count=1)
+            block = end_fig_re.sub(r"\\end{table}", block, count=1)
+        out.append(block)
+        pos = end_m.end()
     return "".join(out)
 
 
@@ -2297,6 +2406,13 @@ def preprocess(tex, stem):
     # sits mid-sentence inside its \caption{...} instead of right after it).
     tex = hoist_labels_out_of_captions(tex)
     tex = swap_label_before_caption(tex)
+
+    # Must run before mark_non_image_captions -- see
+    # convert_table_figures_to_table_env's docstring. Once a table's
+    # \begin{figure} becomes \begin{table} here, mark_non_image_captions's
+    # own \begin{figure} search no longer matches it.
+    tex = convert_table_figures_to_table_env(tex)
+
     tex = mark_non_image_captions(tex)
     tex = convert_description_item_braces(tex)
     # Must run before wrap_bare_font_switches below: a >{\ttfamily} column
@@ -2745,6 +2861,13 @@ def preprocess(tex, stem):
     tex = re.sub(r"\\begin\{mytablethree\}", r"\\begin{tabular}{p{0.7in}p{1.5in}p{2in}}", tex)
     tex = re.sub(r"\\end\{mytablethree\}", r"\\end{tabular}", tex)
 
+    # A hypertarget planted earlier (mark_first_index_occurrences) can
+    # end up as the leading content of a table cell -- see
+    # move_hypertargets_off_table_row_starts's docstring. Must run after
+    # the \begin{mytable}/\begin{mytablethree} conversion just above,
+    # since it scans for the real \begin{tabular} environment name.
+    tex = move_hypertargets_off_table_row_starts(tex)
+
     # \multicolumn{span}{align}{content} (Chapter 2's GHCi-commands table
     # header, "Command (abbrev.)" spanning the first two columns): Pandoc's
     # LaTeX table reader doesn't understand it, and -- the same "unknown
@@ -3006,17 +3129,56 @@ def postprocess(md: str, current_file: str) -> str:
     md = re.sub(r"\[([^\[\]]*)\]\{\.underline\}", r"<u>\1</u>", md)
 
     # Pandoc 2.7.3 (confirmed fixed in 3.11 -- this is 2.7.3-only quirk)
-    # renders a figure's own \label{X} (preserved as a real \label by
-    # preprocess() -- see _label_replacement) as *both* the image's
-    # {#X ...} attribute *and* a redundant empty [](){label="X"} span
-    # tacked onto the end of the caption text itself, e.g.
-    # `![A caption[]{label="fig:x"}](img.png){#fig:x width="3in"}`. Left
-    # in place, the nested brackets break the alt-text regex just below
-    # (which requires bracket-free alt text) so the whole image silently
-    # skips the caption/thumbnail conversion below and this artifact
-    # leaks as literal text on the page. The {#X ...} attribute alone
-    # already carries the id; drop the redundant span.
-    md = re.sub(r'\[\]\{label="[^"]*"\}', "", md)
+    # renders a *kept* \label{X} (preserved as a real \label by
+    # preprocess() -- see _label_replacement) as a redundant empty
+    # []{label="X"} span tacked onto the end of whatever caption it's
+    # attached to. For an image's caption this duplicates the id pandoc
+    # *also* puts on the image itself as a real {#X ...} attribute, e.g.
+    # `![A caption[]{label="fig:x"}](img.png){#fig:x width="3in"}` --
+    # and left in place, the nested brackets break the alt-text regex
+    # just below (which requires bracket-free alt text), silently
+    # skipping the caption/thumbnail conversion and leaking this
+    # artifact as literal text. Drop it whenever it sits inside an
+    # image's own alt text (immediately followed by the alt text's own
+    # closing "]").
+    md = re.sub(r'\[\]\{label="[^"]*"\}(?=\])', "", md)
+
+    # Anywhere else, this span is the *only* place pandoc puts the id at
+    # all -- a table's own caption (convert_table_figures_to_table_env)
+    # is the one other case, e.g. `: Principal GHCi commands[]{label=
+    # "commands"}`, which has no separate {#X} attribute the way an
+    # image gets one. Turn it into a real anchor instead of just
+    # deleting it, or \ref{X} elsewhere loses its target entirely.
+    md = re.sub(r'\[\]\{label="([^"]*)"\}', r'<a id="\1"></a>', md)
+
+    # convert_table_figures_to_table_env's \begin{table} produces a
+    # genuine plain-Markdown table, but pandoc's own "Caption" line
+    # under it (": Text", pandoc's table-caption markdown extension)
+    # isn't plain CommonMark -- mdBook's renderer would show it as
+    # literal text. Convert to this pipeline's usual <figcaption>: the
+    # ".content figcaption" CSS rule applies to any figcaption element
+    # regardless of a <figure> parent, and wrapping the *table itself*
+    # in a <figure> isn't an option -- CommonMark never re-parses
+    # markdown inside a raw HTML block, so a <figure> wrapped around the
+    # table's own pipe-table markdown would corrupt it into literal
+    # text instead of a real <table>. A definition list's own body
+    # marker uses three spaces after the colon (":   text", see the
+    # hypertarget-anchor handling above); pandoc's table caption always
+    # uses exactly one, so the two never collide. Pandoc 3.x (not the
+    # pinned 2.7.3, but harmless to also guard against) puts the id in a
+    # trailing `{#X ...}` attribute here instead of the `[]{label="X"}`
+    # span already handled above -- extract it the same way _id_attr
+    # does for images.
+    def _table_caption_to_figcaption(m):
+        text = m.group(1)
+        am = re.search(r'\{#([A-Za-z0-9_:.\-]+)[^{}]*\}\s*$', text)
+        anchor = ""
+        if am:
+            anchor = f'<a id="{am.group(1)}"></a>'
+            text = text[:am.start()].rstrip()
+        text = re.sub(r"`([^`]*)`", r"<code>\1</code>", text)
+        return "<figcaption>" + text + "</figcaption>" + anchor
+    md = re.sub(r"^: (\S.*)$", _table_caption_to_figcaption, md, flags=re.MULTILINE)
 
     # Bare \includegraphics (no \caption) gets pandoc's placeholder alt
     # text "image" -> drop it so html/mdx writers don't turn it into a

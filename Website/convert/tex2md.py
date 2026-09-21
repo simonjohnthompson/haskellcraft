@@ -215,6 +215,170 @@ def unwrap_bare_beware_figures(tex):
     return "".join(out)
 
 
+def unwrap_center_around_image(tex):
+    r"""\begin{figure}...\begin{center}\includegraphics[...]{...}
+    \end{center}...\end{figure} -- a plain centering wrapper used all
+    over the book around a figure's image (Chapter 1's "Calculating a
+    rotation" figure, among many others). Confirmed directly against
+    Pandoc 3.11: its Markdown writer only degrades a *figure* to plain
+    Markdown when its content is exactly a bare \includegraphics with
+    nothing wrapping it -- a \begin{center} wrapper alone is enough to
+    force the same raw, un-styled HTML fallback as a placement argument
+    (see strip_figure_placement_args) or genuine non-image content, and
+    in practice every one of this book's placement-argument figures is
+    also center-wrapped, so stripping the placement argument alone
+    verified to fix nothing -- this has to run too.
+
+    Deliberately narrow in two ways, both confirmed necessary by direct
+    testing:
+    - Only unwraps a \begin{center} that's the figure's own leading
+      content (immediately after \begin{figure}, modulo whitespace and
+      the same \index/\hypertarget leading decorators
+      unwrap_bare_beware_figures tolerates) -- never a bare, standalone
+      \begin{center}\includegraphics\end{center} out in running prose
+      (Chapter 1's "blackHorse" illustration is exactly this: no
+      \begin{figure} around it at all). Confirmed by diffing a fresh
+      2.7.3 regeneration: unwrapping *that* case is not a no-op -- it
+      turns a block-level image sitting in its own paragraph into an
+      inline one flowing mid-sentence, a real visual regression pandoc's
+      own Figure-block handling doesn't apply to protect against outside
+      an actual \begin{figure}.
+    - Only unwraps when the center's content, once whitespace is
+      trimmed, is one \includegraphics call optionally followed by the
+      figure's own \caption{...} and then \label{...} (Chapter 20's
+      "Positioned images" figure is the book's only instance of the
+      latter shape: caption and label sit inside the \begin{center}
+      rather than after it) -- anything else inside (a second image,
+      other text) is left untouched. Confirmed by fragment test: pandoc
+      treats \caption/\label the same whether they're inside or outside
+      the \begin{center}, so this is exactly as safe as the bare-image
+      case.
+
+    Within those bounds this is confirmed a true no-op against the
+    pinned 2.7.3 (every such figure in the corpus converts identically
+    with or without the wrapper), so it only matters if this pipeline
+    ever moves to a newer Pandoc. Only touches the in-memory text handed
+    to Pandoc; the real .tex source's \begin{center} (meaningless for the
+    printed book's layout anyway, since a figure's contents are already
+    centered by default) is untouched.
+    """
+    fig_pat = re.compile(r"\\begin\{figure\}")
+    out = []
+    pos = 0
+    while True:
+        m = fig_pat.search(tex, pos)
+        if not m:
+            out.append(tex[pos:])
+            break
+
+        scan = m.end()
+        while True:
+            ws = re.match(r"\s*", tex[scan:])
+            scan += ws.end()
+            lead = re.match(r"\\(?:index|hypertarget)\{", tex[scan:])
+            if not lead:
+                break
+            close = _find_matching_brace(tex, scan + lead.end() - 1)
+            if lead.group().startswith(r"\hypertarget"):
+                if close >= len(tex) or tex[close] != "{":
+                    break
+                close = _find_matching_brace(tex, close)
+            scan = close
+
+        center_m = re.match(r"\\begin\{center\}", tex[scan:])
+        if not center_m:
+            out.append(tex[pos:m.end()])
+            pos = m.end()
+            continue
+
+        body_start = scan + center_m.end()
+        end_m = re.search(r"\\end\{center\}", tex[body_start:])
+        if not end_m:
+            out.append(tex[pos:m.end()])
+            pos = m.end()
+            continue
+        body_end = body_start + end_m.start()
+
+        img_m = re.match(r"\s*\\includegraphics(?:\[[^\]\n]*\])?\{", tex[body_start:body_end])
+        if not img_m:
+            out.append(tex[pos:m.end()])
+            pos = m.end()
+            continue
+        open_brace = body_start + img_m.end() - 1
+        close = _find_matching_brace(tex, open_brace)
+
+        cap_m = re.match(r"\s*\\caption\{", tex[close:body_end])
+        if cap_m:
+            close = _find_matching_brace(tex, close + cap_m.end() - 1)
+            lbl_m = re.match(r"\s*\\label\{", tex[close:body_end])
+            if lbl_m:
+                close = _find_matching_brace(tex, close + lbl_m.end() - 1)
+
+        if close > body_end or tex[close:body_end].strip():
+            out.append(tex[pos:m.end()])
+            pos = m.end()
+            continue
+
+        out.append(tex[pos:scan])  # keep \begin{figure} + any leading decorators
+        out.append(tex[body_start:body_end])  # the bare \includegraphics, verbatim
+        pos = body_start + end_m.end()  # resume right after \end{center}
+    return "".join(out)
+
+
+def hoist_hypertargets_out_of_figures(tex):
+    r"""A run of \hypertarget{X}{} calls sitting directly before a figure's
+    own \end{figure} -- almost always a first-occurrence \index{} entry
+    (mark_first_index_occurrences) trailing right after the figure's
+    \label{}/\caption{}, e.g. Chapter 11's \label{plmb}\index{plumbing}
+    -- is, on its own, enough extra content to make Pandoc 3.x's
+    Markdown writer fall back to raw HTML for the whole figure instead
+    of a plain ![]() image, the same "bare image with nothing else" rule
+    as strip_figure_placement_args/unwrap_center_around_image/
+    _label_replacement (confirmed directly against Pandoc 3.11). Unlike
+    a \label, which pandoc can attach as a real {#id} attribute, a
+    \hypertarget has nowhere to attach -- it's only ever rendered as its
+    own separate anchor, so its exact position doesn't matter. Move any
+    such *trailing* hypertarget out to right after \end{figure} instead
+    of leaving it inside, where its only effect (under 2.7.3 too, though
+    harmlessly there) is to make the figure's content non-bare.
+
+    Deliberately narrow: only a run immediately before \end{figure}
+    (modulo whitespace), never one anywhere else in the figure. A
+    hypertarget can also sit deep inside a figure's own content -- e.g.
+    Chapter 2's GHCi-commands table (one of this book's few genuine
+    tables nested in a figure, already documented as a separate,
+    unfixed issue in Admin/PANDOC-VERSION-DRIFT-REPORT.md), which plants
+    one next to almost every row for that row's own index entry.
+    Hoisting *those* out to the end would silently detach each anchor
+    from the specific row it's meant to mark -- a real regression to
+    today's pinned-2.7.3 output, confirmed by a full-corpus diff catching
+    it when this function first tried to sweep up every hypertarget in
+    the figure rather than just the trailing run.
+    """
+    return re.sub(
+        r"((?:\\hypertarget\{[^{}]*\}\{\}\s*)+)\\end\{figure\}",
+        lambda m: r"\end{figure}" + "".join(re.findall(r"\\hypertarget\{[^{}]*\}\{\}", m.group(1))),
+        tex,
+    )
+
+
+def strip_figure_placement_args(tex):
+    r"""\begin{figure}[t]/[b]/[htbp]/etc. -- the placement argument only
+    matters to real LaTeX's own float algorithm in the printed book. Left
+    in place, it makes Pandoc 3.x (not the pinned 2.7.3, but worth
+    guarding against regardless -- see Admin/PANDOC-VERSION-DRIFT-REPORT.md)
+    emit an otherwise-bare-image figure as a
+    data-latex-placement="..."-bearing raw HTML <figure> instead of plain
+    ![](...) Markdown, since there's no plain-Markdown way to carry that
+    attribute alongside the image's id. Affects 15 chapters currently.
+    Strip it here, before Pandoc ever sees it -- only touches the
+    in-memory text handed to Pandoc, not the real .tex source, so the
+    printed book's own float placement (built straight from Book/*.tex by
+    Book/Makefile, entirely separate from this script) is untouched.
+    """
+    return re.sub(r"\\begin\{figure\}\[[^\]\n]*\]", r"\\begin{figure}", tex)
+
+
 def merge_footnotemark_footnotetext(tex):
     r"""\caption{...\protect\footnotemark} paired with a later
     \footnotetext{...} -- used once in the book (Book/13.tex's Wikimedia
@@ -2223,6 +2387,17 @@ def preprocess(tex, stem):
     def _in_beware(start):
         return any(a <= start < b for a, b in beware_spans)
 
+    # Chapter 16's "A two-list queue" figure wraps its centered image
+    # between two genuinely empty \begin{alltt}\end{alltt} blocks (the
+    # book's only use of this) -- vestigial, likely a print-only
+    # vertical-spacing hack. Left as-is, each becomes a real but
+    # entirely empty code block on the web (a pointless blank grey box)
+    # and, worse, is itself enough non-image content inside the figure
+    # to trip Pandoc 3.x's "bare image only" raw-HTML fallback (see
+    # strip_figure_placement_args and friends). Drop before the real
+    # \begin{alltt} -> \begin{minted} conversion below ever sees it.
+    tex = re.sub(r"\\begin\{alltt\}\s*\\end\{alltt\}", "", tex)
+
     def _convert_alltt(m):
         body, code_labels = simplify_alltt_body(m.group(1), in_beware=_in_beware(m.start()))
         anchors = "".join(r"\hypertarget{%s}{}" % lbl for lbl in code_labels)
@@ -2382,11 +2557,23 @@ def preprocess(tex, stem):
     # ...}). find_primary_heading_labels() says which one that first one
     # is, so only that one gets to stay a real \label; the rest are forced
     # through the \hypertarget path below regardless of LABEL_MAP's kind.
+    #
+    # find_primary_heading_labels() treats a \caption{...}'s first following
+    # label exactly the same way as a heading's (see its own docstring) --
+    # so a figure's own label is just as much a "primary" label as a
+    # heading's, and needs the same real-\label treatment: left as
+    # \hypertarget, Pandoc 3.x can only degrade a \begin{figure} to plain
+    # ![]() Markdown when its content is a bare image with *nothing* else
+    # accompanying it, and a bare \hypertarget{X}{} sitting in the figure is
+    # enough on its own to force the raw-HTML fallback instead (see
+    # Admin/PANDOC-VERSION-DRIFT-REPORT.md). Keeping the label lets Pandoc
+    # attach it as the image's own {#X} attribute instead, the same way it
+    # attaches a heading's id.
     primary_heading_labels = find_primary_heading_labels(tex)
 
     def _label_replacement(arg):
         info = LABEL_MAP.get(arg)
-        if info and info["kind"] == "heading" and arg in primary_heading_labels:
+        if info and info["kind"] in ("heading", "figure") and arg in primary_heading_labels:
             return BRACE_PLACEHOLDER_OPEN + "keeplabel" + BRACE_PLACEHOLDER_OPEN + arg + BRACE_PLACEHOLDER_CLOSE
         return r"\hypertarget{%s}{}" % arg
     tex = strip_balanced_macro(tex, "label", _label_replacement)
@@ -2495,6 +2682,18 @@ def preprocess(tex, stem):
     tex = strip_balanced_macro(tex, "subexample*", lambda arg: r"\textbf{%s} " % arg)
     tex = strip_balanced_macro(tex, "subsubexample*", lambda arg: "\n\n" + r"\textbf{%s}" % arg + "\n\n")
 
+    # \begin{figure}[t]/[b]/etc. -- see strip_figure_placement_args's
+    # docstring. Run before unwrap_center_around_image and
+    # unwrap_bare_beware_figures so neither has to think about the
+    # bracket.
+    tex = strip_figure_placement_args(tex)
+
+    # \begin{center}\includegraphics{...}\end{center} -- see
+    # unwrap_center_around_image's docstring. Independent of, and just as
+    # necessary as, the placement-argument strip just above: in practice
+    # every placement-argument figure in this book is also center-wrapped.
+    tex = unwrap_center_around_image(tex)
+
     # \begin{figure}[...]\beware{...}{...}\end{figure} -- a \begin{figure}
     # wrapper added by hand around 37 of the book's \beware call sites
     # purely for the printed book's float placement. Left in place, it
@@ -2505,6 +2704,19 @@ def preprocess(tex, stem):
     # blockquote with a ```haskell``` fenced block. Unwrap it before the
     # \beware substitution below ever sees it.
     tex = unwrap_bare_beware_figures(tex)
+
+    # A trailing \hypertarget{X}{} (usually a first-occurrence \index{}
+    # entry) left inside a figure -- see hoist_hypertargets_out_of_figures's
+    # docstring. Must run after unwrap_bare_beware_figures just above:
+    # until that runs, a \beware-wrapping \begin{figure} can span a whole
+    # prose-and-code aside with several *unrelated*, correctly-placed
+    # mid-content hypertargets of its own (index entries inside the
+    # aside's own text) -- scanning for "\begin{figure}...\end{figure}"
+    # before that wrapper's gone would sweep all of those out to the end
+    # too, corrupting their real positions. By this point every remaining
+    # \begin{figure} is a genuine image figure, where a hypertarget inside
+    # really is just a trailing decoration safe to relocate.
+    tex = hoist_hypertargets_out_of_figures(tex)
 
     # \beware{title}{content} (miradefs.tex: a colorbox-and-parbox
     # callout/warning box) -- used 78+ times across nearly every chapter
@@ -2793,6 +3005,19 @@ def postprocess(md: str, current_file: str) -> str:
     # CommonMark and can trip up MDX-based site generators -> plain HTML.
     md = re.sub(r"\[([^\[\]]*)\]\{\.underline\}", r"<u>\1</u>", md)
 
+    # Pandoc 2.7.3 (confirmed fixed in 3.11 -- this is 2.7.3-only quirk)
+    # renders a figure's own \label{X} (preserved as a real \label by
+    # preprocess() -- see _label_replacement) as *both* the image's
+    # {#X ...} attribute *and* a redundant empty [](){label="X"} span
+    # tacked onto the end of the caption text itself, e.g.
+    # `![A caption[]{label="fig:x"}](img.png){#fig:x width="3in"}`. Left
+    # in place, the nested brackets break the alt-text regex just below
+    # (which requires bracket-free alt text) so the whole image silently
+    # skips the caption/thumbnail conversion below and this artifact
+    # leaks as literal text on the page. The {#X ...} attribute alone
+    # already carries the id; drop the redundant span.
+    md = re.sub(r'\[\]\{label="[^"]*"\}', "", md)
+
     # Bare \includegraphics (no \caption) gets pandoc's placeholder alt
     # text "image" -> drop it so html/mdx writers don't turn it into a
     # <figure><figcaption>image</figcaption></figure>.
@@ -2842,6 +3067,19 @@ def postprocess(md: str, current_file: str) -> str:
                     styles.append(f"{key}:{am.group(1)}")
         return f' style="{"; ".join(styles)}"' if styles else ""
 
+    # A figure's own primary \label (see preprocess()'s _label_replacement)
+    # survives pandoc's LaTeX reader as a genuine {#X ...} attribute on the
+    # image, exactly like a heading's id -- carry it onto the <figure> we
+    # build below so \ref{X} elsewhere still has an anchor to land on
+    # (previously supplied by a separate \hypertarget-derived <a id="X">,
+    # see the ":::" handling above; that path no longer fires for a
+    # figure's primary label).
+    def _id_attr(attrs):
+        if not attrs:
+            return ""
+        m = re.search(r'(?:^|\s)#([A-Za-z0-9_:.\-]+)', attrs)
+        return f' id="{m.group(1)}"' if m else ""
+
     # A \caption{...} becomes the image's alt text (both plain pandoc
     # markdown images and the styled ones above) -- alt text is invisible
     # to sighted readers, so every caption in the book was going unseen.
@@ -2869,9 +3107,10 @@ def postprocess(md: str, current_file: str) -> str:
     def _captioned_image_to_html(m):
         alt, src, attrs = m.group("alt"), m.group("src"), m.group("attrs")
         style_attr = _style_attr(attrs)
+        id_attr = _id_attr(attrs)
         alt_attr = alt.replace('"', "&quot;")
         thumb = _sized_thumbnail(src, alt_attr, style_attr)
-        return f"<figure>{thumb}<figcaption>{_caption_html(alt)}</figcaption></figure>"
+        return f"<figure{id_attr}>{thumb}<figcaption>{_caption_html(alt)}</figcaption></figure>"
     md = re.sub(
         r'!\[(?P<alt>[^\[\]]+)\]\((?P<src>[^()\s]+)(?:\s+"[^"]*")?\)(?:\{(?P<attrs>[^{}]*)\})?',
         _captioned_image_to_html, md,
@@ -2887,12 +3126,21 @@ def postprocess(md: str, current_file: str) -> str:
     # (Chapter 16) needs repeating until nothing more merges: pass 1
     # joins images 1+2, pass 2 then sees that merged figure sitting next
     # to image 3 and joins those.
+    # Each side-by-side image can now carry its own id="X" (see
+    # _id_attr above) -- pandoc attaches the *same* {#X ...} to every
+    # image in the group, since they all share one \label right after
+    # the shared \caption, so the two sides' ids (when present) are
+    # always identical; keep whichever side has one rather than
+    # dropping it (or emitting it twice).
     pair_re = re.compile(
-        r"<figure>(.*?)<figcaption>([^<]*)</figcaption></figure>"
-        r"\s*<figure>(.*?)<figcaption>\2</figcaption></figure>"
+        r'<figure(?P<id1> id="[^"]*")?>(?P<a>.*?)<figcaption>(?P<cap>[^<]*)</figcaption></figure>'
+        r'\s*<figure(?P<id2> id="[^"]*")?>(?P<b>.*?)<figcaption>(?P=cap)</figcaption></figure>'
     )
+    def _merge_pair(m):
+        id_attr = m.group("id1") or m.group("id2") or ""
+        return f'<figure{id_attr}>{m.group("a")} {m.group("b")}<figcaption>{m.group("cap")}</figcaption></figure>'
     while True:
-        md, n = pair_re.subn(r"<figure>\1 \3<figcaption>\2</figcaption></figure>", md)
+        md, n = pair_re.subn(_merge_pair, md)
         if not n:
             break
 
@@ -2937,6 +3185,24 @@ def postprocess(md: str, current_file: str) -> str:
     md = re.sub(
         r'!\[\]\((?P<src>[^()\s]+)(?:\s+"[^"]*")?\)(?:\{(?P<attrs>[^{}]*)\})?',
         _uncaptioned_image_to_html, md,
+    )
+
+    # A stray image, still in raw ![...](...){#X ...} pandoc markdown at
+    # this point, means both image-conversion passes above skipped it --
+    # e.g. Chapter 13's Base-classes diagram, whose caption contains a
+    # `[^2]` footnote reference: the nested brackets break the alt-text
+    # regex above (a pre-existing, separately-documented wart -- see
+    # merge_footnotemark_footnotetext -- not something fixed here) so it
+    # never reaches _id_attr above. Its {#X ...} attribute block is then
+    # just inert literal text to mdBook's renderer, not a real id -- give
+    # it the same fallback anchor a \hypertarget-derived label used to
+    # supply before preprocess() started keeping figure labels as real
+    # \label (see _label_replacement), so \ref{X} elsewhere still finds
+    # somewhere to land.
+    md = re.sub(
+        r'(!\[[^\n]*?\]\([^()\s]+(?:\s+"[^"]*")?\)\{#(?P<id>[A-Za-z0-9_:.\-]+)[^{}\n]*\})',
+        lambda m: m.group(1) + f'\n\n<a id="{m.group("id")}"></a>',
+        md,
     )
 
     # A literal "|" inside an inline code span within a markdown table

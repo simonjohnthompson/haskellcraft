@@ -160,7 +160,15 @@ today's reader:
   `polysemy`) as an alternative to monad-transformer stacks; the Haskell
   Foundation itself as new community infrastructure.
 
-### 3. Recommended further reading (lines 96-101) is showing its age
+### 3. ~~Recommended further reading (lines 96-101) is showing its age~~ **Done**
+
+Flagged *Real World Haskell*'s age in `Book/22.tex` (pre-Stack/Stackage,
+FFI coverage still called out as valuable) and added *Haskell
+Programming from First Principles* (Allen & Moronuki, 2016) and
+*Effective Haskell* (Rebecca Skinner, Pragmatic Bookshelf, 2023 —
+corrected from this report's guessed 2022) as new bullets, with new
+`big.bib` entries (`hpfp`, `effectiveHaskell`). Live in both the PDF
+and website.
 
 *Real World Haskell* is from 2008 — pre-Stack, pre-Stackage, code examples
 look dated. Suggest keeping it (its FFI coverage is still called out as

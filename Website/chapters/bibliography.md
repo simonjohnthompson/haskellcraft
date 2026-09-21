@@ -3,6 +3,8 @@ References
 
 <a id="dragon2ed"></a>Alfred V. Aho, Monica S. Lam, Ravi Sethi, and Jeffrey D. Ullman, *Compilers: Principles, Techniques, and Tools*, Addison Wesley, 2006.
 
+<a id="hpfp"></a>Christopher Allen and Julie Moronuki, *Haskell Programming from First Principles*, 2016. Available from <https://haskellbook.com/>.
+
 <a id="progErlang"></a>Joe Armstrong, *Programming Erlang: Software for a Concurrent World*, The Pragmatic Bookshelf, 2007.
 
 <a id="paradise"></a>Lennart Augustsson, Howard Mansell, and Ganesh Sittampalam, “Paradise: a two-stage DSL embedded in Haskell”, In *ICFP '08*, 225--228, ACM, 2008.
@@ -60,6 +62,8 @@ References
 <a id="awkwardSquad"></a>Simon Peyton Jones, “Tackling the awkward squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell”, 2001. Available at <http://research.microsoft.com/en-us/um/people/simonpj/papers/marktoberdorf/>.
 
 <a id="pj-lester"></a>Simon Peyton Jones and David Lester, *Implementing functional languages*, Prentice Hall, 1992.
+
+<a id="effectiveHaskell"></a>Rebecca Skinner, *Effective Haskell: Solving Real-World Problems with Strongly-Typed Functional Programming*, Pragmatic Bookshelf, 2023.
 
 <a id="Fsharp"></a>Chris Smith, *Programming F#*, O'Reilly, 2009.
 

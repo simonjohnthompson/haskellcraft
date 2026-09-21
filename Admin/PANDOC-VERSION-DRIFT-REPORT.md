@@ -360,14 +360,29 @@ fix in Chapter 17 — same ids, same words, just two adjacent empty
 anchors trading places) and confirmed to work under both the old 2.7.3
 binary and the current 3.11 pin.
 
-## Known remaining issue, unrelated to Pandoc
+## Glossary en-dash question — resolved, and it was the *book* that was wrong
 
-- **Glossary**: `\texttt{--}` (Haskell's line-comment marker) renders
+- **Glossary**: `\texttt{--}` (Haskell's line-comment marker) rendered
   as an en-dash character (–) instead of two literal hyphens under
-  2.7.3 (fixed under 3.11, now the default) — possibly not even a bug:
-  real LaTeX's own `--`-to-en-dash ligature applies inside `\texttt`
-  too, so this might just be faithfully reproducing what the *printed*
-  book itself shows; not verified against the actual PDF.
+  2.7.3 (already fixed under 3.11, now the default). Checked directly
+  against the actual typeset PDF (`Book/root.pdf`, page 606) by
+  extracting the real embedded Unicode codepoint, not just eyeballing
+  the glyph: it was genuinely `U+2013 EN DASH`, not two hyphens — so
+  the *printed book itself* had pdfTeX's `--`→en-dash ligature leaking
+  into `\texttt`, misrepresenting the actual Haskell comment syntax it
+  was meant to show.
+- **Fixed at the source**: `Book/glossary.tex` changed
+  `\texttt{--}` to `\texttt{-{}-}` (the standard LaTeX trick — an
+  empty group between the hyphens blocks ligature formation with no
+  other visible effect). Rebuilt the full 658-page `root.pdf` via the
+  documented `make` pipeline (`make check` clean); diffed extracted
+  text page-by-page against the previously-committed PDF — exactly one
+  page changed (606), now showing literal `--` at the codepoint level.
+  The website's `glossary.md` was regenerated from the fixed source
+  and came out byte-identical to what was already committed — Pandoc
+  had already been treating the empty group as transparent, so no
+  website-side change was needed. Both now agree, and both now match
+  the real Haskell syntax.
 
 ## Is the 3.11 pin durable long-term?
 

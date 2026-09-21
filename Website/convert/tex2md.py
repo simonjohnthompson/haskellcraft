@@ -2715,8 +2715,15 @@ def preprocess(tex, stem):
     # hypertargets immediately before a \label to just after it instead --
     # harmless if the label wasn't a heading's primary label anyway, since
     # both end up as inert anchors in the same vicinity regardless of order.
+    # Whitespace between the hypertarget and the label is optional, not
+    # required -- Chapter 1's \section{Types}\index{type}\label{typesIntro}
+    # has \index{type} (this book's first occurrence, so it's already a
+    # \hypertarget by this point) glued directly onto \label with no space
+    # or newline at all, which an earlier \s*\n\s* (newline required) never
+    # matched, silently orphaning that label -- confirmed live on the real
+    # site as literal "[[typesIntro]]"-style bracket text near "Types".
     tex = re.sub(
-        r"((?:\\hypertarget\{[^{}]*\}\{\}\s*\n\s*)+)(\\label\{[^{}]*\})",
+        r"((?:\\hypertarget\{[^{}]*\}\{\}\s*)+)(\\label\{[^{}]*\})",
         r"\2\n\1",
         tex,
     )
@@ -2903,6 +2910,26 @@ def preprocess(tex, stem):
         anchors = "".join(r"\hypertarget{%s}{}" % lbl for lbl in code_labels)
         return anchors + r"\begin{minted}{haskell}" + body + r"\end{minted}"
     tex = re.sub(r"\\begin\{alltt\}(.*?)\\end\{alltt\}", _convert_alltt, tex, flags=re.DOTALL)
+
+    # \[\begin{tabular}...\end{tabular}\] (Chapter 21's only use: an
+    # exercise question aligning three lines with a table purely for
+    # print layout, wrapped in \[...\] math delimiters despite not
+    # being math at all -- LaTeX doesn't require particular delimiters
+    # around a tabular used this way, so \[...\] was presumably just a
+    # convenient way to get a blank line before/after in the original
+    # source). Pandoc's math-mode reader doesn't understand \begin{
+    # tabular} and just treats the whole thing, table syntax and all,
+    # as literal math source text -- confirmed live on the real site as
+    # garbled text ("tabularll associative: & ..."). Strip just the
+    # \[/\] delimiters and leave the tabular bare; confirmed by fragment
+    # test that pandoc's ordinary (non-math) table reader then handles
+    # it correctly, producing a real Markdown table.
+    tex = re.sub(
+        r"\\\[\s*(\\begin\{tabular\}.*?\\end\{tabular\})\s*\\\]",
+        r"\1",
+        tex,
+        flags=re.DOTALL,
+    )
 
     # Flatten leftover $...$/\(...\)/\[...\] math in prose -- but skip over
     # \minted{haskell} blocks: Haskell's `$` (function application) operator

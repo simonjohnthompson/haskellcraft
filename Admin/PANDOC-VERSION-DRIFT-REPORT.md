@@ -329,19 +329,39 @@ live site the same day, fixed separately (a trailing hard-line-break
 marker with nothing left to break to, right before the enclosing group
 closes -- see the git history for the full fix).
 
-## Known remaining issues, unrelated to Pandoc
+## Two more, fixed the same day (unrelated to Pandoc, found by the rendered-HTML diff)
 
-Found by the rendered-HTML diff but **not fixed** — pre-existing,
-present under both Pandoc versions, unrelated to the version question:
+- **Chapter 1's `[[typesIntro]]`** (garbled bracket text near "Types")
+  was an orphaned secondary `\label`: `\section{Types}\index{type}
+  \label{typesIntro}` has `\index{type}` (this book's first
+  occurrence, so already a `\hypertarget` by this point) glued
+  directly onto `\label{typesIntro}` with *no* whitespace between them
+  at all. An existing fix already moved a hypertarget from before a
+  label to after it (Pandoc only attaches `\label` to its enclosing
+  heading when the label immediately follows with nothing in between),
+  but its regex required a literal newline between the two
+  (`\s*\n\s*`) — safe for every other case in the book, but this one
+  has zero whitespace of any kind, so it never matched. Widened to
+  `\s*` (newline optional, not required).
+- **Chapter 21's `\[...\]`-wrapped `\begin{tabular}`** (an exercise
+  question aligning three lines, not real math at all) rendered as
+  garbled literal text ("tabularll associative: & ..." instead of a
+  table) — Pandoc's math-mode reader parses the whole
+  `\begin{tabular}{ll}...\end{tabular}` as literal math source instead
+  of a table, since it's wrapped in `\[...\]`. Confirmed by fragment
+  test that stripping just the `\[`/`\]` delimiters (LaTeX doesn't
+  require them around a `tabular` used this way) lets Pandoc's
+  ordinary table reader handle it correctly instead — a clean Markdown
+  table. The book's only instance of this shape.
 
-- **Chapter 1**: `[[typesIntro]]` (or similarly garbled bracket text)
-  renders as literal visible text near "Types" — an orphaned secondary
-  `\label` that never got a working anchor of its own.
-- **Chapter 21**: a `\[...\]`-wrapped `\begin{tabular}` (used to align
-  an exercise question) renders as garbled literal text ("tabularll
-  associative: & ..." instead of a table) — Pandoc's math-mode reader
-  parses the whole `\begin{tabular}{ll}...\end{tabular}` as literal
-  math source instead of a table, since it's wrapped in `\[...\]`.
+Both verified corpus-wide (only these two chapters changed, plus a
+harmless anchor-order swap as an incidental side effect of the first
+fix in Chapter 17 — same ids, same words, just two adjacent empty
+anchors trading places) and confirmed to work under both the old 2.7.3
+binary and the current 3.11 pin.
+
+## Known remaining issue, unrelated to Pandoc
+
 - **Glossary**: `\texttt{--}` (Haskell's line-comment marker) renders
   as an en-dash character (–) instead of two literal hyphens under
   2.7.3 (fixed under 3.11, now the default) — possibly not even a bug:

@@ -297,17 +297,29 @@ scope:
 
 ## Recommendation
 
-If the book text is revised for a new edition, the one substantive update
+~~If the book text is revised for a new edition, the one substantive update
 needed to keep Chapter 19 accurate is: introduce `Applicative` (and
 `Functor`) as a documented prerequisite of `Monad`, show the `Applicative`
 instance alongside each `instance Monad` example rather than omitting it,
 and split `fail` out into a short note on `MonadFail` (ideally right where
 the book currently claims every monad gets `fail` "for free" via a default
-— that claim needs qualifying, not just supplementing). All three worked
-examples in the chapter (`MP`/`SParse`, `State`) already have a working,
-tested, AMP/MFP-compliant version sitting in the shipped code
-(`Calculator/CalcParseLib.hs` and, as of this report, `ParseLib.hs` are both
-the version that preserves the book's stated semantics for `fail`, rather
-than quietly dropping them — those two copies of the same book example now
-match each other, so there is a single, consistent pattern to copy into a
-revised Chapter 18 rather than two diverging ones).
+— that claim needs qualifying, not just supplementing).~~ **Done** —
+`Book/19.tex` now has exactly this structure: `\section{The
+\texttt{Functor} class}` and `\section{The \texttt{Applicative} class}`
+both come before the `Monad` material, every `instance Monad` example in
+the chapter has its `Applicative` instance shown alongside it, and a
+dedicated `\subsection*{Adding failure, \texttt{MonadFail}}` immediately
+follows `instance Monad (MP a) where` with `instance MonadFail (MP a)
+where` right after it. The old unqualified "every monad gets `fail` for
+free" claim is gone. Done via commits `5e66785`, `81a0eb5` and `97e50f6`
+(pre-dating this session), which post-date this report's last update —
+the report simply hadn't been checked back against the book text until
+now. Regenerated website chapter is live too.
+
+All three worked examples in the chapter (`MP`/`SParse`, `State`) already
+have a working, tested, AMP/MFP-compliant version sitting in the shipped
+code (`Calculator/CalcParseLib.hs` and, as of this report, `ParseLib.hs`
+are both the version that preserves the book's stated semantics for
+`fail`, rather than quietly dropping them — those two copies of the same
+book example now match each other, so there is a single, consistent
+pattern to copy into a revised Chapter 18 rather than two diverging ones).

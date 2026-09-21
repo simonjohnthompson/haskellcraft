@@ -12,8 +12,8 @@ The operators in the Haskell prelude are listed below in decreasing order of bin
 | 9   | `!!`                                |                                           | .                 |
 | 8   |                                     |                                           | `**, ^, ^^`       |
 | 7   | `*, /, ‘div‘, ‘mod‘, ‘rem‘, ‘quot‘` |                                           |                   |
-| 6   | `+, -`                              |                                           | ``                |
-| 5   | ``                                  |                                           | `:, ++`           |
+| 6   | `+, -`                              |                                           |                   |
+| 5   |                                     |                                           | `:, ++`           |
 | 4   |                                     | `/=, <, <=, ==, >, >=, ‘elem‘, ‘notElem‘` |                   |
 | 3   |                                     |                                           | `&&`              |
 | 2   |                                     |                                           | `\|\|`              |

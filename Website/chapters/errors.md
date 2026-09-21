@@ -313,7 +313,7 @@ System messages {#system-messages .unnumbered}
 
 In response to some commands and interrupts, the system generates messages, including
 
--   ``` {.haskell}
+-   ```haskell
     ^C ... Interrupted
     ```
 

@@ -729,31 +729,83 @@ def merge_footnotemark_footnotetext(tex):
     return "".join(out)
 
 
+def convert_braced_tt(tex):
+    r"""{\tt ...} (plain LaTeX's typewriter-font switch, self-scoped by
+    its own enclosing braces -- e.g. Chapter 4's "{\tt fun} {\tt
+    (n-1)}" in a heading, or Chapter 12's "{\tt x} & {\tt x} is any
+    character..." in a table) -- confirmed by a rendered-HTML diff
+    against Pandoc 3.11 that this is a currently-live formatting gap,
+    not a version-drift issue: Pandoc 2.7.3's markdown writer has no
+    equivalent for a bare font switch and just emits the scoped text
+    unstyled (silently, no visible leak -- the same "invisible until
+    compared against print" issue \mi/\ttfamily have, see
+    wrap_bare_font_switches), so this content is rendering as plain
+    text on the real site right now where it should be code. Unlike
+    \mi/\ttfamily, \tt is never used as a bare declaration extending to
+    the end of its enclosing scope in this book -- every one of its 78
+    uses (confirmed book-wide) is immediately wrapped in its own
+    self-contained {\tt ...} group -- so this can simply become
+    \texttt{...}, no scope-boundary detection needed.
+    """
+    out = []
+    pos = 0
+    pat = re.compile(r"\{\\tt ")
+    while True:
+        m = pat.search(tex, pos)
+        if not m:
+            out.append(tex[pos:])
+            break
+        close = _find_matching_brace(tex, m.start())
+        out.append(tex[pos:m.start()])
+        out.append(r"\texttt{" + tex[m.end():close - 1] + "}")
+        pos = close
+    return "".join(out)
+
+
 def wrap_bare_font_switches(tex):
     """\\mi (defs0.tex: \\newcommand{\\mi}{\\mytt}, \\newfont{\\mytt}
-    {cmtt10} -- the Computer Modern Typewriter font) and \\ttfamily
-    (plain LaTeX's own typewriter-font switch) are both bare font-switch
-    declarations, not \\mi{...}/\\ttfamily{...}-wrapped commands: real
-    LaTeX applies each to everything up to the next "&" (table cell
-    boundary), "\\\\" (row end), or "}" (enclosing group close). Used
-    71 and 76 times respectively across most chapters, almost always
+    {cmtt10} -- the Computer Modern Typewriter font), \\ttfamily (plain
+    LaTeX's own typewriter-font switch), and bare \\tt (LaTeX's older,
+    equivalent switch -- \\tt not immediately followed by its own "{",
+    which convert_braced_tt above already turned into \\texttt{...};
+    8 real uses, all Chapter 12's "meaning of regular expressions"
+    tables, e.g. "\\tt x & ...") are all bare font-switch declarations,
+    not \\mi{...}/\\ttfamily{...}/\\tt{...}-wrapped commands: real LaTeX
+    applies each to everything up to the next "&" (table cell boundary),
+    "\\\\" (row end), or "}" (enclosing group close). \\mi/\\ttfamily
+    used 71/76 times respectively across most chapters, almost always
     inside a plain \\begin{tabular} (not \\texttt{}) for typewriter-style
     cell content -- e.g. Chapter 3's Boolean truth tables (\\mi
     \\tone\\ \\&\\& \\ttwo, \\mi T, ...) and its "Floating-point
     operations and functions." table (\\ttfamily + - *, \\ttfamily
-    Float -> Float -> Float, ...). \\mi is unknown to Pandoc and
-    silently dropped outright; \\ttfamily is real LaTeX Pandoc does
+    Float -> Float -> Float, ...). \\mi/bare \\tt are unknown to Pandoc
+    and silently dropped outright; \\ttfamily is real LaTeX Pandoc does
     recognize structurally, but its markdown writer has no equivalent
     for a bare font switch and just emits the scoped text unstyled --
     either way, not even a visible leak, just plain text where
     monospace was intended, invisible until compared against the print
-    original. Materialize each one's implicit scope into an explicit
-    \\texttt{...} wrapper here, which the rest of the pipeline already
-    turns into a real code span.
+    original (confirmed via a rendered-HTML diff against Pandoc 3.11,
+    which -- unlike 2.7.3 -- does apply code formatting to a bare \\tt's
+    scope, exposing this as a currently-live formatting gap rather than
+    a version-drift difference). Materialize each one's implicit scope
+    into an explicit \\texttt{...} wrapper here, which the rest of the
+    pipeline already turns into a real code span.
     """
     out = []
     pos = 0
-    switch_re = re.compile(r"\\(?:mi|ttfamily)\b")
+    # (?![a-zA-Z]), not \b: a LaTeX control *word* ends at the first
+    # non-letter character, digits included -- \b is a regex "word"
+    # boundary instead, which treats a digit as the same character
+    # class as a letter, so \b alone fails to end the command name
+    # right before one. Confirmed a real, live bug this way: the
+    # glossary's "\mi456.23" (no space between the font switch and the
+    # number, e.g. "{\mi456.23}") wasn't recognized as \mi at all --
+    # the whole number silently vanished on the real site. "ttfamily"
+    # must come before the bare "tt" alternative -- re tries
+    # alternatives in order and takes the first match, so "tt" listed
+    # first would match just the first two letters of "\ttfamily" and
+    # leave "family" behind as leftover text.
+    switch_re = re.compile(r"\\(?:mi|ttfamily|tt)(?![a-zA-Z])")
     while True:
         m = switch_re.search(tex, pos)
         if not m:
@@ -784,7 +836,16 @@ def wrap_bare_font_switches(tex):
             elif c == "&" and depth == 0:
                 break
             i += 1
-        out.append(r"\texttt{" + tex[m.end():i].strip() + "}")
+        # A font switch with nothing after it before the boundary (e.g.
+        # opsTable.tex's "\ttfamily \\" / "\ttfamily &", marking a
+        # deliberately empty table cell) has no content to wrap --
+        # \texttt{} with nothing inside it is not a real CommonMark
+        # inline code span (an empty "``" doesn't parse as code at all),
+        # so it leaked as literal backticks on the real site. Just drop
+        # the declaration instead of wrapping an empty scope.
+        content = tex[m.end():i].strip()
+        if content:
+            out.append(r"\texttt{" + content + "}")
         pos = i
     return "".join(out)
 
@@ -2689,6 +2750,12 @@ def preprocess(tex, stem):
     # docstring) instead of being recognized as a per-column decorator.
     tex = convert_ttfamily_table_columns(tex)
 
+    # {\tt ...} -- see convert_braced_tt's docstring. Run before
+    # wrap_bare_font_switches, for the same ordering reason as that
+    # comment above: any \mi/\ttfamily-scoped shorthand inside a {\tt
+    # ...} group should end up inside the resulting \texttt{...} too.
+    tex = convert_braced_tt(tex)
+
     # Must run before the SYMBOL_MACROS/subscript-shorthand prose passes
     # below, so e.g. \tone inside \mi's scope ends up inside the
     # \texttt{...} wrapper wrap_bare_font_switches materializes for it.
@@ -2705,6 +2772,16 @@ def preprocess(tex, stem):
     # convert_description_item_braces already strip \mbox in their own
     # narrower contexts; this covers everywhere else.
     tex = strip_balanced_macro(tex, "mbox", lambda arg: arg)
+
+    # \hbox{X} (plain LaTeX's own "don't break this across lines"
+    # primitive, root cause pandoc has no notion of -- same rationale
+    # as \mbox above, its one real book use (Chapter 13's "...and
+    # \hbox{\texttt{a -> [a]}}.") has its whole argument silently
+    # dropped otherwise, confirmed via a rendered-HTML diff: it's
+    # missing from the sentence on the real site right now, not a
+    # Pandoc-version issue -- reproduces identically under 2.7.3 and
+    # 3.11 alike).
+    tex = strip_balanced_macro(tex, "hbox", lambda arg: arg)
 
     # \so / \st (defs0.tex: \so = \begin{ttdisplay}\parindent 1pc, itself
     # \begin{alltt}% with some catcode/spacing setup, \st = the matching
@@ -2729,6 +2806,43 @@ def preprocess(tex, stem):
     # \item{\bf Reuse}\hskip 1em The definition..., where an unhandled
     # \hskip 1em leaked as literal "1em" right after "Reuse").
     tex = re.sub(r"\\hskip\s*[0-9.]+[a-z]+", "", tex)
+
+    # \looseness=N (real LaTeX register assignment, no braces -- a
+    # paragraph-tightness hint for the printed book's own line
+    # breaking, 4 uses across Chapters 4/16/17) -- pandoc's reader drops
+    # \looseness itself as an unrecognized command but doesn't know the
+    # "=N" is part of it, leaving that half as literal text (confirmed:
+    # already live on the real site today, e.g. Chapter 4's "...e.g.
+    # `"for: maxThree 6 4 1"`.=-1" -- not a Pandoc-version issue,
+    # reproduces identically under 2.7.3 and 3.11).
+    tex = re.sub(r"\\looseness=-?[0-9]+", "", tex)
+
+    # \verb+X+ (plain LaTeX's verbatim-inline command, always +-delimited
+    # in this book, 7 real uses across Chapters 3/6/7) -- Pandoc 3.11
+    # (not 2.7.3, confirmed by a rendered-HTML diff, isolated to a
+    # minimal fragment) loses track of the closing delimiter specifically
+    # when \verb sits inside a table cell, leaking it as literal text
+    # right after the content (e.g. Chapter 3's "backslash (`\`+)" --
+    # confirmed the same happens with a "|" delimiter too, so it's not
+    # "+" specific, and confirmed clean in ordinary prose, so it's not
+    # \verb itself, only \verb-inside-a-table). None of this book's
+    # \verb content needs anything \texttt{} plus the existing
+    # underscore-escaping below (escape_bare_underscores_in_texttt)
+    # doesn't already handle just as well, so convert every use rather
+    # than special-casing the table ones -- except a literal backslash
+    # has to become \textbackslash{} first (matching how \bs already
+    # renders one elsewhere, see strip_balanced_macro(tex, "bs", ...)
+    # below): unlike \verb, where every character is genuinely literal,
+    # a bare "\" right before \texttt{...}'s closing "}" parses in real
+    # LaTeX as an *escaped* brace, not "backslash then close" -- Chapter
+    # 3's \verb+\+ (a literal backslash) becoming \texttt{\} this way
+    # first regressed the whole rest of that table cell and the row's
+    # own anchor, caught by a full-corpus id-diff before it shipped.
+    tex = re.sub(
+        r"\\verb\+([^+]*)\+",
+        lambda m: r"\texttt{%s}" % m.group(1).replace("\\", r"\textbackslash{}"),
+        tex,
+    )
 
     tex = strip_newcommand_defs(tex)
     tex = escape_bare_underscores_in_texttt(tex)
@@ -3269,12 +3383,79 @@ def warn_on_leaked_tex(chapter_name, md):
             break
 
 
+def _fix_duplicate_image_caption_footnote(md):
+    r"""Pandoc 3.11 (not 2.7.3 -- confirmed by direct, minimal fragment
+    test, isolated down to exactly this combination) emits a footnote
+    nested inside an image's \caption{} *twice* whenever the whole
+    \begin{figure} degrades to a plain ![]() Markdown image: once
+    correctly, as the real in-text reference and its definition, and
+    once more as an orphaned extra definition with identical text and
+    no reference anywhere. Confirmed this is specific to that exact
+    combination -- a footnote in a *table's* caption doesn't trigger
+    it, and neither does one in a figure that *doesn't* degrade to
+    plain markdown (two images forcing the raw-HTML fallback, say).
+    Pure Pandoc 3.11 writer behavior, nothing this pipeline's own
+    preprocessing does wrong -- the text handed to Pandoc already has
+    exactly one \footnote{...} call (see
+    merge_footnotemark_footnotetext, whose one use in the whole book,
+    Chapter 13's Wikimedia image-attribution footnote, is this exact
+    shape).
+
+    Detect a footnote definition that's an exact duplicate of the one
+    immediately before it (blank lines allowed in between) and that has
+    no reference of its own anywhere in the body, drop it, and
+    renumber every reference and definition after it down by one to
+    close the numbering gap Pandoc's own duplicate left behind.
+    """
+    lines = md.split("\n")
+    def_re = re.compile(r"^\[\^(\d+)\]: (.*)$")
+    dup_num = None
+    i = 0
+    while i < len(lines) - 1:
+        m1 = def_re.match(lines[i])
+        if m1:
+            j = i + 1
+            while j < len(lines) and not lines[j].strip():
+                j += 1
+            m2 = def_re.match(lines[j]) if j < len(lines) else None
+            if m2 and m2.group(2) == m1.group(2):
+                n2 = int(m2.group(1))
+                if not re.search(r"\[\^%d\](?!:)" % n2, md):
+                    dup_num = n2
+                    del lines[i + 1:j + 1]
+                    break
+        i += 1
+    if dup_num is None:
+        return md
+    md = "\n".join(lines)
+    return re.sub(
+        r"\[\^(\d+)\]",
+        lambda m: f"[^{int(m.group(1)) - 1 if int(m.group(1)) > dup_num else int(m.group(1))}]",
+        md,
+    )
+
+
 def postprocess(md: str, current_file: str) -> str:
+    md = _fix_duplicate_image_caption_footnote(md)
+
     # \minted{haskell} makes pandoc emit ``` {.haskell} (its own attribute
     # syntax) -- normalize to the plain ```haskell info-string that GitHub
     # /Docusaurus/mdBook/VitePress's highlighters all key off of. Handles
-    # blocks indented under a list item too (leading whitespace kept).
-    md = re.sub(r"^(\s*)``` \{\.haskell\}\s*$", r"\1```haskell", md, flags=re.MULTILINE)
+    # blocks indented under a list item ("-   ``` {.haskell}", e.g.
+    # errors.md), or quoted inside a \beware blockquote
+    # ("> ``` {.haskell}"), too -- confirmed via a rendered-HTML diff
+    # that both were previously missed (plain leading-whitespace only):
+    # left unconverted, `{.haskell}` becomes a literal, bogus CSS class
+    # (`language-{.haskell}`) that no highlighter recognizes, silently
+    # breaking syntax highlighting -- already live on the real site
+    # today for 102 code blocks across 17 chapters, not a Pandoc-version
+    # issue at all (reproduces identically under 2.7.3 and 3.11 alike).
+    md = re.sub(
+        r"^([ \t]*(?:>[ \t]*)*(?:[-*+][ \t]+|\d+[.)][ \t]+)?)``` \{\.haskell\}\s*$",
+        r"\1```haskell",
+        md,
+        flags=re.MULTILINE,
+    )
 
     # CAPTIONSENTINELOPEN/CLOSE (see mark_non_image_captions() in
     # preprocess()) mark a \caption{...} that had no \includegraphics for
@@ -3318,30 +3499,54 @@ def postprocess(md: str, current_file: str) -> str:
     )
     md = re.sub(r"\[\]\{#([A-Za-z0-9_.\-]+)\}", r'<a id="\1"></a>', md)
 
-    # \begin{center}...\end{center} becomes a Pandoc fenced Div, "::: center"
-    # / (matching number of colons, 3+, chosen by Pandoc to out-run any
-    # colon run already inside the content) / ":::" -- also not plain
-    # CommonMark, so mdBook's renderer (pulldown-cmark) left it as literal
-    # "::: center"/":::" text sitting either side of the (correctly
+    # \begin{center}...\end{center} (and any other LaTeX environment
+    # with no Markdown meaning of its own -- e.g. \begin{minipage},
+    # Chapter 2's narrow-column wrapper around an ASCII-art picture)
+    # becomes a Pandoc fenced Div, "::: <name>" / (matching number of
+    # colons, 3+, chosen by Pandoc to out-run any colon run already
+    # inside the content) / ":::" -- also not plain CommonMark, so
+    # mdBook's renderer (pulldown-cmark) left it as literal
+    # "::: <name>"/":::" text sitting either side of the (correctly
     # rendered) content. Almost every use in the book is a bare
     # \includegraphics, which by this point has already become a
     # self-centering <figure> (see the "Images with no caption" pass
     # below/above -- .content figure has text-align:center in custom.css),
-    # making the wrapper redundant; the rare non-image case (e.g. Chapter
-    # 21's a centered table) can't be wrapped in a real <div> either,
-    # since CommonMark treats a line starting with a block HTML tag as a
-    # raw HTML block that swallows every line verbatim up to the next
-    # blank line -- feeding a Markdown table through that would leave it
-    # as literal pipe-and-dash text instead of rendering as a table (the
+    # making the wrapper redundant; a non-image case (e.g. Chapter 21's a
+    # centered table) can't be wrapped in a real <div> either, since
+    # CommonMark treats a line starting with a block HTML tag as a raw
+    # HTML block that swallows every line verbatim up to the next blank
+    # line -- feeding a Markdown table through that would leave it as
+    # literal pipe-and-dash text instead of rendering as a table (the
     # same hazard noted for <figure> above). So simply drop the fence
     # lines and keep the content exactly as Pandoc already rendered it,
     # rather than risk breaking non-image content to preserve centering.
-    md = re.sub(
-        r"^(:{3,}) center\s*\n(.*?)\n\1[ \t]*$",
-        r"\2",
-        md,
+    # Matches any environment name, not just "center": confirmed by a
+    # rendered-HTML diff that Chapter 2's "::: minipage" (indented, not
+    # quoted -- it sits inside an ordinary indented block, no blockquote
+    # involved) was left unstripped by an earlier, "center"-only version
+    # of this regex, and pulldown-cmark's definition-list extension then
+    # misparsed the surrounding text into a garbled <dl>, the same
+    # failure mode as the blockquote-quoted "::: center" case below. The
+    # fence can also be quoted inside a \beware blockquote ("> :::
+    # center", e.g. Chapter 11's "arrow is not associative" box, a bare
+    # \begin{center}\includegraphics\end{center} with no \begin{figure}
+    # around it -- outside the scope unwrap_center_around_image is
+    # allowed to touch, see its own docstring). The content lines in
+    # between keep whatever "> "/indentation prefix they already have --
+    # only the fence lines themselves come out. These can nest too
+    # (Chapter 2's ASCII-art picture is a \begin{minipage} -- itself
+    # now its own fence -- inside a \begin{center}), so keep stripping
+    # until a pass finds nothing left to strip, rather than the single
+    # pass that left Chapter 2's inner "::: minipage" behind, caught by
+    # a rendered-HTML diff.
+    fence_re = re.compile(
+        r"^([ \t>]*)(:{3,}) \S+\s*\n(.*?)\n[ \t>]*\2[ \t]*$",
         flags=re.MULTILINE | re.DOTALL,
     )
+    while True:
+        md, n = fence_re.subn(r"\3", md)
+        if not n:
+            break
 
     # \ref{X} -> XREFOPENxXREFCLOSE sentinel (see preprocess()) -> a real
     # link, now that we know both this file's own name and (from the
@@ -3400,6 +3605,14 @@ def postprocess(md: str, current_file: str) -> str:
     # Pandoc's [text]{.underline} bracketed-span syntax isn't plain
     # CommonMark and can trip up MDX-based site generators -> plain HTML.
     md = re.sub(r"\[([^\[\]]*)\]\{\.underline\}", r"<u>\1</u>", md)
+
+    # Pandoc 3.x (not the pinned 2.7.3 -- confirmed by a rendered-HTML
+    # diff) tags a markdown link built from \url{...} with a trailing
+    # {.uri} attribute (e.g. Chapter 19's footnote,
+    # "[wiki.haskell.org/...](wiki.haskell.org/...){.uri}") -- not plain
+    # CommonMark, so it leaked as literal text right after the link.
+    # The attribute carries no reader-visible meaning here; drop it.
+    md = re.sub(r"(\]\([^()\s]+(?:\s+\"[^\"]*\")?\))\{\.uri\}", r"\1", md)
 
     # Pandoc 2.7.3 (confirmed fixed in 3.11 -- this is 2.7.3-only quirk)
     # renders a *kept* \label{X} (preserved as a real \label by

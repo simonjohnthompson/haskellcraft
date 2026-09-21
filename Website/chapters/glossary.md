@@ -113,7 +113,7 @@ in which the operator '`-`' is applied to two arguments.
 
 **Filter** <a id="ix-glossary-filter"></a> To pick out those elements of a list which have a particular property, represented by a **Boolean**-valued function.
 
-**Floating-point number** <a id="ix-glossary-numbers-floating-point"></a> A number which is given in decimal (e.g. 456.23) or exponent (e.g. `4.5623e+2`) form; these numbers form the type `Float`.
+**Floating-point number** <a id="ix-glossary-numbers-floating-point"></a> A number which is given in decimal (e.g. `456.23`) or exponent (e.g. `4.5623e+2`) form; these numbers form the type `Float`.
 
 **Fold** <a id="ix-glossary-folding"></a> To combine the elements of a list using a binary **operation**.
 

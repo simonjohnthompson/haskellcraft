@@ -182,9 +182,15 @@ a "where these ideas show up today" addition.
 
 ## Suggested priority if asked to act on this
 
-1. Fix the two factual errors (Preface "yearly review" line, Conclusion
+1. ~~Fix the two factual errors (Preface "yearly review" line, Conclusion
    "regular language standard updates" line) — these are the only things
-   that are actually *wrong* rather than merely dated.
+   that are actually *wrong* rather than merely dated.~~ **Done** —
+   rewrote `Book/0.tex:125` and `Book/22.tex:113-116`, both now
+   describing Haskell 2010's real 16-year stability, GHC's evolution via
+   `GHC2021`/`GHC2024` language editions, and the Haskell Foundation
+   working group's new Report-revision effort. Also fixed the dated
+   Erlang/F# examples in the same Preface paragraph (`Book/0.tex:54`)
+   while there. Live in both the PDF and website.
 2. Add the Haskell Foundation mention.
 3. ~~Draft and insert the "What is new in this online edition?"
    section.~~ **Done** — inserted into `Book/0.tex` (before "What has

@@ -27,7 +27,13 @@ References
 
 <a id="specBasedTesting"></a>Koen Claessen and John Hughes, “Specification-based testing with QuickCheck”, In *The Fun of Programming*, Palgrave, 2003.
 
+<a id="Clojure"></a>Clojure, “Clojure”, 2026. Available at <https://clojure.org/>.
+
 <a id="conwayGames"></a>John Horton Conway, *On Numbers and Games*, A K Peters/CRC Press, 2002.
+
+<a id="Elixir"></a>Elixir, “Elixir”, 2026. Available at <https://elixir-lang.org/>.
+
+<a id="Elm"></a>Elm, “Elm”, 2026. Available at <https://elm-lang.org/>.
 
 <a id="GHCi"></a>GHCi, “The Glasgow Haskell Compiler”, 2010. Available from <http://www.haskell.org/ghc/>.
 
@@ -62,6 +68,10 @@ References
 <a id="awkwardSquad"></a>Simon Peyton Jones, “Tackling the awkward squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell”, 2001. Available at <http://research.microsoft.com/en-us/um/people/simonpj/papers/marktoberdorf/>.
 
 <a id="pj-lester"></a>Simon Peyton Jones and David Lester, *Implementing functional languages*, Prentice Hall, 1992.
+
+<a id="PureScript"></a>PureScript, “PureScript”, 2026. Available at <https://www.purescript.org/>.
+
+<a id="Rust"></a>Rust, “The Rust Programming Language”, 2026. Available at <https://www.rust-lang.org/>.
 
 <a id="effectiveHaskell"></a>Rebecca Skinner, *Effective Haskell: Solving Real-World Problems with Strongly-Typed Functional Programming*, Pragmatic Bookshelf, 2023.
 

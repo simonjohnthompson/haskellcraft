@@ -155,6 +155,8 @@ lazy evaluation within a strict language, and Haskell provides
 facilities to make evaluation strict, the Haskell and ML schools of programming are very close
 indeed.
 
+Two more recent languages carry Haskell's influence directly onto the web front end. \emph{PureScript} \cite{PureScript} is a strict Haskell-like language that compiles to JavaScript, sharing much of Haskell's syntax and type system, and is a natural next step for readers who enjoyed this book's browser-based implementation of pictures. \emph{Elm} \cite{Elm} takes a related but more restricted approach, trading some of Haskell's expressiveness for a simpler, beginner-friendly language with an emphasis on especially friendly compiler error messages and a distinctive application architecture (`The Elm Architecture') that has gone on to influence state management in other web frameworks.
+
 A different style of functional programming, `point-free programming', eschews variables as much
 as possible: this was introduced in \citeN{backus}. \citeN{AoP} is a text that
 emphasizes the benefits of this style in supporting program
@@ -165,8 +167,12 @@ LISP is the oldest established functional language, but it differs from
 Haskell and SML in not being strongly typed. An excellent tutorial
 introduction to programming in the Scheme\index{Scheme} dialect of LISP is given in 
 \citeN{strAndInterp}. \emph{Land of Lisp} \cite{LandOfLisp} is a book, website and music video\footnote{\ldots simple but refined, guaranteed to blow your mind \ldots} introducing Lisp by developing a series of games.
- 
-Erlang is a concurrent, fault-tolerant, distributed language, based on a functional programming core. Erlang \cite{progErlang,erlangProg} was developed within Ericsson, and as well as its use in telecoms applications, has applications in the financial sector, and to high-availability distributed systems in general. 
+
+A more recent, and rather different, LISP dialect is \emph{Clojure} \cite{Clojure}, which runs on the Java Virtual Machine (and, via ClojureScript, in the browser), and pairs LISP's traditional dynamic typing and macro system with a strong, pragmatic emphasis on immutable data structures for building concurrent, JVM-hosted systems.
+
+Erlang is a concurrent, fault-tolerant, distributed language, based on a functional programming core. Erlang \cite{progErlang,erlangProg} was developed within Ericsson, and as well as its use in telecoms applications, has applications in the financial sector, and to high-availability distributed systems in general. A more recent language built on the same Erlang virtual machine (the BEAM) is \emph{Elixir} \cite{Elixir}, which pairs Erlang's concurrency and fault-tolerance model with a more modern, Ruby-influenced syntax; its \emph{Phoenix} web framework has become particularly well regarded for building highly concurrent, real-time web applications.
+
+Some of Haskell's ideas have also reached mainstream systems programming. \emph{Rust} \cite{Rust} is not itself a functional language, but its algebraic data types (its \texttt{enum}s), pattern matching, and its \texttt{Option} and \texttt{Result} types for handling absence and failure without exceptions are all directly descended from the ML/Haskell tradition, and its ownership-based type system enforces, at compile time, much of the discipline around mutation and aliasing that functional languages achieve through immutability.
 
 Two surveys of applications of functional programming languages in
 large-scale projects are \citeN{applicsFP} and \citeN{stateArtFP}, and

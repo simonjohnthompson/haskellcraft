@@ -192,7 +192,14 @@ in two places and could drift out of sync again — a cross-reference
 instead of a duplicate list might be worth considering next time either
 is touched.
 
-### 5. "Other functional programming languages" (lines 141-165) is missing anything that has emerged/grown since 2011
+### 5. ~~"Other functional programming languages" (lines 141-165) is missing anything that has emerged/grown since 2011~~ **Done**
+
+Added four new paragraphs to `Book/22.tex`: PureScript/Elm after the
+F#/ML paragraph, Clojure after the Lisp/*Land of Lisp* paragraph, and
+Rust after Erlang — plus, at Simon's request, a sentence on Elixir
+appended to the existing Erlang paragraph itself. Five new `big.bib`
+misc entries (`PureScript`, `Elm`, `Clojure`, `Rust`, `Elixir`). Live
+in both the PDF and website.
 
 PureScript and Elm (both directly Haskell-influenced, and PureScript in
 particular pairs naturally with the book's own SVG/browser Picture DSL

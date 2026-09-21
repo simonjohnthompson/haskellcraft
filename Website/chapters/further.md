@@ -1,5 +1,4 @@
-Problem solving and further examples {#further}
-====================================
+# Problem solving and further examples {#further}
 
 <a id="ix-further-problem-solving"></a>
 
@@ -19,13 +18,13 @@ This section is a worked example of the problem solving process, applied to writ
 
 The first stage of the problem solving process is to work out exactly what the problem is. A palindrome is a string of text which reads the same backwards and forwards, if
 
--   we disregard the punctuation (punctuation marks and spaces) in the string; and
+- we disregard the punctuation (punctuation marks and spaces) in the string; and
 
--   we disregard the case (upper or lower) of the letters in the string.
+- we disregard the case (upper or lower) of the letters in the string.
 
 At this stage we can already say something about the Haskell function we are going to write. We will call it `palin`. What is its type? It takes the string we are checking as its argument, and the result of the test is a Boolean, so
 
-```haskell
+``` haskell
 palin :: String -> Bool
 ```
 
@@ -35,19 +34,19 @@ Now that we know what we are aiming at, we can design a solution. A number of st
 
 We can solve these two separately. Suppose that the string `st` contains no punctuation and is already in lower case; then we just need the second part:
 
-```haskell
+``` haskell
 palin st = (reverse st == st)
 ```
 
 which reverses the string `(reverse st)` and compares it with the original `(... == st)`. This leaves us needing to solve the problem of reversing a string:
 
-```haskell
+``` haskell
 reverse :: String -> String
 ```
 
 To solve the whole problem, we need to do the same, but to a string which has had its punctuation and case disregarded:
 
-```haskell
+``` haskell
 palin st = (reverse st' == st')
            where
            st' = disregard st
@@ -55,7 +54,7 @@ palin st = (reverse st' == st')
 
 where the function which disregards punctuation and case is
 
-```haskell
+``` haskell
 disregard :: String -> String
 ```
 
@@ -65,7 +64,7 @@ Our problem has now been broken down into two simpler problems: defining `revers
 
 To reverse a string, which is a list of characters (`[Char]`), we define the function from scratch (setting aside that it is already in the standard prelude). We can think this through in stages, left-hand side first:
 
-```haskell
+``` haskell
 reverse :: String -> String
 
 reverse []     = ...
@@ -76,13 +75,13 @@ which are the two cases of an empty string, and a non-empty string whose first e
 
 An empty string reversed is empty:
 
-```haskell
+``` haskell
 reverse []     = []
 ```
 
 while in the general case we can be guided by an example. In this sort of definition we define `reverse (a:st)` using `reverse st`. Take the example `"door"`. Reversing the tail gives `"roo"`, and we get what we want by sticking `"d"` on the end. So,
 
-```haskell
+``` haskell
 reverse (a:st) = reverse st ++ [a]
 ```
 
@@ -90,14 +89,14 @@ where `++` joins together two strings and `[a]` is the string made up of the sin
 
 The final problem is to define `disregard`, which as we saw above consists of two parts: removing punctuation, and changing capital letters to lower case. We can solve these separately, with
 
-```haskell
+``` haskell
 remove :: String -> String
 change :: String -> String
 ```
 
 We build `disregard` by applying these in turn: either `disregard st = remove (change st)` or `disregard st = change (remove st)`. Here is an example of reflecting on our design without having implemented either function: we choose the latter, since under this definition we only need to change those characters which remain in the string. This lets us write the definition more concisely still, as the composition
 
-```haskell
+``` haskell
 disregard = change . remove
 ```
 
@@ -107,7 +106,7 @@ first applying `remove`, and then applying `change` to the result.
 
 It remains to define `remove` and `change`. The former follows the familiar recursion pattern over a list:
 
-```haskell
+``` haskell
 remove :: String -> String
 
 remove []     = []
@@ -116,7 +115,7 @@ remove (a:st) = ...
 
 In the `(a:st)` case there are two possibilities, depending on whether `a` is a punctuation character or not; if it is not, `a` goes into the result, and in both cases the remainder comes from removing punctuation from `st`:
 
-```haskell
+``` haskell
 remove (a:st)
   | notPunct a = a : remove st
   | otherwise  =     remove st
@@ -124,7 +123,7 @@ remove (a:st)
 
 where we can decide whether we have punctuation with, for instance,
 
-```haskell
+``` haskell
 notPunct :: Char -> Bool
 notPunct ch = isAlpha ch || isDigit ch
 ```
@@ -133,7 +132,7 @@ that is, that we have either a letter or a digit.
 
 Finally, `change` affects each character in the list in turn:
 
-```haskell
+``` haskell
 change :: String -> String
 
 change []     = []
@@ -142,7 +141,7 @@ change (a:st) = convert a : change st
 
 where
 
-```haskell
+``` haskell
 convert :: Char -> Char
 convert ch
   | isCap ch  = decode (code ch + offset)
@@ -166,7 +165,7 @@ Minesweeper is a long-lived and popular computer game, with a great many impleme
 
 A series of text-interface Haskell implementations of Minesweeper, originally written in 2002 and used as a case study for refactoring Haskell programs, are included with the `Craft3e` code in `Minesweeper/` (see [Working with multiple-module projects](2.md#multipleModuleProgs) for how to obtain and build the code for this book). The commands used in the textual versions are:
 
-```haskell
+``` haskell
 q            Quit
 h            Help information
 m7b          Mark position 7b
@@ -179,17 +178,17 @@ t7b          Transitive automatic from 7b
 
 These commands should not be followed by a newline. The successive versions are:
 
--   <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper.hs" target="_blank" rel="noopener noreferrer">`Minesweeper.hs`</a>: a simple interface -- input a row and column character to uncover a square; run `playGrid`.
+- <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper.hs" target="_blank" rel="noopener noreferrer">`Minesweeper.hs`</a>: a simple interface -- input a row and column character to uncover a square; run `playGrid`.
 
--   <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper2.hs" target="_blank" rel="noopener noreferrer">`Minesweeper2.hs`</a>: implements `q`, `s`, `m`, `u`, `r`. To play, run `playGame m n` where `m` is the number of mines and `n` the size of the (square) board.
+- <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper2.hs" target="_blank" rel="noopener noreferrer">`Minesweeper2.hs`</a>: implements `q`, `s`, `m`, `u`, `r`. To play, run `playGame m n` where `m` is the number of mines and `n` the size of the (square) board.
 
--   <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper3.hs" target="_blank" rel="noopener noreferrer">`Minesweeper3.hs`</a>: adds `a` and `t` to the commands above. Played the same way as `Minesweeper2`.
+- <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper3.hs" target="_blank" rel="noopener noreferrer">`Minesweeper3.hs`</a>: adds `a` and `t` to the commands above. Played the same way as `Minesweeper2`.
 
--   <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper4.hs" target="_blank" rel="noopener noreferrer">`Minesweeper4.hs`</a>: adds `h`. Played the same way as `Minesweeper2`.
+- <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper4.hs" target="_blank" rel="noopener noreferrer">`Minesweeper4.hs`</a>: adds `h`. Played the same way as `Minesweeper2`.
 
--   <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper5.hs" target="_blank" rel="noopener noreferrer">`Minesweeper5.hs`</a>: a further refinement of `Minesweeper4`, played the same way.
+- <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Minesweeper5.hs" target="_blank" rel="noopener noreferrer">`Minesweeper5.hs`</a>: a further refinement of `Minesweeper4`, played the same way.
 
--   <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/MineRandom.hs" target="_blank" rel="noopener noreferrer">`MineRandom.hs`</a>: generates a random starting grid, for use with the versions above.
+- <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/MineRandom.hs" target="_blank" rel="noopener noreferrer">`MineRandom.hs`</a>: generates a random starting grid, for use with the versions above.
 
 A graphical interface to the same game is also kept in the repository, in <a href="https://github.com/simonjohnthompson/haskellcraft/blob/main/Code/Craft3e/Minesweeper/Graphical/GraphicMine.hs" target="_blank" rel="noopener noreferrer">`Minesweeper/Graphical/GraphicMine.hs`</a>. An earlier version of this file, built using a Haskell graphics library that no longer exists, has been rewritten to use the actively-maintained `gloss` package instead: click a cell to reveal it, right-click to flag it, press `n` for a new game or `a` for a deduction assist, and press `Esc` to quit. Run it with `cabal run minesweeperGraphical`, the one part of the `Craft3e` package that isn't pulled in by an ordinary `cabal install Craft3e`, since it depends on `gloss` and the OpenGL/GLUT libraries it in turn needs.
 

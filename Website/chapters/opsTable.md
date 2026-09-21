@@ -1,5 +1,4 @@
-Haskell operators {#hsOps}
-=================
+# Haskell operators {#hsOps}
 
 <a id="ix-opsTable-operator-table-of-properties"></a>
 
@@ -7,18 +6,18 @@ Haskell operators {#hsOps}
 
 The operators in the Haskell prelude are listed below in decreasing order of binding power: see [Operators](3.md#operators) for a discussion of associativity and binding power.
 
-|     | Left associative                    | Non-associative                           | Right associative |
-|:----|:------------------------------------|:------------------------------------------|:------------------|
-| 9   | `!!`                                |                                           | .                 |
-| 8   |                                     |                                           | `**, ^, ^^`       |
-| 7   | `*, /, ‘div‘, ‘mod‘, ‘rem‘, ‘quot‘` |                                           |                   |
-| 6   | `+, -`                              |                                           |                   |
-| 5   |                                     |                                           | `:, ++`           |
-| 4   |                                     | `/=, <, <=, ==, >, >=, ‘elem‘, ‘notElem‘` |                   |
-| 3   |                                     |                                           | `&&`              |
-| 2   |                                     |                                           | `\|\|`              |
-| 1   | `>>, >>=`                           |                                           |                   |
-| 0   |                                     |                                           | `$, $!, ‘seq‘`    |
+|  | Left associative | Non-associative | Right associative |
+|:---|:---|:---|:---|
+| 9 | `!!` |  | . |
+| 8 |  |  | `**, ^, ^^` |
+| 7 | `*, /, ‘div‘, ‘mod‘, ‘rem‘, ‘quot‘` |  |  |
+| 6 | `+, -` |  |  |
+| 5 |  |  | `:, ++` |
+| 4 |  | `/=, <, <=, ==, >, >=, ‘elem‘, ‘notElem‘` |  |
+| 3 |  |  | `&&` |
+| 2 |  |  | `\|\|` |
+| 1 | `>>, >>=` |  |  |
+| 0 |  |  | `$, $!, ‘seq‘` |
 
 <a id="ix-opsTable-mod"></a>
 
@@ -43,7 +42,7 @@ Also defined in this text are the operators <a id="ix-opsTable-sc8beaa"></a> <a 
 
 The restrictions on names of operators, which are formed using the characters
 
-```haskell
+``` haskell
 ! # $ % & * + . / < = > ? @  ^ | : - ~
 ```
 
@@ -51,12 +50,12 @@ are that operators must not start with a colon; this character starts an infix *
 
 To change the associativity or binding power of an operator, `&&&` say, we make a declaration like<a id="ix-opsTable-fixity-declaration"></a>
 
-```haskell
+``` haskell
 infixl 7 &&&
 ```
 
 which states that `&&&` has binding power 7, and is a left associative operator. We can also declare operators as non-associative (`infix`) and right associative (`infixr`). Omitting the binding power gives a default of 9. These declarations can also be used for back-quoted function names, as in
 
-```haskell
+``` haskell
 infix 0 `poodle`
 ```

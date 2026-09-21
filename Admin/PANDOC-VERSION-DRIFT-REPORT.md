@@ -1,37 +1,38 @@
-# Pandoc version drift — status and open issue
+# Pandoc version drift — status: resolved, pin moved to 3.11
 
-**The pandoc-version-drift investigation itself is fully resolved.**
-Every chapter in `Website/chapters/*.md` regenerates byte-for-byte
-identical to the pinned Pandoc 2.7.3 binary — verified corpus-wide, zero
-remaining diffs, as of 20 Sep 2026. The full investigation (two pandoc
-binaries on `$PATH`, what 3.11 does differently and why, nine chapters
-found carrying live un-postprocessed 3.x HTML and fixed, two `\beware`
+**The pin has moved.** As of 21 Sep 2026, `tex2md.py` resolves
+Homebrew-managed `/opt/homebrew/bin/pandoc` (Pandoc 3.11), not the old
+unmanaged 2019 `/usr/local/bin/pandoc` (2.7.3) binary. `Website/chapters/
+*.md` has been regenerated and committed under the new pin, and the live
+site reflects it. This is the end state of an investigation that ran
+across three sessions -- what follows is a record of why the move took
+this long and how it was verified, kept for the next person (human or
+Claude) who wonders whether it's safe to trust.
+
+The original pandoc-version-drift investigation (two pandoc binaries on
+`$PATH`, what 3.11 did differently and why, nine chapters found
+carrying live un-postprocessed 3.x HTML and fixed, two `\beware`
 newline typos, a dropped Wikimedia attribution footnote, five more
 chapters normalised for consistency) is archived in full at
-`Admin/Archive/PANDOC-VERSION-DRIFT-REPORT.md`.
+`Admin/Archive/PANDOC-VERSION-DRIFT-REPORT.md`. That investigation
+concluded the pin needed to stay at 2.7.3 for the time being; a
+follow-up thread revisited that conclusion, found the real blocker was
+bigger than originally scoped, fixed it in full, verified it with a
+real page-by-page rendered-HTML diff (not just markdown-source
+comparison), and moved the pin. Ten distinct causes of the
+raw-HTML-fallback problem were found and fixed first (below), followed
+by ten more found only by that rendered-HTML diff (`## The
+rendered-HTML diff` below) -- some pre-existing and unrelated to any
+Pandoc version, some 3.11-specific.
 
-This file tracks only what's still open. As of 21 Sep 2026, across five
-commits the same day, **ten distinct causes of the raw-HTML-fallback
-problem are now fixed** (committed, pushed, regenerated into the live
-site) -- corpus-wide, under real Pandoc 3.11, there are now zero known
-cases of it. One genuine correction along the way: a "zero chapters
-remaining" claim made earlier the same day was wrong, based on an
-incomplete check that missed several of these -- see "Known-incomplete
-verification" below for what that taught about how to actually verify
-this kind of fix. The one thing left before the pin could actually
-move is a full page-by-page *rendered-HTML* comparison across the whole
-corpus (not just the figures/tables this investigation focused on),
-which has never been done -- see "Is it safe to move to Pandoc 3.x
-yet?" below.
+## Why we couldn't just move to the latest Pandoc for so long (now fixed)
 
-## Why we couldn't just move to the latest Pandoc (now fixed)
-
-`tex2md.py` (`Website/convert/tex2md.py`) resolves an explicit
-`/usr/local/bin/pandoc` itself (commit `5a63daa`), falling back to bare
-`pandoc` on `$PATH` if that's absent, and warns loudly on stderr if the
-resolved binary isn't 2.7.x. This wasn't inertia — a real regression
+`tex2md.py` (`Website/convert/tex2md.py`) used to resolve an explicit
+`/usr/local/bin/pandoc` (commit `5a63daa`), falling back to bare
+`pandoc` on `$PATH` if that's absent, and warned loudly on stderr if the
+resolved binary wasn't 2.7.x. This wasn't inertia — a real regression
 blocked moving to Pandoc 3.x (checked directly against 3.11). Ten
-distinct causes of it are now fixed and committed -- see below.
+distinct causes of it were found and fixed first -- see below.
 
 The root cause (see the archived report for the full derivation):
 Pandoc 3.x's Markdown writer can only degrade a LaTeX `\begin{figure}`
@@ -45,7 +46,7 @@ entirely separate causes (a genuine table in a figure; a stray
 hypertarget landing inside a table cell) that shared the same symptom
 but needed their own fixes. All are now understood and fixed.
 
-**Fixed (uncommitted, in `Website/convert/tex2md.py`):**
+**Fixed, in `Website/convert/tex2md.py`:**
 
 1. **A figure's own primary `\label` was always converted to
    `\hypertarget{X}{}` instead of being kept as a real `\label`** — only
@@ -218,105 +219,201 @@ also any bare `<figure>` not matching this pipeline's own
 "sourceCode">`, and any stray `<figcaption>` not accounted for by a
 known-legitimate case).
 
-**Known-incomplete verification (corrected same day, twice):** two
-separate "this is fixed" claims made earlier the same day were wrong.
-The first ("zero chapters remaining") was based only on the narrow
-`<embed `/`<table>`/`<blockquote>` fingerprint and missed item 7
-entirely. The second was catching real distinct causes (items 8, 9) as
-side effects of fixing item 7, not from deliberately looking for them
-— the corpus kept having one more thing than the last check found.
-What actually worked: after each fix, rerunning the *broadest*
-plausible fingerprint scan (not just the one the current fix targets)
-across the *whole* corpus, every time.
+**Known-incomplete verification along the way (corrected twice in one
+day, before the diff below caught the rest):** two separate "this is
+fixed" claims made the same day were wrong. The first ("zero chapters
+remaining") was based only on the narrow `<embed `/`<table>`/
+`<blockquote>` fingerprint and missed item 7. The second was catching
+real distinct causes (items 8, 9) as side effects of fixing item 7, not
+from deliberately looking for them — the corpus kept having one more
+thing than the last check found. What actually worked: after each fix,
+rerunning the *broadest* plausible fingerprint scan (not just the one
+the current fix targets) across the *whole* corpus, every time — and,
+in the end, the rendered-HTML diff below, which is what actually
+settled it.
 
-## Is it safe to move to Pandoc 3.x yet? Still no — but for a much smaller reason now.
+## The rendered-HTML diff
 
-The raw-HTML-fallback problem itself — the entire subject of this
-investigation across three sessions — is fully fixed. What's left is
-narrower and different in kind: **a full page-by-page *rendered-HTML*
-comparison has never been done.** Every verification so far compared
-Markdown *source* (word-multiset + id-set diffs) between 2.7.3 and
-3.11, which is exactly right for catching content loss and broken
-anchors, but doesn't rule out purely cosmetic-looking differences
-actually rendering differently once mdBook builds the final page.
+The raw-HTML-fallback problem above was the entire subject of this
+investigation across three sessions, but every verification up to this
+point compared Markdown *source* (word-multiset + id-set diffs)
+between 2.7.3 and 3.11 — right for catching content loss and broken
+anchors, but blind to purely cosmetic-*looking* differences that might
+actually render differently once mdBook builds the final page. The
+real test: build the site both ways (`mdbook build` against the
+2.7.3-regenerated chapters, and again against a fresh 3.11
+regeneration) and diff the *rendered* `book/` output page by page, not
+just the markdown that feeds them.
 
-What's known so far, from markdown-source-level comparison only:
+That diff found real issues neither the markdown-source diffs nor the
+fallback fingerprint had caught — ten more distinct causes, fixed in
+two more commits the same day:
 
-- **Zero cross-reference anchors are ever lost** under 3.11, anywhere
-  in the corpus — every id difference found was explained by one of
-  the ten fixes above, never a silently broken `\ref` target.
-- **A large amount of cosmetic-looking Markdown-syntax drift exists
-  across literally every chapter** (ATX `#` headings instead of Setext
-  `===` underlines, `` ``` haskell `` with a space instead of
-  `` ```haskell ``, tighter list-marker spacing) — ordinary differences
-  in Pandoc's own default writer style between major versions, and
-  each should render identically once parsed by CommonMark, but this
-  has only been spot-checked, not confirmed for the whole corpus.
+**Already-live bugs, independent of any Pandoc version** (fixed
+regardless of the migration question — these were broken on the site
+before this thread even started):
 
-Before actually flipping the pin: build the site both ways (`mdbook
-build` against the 2.7.3-regenerated chapters, and again against a
-fresh 3.11 regeneration) and diff the *rendered* `book/` output
-directories page by page, not just the markdown that feeds them. None
-of this is urgent — it costs nothing to leave the pin in place while
-unresolved (see below) — and the ten items already fixed are a real,
-substantial reduction in migration risk, several already paying off
-under the *current* pin regardless of whether a version bump ever
-happens.
+- `\looseness=N` (a print-layout paragraph-tightness hint, no braces)
+  leaking as literal `.=-1`/`.=1` text — pandoc drops `\looseness` but
+  not the `=N` half. 4 uses, Chapters 4/16/17.
+- `\hbox{X}` silently dropping its whole argument, the same failure
+  `\mbox` already had a fix for — Chapter 13 was missing "and
+  `a -> [a]`." from a sentence entirely.
+- Bare `\tt` and `{\tt ...}` (plain LaTeX's older typewriter-font
+  switch, distinct from `\mi`/`\ttfamily`) never being recognized at
+  all — a whole table in Chapter 12 and headings in Chapters 4/7 were
+  rendering unstyled where they should be code.
+- `\mi` immediately followed by a digit (`\mi456.23`, no space) not
+  matching the old regex's `\b` (a digit is a regex "word" character,
+  so `\b` doesn't end the command name there the way a real LaTeX
+  control word does) — a number was silently vanishing from the
+  glossary.
+- A `\ttfamily`/`\tt`/`\mi` scope with nothing in it before the next
+  cell boundary (a deliberately empty table cell) producing literal
+  stray backticks, since an empty ` `` ` isn't a real CommonMark code
+  span — opsTable.
+- `` ``` {.haskell} `` not being normalized to `` ```haskell `` when
+  quoted inside a `\beware` blockquote or indented under a list item —
+  syntax highlighting was silently broken for 102 code blocks across
+  17 chapters.
 
-## Is the 2.7.3 pin durable long-term?
+**Pandoc-3.11-specific bugs** (needed fixing before the pin could
+safely move):
 
-Nothing forces an upgrade: `deploy-book.yml` (the CI that builds and
-publishes the live site) only runs `mdbook build` against the
-already-committed `Website/chapters/*.md` files — it never invokes
-`tex2md.py` or Pandoc. Pandoc only runs when someone manually regenerates
-a chapter from `.tex` on a dev machine, so there's no security-patch
-cadence or CI mandate pushing an upgrade, and the pin can sit unchanged
-indefinitely with zero live-site risk. Missing Pandoc 3.x features is a
-hypothetical concern, not a known one — every chapter in the corpus now
-regenerates byte-identical under 2.7.3, so there's no evidence today that
-2.7.3 is mishandling anything the book actually needs.
+- A footnote nested inside an image's caption gets its definition
+  duplicated by Pandoc 3.11's writer when the figure degrades to a
+  plain image — Chapter 13's Wikimedia attribution footnote.
+- `\verb` loses track of its own delimiter specifically inside a table
+  cell (confirmed with both `+` and `|` delimiters, confirmed clean in
+  ordinary prose) — converted to `\texttt{}` instead (escaping a
+  literal backslash to `\textbackslash{}` first: `\texttt{\}` parses
+  differently from `\verb+\+` in real LaTeX, caught by a full-corpus
+  id-diff before it shipped).
+- The `::: <environment>` fence-stripping (for `\begin{center}` and
+  similar) didn't handle a blockquote-quoted, indented, or *nested*
+  fence (Chapter 2's ASCII art is a `\begin{minipage}` inside a
+  `\begin{center}`) — broke Chapters 2 and 11's rendering into garbled
+  definition lists.
+- Pandoc 3.11 tags a `\url`-derived autolink with a stray `{.uri}`
+  attribute that leaks as visible text — Chapter 19's footnote.
 
-The real, if bounded, cost is durability of one unmanaged binary on one
-machine:
+Verified corpus-wide: every fix a confirmed no-op under the pinned
+2.7.3 except real, understood content restorations (id-checked and
+word-content-checked throughout). Under real Pandoc 3.11: the
+raw-HTML-fallback count still zero, and the rendered-HTML diff across
+every page came down to only cosmetic, understood differences —
+harmless code-span splitting (confirmed harmless: this theme's inline
+`<code>` has no padding/background, so a code span split into several
+adjacent `<code>` elements is visually identical to one), an invisible
+figcaption-anchor position difference, escaped vs. unescaped `#`/`_`
+characters (both render as the literal character either way), a
+soft-hyphen typography difference, and a couple of pre-existing,
+unrelated, equally-broken-in-*both*-versions warts (see "Known
+remaining issues, unrelated to Pandoc" below) — plus a genuine
+corpus-wide *regeneration*, since Pandoc's own default Markdown-writer
+style differs between major versions (ATX `#` headings instead of
+Setext `===` underlines, a space in `` ``` haskell ``, tighter list
+markers) even where nothing else changed.
 
-- `/usr/local/bin/pandoc` is a 2019 x86_64 build, not tracked by any
-  package manager this repo knows about. **Checked (19 Sep 2026): the
-  exact release is still available** — Pandoc's GitHub release
-  [2.7.3](https://github.com/jgm/pandoc/releases/tag/2.7.3) still hosts
-  the original `pandoc-2.7.3-macOS.pkg` (matching the installed binary
-  exactly), and the source is still on Hackage (`cabal get pandoc-2.7.3`
-  works today). So if this binary is ever lost, it can be re-fetched
-  as-is — no re-porting needed, just re-running the original 2019
-  installer.
-- It depends on Rosetta 2 continuing to run x86_64 binaries on Apple
-  Silicon. Apple has kept extending Rosetta 2's support for years with no
-  announced end date, but hasn't committed to "forever" — a real, if
+**Pin moved 21 Sep 2026.** `_PINNED_PANDOC` now resolves
+`/opt/homebrew/bin/pandoc`; `Website/chapters/*.md` was regenerated
+under it and committed in the same change. None of this was urgent —
+it cost nothing to leave the pin in place while unresolved — but the
+concrete blocker is gone, and the day's work (twenty distinct fixes
+between the fallback problem and the rendered-HTML diff) is a real,
+substantial improvement to the live site independent of the version
+question, several of which were already paying off before the pin
+moved. One more, unrelated to any of this: Simon spotted a literal
+stray backslash after the Preface's sign-off ("December 2010\") on the
+live site the same day, fixed separately (a trailing hard-line-break
+marker with nothing left to break to, right before the enclosing group
+closes -- see the git history for the full fix).
+
+## Known remaining issues, unrelated to Pandoc
+
+Found by the rendered-HTML diff but **not fixed** — pre-existing,
+present under both Pandoc versions, unrelated to the version question:
+
+- **Chapter 1**: `[[typesIntro]]` (or similarly garbled bracket text)
+  renders as literal visible text near "Types" — an orphaned secondary
+  `\label` that never got a working anchor of its own.
+- **Chapter 21**: a `\[...\]`-wrapped `\begin{tabular}` (used to align
+  an exercise question) renders as garbled literal text ("tabularll
+  associative: & ..." instead of a table) — Pandoc's math-mode reader
+  parses the whole `\begin{tabular}{ll}...\end{tabular}` as literal
+  math source instead of a table, since it's wrapped in `\[...\]`.
+- **Glossary**: `\texttt{--}` (Haskell's line-comment marker) renders
+  as an en-dash character (–) instead of two literal hyphens under
+  2.7.3 (fixed under 3.11, now the default) — possibly not even a bug:
+  real LaTeX's own `--`-to-en-dash ligature applies inside `\texttt`
+  too, so this might just be faithfully reproducing what the *printed*
+  book itself shows; not verified against the actual PDF.
+
+## Is the 3.11 pin durable long-term?
+
+Much simpler story than the old one below: `/opt/homebrew/bin/pandoc`
+is a Homebrew-managed symlink into `/opt/homebrew/Cellar/pandoc/3.11/`,
+a genuinely native arm64 build kept current by the same package
+manager as everything else on this machine — not a one-off,
+hand-installed, x86_64-under-Rosetta binary nobody else can reproduce.
+If it's ever lost, `brew install pandoc` gets it back (a *current*
+version, not necessarily 3.11 exactly — re-verify with the same
+discipline as this whole investigation, full-corpus regeneration plus
+a rendered-HTML diff, before trusting whatever that installs without
+checking `_check_pandoc_version`'s warning first). `brew upgrade`
+moving it past 3.11 silently is the one real risk worth naming; `brew
+pin pandoc` would prevent that if it matters enough to guard against,
+though nothing here currently requires it — same as before, nothing
+forces an upgrade (`deploy-book.yml` never invokes Pandoc at all, only
+`mdbook build` against the already-committed `Website/chapters/*.md`).
+
+**Nothing to action here now.**
+
+<details>
+<summary>Archived: why the old 2.7.3 pin's durability was a real
+concern (no longer applicable, kept for history)</summary>
+
+The real, if bounded, cost was durability of one unmanaged binary on
+one machine:
+
+- `/usr/local/bin/pandoc` was a 2019 x86_64 build, not tracked by any
+  package manager this repo knew about. **Checked (19 Sep 2026): the
+  exact release was still available** — Pandoc's GitHub release
+  [2.7.3](https://github.com/jgm/pandoc/releases/tag/2.7.3) still
+  hosted the original `pandoc-2.7.3-macOS.pkg` (matching the installed
+  binary exactly), and the source was still on Hackage (`cabal get
+  pandoc-2.7.3` worked). So if that binary was ever lost, it could have
+  been re-fetched as-is — no re-porting needed, just re-running the
+  original 2019 installer.
+- It depended on Rosetta 2 continuing to run x86_64 binaries on Apple
+  Silicon. Apple kept extending Rosetta 2's support for years with no
+  announced end date, but hadn't committed to "forever" — a real, if
   long-tail, risk.
-- **Checked whether a native-arm64 rebuild is a viable fallback if Rosetta
-  support ever erodes: not a quick one, but not obviously hopeless
-  either.** Building pandoc 2.7.3's own source (from Hackage) against a
-  period-correct 2019 dependency graph, using a genuinely native arm64
-  GHC (worth noting: the `ghcup`-installed GHC already on this machine
-  turned out to itself be an x86_64 binary running under Rosetta, despite
-  this being an Apple Silicon Mac — swapped in Homebrew's native arm64
-  GHC 9.14.1 instead), got substantial progress: it compiled cleanly past
-  one real bug (`HsYAML-0.1.2.0`, a transitive, LaTeX-irrelevant
-  dependency used only for YAML frontmatter, missing an import that a
-  newer `mtl` no longer papers over — a one-line fix), then hit a second,
-  deeper one in `blaze-builder-0.4.1.0` (part of the HTML-writer path):
-  GHC's own representation of 32-bit words at the primitive-op level
-  changed sometime in the last six years (`Word32#` is now a distinct
-  type from `Word#`), breaking a hand-written bit-shift helper — real
-  bit-rot in a six-year-old dependency, not a version-bounds annoyance,
-  and fixing it means editing low-level primop calls rather than
+- **Checked whether a native-arm64 rebuild would have been a viable
+  fallback if Rosetta support ever eroded: not a quick one, but not
+  obviously hopeless either.** Building pandoc 2.7.3's own source (from
+  Hackage) against a period-correct 2019 dependency graph, using a
+  genuinely native arm64 GHC (worth noting: the `ghcup`-installed GHC
+  already on this machine turned out to itself be an x86_64 binary
+  running under Rosetta, despite this being an Apple Silicon Mac —
+  swapped in Homebrew's native arm64 GHC 9.14.1 instead), got
+  substantial progress: it compiled cleanly past one real bug
+  (`HsYAML-0.1.2.0`, a transitive, LaTeX-irrelevant dependency used
+  only for YAML frontmatter, missing an import that a newer `mtl` no
+  longer papers over — a one-line fix), then hit a second, deeper one
+  in `blaze-builder-0.4.1.0` (part of the HTML-writer path): GHC's own
+  representation of 32-bit words at the primitive-op level changed
+  sometime in the last six years (`Word32#` is now a distinct type from
+  `Word#`), breaking a hand-written bit-shift helper — real bit-rot in
+  a six-year-old dependency, not a version-bounds annoyance, and
+  fixing it would have meant editing low-level primop calls rather than
   relaxing a constraint. Stopped there rather than continuing to chase
-  further such issues (`hslua`'s C/Lua FFI bindings, not yet reached, are
-  a likely next one) — **decided not worth pursuing further right now**,
-  since nothing today requires it. The upshot: a native-arm64 pandoc 2.7.3
-  is plausible with enough forward-porting effort, but it's a real
-  project for if/when Rosetta 2 support actually erodes, not a five-minute
-  fallback to have ready today.
+  further such issues (`hslua`'s C/Lua FFI bindings, not yet reached,
+  were a likely next one) — decided not worth pursuing further at the
+  time, since nothing then required it.
 
-**Nothing to action here now.** Revisit only if Apple signals an actual
-end date for Rosetta 2, or if `/usr/local/bin/pandoc` is ever lost and
-needs re-fetching.
+This entire section is moot now that the pin is a Homebrew-managed
+native arm64 binary, but is kept here in case the pin is ever reverted
+or a similarly unmanaged binary is pinned again in the future.
+
+</details>

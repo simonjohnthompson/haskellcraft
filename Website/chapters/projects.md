@@ -1,5 +1,4 @@
-Project ideas {#projects}
-=============
+# Project ideas {#projects}
 
 <a id="ix-projects-project-ideas"></a>
 
@@ -115,11 +114,11 @@ Develop mechanisms which provide a *visualisation* of the operation of an FSM. a
 
 One theme of this book has been domain-specific languages, and as a part of some of these projects you could build a domain-specific language. Examples include
 
--   A language for describing games has been defined by Conway ([Conway 2002](bibliography.md#conwayGames); [Berlekamp et al. 2001](bibliography.md#winningWays)): look at how you can build a DSL for these games; you could also look at a language for describing strategies to play these games.
+- A language for describing games has been defined by Conway ([Conway 2002](bibliography.md#conwayGames); [Berlekamp et al. 2001](bibliography.md#winningWays)): look at how you can build a DSL for these games; you could also look at a language for describing strategies to play these games.
 
--   A language for describing different voting systems: your simulations and visualisations could then work with an arbitrary voting system, as described in the language.
+- A language for describing different voting systems: your simulations and visualisations could then work with an arbitrary voting system, as described in the language.
 
--   We saw in the body of the text that it is possible to write a simple DSL for patterns, namely regular expressions. Look at ways that this can be extended to make it more expressible, and also at the possibility of defining a DSL to describe different kinds of finite state machines.
+- We saw in the body of the text that it is possible to write a simple DSL for patterns, namely regular expressions. Look at ways that this can be extended to make it more expressible, and also at the possibility of defining a DSL to describe different kinds of finite state machines.
 
 These are just a few ideas of the kind of DSL that you could build: a general project is to use Haskell for building DSLs in a domain of your choice.
 

@@ -22,25 +22,28 @@ from pathlib import Path
 
 BOOK_DIR = Path(__file__).resolve().parent.parent.parent / "Book"
 
-# Pandoc pin -- see Admin/PANDOC-VERSION-DRIFT-REPORT.md. The postprocessing
-# below (checkbox-zoom image wrapping in particular) was built against, and
-# only tested against, Pandoc 2.7.3's output shape. A much newer Pandoc
-# (confirmed: 3.11) renders any figure/table containing an embedded
-# \label/\index as raw HTML instead of plain Markdown, which that
-# postprocessing doesn't recognise -- it silently no-ops instead of
-# raising, so the failure mode is a quietly degraded chapter, not an
-# error. Pin to an explicit, known-2.7.3 binary rather than trusting bare
-# "pandoc" on $PATH, which stopped being safe the moment a newer Homebrew
-# pandoc landed earlier in $PATH than this one. Update this path (and the
-# version check in _check_pandoc_version) once postprocess() has actually
-# been updated to handle a newer Pandoc's output.
-_PINNED_PANDOC = "/usr/local/bin/pandoc"
+# Pandoc pin -- see Admin/PANDOC-VERSION-DRIFT-REPORT.md for the full
+# history. Originally pinned to an unmanaged, 2019 Pandoc 2.7.3 binary
+# because a newer Pandoc (3.x) rendered any figure/table with an
+# embedded \label/\index as raw HTML instead of plain Markdown, which
+# this script's postprocessing didn't recognise -- a silent, quietly
+# degraded chapter rather than an error. That's now fixed: preprocess()
+# and postprocess() were updated (across several rounds of full-corpus
+# verification, including a real page-by-page rendered-HTML diff, not
+# just markdown-source comparison) to handle Pandoc 3.11's output
+# shape, and the pin was moved here. Homebrew-managed rather than a raw
+# absolute path to an unmanaged binary this time -- update the version
+# check below (and re-verify with the same discipline: full-corpus
+# regeneration under the pinned binary, plus a rendered-HTML diff
+# against whatever changed) before trusting a version this hasn't
+# actually been tested against, should Homebrew ever move it forward.
+_PINNED_PANDOC = "/opt/homebrew/bin/pandoc"
 PANDOC_BIN = _PINNED_PANDOC if Path(_PINNED_PANDOC).exists() else "pandoc"
 
 
 def _check_pandoc_version():
     """Warn, rather than silently regenerate degraded output, if PANDOC_BIN
-    isn't the 2.7.x this script's postprocessing was built against. Runs
+    isn't the 3.11 this script's postprocessing was built against. Runs
     once per invocation, not once per chapter.
     """
     try:
@@ -50,10 +53,10 @@ def _check_pandoc_version():
         first_line = result.stdout.splitlines()[0] if result.stdout else ""
     except FileNotFoundError:
         first_line = ""
-    if not first_line.startswith("pandoc 2.7"):
+    if not first_line.startswith("pandoc 3.11"):
         print(
             f"warning: using {PANDOC_BIN!r} ({first_line or 'not found'}), "
-            "not the pinned Pandoc 2.7.3 -- figure/table postprocessing "
+            "not the pinned Pandoc 3.11 -- figure/table postprocessing "
             "may silently fail to apply. See Admin/PANDOC-VERSION-DRIFT-REPORT.md.",
             file=sys.stderr,
         )

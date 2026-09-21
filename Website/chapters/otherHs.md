@@ -1,5 +1,4 @@
-Haskell practicalities {#OtherHS}
-======================
+# Haskell practicalities {#OtherHS}
 
 <a id="ix-otherHs-haskell-implementations"></a>
 
@@ -13,7 +12,7 @@ GHCup, <https://www.haskell.org/ghcup/>, described in [Getting started with Hask
 
 Readers who would rather not install anything directly onto their own machine, but who already have Docker<a id="ix-otherHs-docker"></a> installed for other reasons, can use the official Haskell Docker image instead:
 
-```haskell
+``` haskell
 docker run -it haskell:9.6 ghci
 ```
 
@@ -25,9 +24,9 @@ This gives a disposable GHC, `cabal` and Stack installation inside a container, 
 
 For a reader who wants to try the book's actual code -- including its multi-module structure and dependencies such as `QuickCheck` -- without installing anything, the best option is a cloud development environment. This book's GitHub repository includes a *dev container* configuration which builds a ready-to-use GHC, `cabal` and HLS environment with the code for the book already built. It can be used in a couple of ways:
 
--   **GitHub Codespaces**: on the repository's GitHub page, <https://github.com/simonjohnthompson/haskellcraft>, click **Code**, then the **Codespaces** tab, then **Create codespace on main**. This opens a full, browser-based copy of VS Code, already connected to a virtual machine with Haskell installed; GitHub gives every personal account a free monthly quota of Codespaces hours.
+- **GitHub Codespaces**: on the repository's GitHub page, <https://github.com/simonjohnthompson/haskellcraft>, click **Code**, then the **Codespaces** tab, then **Create codespace on main**. This opens a full, browser-based copy of VS Code, already connected to a virtual machine with Haskell installed; GitHub gives every personal account a free monthly quota of Codespaces hours.
 
--   With Docker and VS Code's **Dev Containers** extension installed locally, opening a clone of the repository and choosing **Reopen in Container** uses the same configuration, without needing a cloud service at all.
+- With Docker and VS Code's **Dev Containers** extension installed locally, opening a clone of the repository and choosing **Reopen in Container** uses the same configuration, without needing a cloud service at all.
 
 In each case, once the container has finished building -- the first time takes a few minutes, so watch for the "Running postCreateCommand" notification to complete -- opening a terminal and typing `cabal repl` gives a working `ghci` prompt with all of the book's code and dependencies available, exactly as described in [Working with multiple-module projects](2.md#multipleModuleProgs); opening a `.hs` file gives the usual IDE features through HLS.
 

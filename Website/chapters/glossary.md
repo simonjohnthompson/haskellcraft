@@ -1,5 +1,4 @@
-Glossary
-========
+# Glossary
 
 We include this glossary to give a quick reference to the most widely used terminology in the book. Words appearing in **bold** in the descriptions have their own entries. Further references and examples are to be found by consulting the index.
 
@@ -7,14 +6,14 @@ We include this glossary to give a quick reference to the most widely used termi
 
 **Algebraic type** <a id="ix-glossary-algebraic-type"></a> An algebraic type definition states what are the **constructors** of the type. For instance, the declaration
 
-```haskell
+``` haskell
 data Tree = Leaf Int | 
             Node Tree Tree
 ```
 
 says that the two constructors of the `Tree` type are `Leaf` and `Node`, and that their types are, respectively,
 
-```haskell
+``` haskell
 Leaf :: Int->Tree
 Node :: Tree->Tree->Tree
 ```
@@ -43,7 +42,7 @@ Node :: Tree->Tree->Tree
 
 **Combinator** Another name for a **function**.
 
-**Comment** <a id="ix-glossary-comment"></a> Part of a **script** which plays no computational role; it is there for the reader to read and observe. Comments are specified in two ways: the part of the line to the right is made a comment by the symbol `–`; a comment of arbitrary length is enclosed by `{-` and `-}`.
+**Comment** <a id="ix-glossary-comment"></a> Part of a **script** which plays no computational role; it is there for the reader to read and observe. Comments are specified in two ways: the part of the line to the right is made a comment by the symbol `--`; a comment of arbitrary length is enclosed by `{-` and `-}`.
 
 **Complexity** <a id="ix-glossary-complexity"></a> A measurement of the time or space behaviour of a function.
 
@@ -55,7 +54,7 @@ Node :: Tree->Tree->Tree
 
 **Conformal pattern match** <a id="ix-glossary-pattern-matching-conformal"></a> An equation in which a pattern appears on the left-hand side of an equation, as in
 
-```haskell
+``` haskell
 (x,y) = ....
 ```
 
@@ -63,7 +62,7 @@ Node :: Tree->Tree->Tree
 
 **Context** <a id="ix-glossary-context"></a> The hypotheses which appear before `=>` in type and class declarations. A context `M a` means that the type `a` must belong to the class `M` for the function or class definition to apply. For instance, to apply a function of type
 
-```haskell
+``` haskell
 Eq a => [a] -> a -> Bool
 ```
 
@@ -71,13 +70,13 @@ to a list and object, these must come from types over which equality is defined.
 
 **Curried function** <a id="ix-glossary-currying"></a> A function of at least two arguments which takes its arguments one at a time, so having the type
 
-```haskell
+``` haskell
 t1 -> t2 -> ... -> t
 ```
 
 in contrast to the *uncurried* version
 
-```haskell
+``` haskell
 (t1,t2,...) -> t
 ```
 
@@ -103,7 +102,7 @@ The name is in honour of Haskell B. Curry, after whom the Haskell language is a
 
 **Expression** <a id="ix-glossary-expression"></a> An expression is formed by applying a **function** or **operator** to its arguments; these arguments can be **literal** values, or expressions themselves. A simple numerical expression is
 
-```haskell
+``` haskell
 (2+8)-10
 ```
 
@@ -119,7 +118,7 @@ in which the operator '`-`' is applied to two arguments.
 
 **Forward composition** <a id="ix-glossary-forward-composition"></a> Used for the operator '`>.>`' with the definition
 
-```haskell
+``` haskell
 f >.> g = g . f
 ```
 
@@ -153,7 +152,7 @@ Examples include the square root function, whose input and output are numbers, a
 
 **Instance** <a id="ix-glossary-instance"></a><a id="ix-glossary-instance-of-variable"></a> <a id="ix-glossary-instance-of-class"></a> The term 'instance' is used in two different ways in Haskell. An instance of a **type** is a type which is given by **substituting** a type expression for a type **variable**. For example, `[(Bool,b)]` is an instance of `[a]`, given by substituting the type `(Bool,b)` for the variable `a`. An instance of a **class**, such as `Eq (a,b)`, is given by declaring how the function(s) of the class, in this case `==`, are defined over the given type (here `(a,b)`). Here we would say
 
-```haskell
+``` haskell
 (x,y) == (z,w)
   = (x==z) && (y==w)
 ```
@@ -168,7 +167,7 @@ Examples include the square root function, whose input and output are numbers, a
 
 **Lambda expression** <a id="ix-glossary-lambda-expression"></a> An **expression** which denotes a **function**. After a '`\`' we list the arguments of the function, then an '`->`' and then the result. For instance, to add a number to the length of a list we could write
 
-```haskell
+``` haskell
 \xs n -> length xs + n
 ```
 
@@ -272,7 +271,7 @@ Also used of the related principle for any algebraic type.
 
 **Tuples** <a id="ix-glossary-tuples"></a> A tuple type is built up from a number of component types. Elements of the type consist of tuples of elements of the component types, so that
 
-```haskell
+``` haskell
 (2,True,3) :: (Int,Bool,Int)
 ```
 

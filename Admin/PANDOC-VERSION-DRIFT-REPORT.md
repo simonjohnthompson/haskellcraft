@@ -10,23 +10,26 @@ newline typos, a dropped Wikimedia attribution footnote, five more
 chapters normalised for consistency) is archived in full at
 `Admin/Archive/PANDOC-VERSION-DRIFT-REPORT.md`.
 
-This file tracks only what's still open. As of 21 Sep 2026, the
-raw-HTML-fallback issue described below is **fully fixed**: a
-corpus-wide regeneration against the real Pandoc 3.11 binary shows
-**zero** chapters left with un-postprocessed raw HTML, down from 13 at
-the start of this investigation. The fixes are correct and verified but
-still uncommitted — see below.
+This file tracks only what's still open. As of 21 Sep 2026, six fixes
+have landed (committed, pushed, and regenerated into the live site) for
+the raw-HTML-fallback problem described below -- but a genuine
+correction to this file's own earlier claim: **the pin is not yet safe
+to move.** A "zero chapters remaining" claim made earlier the same day
+was based on an incomplete fallback check (see "Known-incomplete
+verification" below) and was wrong. A subsequent full corpus-wide
+regeneration and comparison against Pandoc 3.11 found at least two more
+distinct, unfixed problems. See "Is it safe to move to Pandoc 3.x yet?"
+below for the honest current answer: **not yet.**
 
-## Why we couldn't just move to the latest Pandoc (now fixed)
+## Why we couldn't just move to the latest Pandoc (partially fixed)
 
 `tex2md.py` (`Website/convert/tex2md.py`) resolves an explicit
 `/usr/local/bin/pandoc` itself (commit `5a63daa`), falling back to bare
 `pandoc` on `$PATH` if that's absent, and warns loudly on stderr if the
 resolved binary isn't 2.7.x. This wasn't inertia — a real regression
-blocked moving to Pandoc 3.x (checked directly against 3.11), now
-resolved by the fixes below (still uncommitted, so the pin itself
-hasn't moved yet — see "Is the 2.7.3 pin durable long-term?" below for
-why that's fine either way).
+blocked moving to Pandoc 3.x (checked directly against 3.11). Six
+distinct causes of it are now fixed (committed); at least two more are
+not -- see below.
 
 The root cause (see the archived report for the full derivation):
 Pandoc 3.x's Markdown writer can only degrade a LaTeX `\begin{figure}`
@@ -156,19 +159,73 @@ every anchor id preserved (checked by extracting and diffing every
 `[]{label=...}`/table-caption artifacts, and every word-multiset diff
 either zero or traced to an understood, desirable change (Chapter 3's
 raw-HTML table becoming a real pipe table; Chapter 6's backtick fix).
-Under the real Pandoc 3.11 binary: **zero chapters left with
-un-postprocessed raw HTML**, corpus-wide, down from 13 at the start.
+This part is solid, committed, and live: `Website/chapters/*.md` was
+regenerated and pushed the same day, and the two live-site bugs it
+fixed (Chapter 3's special-characters table, Chapter 6's caption
+backtick) are confirmed fixed on the deployed site.
 
-Left uncommitted for now, simply because this is mid-session work
-rather than any remaining doubt about correctness.
+**Known-incomplete verification (corrected same day):** the "zero
+chapters left with un-postprocessed raw HTML" claim originally made
+here was based only on grepping regenerated output for lines starting
+`<embed `/`<table>`/`<blockquote>` -- the fingerprint of the specific
+failure shapes fixed by items 1-6 above. It missed a different raw-HTML
+shape entirely (`<figure>` followed by `<div class="sourceCode"`) --
+see the next section.
 
-None of this was urgent to begin with — see below, it cost nothing to
-leave the pin in place while unresolved — but the concrete blocker that
-made "just upgrade Pandoc" more than a five-minute change is now gone.
-Whether to actually move the pin to a current Pandoc release is a
-separate decision (worth a fresh, deliberate corpus-wide regeneration
-and review before flipping it, not assumed from this fix alone) — not
-yet made.
+## Is it safe to move to Pandoc 3.x yet? No.
+
+A full corpus-wide regeneration under real Pandoc 3.11, compared
+structurally (id-set diff, not just the narrow fingerprint above)
+against the current committed output, found at least two more distinct
+problems, neither fixed:
+
+- **Figures wrapping a bare Haskell code listing that isn't a `\beware`
+  box** still degrade to raw, unstyled HTML under 3.11 -- e.g. Chapter
+  20's "Simple data types" figure, Chapter 1's ASCII-art `Picture`
+  example. This was flagged as a maybe-already-fixed case in an earlier
+  version of this file ("no longer shows up in the corpus-wide 3.11
+  fallback scan... worth a quick recheck") -- that recheck was never
+  actually done before this file said it was resolved; it wasn't.
+  Same underlying shape as `unwrap_bare_beware_figures` already
+  handles (`\begin{figure}[...]\begin{center}\begin{alltt}...
+  \end{alltt}\end{center}\end{figure}`), likely fixable the same way,
+  but not attempted. Affects at least 10 chapters: `1`, `2`, `6`, `14`,
+  `15`, `16`, `17`, `19`, `20`, `21`.
+- **`_table_caption_to_figcaption` (item 5 above) can't tell a table
+  caption from a definition-list body under 3.11.** It disambiguates
+  by checking for one space after `: ` (a table caption) versus three
+  (`:   `, a `\begin{description}` list item) -- a distinction that
+  holds for Pandoc 2.7.3's markdown writer but not 3.11's, which uses a
+  single space for *both*. Regenerating under 3.11 as-is would corrupt
+  every definition-list item into a stray `<figcaption>`, confirmed
+  directly (Chapter 6's Haskell-resources reading list, itself a
+  `\begin{description}`, got mangled this way in a test regeneration).
+  Affects the 4 chapters using `\begin{description}`: `0`, `6`, `8`,
+  `20`. Needs a disambiguation that doesn't depend on pandoc-version-
+  specific whitespace, e.g. checking that the preceding block is
+  actually a table.
+
+Reassuring, and worth keeping in mind before treating this as worse
+than it is: across every chapter checked this way, **zero cross-
+reference anchors are ever lost** -- the only extra/different ids under
+3.11 are `cb*` code-block line-anchors from the first issue above, not
+broken `\ref` targets. There's also a large amount of cosmetic
+Markdown-syntax drift across literally every chapter (ATX `#` headings
+instead of Setext `===` underlines, `` ``` haskell `` with a space
+instead of `` ```haskell ``, tighter list-marker spacing) that's very
+likely harmless -- both should render identically once parsed -- but
+this hasn't been confirmed with an actual full rendered-HTML,
+page-by-page comparison, only spot checks.
+
+None of this was urgent to begin with — it costs nothing to leave the
+pin in place while unresolved (see below) — and the six items already
+fixed are a real, substantial reduction in migration risk, already
+paying off under the *current* pin regardless of whether a version bump
+ever happens. But "just flip the pin" is still not a safe five-minute
+change today. Before it would be: fix the code-listing-in-figure case,
+fix the caption/definition-list disambiguation properly, then do a real
+page-by-page rendered-HTML diff (not just markdown-source comparison)
+across the whole corpus.
 
 ## Is the 2.7.3 pin durable long-term?
 

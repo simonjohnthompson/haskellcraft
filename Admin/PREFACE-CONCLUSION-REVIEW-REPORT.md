@@ -186,6 +186,10 @@ a "where these ideas show up today" addition.
    "regular language standard updates" line) — these are the only things
    that are actually *wrong* rather than merely dated.
 2. Add the Haskell Foundation mention.
-3. Draft and insert the "What is new in this online edition?" section.
+3. ~~Draft and insert the "What is new in this online edition?"
+   section.~~ **Done** — inserted into `Book/0.tex` (before "What has
+   changed from the second edition?"), merged with a second bullet list
+   drafted independently in the same session, dropping the "released on
+   Hackage" bullet as no longer new. Live in both the PDF and website.
 4. Everything else (reading list refresh, other-languages additions, the
    2011-predictions coda) is optional polish.

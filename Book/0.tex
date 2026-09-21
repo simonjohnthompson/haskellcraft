@@ -307,6 +307,52 @@ The Haskell code for all the examples in the book, as well as other
 background materials, can be downloaded from the book's GitHub repository, \url{https://github.com/simonjohnthompson/haskellcraft}.
 
 
+\section*{What is new in this online edition?}
+
+This is a revision of the 2011 third edition, not a fourth edition in
+its own right: the core text, examples and case studies are unchanged
+in substance. What has changed:
+\begin{itemize}
+\item
+The book is now freely available online under a Creative Commons
+licence (CC BY-NC-SA 4.0), alongside the PDF, as a web edition built
+with mdBook, with the source for both available from the book's
+\href{https://github.com/simonjohnthompson/haskellcraft}{GitHub repository}.
+\item
+The recommended toolchain has moved on: \emph{GHCup} is now the
+single recommended installer for GHC, Cabal and the Haskell Language
+Server (HLS), and VS Code with HLS is the recommended editor setup;
+Chapter \ref{getStart} and its GHCi transcripts and screenshots have
+been brought up to date to match. Readers who want to try the book's
+code without installing anything can use the accompanying dev
+container (GitHub Codespaces or Gitpod).
+\item
+The code accompanying the book has been brought into line with
+current GHC and \texttt{base}: for example the \texttt{MonadFail}
+class, split out of \texttt{Monad} since \texttt{base-4.13}, and the
+\texttt{Foldable} class, are now covered directly, and every example
+compiles cleanly under a current GHC.
+\item
+Guidance on finding libraries and getting help, in Section
+\ref{HaskellLibs}, has been refreshed: Hackage, Stackage snapshots,
+Haddock and Hoogle for libraries; the Haskell Discourse, Haskell Cafe
+and Stack Overflow for questions.
+\item
+Dead links to \texttt{haskellcraft.com} have been retired, with that
+material folded into the book and its GitHub repository.
+\item
+A number of case-study programs have been refreshed: the graphical
+\emph{Minesweeper} example in Chapter \ref{further} now uses the
+actively-maintained \texttt{gloss} library in place of a graphics
+package that no longer exists, and several figures -- including the
+class-hierarchy diagram in Chapter \ref{classes} -- have been
+replaced with freely-licensed originals.
+\end{itemize}
+As noted above, this revision was itself carried out with the
+assistance of an LLM (Claude Code, using Claude Sonnet 5) --- itself
+a small illustration of how much the wider software landscape has
+changed since 2011.
+
 \section*{What has changed from the second edition?}
 
 The third edition has seen changes throughout. Material, particularly by way of new examples, has been added to every chapter, and the order of presentation has changed in response to feedback on the previous edition. In detail the changes are these:

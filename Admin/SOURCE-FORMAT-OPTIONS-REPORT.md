@@ -1071,7 +1071,7 @@ PDF-renderer artefact, not a Pandoc one.
 
 ### `\inso`/`\inst`: same fix, applied
 
-`\inso`/`\inst` (`\newcommand{\inso}{\mi\catcode`\_=12}`,
+`\inso`/`\inst` (``\newcommand{\inso}{\mi\catcode`\_=12}``,
 `\newcommand{\inst}{\rm}`) is the inline cousin of the same font-switch —
 used to typeset a short piece of code mid-sentence rather than as a
 display. It had exactly one call site in the entire book,

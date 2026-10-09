@@ -9,10 +9,20 @@
 
 This chapter introduces some of the key abstractions of the Haskell type / class system, central to which is the notion of a \textbf{monad}. A monad provides the infrastructure for sequencing and naming used in the \texttt{do} notation, and we will show instances of the \texttt{Monad} class for lists, the \texttt{Maybe} type, a parsing monad and more. Before we do that we also introduce the \texttt{Functor} and \texttt{Applicative} classes on which \texttt{Monad} is built.
 
-The chapter then looks again at I/O in Haskell, particularly focussing on the \texttt{do} notation which we can use to write all sorts of different programs, including ones that manipulate state, that non-deterministically return more than one result, or indeed none, as well as programs that may fail, or raise exceptions. 
+The chapter then looks again at I/O in Haskell, particularly focussing on the \texttt{do} notation which we can use to write all sorts of different programs, including ones that manipulate state, that non-deterministically return more than one result, or indeed none, as well as programs that may fail, or raise exceptions.
 
 As well as looking at these definitions, we will program a number of examples, showing how a monadic style, using \texttt{do}, makes programs more readable and flexible.
 Each instance of a monad gives a `little language' for writing programs, and we'll come back to look at this in detail in the next chapter.
+
+\begin{webvideos}
+\webvideo{B1zHc5QtBNY}{Abstraction}
+\webvideo{s7vUod9_AM0}{Functor}
+\webvideo{pJf3q37uxbo}{Applicative}
+\webvideo{TB72Yn_mdKE}{Monads}
+\webvideo{CU1iYIzP0uc}{Monads and computation}
+\webvideo{J9-W6xJNG_E}{Foldable}
+\webvideo{IzTvAkWqzCM}{Week 11 summary}
+\end{webvideos}
 
 \section{Abstraction}
 \label{abstraction}

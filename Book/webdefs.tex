@@ -4,9 +4,12 @@
 % \webvideo calls (see Website/convert/tex2md.py) and replaces the whole
 % block with embedded YouTube players for the web edition instead.
 \newenvironment{webvideos}{%
-  \medskip\noindent\textbf{Related videos online}\par\nopagebreak
+  \par\medskip\noindent
+  \begin{minipage}{\linewidth}
+  \textbf{Related videos online}
   \begin{itemize}\setlength{\itemsep}{0pt}
 }{%
-  \end{itemize}\medskip
+  \end{itemize}
+  \end{minipage}\medskip
 }
 \newcommand{\webvideo}[2]{\item \href{https://youtu.be/#1}{#2}}

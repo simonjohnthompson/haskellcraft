@@ -1,0 +1,12 @@
+% Web-only video content: a chapter's list of related videos from the
+% YouTube lecture course linked in the Preface (0.tex). In print, each
+% becomes a plain hyperlinked bullet; tex2md.py recognises the same
+% \webvideo calls (see Website/convert/tex2md.py) and replaces the whole
+% block with embedded YouTube players for the web edition instead.
+\newenvironment{webvideos}{%
+  \medskip\noindent\textbf{Related videos online}\par\nopagebreak
+  \begin{itemize}\setlength{\itemsep}{0pt}
+}{%
+  \end{itemize}\medskip
+}
+\newcommand{\webvideo}[2]{\item \href{https://youtu.be/#1}{#2}}

@@ -48,3 +48,37 @@
         margin: 1em auto;
     }
 }
+
+/* \begin{webvideos}\webvideo{id}{title}...\end{webvideos} (see
+   tex2md.py) -- a chapter's related videos from the YouTube lecture
+   course, embedded as a responsive grid of players. The iframe has no
+   width/height attributes (tex2md.py emits none), so its box comes
+   entirely from this aspect-ratio rule -- that's what keeps each
+   player a correct 16:9 rectangle at any grid width instead of the
+   browser's unstyled default of 300x150. */
+.content .webvideos {
+    margin: 1.5em 0;
+    padding: 1em;
+    border-radius: 6px;
+    background: var(--quote-bg);
+}
+
+.content .webvideo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25em;
+}
+
+.content .webvideo iframe {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 0;
+    border-radius: 4px;
+}
+
+.content .webvideo-caption {
+    margin: 0.5em 0 0;
+    font-size: 0.9em;
+    text-align: center;
+}

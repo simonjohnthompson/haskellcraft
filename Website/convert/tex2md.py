@@ -15,6 +15,7 @@ converted to web-friendly images separately (e.g. via `sips` on macOS or
 Markdown to point at Pictures/<name>.png, it doesn't render them.
 """
 import hashlib
+import html
 import re
 import subprocess
 import sys
@@ -3155,6 +3156,20 @@ def preprocess(tex, stem):
     # anchor that opens in a new tab.
     tex = strip_two_arg_macro(tex, "codelink", lambda url, txt: f"CODELINKOPEN{url}CODELINKMID{txt}CODELINKCLOSE")
 
+    # \begin{webvideos}\webvideo{id}{title}...\end{webvideos} (Book/webdefs.tex)
+    # -- a chapter's list of related videos from the YouTube lecture course.
+    # In print this becomes a plain bulleted list of hyperlinks (webdefs.tex's
+    # own definition), which Pandoc could in principle reproduce -- but the
+    # web edition should show embedded players, not a list of links, and
+    # there's no Markdown/CommonMark source construct for an embedded
+    # <iframe>. So, same idiom as \codelink just above: swap the whole block
+    # for plain-text sentinels before Pandoc ever sees it (avoiding both
+    # \begin{itemize} and \item, neither of which the web edition wants),
+    # and build the real embeds afterwards, in postprocess().
+    tex = re.sub(r"\\begin\{webvideos\}", "WEBVIDEOSOPEN", tex)
+    tex = re.sub(r"\\end\{webvideos\}", "WEBVIDEOSCLOSE", tex)
+    tex = strip_two_arg_macro(tex, "webvideo", lambda vid, title: f"WEBVIDEOOPEN{vid}WEBVIDEOMID{title}WEBVIDEOCLOSE")
+
     # Book-specific glyphs/commands with no args.
     tex = tex.replace(r"\step", "~>")
     tex = tex.replace(r"\chapstart", "")
@@ -3625,6 +3640,36 @@ def postprocess(md: str, current_file: str) -> str:
         md,
         flags=re.DOTALL,
     )
+
+    # \begin{webvideos}\webvideo{id}{title}...\end{webvideos} ->
+    # WEBVIDEOSOPEN / WEBVIDEOOPEN...WEBVIDEOMID...WEBVIDEOCLOSE* /
+    # WEBVIDEOSCLOSE sentinels (see preprocess()) -> a "Related videos
+    # online" block of embedded YouTube players, one per video. No
+    # Markdown/CommonMark equivalent of an embedded <iframe>, so this is
+    # built directly as raw HTML, same as the click-to-zoom image wrapper
+    # above. youtube-nocookie.com is YouTube's own privacy-enhanced embed
+    # domain (no cookies/tracking until the viewer actually presses play).
+    def _resolve_webvideos(m):
+        videos = re.findall(
+            r"WEBVIDEOOPEN(.*?)WEBVIDEOMID(.*?)WEBVIDEOCLOSE", m.group(1), re.DOTALL
+        )
+        if not videos:
+            return ""
+        players = "".join(
+            '<div class="webvideo">'
+            f'<iframe src="https://www.youtube-nocookie.com/embed/{vid}" '
+            f'title="{html.escape(title)}" loading="lazy" allowfullscreen '
+            'allow="accelerometer; autoplay; clipboard-write; encrypted-media; '
+            'gyroscope; picture-in-picture; web-share" '
+            'referrerpolicy="strict-origin-when-cross-origin"></iframe>'
+            f'<p class="webvideo-caption">{html.escape(title)}</p></div>'
+            for vid, title in videos
+        )
+        return (
+            '\n\n<div class="webvideos">\n<p><strong>Related videos online</strong></p>\n'
+            f'<div class="webvideo-grid">{players}</div>\n</div>\n\n'
+        )
+    md = re.sub(r"WEBVIDEOSOPEN(.*?)WEBVIDEOSCLOSE", _resolve_webvideos, md, flags=re.DOTALL)
 
     # \cite{a,b}/\citeyear{x} -> XCITE(YEAR)OPEN...XCITECLOSE sentinels
     # (see preprocess()) -> links into bibliography.md, one per key,

@@ -8,4 +8,4 @@ id = "fa7a655d642347e7b50705390ba8c4e6"
 
 [vars]
 ALLOWED_ORIGIN = "https://simonjohnthompson.github.io"
-RATE_LIMIT_PER_HOUR = "10"
+RATE_LIMIT_PER_HOUR = "30"

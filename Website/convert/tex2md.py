@@ -16,6 +16,7 @@ Markdown to point at Pictures/<name>.png, it doesn't render them.
 """
 import hashlib
 import html
+import json
 import re
 import subprocess
 import sys
@@ -1581,6 +1582,13 @@ def build_label_map():
 
 LABEL_MAP = build_label_map()
 
+# Populated by number_exercises() as it assigns each real exercise its
+# chapter.exercise id, across the whole run -- the AI exercise-feedback
+# Worker's manifest (see build_exercise_manifest()). Keying off the same
+# counter that produces the id printed in the book means there's no
+# second parser to keep in sync and no way for an id to drift.
+EXERCISE_MANIFEST = {}
+
 
 def _web_image_ext_path(path):
     """Pictures/X.pdf (or an extension-less Pictures/X, which LaTeX
@@ -2638,6 +2646,68 @@ def _split_top_level_items(body):
     return items
 
 
+def _exercise_text_for_manifest(content):
+    """A real exercise's raw content, as captured inside number_exercises()'s
+    replace() closure, cleaned up enough to paste into an LLM prompt -- this
+    is context for a model, not rendered HTML, so it doesn't need to be
+    pixel-perfect. By this point in preprocess() (number_exercises() runs
+    well after the \\ref/\\cite sentinels and the \\begin{alltt} ->
+    \\begin{minted} conversion), most of the heavy lifting is already done;
+    this just mops up what's left.
+    """
+    def _ref(m):
+        return LABEL_MAP.get(m.group(1), {}).get("text", "")
+    content = re.sub(r"XREFOPEN([A-Za-z0-9_\-]+)XREFCLOSE", _ref, content)
+    content = re.sub(r"XCITE(?:YEAR|N)?OPEN.*?XCITECLOSE", "", content, flags=re.DOTALL)
+    content = re.sub(
+        r"\\begin\{minted\}\{haskell\}(.*?)\\end\{minted\}",
+        lambda m: f"```haskell{m.group(1)}```",
+        content,
+        flags=re.DOTALL,
+    )
+    # Code blocks are already-correct Haskell, verbatim -- the LaTeX
+    # unescaping below would otherwise mistake Haskell's own backslashes
+    # (a lambda `\x ->`, the list-difference operator `\\`) for LaTeX
+    # macros, and the whitespace collapsing further down would flatten
+    # deliberately-indented layout. Stash each fenced block out, clean up
+    # the surrounding prose, then restore the blocks completely untouched.
+    code_blocks = []
+    def _stash(m):
+        code_blocks.append(m.group(0))
+        return f"\x00{len(code_blocks) - 1}\x00"
+    content = re.sub(r"```haskell.*?```", _stash, content, flags=re.DOTALL)
+
+    content = content.replace("\\\\", "\n")  # LaTeX's own \\ line break
+    content = re.sub(r"\\hypertarget\{[^{}]*\}\{\}", "", content)
+    content = re.sub(r"\\texttt\{([^{}]*)\}", r"`\1`", content)
+    content = re.sub(r"\\(?:emph|textbf|textit)\{([^{}]*)\}", r"\1", content)
+    content = content.replace(r"\/", "")  # italic correction, zero-width
+    # \{ and \} (literal brace characters) need protecting, via sentinels,
+    # from the bare-grouping-brace strip below -- everything else in
+    # ESCAPED_CHARS (see its own definition) unescapes straight to the
+    # real character.
+    content = content.replace(r"\{", "\x01").replace(r"\}", "\x02")
+    for macro, char in ESCAPED_CHARS.items():
+        content = content.replace(macro, char)
+    content = content.replace(r"\,", " ").replace(r"\:", " ").replace("\\ ", " ")
+    # Generic catch-all for anything still left: a macro with a single
+    # braced arg keeps the arg, a bare macro (a font/style declaration,
+    # e.g. old-style \em, \tt) is dropped, and the bare grouping braces
+    # that declaration leaves behind are meaningless outside LaTeX, so
+    # those go too -- only the two sentinels above still mark a real,
+    # literal brace character by this point.
+    content = re.sub(r"\\[a-zA-Z]+\{([^{}]*)\}", r"\1", content)
+    content = re.sub(r"\\[a-zA-Z]+", "", content)
+    content = content.replace("{", "").replace("}", "")
+    content = content.replace("\x01", "{").replace("\x02", "}")
+    content = re.sub(r"[ \t]+", " ", content)
+    content = re.sub(r"\n{3,}", "\n\n", content)
+    content = content.strip()
+
+    content = re.sub(r"\x00(\d+)\x00", lambda m: code_blocks[int(m.group(1))], content)
+    return content
+
+
 def number_exercises(tex, stem):
     """Restore the book's cumulative-within-chapter exercise numbering
     (Exercise N.M, the Mth exercise of chapter N -- root.tex:
@@ -2681,7 +2751,13 @@ def number_exercises(tex, stem):
                 counter[0] += 1
                 num = f"{chapter_num}.{counter[0]}"
                 prefix = f"Exercise {num}" if kind == "exercise" else num
-                parts.append(f"\\textbf{{{prefix}}} {content}")
+                EXERCISE_MANIFEST[num] = {
+                    "chapter": chapter_num,
+                    "text": _exercise_text_for_manifest(content),
+                }
+                parts.append(
+                    f"EXERCISEOPEN{num}EXERCISEMID\\textbf{{{prefix}}} {content}EXERCISECLOSE"
+                )
         if kind == "exercise":
             return "\n\n".join(parts)
         return "\\textbf{Exercises}\n\n" + "\n\n".join(parts)
@@ -3671,6 +3747,30 @@ def postprocess(md: str, current_file: str) -> str:
         )
     md = re.sub(r"WEBVIDEOSOPEN(.*?)WEBVIDEOSCLOSE", _resolve_webvideos, md, flags=re.DOTALL)
 
+    # EXERCISEOPEN<id>EXERCISEMID...EXERCISECLOSE (see number_exercises()) ->
+    # a <div> wrapper carrying the exercise's id, plus an (initially empty)
+    # mount point for the AI-feedback widget -- exercise-feedback.js fills
+    # it in client-side. Unlike _resolve_webvideos above, Pandoc's own
+    # rendering of the exercise's content is kept exactly as-is, just
+    # wrapped; only the surrounding sentinel markers are consumed. Blank
+    # lines around each tag are required so pulldown-cmark treats each as
+    # its own raw-HTML block rather than swallowing the real content
+    # between them as literal text.
+    def _resolve_exercise_feedback(m):
+        ex_id, inner = m.group(1), m.group(2)
+        return (
+            f'\n\n<div class="exercise" id="exercise-{ex_id}" data-exercise-id="{ex_id}">\n\n'
+            f'{inner}\n\n'
+            f'<div class="exercise-feedback" data-exercise-id="{ex_id}"></div>\n\n'
+            '</div>\n\n'
+        )
+    md = re.sub(
+        r"EXERCISEOPEN([\d.]+)EXERCISEMID(.*?)EXERCISECLOSE",
+        _resolve_exercise_feedback,
+        md,
+        flags=re.DOTALL,
+    )
+
     # \cite{a,b}/\citeyear{x} -> XCITE(YEAR)OPEN...XCITECLOSE sentinels
     # (see preprocess()) -> links into bibliography.md, one per key,
     # "(Surname Year; Surname2 Year2)" -- or just the year for \citeyear.
@@ -4068,6 +4168,20 @@ def build_bibliography_page(out_dir: Path):
     return out_path
 
 
+def build_exercise_manifest(out_dir: Path):
+    """exercises.json: every real numbered exercise's id, chapter, and
+    cleaned-up text, collected into EXERCISE_MANIFEST by number_exercises()
+    as it runs over every chapter. The Cloudflare Worker behind the AI
+    feedback widget imports this file directly (see Worker/src/index.js),
+    so it's the one place this context is ever assembled."""
+    out_path = out_dir / "exercises.json"
+    out_path.write_text(
+        json.dumps(EXERCISE_MANIFEST, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return out_path
+
+
 if __name__ == "__main__":
     _check_pandoc_version()
     out_dir = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path(".").resolve()
@@ -4085,3 +4199,5 @@ if __name__ == "__main__":
         print(f"(index) -> {index_path}")
         summary_path = build_summary_page(out_dir)
         print(f"(summary) -> {summary_path}")
+        manifest_path = build_exercise_manifest(out_dir)
+        print(f"(exercise manifest) -> {manifest_path}")

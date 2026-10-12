@@ -1,0 +1,2450 @@
+{
+  "10.1": {
+    "chapter": 10,
+    "text": "Write three line-by-line calculations of `doubleAll [2,1,7]` using\nthe three different definitions of `doubleAll` that use a list\ncomprehension, primitive recursion and `map`."
+  },
+  "10.10": {
+    "chapter": 10,
+    "text": "Using `iter` and `double` define a function which on input `n` \nreturns `2^n`; remember that \n`2^n` means one multiplied by two `n`\ntimes."
+  },
+  "10.11": {
+    "chapter": 10,
+    "text": "Define QuickCheck properties that you would expect to hold for the result of a `filter`,\n```haskell\nfilter p xs\n```"
+  },
+  "10.12": {
+    "chapter": 10,
+    "text": "Suppose that `g` is the inverse of `f`, so that \n```haskell\ng (f x) ~>x\nf (g y) ~>y\n```\nfor all `x` and `y`, give properties that you would expect to hold for the result of the `map`:\n```haskell\nmap f xs\n```"
+  },
+  "10.13": {
+    "chapter": 10,
+    "text": "How would you define the sum of the squares of the natural numbers `1` to\n`n` using `map` and `foldr`?"
+  },
+  "10.14": {
+    "chapter": 10,
+    "text": "Define a function to give the sum of squares of the positive\nintegers in a list of integers."
+  },
+  "10.15": {
+    "chapter": 10,
+    "text": "For the purposes of this exercise you should use `foldr` to\ngive definitions of the prelude functions\n`unZip`, `last` and `init`, where examples of the\nlatter two\nare given by\n```haskell\nlast \"Greggery Peccary\" = 'y'\ninit \"Greggery Peccary\" = \"Greggery Peccar\"\n```"
+  },
+  "10.16": {
+    "chapter": 10,
+    "text": "How does the function\n```haskell\nmystery xs = foldr (++) [] (map sing xs)\n```\nbehave, where `sing x = [x]` for all `x`?"
+  },
+  "10.17": {
+    "chapter": 10,
+    "text": "The function `formatLines` is intended to format a list of lines using the function\n```haskell\nformatLine :: Line -> String\n```\nto format each line in the list. Define a function \n```haskell\nformatList :: (a -> String) -> [a] -> String\n```\nwhich takes as a parameter a function of type\n```haskell\na -> String\n```\nto format each item of the list which is passed as the second parameter. Show\nhow `formatLines` can be defined using `formatList` and\n`formatLine`."
+  },
+  "10.18": {
+    "chapter": 10,
+    "text": "Define a function\n```haskell\nfilterFirst :: (a -> Bool) -> [a] -> [a]\n```\nso that `filterFirst p xs` removes the first element of `xs` which does\nnot have the property `p`. Use this to give a version of `returnLoan`\nwhich returns only one copy of a book. What does your function do on a list\nall of whose elements have property `p`?"
+  },
+  "10.19": {
+    "chapter": 10,
+    "text": "Can you define a function\n```haskell\nfilterLast :: (a -> Bool) -> [a] -> [a]\n```\nwhich removes the last occurrence of an element of a list without property\n`p`? How could you define it using `filterFirst`?"
+  },
+  "10.2": {
+    "chapter": 10,
+    "text": "How would you define the `length` function using `map` and\n`sum`?"
+  },
+  "10.20": {
+    "chapter": 10,
+    "text": "How could you define a function `switchMap` which maps two functions along a list, alternating which to apply. For example,\n```haskell\nswitchMap addOne addTen [1,2,3,4] ~>[2,12,4,14]\n```\nwhere `addOne` and `addTen` behave as you would expect.\nWhat is the most general type of `switchMap`?"
+  },
+  "10.21": {
+    "chapter": 10,
+    "text": "Define functions \n```haskell\nsplit :: [a] -> ([a],[a])\nmerge :: ([a],[a]) -> [a]\n```\nso that `spilt` will split a list into two lists, picking elements alternately, while merge will interleave the two lists; for example,\n```haskell\nsplit [1,2,3,4,5] ~>([1,3,5],[2,4])\nmerge ([1,3,5],[2,4]) ~>[1,2,3,4,5]\n```"
+  },
+  "10.22": {
+    "chapter": 10,
+    "text": "Can you formulate QuickCheck properties which characterise the way that `split` and `merge` work together?"
+  },
+  "10.23": {
+    "chapter": 10,
+    "text": "[Harder]\nSuppose that the function `g` is associative, that is\n```haskell\ng x (g y z) = g (g x y) z\n```\ngive a QuickCheck property that you would expect `foldr1 g (xs ++ ys)` to have. Can you think of a similar property for `foldr g s (xs ++ ys)`? Hint: you will need to think about what property `s` needs to obey."
+  },
+  "10.24": {
+    "chapter": 10,
+    "text": "Give the type and definition of the generalization `dropUntil` of the function\n`dropWord`."
+  },
+  "10.25": {
+    "chapter": 10,
+    "text": "How would you define the function `dropSpace` using `dropUntil`?\nHow would you define `takeWhile`\nusing `getUntil`?"
+  },
+  "10.26": {
+    "chapter": 10,
+    "text": "How would you split a string into lines using `getUntil` and `dropUntil`?"
+  },
+  "10.27": {
+    "chapter": 10,
+    "text": "The function `getLine` of Defining functions over lists has a polymorphic type --\nwhat is it? How could you generalize the test in this function? If you do\nthis, does the type of the function become more general? Explain your\nanswer."
+  },
+  "10.28": {
+    "chapter": 10,
+    "text": "Can you give generalizations to polymorphic higher-order functions of the \ntext processing functions `getLine`, `dropLine` and `splitLines`?"
+  },
+  "10.29": {
+    "chapter": 10,
+    "text": "How can you use `map` to define the `invertColour` function, which turns a Picture into its negative?"
+  },
+  "10.3": {
+    "chapter": 10,
+    "text": "Given the function\n```haskell\naddUp ns = filter greaterOne (map addOne ns)\n```\nwhere\n```haskell\ngreaterOne n = n>1\naddOne n     = n+1\n```\nhow would you redefine it using `filter` before `map`, as\nin\n```haskell \naddUp ns = map fun1 (filter fun2 ns)\n```"
+  },
+  "10.30": {
+    "chapter": 10,
+    "text": "How can you use `zipWith` to define the `superimpose` function, \n```haskell\nsuperimpose :: Picture -> Picture -> Picture\n```\nwhich superimposes one `Picture` (the first argument) on top of another (the second)? What does your function do if the pictures are not the same size? Can you modify your definition so that it handles this case properly?"
+  },
+  "10.31": {
+    "chapter": 10,
+    "text": "[Harder]\nUsing `map` and any other functions that you need, define the function\n```haskell\nrotate90 :: Picture -> Picture\n```\nwhich rotates a picture through 90 degrees."
+  },
+  "10.32": {
+    "chapter": 10,
+    "text": "Re-implement the functions\n```haskell\nbooks       :: Database -> Person -> [Book]\nborrowers   :: Database -> Book -> [Person]\nborrowed    :: Database -> Book -> Bool\nnumBorrowed :: Database -> Person -> Int\nmakeLoan   :: Database -> Person -> Book -> Database\nreturnLoan :: Database -> Person -> Book -> Database\n```\nusing the functions `map`, `filter` and so on."
+  },
+  "10.33": {
+    "chapter": 10,
+    "text": "Re-implement the functions from the previous exercise using this new definition of the \n`Database` type:\n```haskell\ntype Database = [(Person,[Book])]\n```"
+  },
+  "10.34": {
+    "chapter": 10,
+    "text": "Revisit the exercises of Extended exercise: supermarket billing, where the supermarket billing example was developed, and re-implement your solutions using the prelude and library functions `map`, `filter` and so on."
+  },
+  "10.35": {
+    "chapter": 10,
+    "text": "In the light of the previous exercises, can you come to any conclusions about when it is sensible to use list comprehensions, and when it is more useful to use the prelude and library functions explicitly?"
+  },
+  "10.36": {
+    "chapter": 10,
+    "text": "Using the function `outcome` from Exercise 8.1 ()\nand standard list functions such as `map`, redefine the function\n```haskell\ntournamentOutcome :: Tournament -> Integer\n```\ndescribed in Exercise 8.2."
+  },
+  "10.37": {
+    "chapter": 10,
+    "text": "Redefine the function\n```haskell\nshowTournament :: Tournament -> String\n```\nfirst introduced, using the standard list functions introduced in this chapter."
+  },
+  "10.4": {
+    "chapter": 10,
+    "text": "Describe the effect of \n```haskell\nmap addOne (map addOne ns) \n```\nCan you conclude anything in general about properties of\n`map f (map g xs)`\nwhere `f` and `g` are arbitrary functions?"
+  },
+  "10.5": {
+    "chapter": 10,
+    "text": "What is the effect of \n```haskell\nfilter greaterOne (filter lessTen ns)\n```\nwhere `lessTen n = n<10`? What about the general case of\n```haskell\nfilter p (filter q xs)\n```\nwhere `p` and `q` are arbitrary properties?"
+  },
+  "10.6": {
+    "chapter": 10,
+    "text": "Give definitions of functions to take a list of integers, `ns`, and\nitemize\n return the list consisting of the squares of the integers in `ns`;\n return the sum of squares of items in `ns`;\n check whether all items of the list are greater than zero.\nitemize"
+  },
+  "10.7": {
+    "chapter": 10,
+    "text": "Using functions defined already wherever possible, write definitions of functions to \nitemize\n give the minimum value of a function `f` on inputs `0` to `n`;\n test whether the values of `f` on inputs `0` to `n` are all\nequal;\n test if all values of `f` on inputs `0` to `n` are greater\nthan zero, and,\n check whether the values `f 0`, `f 1` to `f n` are in\nincreasing order.\nitemize"
+  },
+  "10.8": {
+    "chapter": 10,
+    "text": "State the type of and define a function `twice` which takes a function from integers to integers\nand an input integer, and whose output is the function applied to the input\ntwice. For instance, with the `double` function and `7` as input,\nthe result is `28`. What is the most general type of the function\nyou have defined?"
+  },
+  "10.9": {
+    "chapter": 10,
+    "text": "Give the type of and define a function `iter` so that\n```haskell\niter n f x = f (f (f ... (f x)...))  \n```\nwhere `f` occurs `n` times on the right-hand side of the equation.\nFor instance, we should have\n```haskell\niter 3 f x = f (f (f x))\n```\nand `iter 0 f x` should return `x`."
+  },
+  "11.1": {
+    "chapter": 11,
+    "text": "Redefine the function `printBill` from the supermarket billing exercise\nin Extended exercise: supermarket billing so that composition is used. Repeat the exercise using\nforward composition, `>.>`."
+  },
+  "11.10": {
+    "chapter": 11,
+    "text": "Using the last exercise, or otherwise, give a definition of the function\n```haskell\nflip :: (a -> b -> c) -> (b -> a -> c)\n```\nwhich reverses the order in which its function argument takes its arguments."
+  },
+  "11.11": {
+    "chapter": 11,
+    "text": "Use partial applications to define the functions `comp2` and\n`total` given in Expressions for functions: lambda abstractions and its exercises."
+  },
+  "11.12": {
+    "chapter": 11,
+    "text": "Find operator sections `sec1` and\n`sec2` so that\n```haskell\nmap sec1 . filter sec2\n```\nhas the same effect as\n```haskell\nfilter (>0) . map (+1)\n```"
+  },
+  "11.13": {
+    "chapter": 11,
+    "text": "Re-define the function `mapFuns`, first defined in Expressions for functions: lambda abstractions, using an operator section of the application operator, `$`."
+  },
+  "11.14": {
+    "chapter": 11,
+    "text": "What is the effect of `uncurry ($)`? What is its type? Answer a similiar question for `uncurry (:)`, `uncurry (.)`."
+  },
+  "11.15": {
+    "chapter": 11,
+    "text": "[Harder] What are the effects and types of `uncurry uncurry`, `curry uncurry`."
+  },
+  "11.16": {
+    "chapter": 11,
+    "text": "Can you state a property relating `unzip` and `uncurry zip`, where the latter is the function applied first?"
+  },
+  "11.17": {
+    "chapter": 11,
+    "text": "Can you define functions \n```haskell\ncurry3 :: ((a,b,c) -> d) -> (a -> b -> c -> d)\nuncurry3 :: (a -> b -> c -> d) -> ((a,b,c) -> d)\n```\nwhich perform the analogue of `curry` and `uncurry` but for three arguments rather than two? Can you use `curry` and `uncurry` in these definitions?"
+  },
+  "11.18": {
+    "chapter": 11,
+    "text": "[Harder]\nCan you define functions \n```haskell\ncurryList :: ([a] -> d) -> (a -> [a] -> d)\nuncurryList :: (a -> [a] -> d) -> ([a] -> d)\n```\nwhich perform the analogue of `curry` and `uncurry` but for a list of arguments rather than two distinct arguments? Can you use `curry` and `uncurry` in these definitions?"
+  },
+  "11.19": {
+    "chapter": 11,
+    "text": "Give calculations of\n```haskell\niter 3 double 1\n(comp2 succ (*)) 3 4\ncomp2 sq add 3 4\n```"
+  },
+  "11.2": {
+    "chapter": 11,
+    "text": "If `id` is the polymorphic identity function, defined by \n`id x = x`, explain the\nbehaviour of the expressions \n```haskell\n(id.f)         (f.id)         id f\n```If `f` is of type\n`Int -> Bool`, at what instance of its most general type `a -> a`\nis `id` used in each case? What type does\n`f` have if `f id` is properly typed?"
+  },
+  "11.20": {
+    "chapter": 11,
+    "text": "What is the type and effect of the function\n```haskell\n\\n -> iter n succ\n```"
+  },
+  "11.21": {
+    "chapter": 11,
+    "text": "Give an alternative ``constructive'' definition of `iter` which creates the list of `n` copies of `f`\n```haskell\n[f,f,...,f]\n``` and then composes these functions by folding in the\noperator ``.`' to give \n```haskell\nf . f . ... . f\n```"
+  },
+  "11.22": {
+    "chapter": 11,
+    "text": "Using partial application re-define the function \n```haskell\nmapFuns :: [a->b] -> a -> [b]\n```\nfirst defined in Expressions for functions: lambda abstractions."
+  },
+  "11.23": {
+    "chapter": 11,
+    "text": "[Harder] Define a function\n```haskell\nslope :: (Float -> Float) -> (Float -> Float)\n```\nwhich takes a function `f` as argument, and returns (an approximation to)\nits derivative `f'` as result."
+  },
+  "11.24": {
+    "chapter": 11,
+    "text": "[Harder] Define a function\n```haskell\nintegrate :: (Float -> Float) -> (Float -> Float -> Float)\n```\nwhich takes a function `f` as argument, and returns (an approximation to)\nthe two argument function which gives the area under its graph between two end\npoints as its result."
+  },
+  "11.25": {
+    "chapter": 11,
+    "text": "Using the principle of extensionality, show that function composition \nis associative: that is, for all `f`, `g` and `h`,\n```haskell\nf . (g . h) = (f . g) . h\n```"
+  },
+  "11.26": {
+    "chapter": 11,
+    "text": "Show that for all `f`,\n```haskell\nid . f = f\n```"
+  },
+  "11.27": {
+    "chapter": 11,
+    "text": "Show that the function `flip` defined in Currying and uncurrying satisfies\n```haskell\nflip . flip = id\n```\nHint: to show this, you might want to prove that for any `f`,\n```haskell\nflip (flip f) = f\n```"
+  },
+  "11.28": {
+    "chapter": 11,
+    "text": "Two functions `f` and `g` are inverses if it can be shown that ```haskell\nf . g = id              g . f = id\n```\nProve that the functions `curry` and `uncurry` of Currying and uncurrying\nare inverses. Can you think of other pairs of inverse functions?"
+  },
+  "11.29": {
+    "chapter": 11,
+    "text": "Using induction, prove that for all natural numbers `n`,\n```haskell\niter n id = id\n```"
+  },
+  "11.3": {
+    "chapter": 11,
+    "text": "Define a function `composeList` which composes a list of\nfunctions into a single function. You should give the\ntype of `composeList`, and explain why the function has this\ntype. What is the effect of your function on an empty list of functions?"
+  },
+  "11.30": {
+    "chapter": 11,
+    "text": "A function `f` is called idempotent if \n```haskell\nf . f = f\n```\nShow that the functions `abs` and `signum` are idempotent. Can you\nthink of any other idempotent functions?"
+  },
+  "11.31": {
+    "chapter": 11,
+    "text": "Prove that for all `ys` and `zs` the equation\n```haskell\nmap f (ys++zs) = map f ys ++ map f zs  -- (map++)\n```\nas was used in the proof of the theorem about `map` and\n`reverse`."
+  },
+  "11.32": {
+    "chapter": 11,
+    "text": "If `f` is associative, and `st` is an identity for `f` -- these notions were defined -- then prove that\nthe equation `(foldr.3)`:\n```haskell\nfoldr f st (xs++ys) = f (foldr f st xs) (foldr f st ys)\n```\nholds for all\nfinite `xs` and `ys`."
+  },
+  "11.33": {
+    "chapter": 11,
+    "text": "Argue that the result\n```haskell\nconcat (xs ++ ys) = concat xs ++ concat ys\n``` \nis a special case of `(foldr.3)`, using \n```haskell\nconcat = foldr (++) []\n```\nas the definition of `concat`."
+  },
+  "11.34": {
+    "chapter": 11,
+    "text": "Prove that for all finite lists `xs`, and functions `f`,\n```haskell\nconcat (map (map f) xs) = map f (concat xs)\n```"
+  },
+  "11.35": {
+    "chapter": 11,
+    "text": "Prove that over the type `Int`\n```haskell\n(0<) . (+1) = (0<=)\n```\nas is used in the theorem relating `map` and `filter`."
+  },
+  "11.36": {
+    "chapter": 11,
+    "text": "Prove for all finite lists `xs` that\n```haskell\nfilter p (filter q xs) = filter (p &&& q) xs\n```\nwhere the operator `&&&` is defined by\n```haskell\np &&& q = \\x -> (p x && q x)\n```"
+  },
+  "11.4": {
+    "chapter": 11,
+    "text": "What is the type of the application operator, `$`?"
+  },
+  "11.5": {
+    "chapter": 11,
+    "text": "What is the result of the expression given above:\n```haskell\nzipWith ($) [sum,product] [[1,2],[3,4]] \n```"
+  },
+  "11.6": {
+    "chapter": 11,
+    "text": "If `id` is the polymorphic identity function, defined by \n`id x = x`, explain the\nbehaviour of the expressions \n```haskell\n(id $ f)         (f $ id)         id ($)\n```If `f` is of type\n`Int -> Bool`, at what instance of its most general type `a -> a`\nis `id` used in each case? What type does\n`f` have if `f $ id` is properly typed?"
+  },
+  "11.7": {
+    "chapter": 11,
+    "text": "Using a lambda abstraction, the Boolean function `not`\nand the built-in function `elem`\ndescribe a function of type\n```haskell\nChar -> Bool\n```\nwhich is `True` only on non-whitespace characters, that is those which are\nnot elements of the list \" tn\"."
+  },
+  "11.8": {
+    "chapter": 11,
+    "text": "Define a function `total`\n```haskell\ntotal :: (Integer -> Integer) -> (Integer -> Integer)\n```\nso that `total f` is the function which at value `n` gives the total\n```haskell\nf 0 + f 1 + ... + f n\n```\nYou should be able to do this using built-in functions, rather than using recursion."
+  },
+  "11.9": {
+    "chapter": 11,
+    "text": "Given a function `f` of type `a -> b -> c`, write down a lambda abstraction that\ndescribes\nthe function of type `b -> a -> c` which behaves like `f` but\nwhich takes its arguments in the other order. Pictorially,\ncenter\n[width=3.4in]Pictures/flip.pdf\ncenter"
+  },
+  "12.1": {
+    "chapter": 12,
+    "text": "Define a function\n```haskell\nchessBoard :: Int -> Picture\n```\nso that `chessBoard n`\nis a picture of an `n` by `n` chess board."
+  },
+  "12.10": {
+    "chapter": 12,
+    "text": "Can you use the function `sTossList` to give another definition of the `randomStrategy` strategy first defined in Rock - Paper - Scissors: strategies?"
+  },
+  "12.11": {
+    "chapter": 12,
+    "text": "Define a function\n```haskell\nmajority :: [Strategy] -> Strategy\n```\nwhich works by applying all the strategies in the list at each stage, choosing the option that is chosen by the most strategies: in the case of a draw, a choice is made randomly."
+  },
+  "12.12": {
+    "chapter": 12,
+    "text": "Define a function\n```haskell\ntrain :: Moves -> [Strategy] -> Strategy\n```\nwhich is supplied with a list of opponent's moves to train it, and a list of possible strategies to use. The function should run all the strategies in the list on the list of moves, and choose the strategy which is most successful in winning against the given moves."
+  },
+  "12.13": {
+    "chapter": 12,
+    "text": "Define the function\n```haskell\nsplits :: [a] -> ([a],[a])\n```\nwhich defines the list of all the ways that a list can be split in two (see the example of `splits \"Spy\"` above)."
+  },
+  "12.14": {
+    "chapter": 12,
+    "text": "By trying it with a number of examples, which strings does this regular expression match?\n```haskell\nstar ((a ||| b) <*> (a ||| b))\n```\nwhere `a` and `b` are defined by\n```haskell\na, b :: RegExp\na = char 'a'\nb = char 'b'\n```"
+  },
+  "12.15": {
+    "chapter": 12,
+    "text": "Which strings does this regular expression match?\n```haskell\nstar (star ((a ||| b) <*> (a ||| b)))\n```"
+  },
+  "12.16": {
+    "chapter": 12,
+    "text": "Define functions\n```haskell\noption, plus :: RegExp -> RegExp\n```\nwhere `option e` matches zero or one occurrences of the pattern `e`, and `plus e` matches one or more occurrences of the pattern `e`."
+  },
+  "12.17": {
+    "chapter": 12,
+    "text": "Define regular expressions which match \nitemize\n\nStrings of digits which begin with a non-zero digit.\n\nFractional numbers: two strings of digits separated by '.'; make sure that these numbers have no superfluous zeroes at the beginning or the end, so exclude strings like `\"01.34\"` and `\"1.20\"`.\nitemize\nIn doing this you might find it useful to define a function\n```haskell\nrange :: Char -> Char -> RegExp\n```\nso that, for example, `range 'A' 'Z'` will match any capital letter."
+  },
+  "12.18": {
+    "chapter": 12,
+    "text": "Give regular expressions describing the following sets of strings\nitemize\n All strings of `a`s and `b`s containing at most two `a`s.\n All strings of `a`s and `b`s containing exactly two `a`s.\n All strings of `a`s and `b`s of length at most three.\n All strings of `a`s and `b`s which contain no repeated adjacent\ncharacters, that is no substring of the form aa or bb.\nitemize"
+  },
+  "12.19": {
+    "chapter": 12,
+    "text": "[Hard]\nAdd to the regular expressions the facility to name substrings that match particular sub-expressions, so that instead of returning a `Bool` a `RegExp` will return a list of bindings of names to substrings. \n\nWhy a list? First, it allows for no matching to happen (empty list, `[]`) or for multiple matches, which can also happen as matching the regular expressions `(r1r2)` and `(r)*` can succeed in multiple different ways."
+  },
+  "12.2": {
+    "chapter": 12,
+    "text": "How would you implement `invertColour`, `superimpose` and\n`printPicture` if `Picture` was defined to be\n`[[Bool]]`?"
+  },
+  "12.20": {
+    "chapter": 12,
+    "text": "Define functions \n```haskell\nsucc :: Natural a -> Natural a\n  -- sends representation of n to rep. of n+1\n\nplus :: Natural a -> Natural a -> Natural a\n  -- sends reps. of n and m to rep. of n+m\n\ntimes :: Natural a -> Natural a -> Natural a\n  -- sends reps. of n and m to rep. of n*m\n```\nand test your answers using `int`."
+  },
+  "12.21": {
+    "chapter": 12,
+    "text": "Can you write QuickCheck properties which can be used to test these functions and this representation of natural numbers?"
+  },
+  "12.22": {
+    "chapter": 12,
+    "text": "Give new definitions of `Bitmap` which embody the floating and positioned representations outlined above."
+  },
+  "12.23": {
+    "chapter": 12,
+    "text": "Define functions that will convert between your definitions of `Bitmap` and `Picture`."
+  },
+  "12.24": {
+    "chapter": 12,
+    "text": "[Harder]\nInvestigate the `Data.Map` module as another representation of bitmaps."
+  },
+  "12.25": {
+    "chapter": 12,
+    "text": "Try to re-implement the operations over pictures using the two representations of `Bitmap` you developed earlier. Is it possible to implement all the operations: if not, explain why not."
+  },
+  "12.26": {
+    "chapter": 12,
+    "text": "[Harder]\nRe-implement the operations over the `Data.Map` representation of bitmaps."
+  },
+  "12.27": {
+    "chapter": 12,
+    "text": "Develop a variant of `Bitmap` that allows for pixels to be coloured. You can render this to a terminal using the facilities of the package `ansi-terminal`, which is available on Hackage."
+  },
+  "12.28": {
+    "chapter": 12,
+    "text": "[Hard]\nTransform the ``lo fi'' representation we discussed in this section into a real graphical format such as BMP, GIF or TIFF, using the facilities provided in Hackage."
+  },
+  "12.29": {
+    "chapter": 12,
+    "text": "[Hard]\nAs an application of one of the bitmap formats supported by Haskell, create a program to yield a pixel visualisation of a text file, such as a computer program. In this visualisation each character in the file is rendered as a pixel, and it is particularly effective for visualising program code which has been processed with some sort of syntax highlighting."
+  },
+  "12.3": {
+    "chapter": 12,
+    "text": "Define a function\n```haskell\nmakePicture :: Int -> Int -> [(Int,Int)] -> Picture\n```\nwhere the list argument gives the positions of the black points in the\npicture, and the two integer arguments give the width and height of the picture.\nFor example,\n```haskell\nmakePicture 7 5 [(1,3),(3,2)]\n```\nwill have the form\n```haskell\n.......\n...#...\n.......\n..#....\n.......\n```\nIt is evident from this that positions within lines and lines themselves\nare counted from zero, with line zero being the top line."
+  },
+  "12.30": {
+    "chapter": 12,
+    "text": "Define the function `lines` using the functions `getUntil` and \n`dropUntil` from Generalization: patterns of computation, or the built-in functions `takeWhile`\nand `dropWhile`. You should be careful that your functions do not give an\nempty word when there are empty lines in the `Doc`; this might happen for the\nexamples \"catnndog\" and \"fishn\"."
+  },
+  "12.31": {
+    "chapter": 12,
+    "text": "How would you use lambda expressions to replace the local definitions in\n`makeLists` and `shorten`? How would you define these\nfunctions using list comprehensions?"
+  },
+  "12.32": {
+    "chapter": 12,
+    "text": "In the index for this book, instead of printing an entry like\n```haskell\ncathedral        3, 5, 6, 7, 9, 10\n```\na number of ranges could be given:\n```haskell\ncathedral        3, 5-7, 9-10\n```\nHow would you redesign your program to do this? Hint: first think about the type\nof the new index representation and then consider adding\nanother function to the (forward) composition which currently forms the\ndefinition of `makeIndex`."
+  },
+  "12.33": {
+    "chapter": 12,
+    "text": "How would you re-define `sortLs` so that duplicate copies of an item are\n not removed? For the index, this means that if a word occurs twice on line\n`123` say, then `123` occurs twice in the index entry for that word."
+  },
+  "12.34": {
+    "chapter": 12,
+    "text": "How could the functions `getUntil` and `dropUntil` be used in the\ndefinition of `amalgamate`?"
+  },
+  "12.35": {
+    "chapter": 12,
+    "text": "Explain how the function `sizer` defined locally in `shorten`\ncan be defined as a composition of\nbuilt-in functions and operator sections; the role of `sizer` is\nto pick the second half of a pair, find its length, and compare the result\nwith `4`."
+  },
+  "12.36": {
+    "chapter": 12,
+    "text": "How is the following definition of the last conditional\nequation for `amalgamate`\nincorrect? Give an example calculation to justify your answer.\n```haskell\namalgamate ((l1,w1):(l2,w2):rest)\n  | w1 /= w2    = (l1,w1) : amalgamate ((l2,w2):rest)\n  | otherwise   = (l1++l2,w1) : amalgamate rest\n```"
+  },
+  "12.37": {
+    "chapter": 12,
+    "text": "Give a definition of\n```haskell\nprintIndex :: [ ([Int],Word) ] -> IO ()\n```\nwhich gives a neatly laid-out printable version of an index, as shown at\nthe start of the section. You might find it useful to define a function \n```haskell\nshowIndex :: [ ([Int],Word) ] -> String\n```\nand to use this as a part of your definition of `printIndex`."
+  },
+  "12.38": {
+    "chapter": 12,
+    "text": "Modify the program so that words of less than four letters are removed\nas a part of the\ndefinition of `allNumWords`."
+  },
+  "12.39": {
+    "chapter": 12,
+    "text": "Modify the `makeIndex` function so that instead of\nreturning the list of line numbers on which a word occurs, the function\nreturns\nthe total number of times that the word occurs. You will need to make\nsure that multiple occurrences of a word in a single line are counted. There\nare two ways of tackling the problem.\nitemize\n Modify the program as little as is necessary -- you could return the\nlength of a list rather than the list itself, for instance.\n Take the program structure as a guide, and write a (simpler) program\nwhich calculates the number of occurrences directly.\nitemize"
+  },
+  "12.4": {
+    "chapter": 12,
+    "text": "Define a function \n```haskell\npictureToRep :: Picture -> ( Int , Int , [(Int,Int)] )\n```\nwhich has the reverse effect of `makePicture`. For example, if \n`pic` is\n```haskell\n....\n.##.\n....\n```\nthen `pictureToRep pic` will be `( 4 , 3, [(1,1),(1,2)] )`"
+  },
+  "12.40": {
+    "chapter": 12,
+    "text": "Modify the program so that capitalized words like `\"Dog\"` are indexed under\ntheir uncapitalized equivalents (`\"dog\"`). This does not work well for\nproper names like `\"Amelia\"` --- what could you do about that?"
+  },
+  "12.41": {
+    "chapter": 12,
+    "text": "The function `sortLs` is limited to sorting lists of type \n`[(Int,Word)]` because it calls the `orderPair` function. Redefine the\nfunction so that it takes the comparison function as a parameter. What is\nits type after this redefinition?"
+  },
+  "12.42": {
+    "chapter": 12,
+    "text": "How would you modify the program if it was to be used to form the index\nfor a Haskell script? Hint: you need to think about what it is sensible to\nignore in such an enterprise."
+  },
+  "12.43": {
+    "chapter": 12,
+    "text": "Give a recursive definition of the range\n```haskell\n[m,n .. p]\n```"
+  },
+  "12.44": {
+    "chapter": 12,
+    "text": "Think of two more ways of implementing the function\n```haskell\nsimplePalCheck :: String -> Bool\n```\ndiscussed."
+  },
+  "12.45": {
+    "chapter": 12,
+    "text": "Define a function \n```haskell\nsubst :: String -> String -> String ->  String\n```\nso that the result of `subst start find replace` is the string\n`start`\nmodified so that the first occurrence of `find` as a subsequence\nis replaced by `replace`. If there is no such subsequence, the\nstring should be returned unmodified, so that, for instance,\n```haskell\nsubst \"Fish & Chips\" \"Chip\" \"Boat\" ~> \"Fish & Boats\"\nsubst \"Fish & Chips\" \"Ship\" \"Boat\" ~> \"Fish & Chips\"\n```\nModify the definition so that every occurrence of `find` is\nreplaced by `replace`.\nExplain what your original and modified definitions do in the case of the example \n```haskell\nsubst \"Fish & Chips\" \"\" \"Boat\"\n```"
+  },
+  "12.5": {
+    "chapter": 12,
+    "text": "If we make the definition\n```haskell\ntype Rep = ( Int , Int , [(Int,Int)] )\n```\ndiscuss how you would define functions over `Rep` to rotate,\nreflect and superimpose \npictures under this alternative representation. Discuss the advantages\nand disadvantages of this representation in comparison with\nthe original representation given by\nthe `Picture` type."
+  },
+  "12.6": {
+    "chapter": 12,
+    "text": "In the light of the discussion in the last four chapters, redo the exercises of \nExtended exercise: positioned pictures, which deal with positioned\npictures."
+  },
+  "12.7": {
+    "chapter": 12,
+    "text": "Using `randInt n`, which returns a random integer in the range `[0 .. n-1]`, or otherwise, define a function\n```haskell\nsToss :: Strategy -> Strategy -> Strategy\n```\nso that `sToss srt1 srt2` makes a random choice between the two strategies each time the function is applied to a list of moves."
+  },
+  "12.8": {
+    "chapter": 12,
+    "text": "Define a function \n```haskell\nalternativeList :: [Strategy] -> Strategy\n```\nwhich cycles through all the strategies in the argument in turn. Hint: you may want to model you definition on one of the definitions of `alternative` above.\nYou may also want to think about what your function does when passed the empty list of strategies!"
+  },
+  "12.9": {
+    "chapter": 12,
+    "text": "Define a function \n```haskell\nsTossList :: [Strategy] -> Strategy\n```\nwhich makes a random choice of which strategy it should apply form its argument list, each time it applied. In writing the definition, you will need to think about what `sTossList []` should be."
+  },
+  "13.1": {
+    "chapter": 13,
+    "text": "How would you define the `not equal'\noperation, `/=`, from equality, `==`? What is the type of\n`/=`?"
+  },
+  "13.10": {
+    "chapter": 13,
+    "text": "Investigate the Haskell definition of ``<`' on the types `Bool` and\n`(t1,t2,,tk)`."
+  },
+  "13.11": {
+    "chapter": 13,
+    "text": "Define a function\n```haskell\nshowBoolFun :: (Bool -> Bool) -> String\n```\nwhich displays a Boolean function as a table. Generalize this to\n```haskell\nshowBoolFunGen :: (a -> String) -> (Bool -> a) -> String\n```\nwhose first argument is a\nfunction to show elements of `a`. This argument is used in giving a table\nof the results of the function. How would you extend your answer to deal\nwith multiple-argument Boolean functions?"
+  },
+  "13.12": {
+    "chapter": 13,
+    "text": "Using your answer to the previous question, or otherwise, describe how\nyou would make `Bool -> Bool` an instance of the class\n`Show`. (Note, however, that this will not be legitimate Haskell 2010,\nsince `Bool -> Bool` is not of the right form for an instance\ndeclaration; you can achieve this using the GHC option `-XFlexibleInstances`.)"
+  },
+  "13.13": {
+    "chapter": 13,
+    "text": "How can you write a general instance for `Show` for function types: you could do this by showing a ``sample'' of the values from the function, that is showing how a sample of inputs are sent to the corresponding outputs."
+  },
+  "13.14": {
+    "chapter": 13,
+    "text": "Some types are not enumerated in the sense that they can be listed from smallest to largest: a good example is the `Move` type from the Rock - Paper - Scissors game. Define a type class to which the `Move` type can belong, and give an instance for `Move`. What other types can you think of giving an instance for: give some examples and their instances, too."
+  },
+  "13.15": {
+    "chapter": 13,
+    "text": "Define a `data` type `Roman` like this\n```haskell\ndata Roman = Roman Integer\n```\nand define instances of `Show` and `Num` for this type. The `show` function should display numbers in the form of Roman numerals, so that\n```haskell\nshow (Roman 99) = \"IC\"\nshow (Roman 1327) = \"MCCCXXVII\"\n```\nand so forth. The instance of `Num` should obey\n```haskell\n(Roman n) + (Roman m) ~> Roman (n+m)\n```"
+  },
+  "13.16": {
+    "chapter": 13,
+    "text": "[Harder]\nFor the `data` type `Roman` define an instances of the `Read` class, which is the inverse of the `show` function in the previous question."
+  },
+  "13.17": {
+    "chapter": 13,
+    "text": "Predict the type errors you would obtain by defining the following functions\n```haskell\nf n     = 37+n\nf True  = 34\n\ng 0 = 37\ng n = True\n\nh x \n  | x>0         = True\n  | otherwise   = 37\n\nk x = 34\nk 0 = 35\n```\nCheck your answers by typing each definition into a Haskell script, and\nloading the script into GHCi. Remember that you can use `:type`\nto give the type of an expression."
+  },
+  "13.18": {
+    "chapter": 13,
+    "text": "Do the following pairs of types -- listed vertically -- unify? If so, give a most general\nunifier for them; if not, explain why they fail to unify.\n```haskell\n(Int -> b)       (Int,a,a)\n(a -> Bool)      (a,a,[Bool])\n```"
+  },
+  "13.19": {
+    "chapter": 13,
+    "text": "Show that we can unify `(a,[a])` with\n`(b,c)` to give `(Bool,[Bool])`."
+  },
+  "13.2": {
+    "chapter": 13,
+    "text": "Define the function `numEqual` which takes a list of items, `xs` say,\nand an item, `x` say, and returns the number of times `x` occurs in\n`xs`. What is the type of your function? How could you use `numEqual`\nto define `member`?"
+  },
+  "13.20": {
+    "chapter": 13,
+    "text": "Can the function\n```haskell\nf :: (a,[a]) -> b\n```\nbe applied to the arguments `(2,[3])`, `(2,[])` and `(2,[True])`;\nif so, what are the types of the results?\nExplain your answers."
+  },
+  "13.21": {
+    "chapter": 13,
+    "text": "Repeat the previous question for the function\n```haskell\nf :: (a,[a]) -> a\n```\nExplain your answers."
+  },
+  "13.22": {
+    "chapter": 13,
+    "text": "Give the type of `f [] []` if `f` has type\n```haskell\nf :: [a] -> [b] -> a -> b\n```\nWhat is the type of the function `h` given by the definition\n```haskell\nh x = f x x ?\n```"
+  },
+  "13.23": {
+    "chapter": 13,
+    "text": "How can you use the Haskell system to check whether two type expressions are\nunifiable, and if so what is their unification? Hint: you can make dummy definitions\nin Haskell in which the defined value, `zircon`\nsay, is equated with itself:\n```haskell\nzircon = zircon\n```\nValues defined like this can be declared to have any type you wish."
+  },
+  "13.24": {
+    "chapter": 13,
+    "text": "[Harder] Recalling the definitions of `curry` and\n`uncurry` from Currying and uncurrying, what are the types of\n```haskell\ncurry id\nuncurry id\ncurry (curry id)\nuncurry (uncurry id)\nuncurry curry\n```\nExplain why the following expressions do not type-check:\n```haskell\ncurry uncurry\ncurry curry\n```"
+  },
+  "13.25": {
+    "chapter": 13,
+    "text": "[Harder] Give an algorithm which decides whether two\ntype expressions are unifiable. If they are, your algorithm\nshould return a most general unifying substitution; if not, it\nshould give some explanation of why the unification fails."
+  },
+  "13.26": {
+    "chapter": 13,
+    "text": "Give the type of each of the individual conditional\nequations which follow, and discuss the\ntype of the function which together they define.\n```haskell\nmerge (x:xs) (y:ys) \n  | x<y         = x : merge xs (y:ys)\n  | x==y        = x : merge xs ys\n  | otherwise   = y : merge (x:xs) ys\nmerge (x:xs) []    = (x:xs)\nmerge []    (y:ys) = (y:ys)\nmerge []    []     = []\n```"
+  },
+  "13.27": {
+    "chapter": 13,
+    "text": "Define a polymorphic sorting function, and show how its type is derived from\nthe type of the ordering relation\n```haskell\ncompare :: Ord a => a -> a -> Ordering\n```"
+  },
+  "13.28": {
+    "chapter": 13,
+    "text": "Investigate the types of the following numerical functions; you will\nfind that the types refer to some of the built-in numeric classes.\n```haskell\nmult x y = x*y\ndivide x = x `div` 2\nshare x  = x / 2.0\n```\nRecall that these can be given more restrictive types, such as\n```haskell\ndivide :: Int -> Int\n```\nby explicitly asserting their types as above."
+  },
+  "13.3": {
+    "chapter": 13,
+    "text": "Define functions\n```haskell\noneLookupFirst  :: Eq a => [ (a,b) ] -> a -> b\noneLookupSecond :: Eq b => [ (a,b) ] -> b -> a\n```\n`oneLookupFirst` takes a list of pairs and an item, and returns the second\npart of the first pair whose first part equals the item. You\nshould explain what your function does if there is no such pair. \n`oneLookupSecond` returns the first pair with the roles of first and second\nreversed."
+  },
+  "13.4": {
+    "chapter": 13,
+    "text": "How would you make `Move`, playing cards (as defined in Extended exercise: cards and card games), and triple types,\n`(a,b,c)`, into `Info` types?"
+  },
+  "13.5": {
+    "chapter": 13,
+    "text": "[Harder]\nMoving beyond Haskell 2010 to use the `-XFlexibleInstances` for GHCi, declare instances of `Info` for `Int -> Bool` and `Int -> Int`."
+  },
+  "13.6": {
+    "chapter": 13,
+    "text": "Give an instance of `Info` for the `Float` type, and using this re-define the instance of `Info` for the `Shape` type."
+  },
+  "13.7": {
+    "chapter": 13,
+    "text": "What is the type of the function\n```haskell\ncompare x y    = size x <= size y ?\n```"
+  },
+  "13.8": {
+    "chapter": 13,
+    "text": "Complete the default definitions for the class `Ord`."
+  },
+  "13.9": {
+    "chapter": 13,
+    "text": "Complete the following instance declarations:\n```haskell\ninstance (Ord a, Ord b) => Ord (a,b) where ...\ninstance Ord b => Ord [b] where ...\n```\nwhere pairs and lists should be ordered lexicographically, like the words in a\ndictionary."
+  },
+  "14.1": {
+    "chapter": 14,
+    "text": "Reimplement the library database\nof A library database to use an\nalgebraic type like `People` rather than a pair. Compare\nthe two approaches to this example."
+  },
+  "14.10": {
+    "chapter": 14,
+    "text": "Define a function to decide whether a number is an element of an `NTree`."
+  },
+  "14.11": {
+    "chapter": 14,
+    "text": "Define functions to find the maximum and minimum values held in an \n`NTree`."
+  },
+  "14.12": {
+    "chapter": 14,
+    "text": "A tree is reflected by swapping left and right sub-trees, recursively. Define\na function to reflect an `NTree`. What is the result of\nreflecting twice, `reflect . reflect`?"
+  },
+  "14.13": {
+    "chapter": 14,
+    "text": "Define functions\n```haskell\ncollapse, sort :: NTree -> [Integer]\n```\nwhich turn a tree into a list. The function `collapse` should enumerate the\nleft sub-tree, then the value at the node and finally the right sub-tree;\n`sort` should sort the elements in ascending order. For instance, \n```haskell\ncollapse (Node 3 (Node 4 NilT NilT) NilT) = [4,3]\nsort     (Node 3 (Node 4 NilT NilT) NilT) = [3,4]\n```"
+  },
+  "14.14": {
+    "chapter": 14,
+    "text": "Complete the definitions of `showPerson` and `showBio` which were\nleft incomplete in the text."
+  },
+  "14.15": {
+    "chapter": 14,
+    "text": "It is possible to extend the type `Expr` so that it contains\n conditional \nexpressions, `If b e1 e2`,\nwhere `e1` and `e2` are expressions, and\n`b` is a Boolean expression, a member of the type `BExp`,\n```haskell\ndata Expr = Lit Integer |\n            Op Ops Expr Expr |\n            If BExp Expr Expr\n```\nThe expression\n```haskell\nIf b e1 e2\n```\nhas the value of `e1` if `b` has the\nvalue `True` and otherwise it has the value of `e2`.\n```haskell\ndata BExp = BoolLit Bool |\n            And BExp BExp |\n            Not BExp |\n            Equal Expr Expr |\n            Greater Expr Expr\n```\nThe five clauses here give\nitemize\n Boolean literals, `BoolLit True` and `BoolLit False`.\n The conjunction of two expressions; it is `True` if both sub-expressions have\nthe value `True`.\n The negation of an expression. `Not be` has value `True` if\n`be` has the value `False`.\n `Equal e1 e2` is `True` when the two numerical expressions have\nequal values.\n `Greater e1 e2` is `True` when the numerical expression \n`e1` has a larger value then `e2`.\nitemize\nDefine the functions \n```haskell\neval  :: Expr -> Integer \nbEval :: BExp -> Bool\n```\nby mutual recursion, and\nextend the function `show` to show the redefined type of expressions."
+  },
+  "14.16": {
+    "chapter": 14,
+    "text": "Investigate which of the functions over trees discussed in the exercises of\nRecursive algebraic types can be made polymorphic."
+  },
+  "14.17": {
+    "chapter": 14,
+    "text": "Define a function `twist` which swaps the order of a union\n```haskell\ntwist :: Either a b -> Either b a\n```\nWhat is the effect of `(twist . twist)`?"
+  },
+  "14.18": {
+    "chapter": 14,
+    "text": "How would you define `applyLeft` using the function\n`either`?"
+  },
+  "14.19": {
+    "chapter": 14,
+    "text": "Show that any function of type `a -> b` can be transformed into\nfunctions of type\n```haskell\na -> Either b c\na -> Either c b\n```"
+  },
+  "14.2": {
+    "chapter": 14,
+    "text": "The library database of A library database is to be extended in the\nfollowing ways.\nitemize\n CDs and videos as well as books are available for loan.\n A record is kept of the authors of books as well as their titles.\nSimilar information is kept about CDs, but not about videos.\n Each loan has a period: books one month, CDs one week and videos three\ndays.\nitemize\nExplain how you would modify the types used to implement the database, and\nhow the function types might be changed. \nThe system should perform the following operations. For each case, give the\ntypes and definitions of the functions involved.\nitemize\n Find all items on loan to a given person.\n Find all books, CDs or videos on loan to a particular person.\n Find all items in the database due back on or before a particular day,\nand the same information for any given person.\n Update the database with loans; the constant `today`\ncan be assumed to contain today's date, in a format of your\nchoice.\nitemize \nWhat other functions would have to be defined to make the\nsystem usable? Give their types, but not their definitions."
+  },
+  "14.20": {
+    "chapter": 14,
+    "text": "How could you generalize `either` to `join` so that it has type\n```haskell\njoin :: (a -> c) -> (b -> d) -> Either a b -> Either c d\n```\nYou might find the answer to the previous exercise useful here, if you want\nto define `join` using `either`."
+  },
+  "14.21": {
+    "chapter": 14,
+    "text": "Define functions \nitemize \n to count the number of leaves in a `GTree`; \n to find\nthe depth of a `GTree`; \n to sum a numeric `GTree Int`; \n to find whether\nan element appears in a `GTree`; \n to map a function over the elements at\nthe leaves of a `GTree`; and \n to flatten a `GTree` to a list.\nitemize\nIn each case give the type of the function that you have defined."
+  },
+  "14.22": {
+    "chapter": 14,
+    "text": "How is the completely empty tree represented as a `GTree`?"
+  },
+  "14.23": {
+    "chapter": 14,
+    "text": "Using the functions `mapMaybe` and `maybe`, or otherwise, define a function \n```haskell\nprocess :: [Int] -> Int -> Int -> Int\n```\nso that `process xs n m` takes the `n`th and `m`th items of the list\nof numbers `xs`, and returns their sum. Your function should return `0`\nif either of the numbers is not one of the indices of the list:\nfor a list of length `p`, the indices are `0`, , \n`p-1` inclusive."
+  },
+  "14.24": {
+    "chapter": 14,
+    "text": "Discuss the advantages and disadvantages of the three approaches to error\nhandling presented in this section."
+  },
+  "14.25": {
+    "chapter": 14,
+    "text": "What are the values of type `Maybe (Maybe a)`?\nDefine a function\n```haskell\nsquashMaybe :: Maybe (Maybe a) -> Maybe a\n```\nwhich will `squash' `Just (Just x)` to `Just x` and all other values to\n`Nothing`."
+  },
+  "14.26": {
+    "chapter": 14,
+    "text": "In a similar way to `mapMaybe`, define the function\n```haskell\ncomposeMaybe :: (a -> Maybe b) -> \n                (b -> Maybe c) -> \n                (a -> Maybe c)\n```\nwhich composes two error-raising functions. How could you use `mapMaybe`, the\nfunction composition operator\nand the `squash` function to define `composeMaybe`?"
+  },
+  "14.27": {
+    "chapter": 14,
+    "text": "The `Maybe` type could be generalized to allow messages to be carried in the\n`Nothing` part, thus: \n```haskell\ndata Err a = OK a | Error String\n```\nHow do the definitions of `mapMaybe`, `maybe` and `composeMaybe` have to\nbe modified to accommodate this new definition?"
+  },
+  "14.28": {
+    "chapter": 14,
+    "text": "How would you modify the edit distance program to accommodate a `Swap`\noperation, which can be used to transform `\"abxyz\"` to `\"baxyz\"` in a\nsingle step?"
+  },
+  "14.29": {
+    "chapter": 14,
+    "text": "Write a definition of the `edit` function described above, which when given a list of edits and a string `st`,\nreturns the sequence of strings given by applying the edits to `st` in\nsequence."
+  },
+  "14.3": {
+    "chapter": 14,
+    "text": "Give calculations of \n```haskell\neval (Lit 67)\neval (Add (Sub (Lit 3) (Lit 1)) (Lit 3))\nshow (Add (Lit 67) (Lit (-34)))\n```"
+  },
+  "14.30": {
+    "chapter": 14,
+    "text": "Can you give other QuickCheck properties that you would expect the edit distance program to have? You could think, for example, about particular sorts of inputs, e.g. where the input is an initial segment of the output."
+  },
+  "14.31": {
+    "chapter": 14,
+    "text": "Give a calculation of `transform \"cat\" \"am\"`. What do you conclude about\nthe efficiency of the `transform` function?"
+  },
+  "14.32": {
+    "chapter": 14,
+    "text": "[Harder]\nCan you give a more efficient implementation of the function calculating the `transform`?"
+  },
+  "14.33": {
+    "chapter": 14,
+    "text": "It is decided to keep a record of vehicles which will use a particular car\npark. Design an algebraic data type to represent them."
+  },
+  "14.34": {
+    "chapter": 14,
+    "text": "If you knew that the records of vehicles were to be used for comparative\ntests of fuel efficiency, how would you modify your answer to the last\nquestion?"
+  },
+  "14.35": {
+    "chapter": 14,
+    "text": "Discuss the data types you might use in a database of students' marks for\nclasses and the like. Explain the design of any algebraic data types that\nyou use."
+  },
+  "14.36": {
+    "chapter": 14,
+    "text": "What data types might be used to represent the objects which can be drawn\nusing an interactive drawing program? To give yourself more of a challenge, you\nmight like to think about grouping of objects, multiple copies of objects, and\nscaling."
+  },
+  "14.37": {
+    "chapter": 14,
+    "text": "A different way of combining the classes `Named` and `Movable` is to\nestablish the instance\n```haskell\ninstance (Movable b,Named c) => NamedMovable (b,c)\n```\nThis is done by giving the instances\n```haskell\ninstance Movable b => Movable (b,c) where ....\ninstance Named c   => Named (b,c) where ....\n```\nComplete these instance declarations."
+  },
+  "14.38": {
+    "chapter": 14,
+    "text": "Show that the method of the previous question can be used to combine\ninstances of any two classes."
+  },
+  "14.39": {
+    "chapter": 14,
+    "text": "The example in the final part of this section shows how we can combine an\narbitrary instance of the `Movable` class, `a`,\nwith a particular\ninstance of the `Named` class, `String`. Show how it can be used to\ncombine an arbitrary instance of one class with a particular instance of\nanother for any two classes whatever."
+  },
+  "14.4": {
+    "chapter": 14,
+    "text": "Define the function\n```haskell\nsize :: Expr -> Integer\n```\nwhich counts the number of operators in an expression."
+  },
+  "14.40": {
+    "chapter": 14,
+    "text": "Extend the collection of operations for moving objects to include scaling and\nrotation by an arbitrary angle. This can be done by re-defining `Movable`\nor by defining a class `MovablePlus` over the class `Movable`. Which\napproach is preferable? Explain your answer."
+  },
+  "14.41": {
+    "chapter": 14,
+    "text": "Design a collection of classes to model bank accounts. These have different\nforms: current, deposit and so on, as well as different levels of\nfunctionality. Can you reuse the `Named` class here?"
+  },
+  "14.42": {
+    "chapter": 14,
+    "text": "Prove that the function `weather` from Introducing algebraic types has the same\nbehaviour as \n```haskell\nnewWeather = makeHot . isSummer\n```\nwhen\n```haskell\nmakeHot True  = Hot\nmakeHot False = Cold\nisSummer = (==Summer)\n```\nwhere recall that `(==Summer)` is an operator section whose effect is to\ntest whether its argument is equal to `Summer`."
+  },
+  "14.43": {
+    "chapter": 14,
+    "text": "Is it the case that the `area` of each `Shape` from Introducing algebraic types is non-negative? If so, give a proof; if not, give an example\nwhich shows that it is not the case."
+  },
+  "14.44": {
+    "chapter": 14,
+    "text": "If we define the `size` of an `NTree` thus\n```haskell\nsize NilT           = 0\nsize (Node x t1 t2) = 1 + size t1 + size t2\n```\nthen prove that for all finite `nTree`s, `tr`,\n```haskell\nsize tr < 2^{(depth tr)}\n```"
+  },
+  "14.45": {
+    "chapter": 14,
+    "text": "Show for all finite `NTree`s `tr` that\n```haskell\noccurs tr x = length (filter (==x) (collapse tr))\n```\n\nThe next two exercises refer back to the exercises of Polymorphic algebraic types."
+  },
+  "14.46": {
+    "chapter": 14,
+    "text": "Prove that the function `twist` has the property that\n```haskell\ntwist . twist = id\n```"
+  },
+  "14.47": {
+    "chapter": 14,
+    "text": "Explain the principle of structural induction for the type `GTree`.\nFormulate and prove the equivalent of the theorem relating `map`, \n`mapTree` and `collapse` for this type of trees."
+  },
+  "14.5": {
+    "chapter": 14,
+    "text": "Add the operations of multiplication and integer division to the type \n`Expr`, and redefine the functions `eval`, `show` and `size`\nto include these new cases. What does your definition of `eval` do when\nasked to perform a division by zero?"
+  },
+  "14.6": {
+    "chapter": 14,
+    "text": "Instead of adding extra constructors to the `Expr` type, as in the\nprevious question, it is possible to factor the definition thus:\n\n```haskell\ndata Expr = Lit Integer |\n            Op Ops Expr Expr\n\ndata Ops  = Add | Sub | Mul | Div \n```\nShow how the functions `eval`, `show` and `size` are defined\nfor this type, and discuss the changes you have to make to your definitions if\nyou add the extra operation `Mod` for remainder on integer division."
+  },
+  "14.7": {
+    "chapter": 14,
+    "text": "Give line-by-line calculations of \n```haskell\nsumTree (Node 3 (Node 4 NilT NilT) NilT)\ndepth   (Node 3 (Node 4 NilT NilT) NilT)\n```"
+  },
+  "14.8": {
+    "chapter": 14,
+    "text": "Complete the redefinition of functions over `Expr` after it has been\ndefined using the infix constructors `:+:` and `:-:`."
+  },
+  "14.9": {
+    "chapter": 14,
+    "text": "Define functions to return the left- and right-hand sub-trees\nof an `NTree`."
+  },
+  "15.1": {
+    "chapter": 15,
+    "text": "Can you get the effect of export controls using `import`? Can you get\nthe effect of the qualifications of `import` using export controls?\nDiscuss why both directives are included in the language."
+  },
+  "15.10": {
+    "chapter": 15,
+    "text": "Give a version of merge sort which takes an ordering function as a parameter:\n```haskell\nordering :: a -> a -> Ordering\n```\nExplain how to implement `mergeSort freqMerge` using this version of\nmerge sort, and discuss why you cannot implement `mergeSort\nalphaMerge` this way."
+  },
+  "15.11": {
+    "chapter": 15,
+    "text": "Define the `insTree` function, used in the definition of `makeTree`."
+  },
+  "15.12": {
+    "chapter": 15,
+    "text": "Give a calculation of\n```haskell\nmakeTree  [('b',2),('a',2),('t',3),('e',4)]\n```"
+  },
+  "15.13": {
+    "chapter": 15,
+    "text": "Define functions\n```haskell\nshowTree  :: Tree  -> String\nshowTable :: Table -> String\n```\nwhich give printable versions of Huffman trees and code tables. One general\nway of printing trees is to use indentation to indicate the structure.\nSchematically, this looks like\n```haskell\n    left sub tree,  indented by 4 characters\nvalue(s) at Node\n    right sub tree, indented by 4 characters\n```"
+  },
+  "15.14": {
+    "chapter": 15,
+    "text": "Define a QuickCheck property to test coding and decoding: specifically this should code a string and decode it, and compare the result with the original. You may need to restrict the strings over which the test is made."
+  },
+  "15.15": {
+    "chapter": 15,
+    "text": "Define `sorted` so that it checks whether its argument is sorted into ascending order and define `merge` which will merge two ordered lists in order. Using these check whether the property `prop_mergeSort :: [Int] -> Bool`, defined earlier, holds."
+  },
+  "15.16": {
+    "chapter": 15,
+    "text": "Write QuickCheck unit tests for other functions in `Frequency.hs` and other modules of the Hufmann coding system."
+  },
+  "15.17": {
+    "chapter": 15,
+    "text": "You may find that it is necessary to restrict the domain over which some properties hold in order for them to QuickCheck successfully: can you re-define the functions involved so that the properties hold for all randomly generated inputs."
+  },
+  "15.18": {
+    "chapter": 15,
+    "text": "The correctness property for the Huffman system formulated earlier states that `decode.code` is the identity. Would you expect that `code.decode` is the identity: if so, over what domain; if not, can you give a sub-domain over which you wold expect it to hold?"
+  },
+  "15.2": {
+    "chapter": 15,
+    "text": "Explain why you think it is the default that `import`ed definitions\nare not themselves exported."
+  },
+  "15.3": {
+    "chapter": 15,
+    "text": "It is proposed to add the following option to the `module` export\ncontrol and the `import` statement.\nIf the item `-module Dog`\nappears, then none of the definitions in the module `Dog` is exported or\nimported. Discuss the advantages and disadvantages of this proposal. How would\nyou achieve the effect of this feature in the existing Haskell module system?"
+  },
+  "15.4": {
+    "chapter": 15,
+    "text": "What is the coding of the message `battat` using the following\ntree?\ncenter\n[width=1in]Pictures/Huffman10.pdf\ncenter\nCompare the length of the coding with the others given earlier."
+  },
+  "15.5": {
+    "chapter": 15,
+    "text": "Using the first coding tree, decode the coded\nmessage `RLLRLRLLRR`. Which tree\nwould you expect to give the best coding of the message? Check your answer by\ntrying the three possibilities."
+  },
+  "15.6": {
+    "chapter": 15,
+    "text": "Complete the calculation of `decodeMessage exam1 mess1` begun above."
+  },
+  "15.7": {
+    "chapter": 15,
+    "text": "With the table\n```haskell\ntable1 = [ ('a',[L]) , ('b',[R,L]) , ('t',[R,R]) ]\n```\ngive a calculation of \n```haskell\ncodeMessage table1 \"battab\"\n```"
+  },
+  "15.8": {
+    "chapter": 15,
+    "text": "Give a definition of merge sort which uses the built-in ordering ``<=`'.\nWhat is its type?"
+  },
+  "15.9": {
+    "chapter": 15,
+    "text": "Modifying your previous answer if necessary, give a version of merge sort\nwhich removes duplicate entries."
+  },
+  "16.1": {
+    "chapter": 16,
+    "text": "Give an implementation of `Store` using lists whose entries are ordered\naccording to the variable names. Discuss why this might be preferable to the\noriginal list implementation, and also its disadvantages, if any."
+  },
+  "16.10": {
+    "chapter": 16,
+    "text": "A double-ended queue, or deque, allows elements to be added or removed from\neither end of the structure. Give a signature for the ADT `Deque a`,\nand give two different implementations of the deque type."
+  },
+  "16.11": {
+    "chapter": 16,
+    "text": "A unique queue can contain only one occurrence of each entry (the one to\narrive earliest). Give a signature for the ADT of these queues, and an\nimplementation of the ADT."
+  },
+  "16.12": {
+    "chapter": 16,
+    "text": "Each element of a priority queue has a numerical priority. When an element is\nremoved, it will be of the highest priority in the queue. If there is more\nthan one of these, the earliest to arrive is chosen. Give a signature and\nimplementation of the ADT of priority queues."
+  },
+  "16.13": {
+    "chapter": 16,
+    "text": "[Harder]\nExamine how priority queues could be used to implement the Huffman coding\nsystem in Case study: Huffman codes."
+  },
+  "16.14": {
+    "chapter": 16,
+    "text": "Are all the operations in the `Tree a` signature necessary? Identify those\nwhich can be implemented using the other operations of the signature."
+  },
+  "16.15": {
+    "chapter": 16,
+    "text": "Design a signature for an abstract type of library databases, as first\nintroduced in Data types, tuples and lists."
+  },
+  "16.16": {
+    "chapter": 16,
+    "text": "Design a signature for an abstract type of indexes, as examined in Example: creating an index."
+  },
+  "16.17": {
+    "chapter": 16,
+    "text": "Are there redundant operations in the signatures of the ADTs \n`QueueState` and `ServerState`?"
+  },
+  "16.18": {
+    "chapter": 16,
+    "text": "Design a signature for round-robin simulation,\nin which allocation of the first item is to queue `0`, the second to queue\n`1`, and so on, starting again at `0` after the final queue has had an \nelement assigned to it."
+  },
+  "16.19": {
+    "chapter": 16,
+    "text": "Give calculations of the expressions\n```haskell\nqueueStep (QS 12 3 [Yes 8 4])\nqueueStep (QS 13 4 [Yes 8 4])\nqueueStep (QS 14 0 [])\n```"
+  },
+  "16.2": {
+    "chapter": 16,
+    "text": "For the implementation of `Store` as a list type `[(Integer,Var)]`, give a\ndefinition of equality which equates any two stores which give the same values\nto each variable. Can this operation be defined for the second implementation?\nIf not, give a modification of the implementation which allows it to be\ndefined."
+  },
+  "16.20": {
+    "chapter": 16,
+    "text": "If we let\n```haskell\nserverSt1 = SS [ (QS 13 4 [Yes 8 4]) , (QS 13 3 [Yes 8 4]) ]\n```\nthen give calculations of \n```haskell\nserverStep serverSt1\nsimulationStep (Yes 13 10) serverSt1\n```"
+  },
+  "16.21": {
+    "chapter": 16,
+    "text": "Define QuickCheck properties which will test the simulation system. We will show how to define the appropriate generators needed to perform the tests in Domain-Specific Languages."
+  },
+  "16.22": {
+    "chapter": 16,
+    "text": "Explain why we cannot use the function type `(Int -> QueueState)` as the\nrepresentation type of `ServerState`. Design an extension of this type\nwhich will represent the server state, and implement the functions of the\nsignature over this type."
+  },
+  "16.23": {
+    "chapter": 16,
+    "text": "Given the implementations of the ADTs from this section,\nis your answer to the question of\nwhether there are redundant operations in the signatures of queues and servers\nany different?"
+  },
+  "16.24": {
+    "chapter": 16,
+    "text": "If you have not done so already, design a signature for round-robin simulation,\nin which allocation of the first item is to queue `0`, the second to queue\n`1`, and so on."
+  },
+  "16.25": {
+    "chapter": 16,
+    "text": "Give an implementation of the round-robin simulation which uses the \n`ServerState` ADT."
+  },
+  "16.26": {
+    "chapter": 16,
+    "text": "Give a different implementation\nof the round-robin simulation which modifies\nthe implementation of the type `ServerState` itself."
+  },
+  "16.27": {
+    "chapter": 16,
+    "text": "Explain how you would test the implementations of the functions over\nsearch trees. You might need to augment the signature of the type with a\nfunction to print a tree."
+  },
+  "16.28": {
+    "chapter": 16,
+    "text": "Define QuickCheck properties which will test the implementation of search trees. We will show how to define the appropriate generators needed to perform the tests in Domain-Specific Languages."
+  },
+  "16.29": {
+    "chapter": 16,
+    "text": "Define the functions\n```haskell\nsuccessor :: Ord a => a -> Tree a -> Maybe a\nclosest   :: Int -> Tree Int -> Int \n```\nThe successor of `v` in a tree `t` is the smallest value in `t` larger\nthan `v`, while the closest value to `v` in a numerical tree `t`\nis a value in `t` which has the smallest difference from `v`. \nYou\ncan assume that `closest` is always called on a non-`Nil` tree, so\nalways returns an answer."
+  },
+  "16.3": {
+    "chapter": 16,
+    "text": "In this question you should use the type `Maybe a`.\nSuppose it is an error to look up the `value`\nof a variable which does not have a value in the given store. Explain how you\nwould modify both the signature of `Store` and the two implementations."
+  },
+  "16.30": {
+    "chapter": 16,
+    "text": "Redefine the functions of the `Tree a` signature over the\n`Stree` implementation type."
+  },
+  "16.31": {
+    "chapter": 16,
+    "text": "To speed up the calculation of `maxTree` and other functions, you could\nimagine storing the maximum and minimum of the sub-tree at each node.\nRedefine the functions of the signature to manipulate these maxima and\nminima, and redefine the functions `maxTree`, `minTree` and \n`successor` to make use of this extra information stored in the trees."
+  },
+  "16.32": {
+    "chapter": 16,
+    "text": "You are asked to implement search trees with a count of the number of times an\nelement occurs. How would this affect the signature of the type? How would\nyou implement the operations? How much of the previously written\nimplementation could be re-used?"
+  },
+  "16.33": {
+    "chapter": 16,
+    "text": "Using a modified version of search trees instead of lists, reimplement the\nindexing software of Example: creating an index."
+  },
+  "16.34": {
+    "chapter": 16,
+    "text": "Design a polymorphic abstract data type\n```haskell\nTree a b c\n```\nso that entries at each node contain an item of type `a`, on which the\ntree is ordered, and an item of type `b`, which might be something like\nthe count, or a list of index entries. \n\n On inserting an element, information\nof type `c` is given (a single index entry in that example); this\ninformation has to be combined with the information already present. The\nmethod of combination can be a functional parameter. There also needs to be a\nfunction to describe the way in which information is transformed at deletion.\n\n As a test of your type, you should be able to implement the count trees and\nthe index trees as instances."
+  },
+  "16.35": {
+    "chapter": 16,
+    "text": "Compare how the following pairs of sets are related by the orderings\n`<=` and `subSet`.\n```haskell\n\ue0003\ue001          \ue0003,4\ue001\n\ue0002,3\ue001        \ue0003,4\ue001\n\ue0002,9\ue001        \ue0002,7,9\ue001\n```"
+  },
+  "16.36": {
+    "chapter": 16,
+    "text": "Define the function `diff` so that `diff s1 s2` consists of the \nelements of `s1` which do not belong to `s2`."
+  },
+  "16.37": {
+    "chapter": 16,
+    "text": "Define the function\n```haskell\nsymmDiff :: Ord a => Set a -> Set a -> Set a\n```\nwhich gives the symmetric difference of two sets. This consists of the\nelements which lie in one of the sets but not the other, so that\n```haskell\nsymmDiff \ue000Joe,Sue\ue001 \ue000Sue,Ben\ue001 =  \ue000Joe,Ben\ue001\n```\nCan you use the function `diff` in your definition?"
+  },
+  "16.38": {
+    "chapter": 16,
+    "text": "How can you define the\nfunction\n```haskell\npowerSet :: Ord a => Set a -> Set (Set a)\n```\nwhich returns the set of all\nsubsets of a set defined? Can you give a definition which uses only the\noperations of the abstract data type and not the concrete implementation?"
+  },
+  "16.39": {
+    "chapter": 16,
+    "text": "How are the\nfunctions\n```haskell\nsetUnion :: Ord a => Set (Set a) -> Set a\nsetInter :: Ord a => Set (Set a) -> Set a\n```\nwhich return the union and intersection\nof a set of sets defined using the operations of the abstract data type?"
+  },
+  "16.4": {
+    "chapter": 16,
+    "text": "Rather than giving an error when looking up a variable which does not have a\nvalue in the particular store, extend the signature to provide a test of\nwhether a variable has a value in a given store, and explain how would\nmodify the two implementations to define the test."
+  },
+  "16.40": {
+    "chapter": 16,
+    "text": "Can infinite sets (of numbers, for instance) be adequately\nrepresented by ordered lists? Can you tell if two infinite lists are equal,\nfor instance?"
+  },
+  "16.41": {
+    "chapter": 16,
+    "text": "The abstract data type `Set a` can be represented in a number of different ways.\nAlternatives include arbitrary lists (rather than ordered lists without\nrepetitions) and Boolean valued functions, that is elements of the type \n`a -> Bool`. Give implementations of the type using these two representations."
+  },
+  "16.42": {
+    "chapter": 16,
+    "text": "Give an implementation of the `Set` abstract data type using search trees."
+  },
+  "16.43": {
+    "chapter": 16,
+    "text": "Give an implementation of the search tree abstract data type using ordered lists. Compare\nthe behaviour of the two implementations."
+  },
+  "16.44": {
+    "chapter": 16,
+    "text": "Give a set of QuickCheck properties for the `Set` type. These should reflect the mathematical properties of sets. Hint: you could begin by thinking about corresponding properties of lists, and about which of these you would expect to hold for sets and which would not."
+  },
+  "16.45": {
+    "chapter": 16,
+    "text": "Calculate\n```haskell\nclasses (connect graph1)\nclasses (connect graph2)\n```\nwhere graph2 = graph1 `\u222a` {(4,3)}."
+  },
+  "16.46": {
+    "chapter": 16,
+    "text": "Give calculations of \n```haskell\nbreadthFirst graph2 1\ndepthFirst graph2 1\n```\nwhere `graph2` is defined in the previous question."
+  },
+  "16.47": {
+    "chapter": 16,
+    "text": "Using the searches as a model, give a function\n```haskell\ndistance :: Eq a => Relation a -> a -> a -> Int\n```\nwhich gives the length of a shortest path from one node to another in a\ngraph. For instance,\n```haskell\ndistance graph1 1 4 = 2\ndistance graph1 4 1 = 0\n```\n`0` is the result when no such path exists, or when the two nodes are\nequal."
+  },
+  "16.48": {
+    "chapter": 16,
+    "text": "A weighted graph carries a numerical weight with each edge. Design a type to\nmodel this. Give functions for breadth-first and depth-first search which\nreturn lists of pairs. Each pair consists of a node, together with the\nlength of a shortest path to that node from the node at the start of the\nsearch."
+  },
+  "16.49": {
+    "chapter": 16,
+    "text": "A heterogeneous relation relates objects of different type. An\nexample might be the relation relating a person to their age. Design a type\nto model these relations; how do you have to modify the functions defined over\n`Relation a` to work over this type, if it is possible?"
+  },
+  "16.5": {
+    "chapter": 16,
+    "text": "Suppose you are to implement a fourth operation over `Store`\n```haskell\nsetAll :: Integer -> Store\n```\nso that `setAll n` is the store where every variable has the value \n`n`. Can you do this for both the example implementations? Show how if you\ncan, and explain why, if not."
+  },
+  "16.50": {
+    "chapter": 16,
+    "text": "[Harder]\nFormulate QuickCheck properties for the search functions given in this section. You should try to think of properties which are shared by all search functions, and also other properties which hold of particular search functions."
+  },
+  "16.6": {
+    "chapter": 16,
+    "text": "Design an ADT for the library database, first examined in\nData types, tuples and lists."
+  },
+  "16.7": {
+    "chapter": 16,
+    "text": "Give calculations of\n```haskell\n\"abcde\" ++ \"f\"\ninit \"abcdef\"\nlast \"abcdef\"\n```\nwhere\n```haskell\ninit x = take (length x-1) x\nlast x = x !! (length x-1)\n```"
+  },
+  "16.8": {
+    "chapter": 16,
+    "text": "Explain the behaviour of the three queue models if you are asked to\nperform the following sequence of queue operations: \nadd 2,\nadd 1,\nremove item,\nadd 3,\nremove item,\nadd 1,\nadd 4,\nremove item,\nremove item."
+  },
+  "16.9": {
+    "chapter": 16,
+    "text": "Define QuickCheck properties which will test the queue implementations given here. We will show how to define the appropriate generators needed to perform the tests in Domain-Specific Languages."
+  },
+  "17.1": {
+    "chapter": 17,
+    "text": "Give a calculation of the expression\n```haskell\n[ x+y | x <- [1 .. 4] , y <- [2 .. 4] , x>y ]\n```"
+  },
+  "17.10": {
+    "chapter": 17,
+    "text": "Define the functions\n```haskell\nneList   :: Parse a b -> Parse a [b]\noptional :: Parse a b -> Parse a [b]\n```\nso that `neList p` recognizes a non-empty list of the objects\nwhich are\nrecognized by `p`, and `optional p` recognizes such an object\n optionally -- it may recognize an object or succeed immediately."
+  },
+  "17.11": {
+    "chapter": 17,
+    "text": "Define the function\n```haskell\nnTimes :: Integer -> Parse a b -> Parse a [b]\n```\nso that `nTimes n p` recognizes `n` of the\nobjects recognized by `p`."
+  },
+  "17.12": {
+    "chapter": 17,
+    "text": "Define the functions \n```haskell\nisOp     :: Char -> Bool\ncharToOp :: Char -> Ops\n```\nused in the parsing of expressions."
+  },
+  "17.13": {
+    "chapter": 17,
+    "text": "A recogniser is like a parser, but simpler: all it needs to do is to recognise whether (the first part of) a string is what we are looking for. Taking a particular example, a recogniser for numbers, `numberRec`, should behave like this\n```haskell\nnumberRec \"234\"  ~>[\"34\" , \"4\" , \"\"]\nnumberRec \"(34\"  ~>[]\n```\nwhere the corresponding `number` parser gives:\n```haskell\nnumber \"234\"  ~>[(2,\"34\") , (23,\"4\") , (234,\"\")]\nnumber \"(34\"  ~>[]\n```\nExplain how you could define `numberRec` from `number`, and then give a general set of library functions for building recognisers in a similar way to the library for building parsers."
+  },
+  "17.14": {
+    "chapter": 17,
+    "text": "Define the function\n```haskell\ncharlistToExpr :: [Char] -> Expr\n```\nso that\n```haskell\ncharlistToExpr \"234\" ~>Lit 234\ncharlistToExpr \"~98\" ~>Lit (-98)\n```\nwhich is used in parsing literal expressions."
+  },
+  "17.15": {
+    "chapter": 17,
+    "text": "A command to the calculator to assign the value of `expr` to the variable\n`var` is represented thus\n```haskell\nvar:expr\n```\nGive a parser for these commands."
+  },
+  "17.16": {
+    "chapter": 17,
+    "text": "How would you change the parser for numbers if decimal fractions are to be\nallowed in addition to integers?"
+  },
+  "17.17": {
+    "chapter": 17,
+    "text": "How would you change the parser for variables if names longer than a single\ncharacter are to be allowed?"
+  },
+  "17.18": {
+    "chapter": 17,
+    "text": "Explain how you would modify your parser so that the whitespace\ncharacters space and tab can be used in expressions, but would be ignored on\nparsing. (Hint: there is a simple pre-processor which does the trick!)"
+  },
+  "17.19": {
+    "chapter": 17,
+    "text": "(Note: this exercise is for those familiar with Backus-Naur\nnotation for grammars.) \n\nExpressions without bracketing and allowing the\nmultiplicative expressions higher binding power are described by the grammar\n```haskell\nExpr  ::= Integer | Var | (Expr Ops Expr) |\n          Lexpr Mop Mexpr | Mexpr Aop Expr\nLexpr ::= Integer | Var | (Expr Ops Expr)\nMexpr ::= Integer | Var | (Expr Ops Expr) | Lexpr Mop Mexpr\nMop   ::= '*' | '/' | '%'\nAop   ::= '+' | '-'     \nOps   ::= Mop | Aop\n```\nGive a Haskell parser for this grammar. Discuss the associativity of the\noperator ``-`' in this grammar."
+  },
+  "17.2": {
+    "chapter": 17,
+    "text": "Using the list comprehension notation, define the functions \n```haskell\nsubLists,subSequences :: [a] -> [[a]]\n```\nwhich return all the\nsublists and subsequences of a list. A sublist is obtained by omitting some\nof the elements of a list; a subsequence is a\ncontinuous block from a list. For instance, both `[2,4]` and `[3,4]`\nare sublists of `[2,3,4]`, but only `[3,4]` is a subsequence."
+  },
+  "17.20": {
+    "chapter": 17,
+    "text": "Define a parser which recognizes strings representing Haskell lists of integers,\nlike\n`\"[2,-3,45]\"`."
+  },
+  "17.21": {
+    "chapter": 17,
+    "text": "Define a parser to recognize simple sentences of English, with a subject,\nverb and object. You will need to provide some vocabulary, `\"cat\"`,\n`\"dog\"`, and so on, and a parser to recognize a string. You will also need\nto define a function\n```haskell\ntokenList :: Eq a => [a] -> Parse a [a]\n```\nso that, for instance,\n```haskell\ntokenList \"Hello\" \"Hello Sailor\" ~> [ (\"Hello\",\" Sailor\") ]\n```"
+  },
+  "17.22": {
+    "chapter": 17,
+    "text": "Define the function\n```haskell\nspotWhile :: (a -> Bool) -> Parse a [a]\n```\nwhose parameter is a function which tests elements of the input type, and\nreturns the longest initial part of the input, all of whose elements have the\nrequired property. For instance\n```haskell\nspotWhile digit \"234abc\"  ~> [ (\"234\",\"abc\") ]\nspotWhile digit \"abc234\"  ~> [ ([],\"abc234\") ]\n```"
+  },
+  "17.23": {
+    "chapter": 17,
+    "text": "Define the infinite lists of factorial and Fibonacci numbers, \n```haskell\nfactorial = [1,1,2,6,24,120,720,...]\nfibonacci = [0,1,1,2,3,5,8,13,21,...]\n```"
+  },
+  "17.24": {
+    "chapter": 17,
+    "text": "Give a definition of the function\n```haskell\nfactors :: Int -> [Int]\n```\nwhich returns a list containing the factors of a positive integer. For\ninstance,\n```haskell\nfactors 12 = [1,2,3,4,6,12]\n```\nUsing this function or otherwise, define the list of numbers whose only prime\nfactors are `2`, `3` and `5`, the so-called Hamming numbers:\n\n```haskell\nhamming = [1,2,3,4,5,6,8,9,10,12,15,...\n```"
+  },
+  "17.25": {
+    "chapter": 17,
+    "text": "Define the function\n```haskell\nrunningSums :: [Int] -> [Int]\n```\nwhich calculates the running sums\n```haskell\n[0,a0,a0+a1,a0+a1+a2,...\n```\nof a list\n```haskell\n[a0,a1,a2,...\n```"
+  },
+  "17.26": {
+    "chapter": 17,
+    "text": "Define the function `infiniteProduct` specified above, and use it to\ncorrect the definition of `pythagTriples2`."
+  },
+  "17.27": {
+    "chapter": 17,
+    "text": "Give a definition of the list [ 2^n | n <- [0 .. ] ] using a process\nnetwork based on `scanl'`. (Hint: you can take the example of factorial as a\nguide.)"
+  },
+  "17.28": {
+    "chapter": 17,
+    "text": "How would you select certain elements of an infinite list? For instance, how\nwould you keep running sums of the positive numbers in a list of\nnumbers?"
+  },
+  "17.29": {
+    "chapter": 17,
+    "text": "How would you merge two infinite lists, assuming that they are\nsorted?\nHow would you remove duplicates from the list which results? As an example,\nhow would you merge the lists of powers of `2` and `3`?"
+  },
+  "17.3": {
+    "chapter": 17,
+    "text": "Give calculations of the expressions\n```haskell\nperm [2]\nperm [2,3]\nperm [1,2,3]\n```\nand of the matrix multiplication\n```haskell\nmatrixProduct [[2.0,3.0,4.0],[5.0,6.0,-1.0]] \n              [[1.0,0.0],[1.0,1.0],[0.0,-1.0]]\n```"
+  },
+  "17.30": {
+    "chapter": 17,
+    "text": "Give definitions of the lists of Fibonacci numbers \n`\n[0,1,1,2,3,5,...]` and Hamming numbers `[1,2,3,4,5,6,8,9,...]` (defined) using networks of processes. For the latter problem, you may find\nthe merge function of the previous question useful."
+  },
+  "17.31": {
+    "chapter": 17,
+    "text": "Show that for all fp-lists `ys` and `zs`,\n```haskell\nundef ++ (ys ++ zs)  = (undef ++ ys) ++ zs\n```\nto infer that `++` is associative over all lists."
+  },
+  "17.32": {
+    "chapter": 17,
+    "text": "If `rev xs` is defined to be `shunt xs []`, as\nin Generalizing the proof goal, show that\n```haskell\nrev (rev undef) = undef   -- (rev-rev.1)\n```\nIn Reasoning about programs we proved that \n```haskell\nrev (rev xs) = xs   -- (rev-rev.2)\n```\nfor all\nfinite lists `xs`. \n\nWhy can we not infer from `(rev-rev.1)` and `(rev-rev.2)`\nthat the equation `rev (rev xs) = xs` holds for all fp-lists `xs`?"
+  },
+  "17.33": {
+    "chapter": 17,
+    "text": "Prove for all natural numbers `m`, `n` and functions \n`f :: Int -> a` that \n```haskell\n(map f [m .. ])!!n = f (m+n)\n```\n[Hint: you will need to choose the right variable for the induction proof.]"
+  },
+  "17.34": {
+    "chapter": 17,
+    "text": "Prove that the lists\n```haskell\nfacMap = map fac [0 .. ]\nfacs = 1 : zipWith (*) [1 .. ] facs\n```\nare infinite."
+  },
+  "17.35": {
+    "chapter": 17,
+    "text": "If we define indexing thus\n```haskell\n(x:_)!!0  = x\n(_:xs)!!n = xs!!(n-1)\n[]!!n     = error \"Indexing\"\n```\nshow that for all strict functions `f`, fp-lists `xs` and natural numbers `n`,\n```haskell\n(map f xs)!!n = f (xs!!n)\n```\nand therefore infer that the result is valid for all lists `xs`.\nState and prove a similar result for `zipWith`."
+  },
+  "17.36": {
+    "chapter": 17,
+    "text": "Show that the following equations hold between functions.\n```haskell\nfilter p . map f     = map f . filter (p . f)\nfilter p . filter q  = filter (q &&& p)\nconcat . map (map f) = map f . concat      \n```\nwhere the operator `&&&` is defined by\n```haskell\n(q &&& p) x = q x && p x\n```"
+  },
+  "17.4": {
+    "chapter": 17,
+    "text": "Give a definition of `scalarProduct` using `zipWith`."
+  },
+  "17.5": {
+    "chapter": 17,
+    "text": "Define functions to calculate\nthe determinant of a square matrix and, if this is\nnon-zero, to invert the matrix."
+  },
+  "17.6": {
+    "chapter": 17,
+    "text": "The calculation rules for list comprehensions can be re-stated for the two\ncases `[]` and `(x:xs)`, instead of for the arbitrary list \n`[a1,...,an]`.\nGive these rules by completing the equations\n```haskell\n[ e | v <- []     , q2 , ... , qk ] ~> ...\n[ e | v <- (x:xs) , q2 , ... , qk ] ~> ...\n```"
+  },
+  "17.7": {
+    "chapter": 17,
+    "text": "Give the precise rules for calculating with a generator containing a refutable \npattern,\nlike `(x:xs) <- lExp`. You might need to define auxiliary functions to do\nthis."
+  },
+  "17.8": {
+    "chapter": 17,
+    "text": "List comprehensions can be translated into expressions involving `map`,\n`filter` and `concat` by the following equations.\n```haskell\n[ x | x<-xs ]              = xs\n[ f x | x<-xs ]            = map f xs\n[ e | x<-xs , p x , ... ]  = [ e | x <- filter p xs , ... ]\n[ e | x<-xs , y<-ys , .. ] = concat [ [e|y<-ys, ..] | x<-xs]\n```\nTranslate the expressions\n```haskell\n[ m*m | m <- [1 .. 10] ]\n[ m*m | m <- [1 .. 10] , m*m<50 ]\n[ x+y | x <- [1 .. 4] , y <- [2 .. 4] , x>y ]\n[ x:p | x <- xs , p <- perms (xs\\\\[x]) ]\n```\nusing these equations; you will need to define some auxiliary functions as a\npart of your translation."
+  },
+  "17.9": {
+    "chapter": 17,
+    "text": "Defining `graphEx2` to be\n```haskell \nmakeSet [(1,2),(2,1),(1,3),(2,4),(3,5),(5,6),(3,6)]\n```\ntry calculating\nthe effect of the original definition on \n```haskell\nroutes graphEx 1 4\n```\nRepeat the calculation with the revised definition which follows:\n```haskell\nroutes rel x y\n  | x==y        = [[x]]   \n  | otherwise   = [ x:r | z <- nbhrs rel x ,\n                          r <- routes rel z y ,\n                          not (elem x r) ]\n```\nand explain why this definition is not suitable for use on cyclic graphs.\nFinally, give a calculation of \n```haskell\nroutesC graphEx 1 4 []\n```"
+  },
+  "18.1": {
+    "chapter": 18,
+    "text": "Compare the definition of `sumInts` above with this definition:\n```haskell\nsumInts :: IO Integer\nsumInts\n  = do n <- getInt\n       if n==0 \n          then return 0\n          else (do m <- sumInts\n                   return (n+m))\n```\nWhich will have the better performance, do you think? Wny?"
+  },
+  "18.10": {
+    "chapter": 18,
+    "text": "[Harder]\nWrite a lazy-list version of the calculator program."
+  },
+  "18.11": {
+    "chapter": 18,
+    "text": "[Harder]\nReimplement the Rock - Paper - Scissors case study to use the monadic strategies in `StrategyM`."
+  },
+  "18.12": {
+    "chapter": 18,
+    "text": "How would you add initial and final messages to the output of the calculator?"
+  },
+  "18.13": {
+    "chapter": 18,
+    "text": "Discuss how you would have to modify the system to allow variables to have\narbitrarily long names, consisting of letters and numbers, starting with a\nletter."
+  },
+  "18.14": {
+    "chapter": 18,
+    "text": "How would you extend the calculator to deal with decimal floating-point numbers\nas well as\nintegers?"
+  },
+  "18.15": {
+    "chapter": 18,
+    "text": "Discuss how you would modify the calculator so that it could read input\ncommands split over more than one line. You will need to decide how this\nsort of split is signalled by the user -- maybe by at the end of the line --\nand how to modify the interaction program to accommodate this.\nAlternatively, you might let the user do this without signalling; can\nyou modify the program to do that?"
+  },
+  "18.16": {
+    "chapter": 18,
+    "text": "How would you modify the parser so that `white space' is permitted in\nthe input commands, as in the example\n```haskell\n\"    x : (2\\t+3)     \"\n```\nwhich parses to the `Command`\n```haskell\n(Assign 'x' (Op Add (Lit 2) (Lit 3)))\n```"
+  },
+  "18.2": {
+    "chapter": 18,
+    "text": "Give a definition of the function\n```haskell\nfmap :: (a -> b) -> IO a -> IO b\n```\nthe effect of which is to transform an interaction by applying the function to its\nresult. You should define it using the `do` construct."
+  },
+  "18.3": {
+    "chapter": 18,
+    "text": "Define the function\n```haskell\nrepeat ::  IO Bool -> IO () -> IO ()\n```\nso that `repeat test oper` has the effect of repeating `oper` until\nthe condition `test` is `True`."
+  },
+  "18.4": {
+    "chapter": 18,
+    "text": "Define the higher-order function `while` in which the condition and the operation\nwork over values of type `a`. Its type should be\n```haskell\nwhileG :: (a -> IO Bool) -> (a -> IO a) -> (a -> IO a)\n```"
+  },
+  "18.5": {
+    "chapter": 18,
+    "text": "Using the function `whileG` or otherwise, define an interaction which\nreads a number, `n` say, and then reads a further `n` numbers and\nfinally returns their average."
+  },
+  "18.6": {
+    "chapter": 18,
+    "text": "Modify your answer to the previous question so that if the end of file is\nreached before `n` numbers have been read, a message to that effect is\nprinted."
+  },
+  "18.7": {
+    "chapter": 18,
+    "text": "Define a function\n```haskell\naccumulate :: [IO a] -> IO [a]\n```\nwhich performs a sequence of interactions and accumulates their result in a\nlist. Also give a definition of the function\n```haskell\nsequence :: [IO a] -> IO ()\n```\nwhich performs the interactions in turn, but discards their results. Finally,\nshow how you would sequence a series, passing values from one to the next:\n```haskell\nseqList :: [a -> IO a] -> a -> IO a\n```\nWhat will be the result on an empty list?"
+  },
+  "18.8": {
+    "chapter": 18,
+    "text": "Write a file-handling version of the program\n`sumInts`, which reads the integer sequence from a file."
+  },
+  "18.9": {
+    "chapter": 18,
+    "text": "Write a lazy-list version of the program `sumInts`, which you can then run using `interact`."
+  },
+  "19.1": {
+    "chapter": 19,
+    "text": "Define `fmap` using the functions specified in the `Applicative` type class definition."
+  },
+  "19.10": {
+    "chapter": 19,
+    "text": "Prove the following properties using the monad laws:\n```haskell\njoin . return = join . fmap return\njoin . return = id\n```"
+  },
+  "19.11": {
+    "chapter": 19,
+    "text": "Can you define a different monad structure over lists from that given above?\nCheck that your definition has properties `(M1)` to `(M3)`."
+  },
+  "19.12": {
+    "chapter": 19,
+    "text": "Write down the definitions of `map` and `join` over lists\nusing list comprehensions. Compare them with the definitions of\n`fmap` and `join` given in the `do` notation in this section."
+  },
+  "19.13": {
+    "chapter": 19,
+    "text": "Re-implement the parser for the calculator using the `do`\nconstruct (based on `>>=`) \nrather than `(>*>)` and `build`. Contrast the two\napproaches."
+  },
+  "19.14": {
+    "chapter": 19,
+    "text": "Show that the type functions `(a,a)` and `([a],[a])` are instances of `Functor`."
+  },
+  "19.15": {
+    "chapter": 19,
+    "text": "Give a non-monadic definition of `numTree`, threading the state through the computation explicitly; compare your solution with the monadic version given here."
+  },
+  "19.16": {
+    "chapter": 19,
+    "text": "Show how to look up the position of an element in a list\n```haskell\nlookup :: Eq a => a -> Table a -> Int\n```\nYou might find it useful to define a function\n```haskell\nlook :: Eq a => a -> Table a -> Int -> Int\n```\nwhere the extra integer parameter carries the current `offset' into the list."
+  },
+  "19.17": {
+    "chapter": 19,
+    "text": "Show how you can use a `State`-style monad in a computation to replace\neach element in a tree by a random integer, generated using the techniques of\nInfinite lists."
+  },
+  "19.18": {
+    "chapter": 19,
+    "text": "We can use monads to extend the case study of the calculator in a variety of\nways. Consider how you would\nitemize\n add exceptions or messages to be given on an attempt to divide by zero;\n count the number of steps taken in a calculation; and\n combine the two.\nitemize"
+  },
+  "19.2": {
+    "chapter": 19,
+    "text": "Define `liftA2` using `<*>` and vice versa."
+  },
+  "19.3": {
+    "chapter": 19,
+    "text": "Define `<*>` for the `Tree` example."
+  },
+  "19.4": {
+    "chapter": 19,
+    "text": "Repeat some of the earlier examples and exercises using the `>>=`\noperator instead of a `do` expression."
+  },
+  "19.5": {
+    "chapter": 19,
+    "text": "Show that lists and the `Maybe` type are instances of `MonadFail`. Hint: in both cases the `String` argument is ignored."
+  },
+  "19.6": {
+    "chapter": 19,
+    "text": "Once a computation has failed, it cannot be ``unfailed'' as it were. As a law this is expressed as `fail s >>= f = fail s`. Show that this rule holds for the instances of `MonadFail` that you defined in the previous exercise."
+  },
+  "19.7": {
+    "chapter": 19,
+    "text": "Show that sets and binary trees\ncan be given a monad structure, as can the type:\n```haskell\ndata Error a = OK a | Error String\n```"
+  },
+  "19.8": {
+    "chapter": 19,
+    "text": "For the monads `Id` , `[]` and `Maybe` prove the rules \n`(M1)` to `(M3)`. Also show that\nthese rules hold for your implementations in the\nprevious exercise."
+  },
+  "19.9": {
+    "chapter": 19,
+    "text": "Prove the property `(M4)` using the laws `(M1)` to `(M3)`."
+  },
+  "2.1": {
+    "chapter": 2,
+    "text": "Define a module `UsePictures` which imports\n`Pictures` (or `PicturesSVG`) and contains definitions of `blackHorse` and `rotateHorse` which can use the definitions\nimported from the pictures module.\n\nIn the remaining questions you are expected to add other definitions to\nyour module `UsePictures`."
+  },
+  "2.2": {
+    "chapter": 2,
+    "text": "How could you make the picture\ncenter\n[width=1in]Pictures/twoByTwo.pdf\ncenter\nTry to find two different ways of getting the result. It may help to work\nwith pieces of white and black paper.\n\nUsing your answer to the first part of this question, how would you\ndefine a chess (or checkers) board, which is an `8\u00d78` board of alternating squares?"
+  },
+  "2.3": {
+    "chapter": 2,
+    "text": "Three variants of the last picture which involve the `horse' pictures\nare\ncenter\n[width=4in]Pictures/chessHorse.pdf\ncenter\nHow would you produce these three?"
+  },
+  "2.4": {
+    "chapter": 2,
+    "text": "Give another variant of the `horse' pictures in the previous question,\nand show how it could be created. Note: a nice variant is \ncenter\n[width=1in]Pictures/chessReflect.pdf\ncenter"
+  },
+  "20.1": {
+    "chapter": 20,
+    "text": "Define the interpreter function\nfor `RE` into `RegExp`,\n```haskell\ninterp :: RE -> RegExp\n```\nYou should use the functions already defined over `RegExp` to help you in doing this."
+  },
+  "20.10": {
+    "chapter": 20,
+    "text": "Define a function or functions which allow you to extract the pictures from the `(Def a)` monad so that they can be rendered somehow."
+  },
+  "20.11": {
+    "chapter": 20,
+    "text": "[Harder]\nGive an extension to regular expressions so that sub-components can be named and the names used subsequently in the expression. An informal example would be \n```haskell\n((a|b)*:x)a<x>\n```\nwhich should match an arbitrary string of `a`s and `b`s (which is named `x`) followed by an `a` and then a repeat of the string `x`. For example; `abbaaabba` would match this regular expression, but `abbaabba` would not.\n\nYou will first need to think about how to make this idea `watertight' and then for the best way to implement a DSL embodying this."
+  },
+  "20.12": {
+    "chapter": 20,
+    "text": "Define a function which will give a pretty printed version of a sample from the generator for expressions."
+  },
+  "20.13": {
+    "chapter": 20,
+    "text": "Define QuickCheck generators for the types used in the interactive version of the calculator, as described in The calculator. Define properties that you would expect (parts of) the calculator to satisfy, and test them using your generators and QuickCheck."
+  },
+  "20.14": {
+    "chapter": 20,
+    "text": "Define a function\n```haskell\n  showMap :: (Show a, Show b) => [(a,b)] -> String\n```\nso that `[(1,1),(0,0),(-2,0)]` is shown as\n```haskell\n  (1|->1) ,(0|->0) ,(-2|->0)\n```"
+  },
+  "20.2": {
+    "chapter": 20,
+    "text": "Choose a suitable notation for writing down regular expressions as strings (e.g. as used in Functions as data: recognising regular expressions) and then define functions to parse these strings into `RE`, and to pretty-print elements of `RE` as strings:\n```haskell\nparseRE  :: String -> RE\nprettyRE :: RE -> String\n```\nCan you define QuickCheck properties that you would expect these functions to satisfy?"
+  },
+  "20.3": {
+    "chapter": 20,
+    "text": "Define a recursive regular expression which will generate all palindromes built from `a`s and `b`s."
+  },
+  "20.4": {
+    "chapter": 20,
+    "text": "[Harder]\nCan you give a recursive regular expression which generates all (non-recursive) regular expressions?"
+  },
+  "20.5": {
+    "chapter": 20,
+    "text": "[Harder]\nIs there any limit to what else you can define using recursive regular expressions: can you, for example, define all the strings which are strings of `a`s then `b`s, and then `c`s, each of the same length, as in `aaabbbccc`?"
+  },
+  "20.6": {
+    "chapter": 20,
+    "text": "Show how to extend the DSL to include these constructs:\nitemize\n\nTo say that an expression is matched a given number of times.\n\nTo match something in a range of characters, e.g. `'a'` to `'z'`.\n\nTo match a character in this collection of characters.\n\nTo match a character that is not in this collection of characters.\nitemize"
+  },
+  "20.7": {
+    "chapter": 20,
+    "text": "[Harder]\nShow how to extend the DSL to include these constructs:\nitemize\n\nTo say that an expression should match both of these two expressions.\n\nTo fail to match this regular expression.\nitemize"
+  },
+  "20.8": {
+    "chapter": 20,
+    "text": "Define the state monad `(Def a)` which implements the information about the position of pictures, and in particular give the `instance` declaration which establishes that this is a monad."
+  },
+  "20.9": {
+    "chapter": 20,
+    "text": "Define the functions `placeId`, `place`, `positionId` and `position` over the `(Def a)` monad."
+  },
+  "21.1": {
+    "chapter": 21,
+    "text": "Show that the example\n```haskell\nf n = 2*n^2 + 4*n + 13\n```\nis `\u0398(n^2)`."
+  },
+  "21.10": {
+    "chapter": 21,
+    "text": "Prove by induction over the natural number `n` that\n```haskell\n1 + 2 + 4 + ... + 2^n = 2^(n+1) - 1\n1 + 2 + ... + n      = n*(n+1) `div` 2\n1^2 + 2^2 + ... + n^2   = n*(n+1)*(2*n+1) `div` 6\n1^3 + 2^3 + ... + n^3   = (n*(n+1) `div` 2)^2\n```"
+  },
+  "21.11": {
+    "chapter": 21,
+    "text": "Estimate the time complexity of the two reverse functions given here:\n```haskell\nrev1 []     = []\nrev1 (x:xs) = rev1 xs ++ [x]\n```\nand\n```haskell\nrev2            = shunt []\nshunt xs []     = xs\nshunt xs (y:ys) = shunt (y:xs) ys\n```"
+  },
+  "21.12": {
+    "chapter": 21,
+    "text": "We can define multiplication by repeated addition as follows:\n```haskell\nmult n 0 = 0\nmult n m = mult n (m-1) + n\n```\n`Russian' multiplication is defined by\n```haskell\nruss n 0 = 0\nruss n m \n  | (m `mod` 2 == 0)    = russ (n+n) (m `div` 2)\n  | otherwise           = russ (n+n) (m `div` 2) + n\n```\nEstimate the time complexity of these two multiplication algorithms."
+  },
+  "21.13": {
+    "chapter": 21,
+    "text": "Estimate the time complexity of the Fibonacci function."
+  },
+  "21.14": {
+    "chapter": 21,
+    "text": "Show that the worst-case time behaviour of the merge sort function below is\n`O(n(log n))`.\n```haskell\nmSort :: Ord a => [a] -> [a]\n\nmSort xs \n  | (len < 2)   = xs\n  | otherwise   = mer (mSort (take m xs)) (mSort (drop m xs))\n    where\n    len = length xs\n    m   = len `div` 2\n\nmer :: Ord a => [a] -> [a]  -> [a]\n\nmer (x:xs) (y:ys) \n  | (x<=y)      = x : mer xs (y:ys)\n  | otherwise   = y : mer (x:xs) ys\nmer (x:xs) []   = (x:xs)\nmer []     ys   = ys\n```"
+  },
+  "21.15": {
+    "chapter": 21,
+    "text": "Confirm the time complexities given in the table above for the two list\nimplementations of sets."
+  },
+  "21.16": {
+    "chapter": 21,
+    "text": "Implement the operations `subSet`, `inter`, `makeSet` and \n`mapSet` for the search tree implementation, and estimate the time complexity\nof your implementations."
+  },
+  "21.17": {
+    "chapter": 21,
+    "text": "Give an implementation of sets as lists without repetitions, and estimate\nthe time complexity of the functions in your implementation."
+  },
+  "21.18": {
+    "chapter": 21,
+    "text": "Estimate the space complexity of the function\n```haskell\nsumSquares :: Integer -> Integer\nsumSquares n = sumList (map sq [1 .. n])\n```\nwhere\n```haskell\nsumList = foldr (+) 0\nsq n    = n*n\n```\nand `map` and `[1 .. n]` have their standard definitions."
+  },
+  "21.19": {
+    "chapter": 21,
+    "text": "Give an informal estimate of the complexity of the text processing functions\nin Defining functions over lists."
+  },
+  "21.2": {
+    "chapter": 21,
+    "text": "Give a table of the values of the functions `n^0`, `log n`, \n`n^1`, `n(log n)`, `n^2`, `n^3` and \n`2^n` for the values \n```haskell\n0 1 2 3 4 5 10 50 100 500 1000 10000 100000 10000000\n```"
+  },
+  "21.20": {
+    "chapter": 21,
+    "text": "Define the functions to reverse a list and to convert a digit list into a\nnumber using both `foldr` and `foldl'` and compare their behaviour \nby means of calculation."
+  },
+  "21.21": {
+    "chapter": 21,
+    "text": "Is it better to define insertion sort using `foldr` or `foldl'`?\nJustify your answer."
+  },
+  "21.22": {
+    "chapter": 21,
+    "text": "How are the results of `foldr` and `foldl'` related? You may like to use\nthe functions `reverse` and `flip` in framing your\nanswer."
+  },
+  "21.23": {
+    "chapter": 21,
+    "text": "What is the relationship between `foldr` and `foldl'` when the\nfunction to be folded is\n\ntabularll\nassociative: & `a `f` (b `f` c) = (a `f` b) `f` c`;\n\nhas `st` as an identity: & `st `f` a = a = a `f` st`;\n\ncommutative: & `a `f` b = b `f` a`;\ntabular\nand what is the relationship when all three hold?"
+  },
+  "21.24": {
+    "chapter": 21,
+    "text": "Give an implementation of the greedy solution to the maximal common\nsubsequence problem, and show that it behaves as explained above on the\nlists `[1,2,3]` and `[2,4,1,2,3]` above."
+  },
+  "21.25": {
+    "chapter": 21,
+    "text": "Can you give an improvement of the maximal common subsequence solution along\nthe lines of `fibP`, returning a complex (finite) data structure as the\nresult of a function call, rather than simply one value?"
+  },
+  "21.26": {
+    "chapter": 21,
+    "text": "Finding the `edit distance' between two strings was first discussed in\nDesign with algebraic data types where we gave a dynamic programming solution to the\nproblem. Show how you can give an efficient implementation of this\nalgorithm using the techniques of this section, and also how you give a greedy\nsolution to the problem. How do the two solutions compare?"
+  },
+  "21.27": {
+    "chapter": 21,
+    "text": "Based on the examples of this section, provide a program which gives the\ndifference between two files, matching the corresponding lines and giving the\noutput in a suitable form, such as a list of the pairs of matching line\nnumbers or a form copied from the Unix `diff` program."
+  },
+  "21.3": {
+    "chapter": 21,
+    "text": "By giving the values of `d`, `m` and `c` (when necessary), show\nthat the following functions have the complexity indicated.\n```haskell\nf1 n = 0.1*n^5 + 31*n^3 + 1000              O(n^6)\nf2 n = 0.7*n^5 + 13*n^2 + 1000              \u0398(n^5)\n```"
+  },
+  "21.4": {
+    "chapter": 21,
+    "text": "Show that `n^k \u226a 2^n` for all positive `k`. By taking\nlogarithms of both sides, show that `log n \u226a n^k` for all\npositive `k`."
+  },
+  "21.5": {
+    "chapter": 21,
+    "text": "Show that \n```haskell\nlog \u2261 ln \u2261 log2\n```\nand in fact that logarithms to any base have the same rate of growth."
+  },
+  "21.6": {
+    "chapter": 21,
+    "text": "The function `fib` is defined by\n```haskell\nfib 0 = 0\nfib 1 = 1\nfib m = fib (m-2) + fib (m-1)\n```\nShow that `n^k \u226a fib n` for all `k`."
+  },
+  "21.7": {
+    "chapter": 21,
+    "text": "Show that `\u226a` is transitive -- that is `f\u226ag` and \n`g\u226ah` together imply that `f\u226ah`. Show also that `\u2261` is an\nequivalence relation."
+  },
+  "21.8": {
+    "chapter": 21,
+    "text": "If `f` is `O(g)`, show that any constant multiple of `f` is also\nof the same order. If `f1` and `f2` are `O(g)`, show that their\nsum and difference are also `O(g)`. Are the same results valid\nwith `\u0398` replacing `O`?"
+  },
+  "21.9": {
+    "chapter": 21,
+    "text": "If `f1` is `O(n^k1)` and `f2` is `O(n^k2)`, show\nthat their product,\n```haskell\nf n = f1 n * f2 n\n```\nis `O(n^(k1+k2))`."
+  },
+  "3.1": {
+    "chapter": 3,
+    "text": "Give another version of the definition of `exclusive or' which\nworks informally\nlike this: `exclusive or of `x` and `y` will be `True` if either\n`x` is `True` and `y` is `False`, or `x` is `False` and `y` is `True`'."
+  },
+  "3.10": {
+    "chapter": 3,
+    "text": "This question is about the function\n```haskell\nfourEqual :: Integer -> Integer -> Integer -> Integer -> Bool\n```\nwhich returns the value `True` only if all four of its arguments\nare equal.\n\nGive a definition of `fourEqual` modelled on the\ndefinition of `threeEqual` above. Now give a definition of\n`fourEqual` which uses the function `threeEqual`\nin its definition. Compare your two answers."
+  },
+  "3.11": {
+    "chapter": 3,
+    "text": "Give line-by-line calculations of\n```haskell\nthreeEqual (2+3) 5 (11 `div` 2)\nmystery (2+4) 5 (11 `div` 2)\nthreeDifferent (2+4) 5 (11 `div` 2)\nfourEqual (2+3) 5 (11 `div` 2) (21 `mod` 11)\n```"
+  },
+  "3.12": {
+    "chapter": 3,
+    "text": "Devise QuickCheck tests for the functions that you have defined here.\n\n%"
+  },
+  "3.13": {
+    "chapter": 3,
+    "text": "Give calculations of \n```haskell\nmax (3-2) (3*8)\nmaxThree (4+5) (2*6) (100 `div` 7)\n```"
+  },
+  "3.14": {
+    "chapter": 3,
+    "text": "Give definitions of the functions\n```haskell\nmin      :: Int -> Int -> Int\nminThree :: Int -> Int -> Int -> Int\n```\nwhich calculate the minimum of two and three integers, respectively."
+  },
+  "3.15": {
+    "chapter": 3,
+    "text": "Define QuickCheck properties to test the functions `maxThree`, `min` and `minThree`."
+  },
+  "3.16": {
+    "chapter": 3,
+    "text": "Define a function to convert small letters to capitals which returns\nunchanged characters which are not small letters."
+  },
+  "3.17": {
+    "chapter": 3,
+    "text": "Define the function\n```haskell\ncharToNum :: Char -> Int\n```\nwhich converts a digit like `'8'` to its value, `8`. The value of\nnon-digits should be taken to be `0`."
+  },
+  "3.18": {
+    "chapter": 3,
+    "text": "Define a function \n```haskell\nonThreeLines :: String -> String -> String -> String\n```\nwhich takes three strings and returns a single string which when printed\nshows the three strings on separate lines."
+  },
+  "3.19": {
+    "chapter": 3,
+    "text": "Define a function\n```haskell\nromanDigit :: Char -> String\n```\nwhich converts a digit to its representation in Roman numerals, so \nat `'7'` it will have the value `\"VII\"` and so on."
+  },
+  "3.2": {
+    "chapter": 3,
+    "text": "Give the `box and line' diagram corresponding to your answer to the \nprevious question."
+  },
+  "3.20": {
+    "chapter": 3,
+    "text": "Give a function to return the average of three integers\n```haskell\naverageThree :: Integer -> Integer -> Integer -> Float\n```\nUsing this function define a function\n```haskell\nhowManyAboveAverage :: Integer -> Integer -> Integer -> Integer\n```\nwhich returns how many\nof its inputs are larger than their average value."
+  },
+  "3.21": {
+    "chapter": 3,
+    "text": "How would you write QuickCheck properties to test the functions `averageThree` and `howManyAboveAverage`?"
+  },
+  "3.22": {
+    "chapter": 3,
+    "text": "Write a function\n```haskell\nnumberNDroots :: Float -> Float -> Float -> Integer \n``` \nthat given the coefficients of the quadratic,\n`a`, `b` and `c`, will return how many roots the\nequation has. \nYou may assume that the equation is \nnon-degenerate."
+  },
+  "3.23": {
+    "chapter": 3,
+    "text": "Using your answer to the last question, write a function \n```haskell\nnumberRoots :: Float -> Float -> Float -> Integer \n```\nthat given \nthe coefficients of the quadratic,\n`a`, `b` and `c`, will return how many roots the\nequation has. In the case that the equation has every number a root you\nshould return the result `3`."
+  },
+  "3.24": {
+    "chapter": 3,
+    "text": "The formula for the roots of a quadratic is \n`(-b \u00b1 \u221a(b^2 - 4ac))/(2a)`\nWrite definitions of the functions\n```haskell\nsmallerRoot, largerRoot :: Float -> Float -> Float -> Float\n```\nwhich return the smaller and larger real roots of the quadratic. In the case\nthat the equation has no real roots or has all values as roots you should return\nzero as the result of each of the functions."
+  },
+  "3.25": {
+    "chapter": 3,
+    "text": "How would you write QuickCheck properties to test the functions `smallerRoot` and `largerRoot`? \n\nHint: one thing you would expect is that the result of the first function is less than or equal to the second. Another thing you should expect is that if you substitute the roots back into the equation, the result should be zero. However, because floating-point calculation is only approximate, you need to check whether the result of substituting a root is close to zero, rather than being actually equal to it."
+  },
+  "3.26": {
+    "chapter": 3,
+    "text": "Rewrite your solutions to the earlier exercises to use the recommended\nlayout."
+  },
+  "3.27": {
+    "chapter": 3,
+    "text": "Given the definitions\n```haskell\nfunny x = x+x\n peculiar y = y\n```\nexplain what happens when you remove the space in front of the `peculiar`."
+  },
+  "3.3": {
+    "chapter": 3,
+    "text": "Using literals on the left-hand side we can make the truth table\nfor a function into its Haskell definition. Complete the following\ndefinition of `exOr` in this style.\n```haskell\nexOr True True  = ...\nexOr True False = ...\n  ...\n```"
+  },
+  "3.4": {
+    "chapter": 3,
+    "text": "Give your own definitions of the built-in `&&` and `||`. If you want to use the same operator for `&&`, say, you will need to make sure you hide its import. You can do this by adding it to the list of what is hidden, thus:\n```haskell\nimport Prelude hiding (max,(&&))\n```\nafter the `module` declaration at the start of the `Chapter3` module."
+  },
+  "3.5": {
+    "chapter": 3,
+    "text": "Give two different definitions of the `nAnd` function \n```haskell\nnAnd :: Bool -> Bool -> Bool\n```\nwhich returns the result `True` except when both its arguments\nare `True`. Give a diagram illustrating one of your definitions."
+  },
+  "3.6": {
+    "chapter": 3,
+    "text": "Give line-by-line calculations of \n```haskell\nnAnd True True\nnAnd True False\n```\nfor each of your definitions of `nAnd` in the previous exercise."
+  },
+  "3.7": {
+    "chapter": 3,
+    "text": "Write QuickCheck properties to test the functions you have written in the earlier exercises. You might be able to check one version of a function against another, or perhaps think up different properties for your functions."
+  },
+  "3.8": {
+    "chapter": 3,
+    "text": "Explain the effect of the function defined here:\n```haskell\nmystery :: Integer -> Integer -> Integer -> Bool\nmystery m n p = not ((m==n) && (n==p))\n```\nHint: if you find it difficult to answer this question directly, try to\nsee what the function does on some example inputs."
+  },
+  "3.9": {
+    "chapter": 3,
+    "text": "Define a function \n```haskell\nthreeDifferent :: Integer -> Integer -> Integer -> Bool\n```\nso that the result of `threeDifferent m n p` is `True`\nonly if all three of the numbers `m`, `n` and `p`\nare different.\n\nWhat is your answer for `threeDifferent 3 4 3`? Explain why you\nget the answer that you do."
+  },
+  "4.1": {
+    "chapter": 4,
+    "text": "This question is about the function\n```haskell\nmaxFour :: Integer -> Integer -> Integer -> Integer -> Integer\n```\nwhich returns the maximum of four integers. Give three definitions of this\nfunction: the first should be modelled\non that of `maxThree`, the second should use the function\n`max` and the third should use the functions `max` and\n`maxThree`. For your second and third solutions give diagrams\nto illustrate your answers. Discuss the relative merits of the three\nsolutions\nyou have given."
+  },
+  "4.10": {
+    "chapter": 4,
+    "text": "Give sample calculations of \n```haskell\nmaxThreeOccurs 4 5 5\nmaxThreeOccurs 4 5 4\n```\nusing your definition of `maxThreeOccurs` from the previous\nquestion."
+  },
+  "4.11": {
+    "chapter": 4,
+    "text": "Define a `data` type `Result` which represents the outcome of a round of rock - paper - scissors, which will either be a win. lose or draw."
+  },
+  "4.12": {
+    "chapter": 4,
+    "text": "Define a function\n```haskell\noutcome :: Move -> Move -> Result\n```\nso that this gives the outcome of a round for the first player. For example, we should expect that `outcome Rock Scissors` should be a win."
+  },
+  "4.13": {
+    "chapter": 4,
+    "text": "We have added some `magic' to the `Chapter4` module to allow QuickCheck properties to be tested over the `Move` type. Define a QuickCheck property which connects the results of `beat` and `lose`."
+  },
+  "4.14": {
+    "chapter": 4,
+    "text": "How would you define a QuickCheck property to test the `outcome` function?"
+  },
+  "4.15": {
+    "chapter": 4,
+    "text": "Define a type of seasons, `Season`, and give a function from seasons to temperature given by the type\n```haskell\ndata Temp = Cold | Hot\n            deriving (Eq, Show, Ord)\n```\nIn defining this function assume that you're in the UK."
+  },
+  "4.16": {
+    "chapter": 4,
+    "text": "Define a type `Month` and a function from this type to `Season`, assuming that you're in the northern hemisphere."
+  },
+  "4.17": {
+    "chapter": 4,
+    "text": "Define the function `rangeProduct`\nwhich when given natural numbers `m` and\n`n` returns the product \n```haskell\nm*(m+1)*...*(n-1)*n\n```\nYou should include in your definition the type of the function, and your function\nshould return `0` when `n` is smaller than `m`.\n\nHint: you do\nnot need to use recursion in your definition, but you may if you wish."
+  },
+  "4.18": {
+    "chapter": 4,
+    "text": "As `fac` is a special case of `rangeProduct`, \nwrite a definition of `fac`\nwhich uses `rangeProduct`."
+  },
+  "4.19": {
+    "chapter": 4,
+    "text": "Using the addition function over the natural numbers, give a recursive definition \nof multiplication of natural numbers."
+  },
+  "4.2": {
+    "chapter": 4,
+    "text": "Give a definition of the function \n```haskell\nbetween :: Integer -> Integer -> Integer -> Bool\n```\ndiscussed in this section. The definition should be consistent with what we said\nin explaining how `middleNumber`\nworks. You also need to think carefully about the different ways that\none number can lie between two others. You might find it useful to\ndefine a function\n```haskell\nweakAscendingOrder :: Integer -> Integer -> Integer -> Bool\n```\nso that `weakAscendingOrder m n p` is `True` exactly when\n`m`, `n` and `p` are in weak ascending order, that is the sequence\ndoes not go down at any point. An example of such a sequence is \n`2 3 3`."
+  },
+  "4.20": {
+    "chapter": 4,
+    "text": "The integer square root of a positive integer `n` is the largest\ninteger whose square is less than or equal to `n`. For instance,\nthe integer square roots of `15`\nand `16` are `3` and `4`, respectively. Give a\nprimitive recursive definition of this function."
+  },
+  "4.21": {
+    "chapter": 4,
+    "text": "Given a function `f` of type `Integer -> Integer` give a\nrecursive definition of a function of type `Integer -> Integer`\nwhich on input `n` returns the \nmaximum of the values `f 0`, `f 1`, , `f n`. You\nmight find the `max` function defined in Guards useful.\n\nTo test this function, add to your script a definition of some values of\n`f` thus:\n```haskell\nf 0 = 0\nf 1 = 44\nf 2 = 17\nf _ = 0\n```\nand so on; then test your function at various values."
+  },
+  "4.22": {
+    "chapter": 4,
+    "text": "Given a function `f` of type `Integer -> Integer` give a\nrecursive definition of a function of type `Integer -> Bool`\nwhich on input `n` returns `True` if one or more of the values\n`f 0`, `f 1`, , `f n` is zero and\n`False` otherwise."
+  },
+  "4.23": {
+    "chapter": 4,
+    "text": "Can you give a definition of `regions`\nwhich instead of being recursive uses the function `sumFun`?"
+  },
+  "4.24": {
+    "chapter": 4,
+    "text": "[Harder] Find\nout the maximum number of pieces we can get\nby making a given number of flat (that is planar) cuts \nthrough a solid block. It is not the same answer as we calculated\nfor straight-line cuts of a flat piece of paper."
+  },
+  "4.25": {
+    "chapter": 4,
+    "text": "Complete the definitions of `whiteBlack` and `whiteChess`."
+  },
+  "4.26": {
+    "chapter": 4,
+    "text": "How would you define a function to give a column of pictures,\n```haskell\ncolumn :: Picture -> Integer -> Picture\n```\nso that the result of ` column horse 3 ` is as shown to the right."
+  },
+  "4.27": {
+    "chapter": 4,
+    "text": "Give a Haskell function which takes an integer `n` and returns an `n` by `n` white square with a diagonal black line from top left to bottom right, as in.\ncenter\n[width=1.5in]Pictures/diag1.pdf\ncenter"
+  },
+  "4.28": {
+    "chapter": 4,
+    "text": "Give a Haskell function which takes an integer `n` and returns an `n` by `n` white square with a diagonal black line from top right to bottom left, as in.\ncenter\n[width=1.5in]Pictures/diag2.pdf\ncenter"
+  },
+  "4.29": {
+    "chapter": 4,
+    "text": "Give a Haskell function which takes an integer `n` and returns an `n` by `n` white square with both diagonals coloured black, as in.\ncenter\n[width=1.5in]Pictures/diag3.pdf\ncenter"
+  },
+  "4.3": {
+    "chapter": 4,
+    "text": "Give a definition of the function\n```haskell\nhowManyEqual :: Integer -> Integer -> Integer -> Integer\n```\nwhich returns how many of its three arguments are equal, so that\n```haskell\nhowManyEqual 34 25 36 = 0\nhowManyEqual 34 25 34 = 2\nhowManyEqual 34 34 34 = 3\n```\nThink about what functions you have already seen -- perhaps in the exercises --\nwhich you can use in the solution."
+  },
+  "4.30": {
+    "chapter": 4,
+    "text": "Can you give a direct recursive definition of a function \n```haskell\nchessBoard :: Integer -> Picture\n```\nso that \n```haskell\nchessBoard n = ... chessBoard (n-1) ...\n```\nHint: you might want to use some of the functions defined here, or variants of them, in writing your definition."
+  },
+  "4.31": {
+    "chapter": 4,
+    "text": "Give a recursive definition of a function to find the highest common\nfactor of two positive integers."
+  },
+  "4.32": {
+    "chapter": 4,
+    "text": "Suppose we have to raise `2` to the power `n`. If\n`n` is even, `2*m` say, then\n```haskell\n2^n = 2^2*m = (2^m)^2\n```\nIf `n` is odd, `2*m+1` say, then\n```haskell\n2^n = 2^2*m+1 = (2^m)^2*2\n```\nGive a recursive function to compute\n2^n which uses these insights."
+  },
+  "4.33": {
+    "chapter": 4,
+    "text": "Devise test data for a function\n```haskell\nallEqual :: Integer -> Integer -> Integer -> Bool\n```\nintended to test whether its three integer inputs are equal."
+  },
+  "4.34": {
+    "chapter": 4,
+    "text": "Use the test data from the previous question to test the function\n```haskell\nsolution m n p = ((m+n+p)==3*p)\n```\nDiscuss your results."
+  },
+  "4.35": {
+    "chapter": 4,
+    "text": "The function \n```haskell\nallDifferent :: Integer -> Integer -> Integer -> Bool\n```\nshould return `True` only if all its inputs are different. Devise\nblack box test data for this function."
+  },
+  "4.36": {
+    "chapter": 4,
+    "text": "Test the following function\n```haskell\nattempt m n p = (m/=n) && (n/=p)\n```\nusing the test data written in the previous question. What do you\nconclude on the basis of your results?"
+  },
+  "4.37": {
+    "chapter": 4,
+    "text": "Devise test data for a function\n```haskell\nhowManyAboveAverage :: Integer -> Integer -> Integer -> Integer\n```\nwhich returns how many of its three integer inputs are larger than their\naverage value."
+  },
+  "4.38": {
+    "chapter": 4,
+    "text": "Devise test data for a function to raise two to a positive integer\npower."
+  },
+  "4.39": {
+    "chapter": 4,
+    "text": "Repeat these exercises to define QuickCheck properties which can be used to test these functions."
+  },
+  "4.4": {
+    "chapter": 4,
+    "text": "Give a definition of the function\n```haskell\nhowManyOfFourEqual :: Integer -> Integer -> Integer -> Integer -> Integer\n```\nwhich is the analogue of `howManyEqual` for four numbers. You may\nneed to think what if ?."
+  },
+  "4.5": {
+    "chapter": 4,
+    "text": "Give two other ways of completing the definition of `fourPics` given in this section."
+  },
+  "4.6": {
+    "chapter": 4,
+    "text": "Another way of solving the problem is to break it down into one picture above another, as in\n```haskell\nfourPics :: Picture -> Picture\n\nfourPics pic =\n    top `above` bottom\n      where\n        top    = ...\n        bottom = ...\n```\nGive three different ways of completing this definition."
+  },
+  "4.7": {
+    "chapter": 4,
+    "text": "Give two other ways of defining the `fourPics` function."
+  },
+  "4.8": {
+    "chapter": 4,
+    "text": "Define the `possible` value as used in the `triArea` function."
+  },
+  "4.9": {
+    "chapter": 4,
+    "text": "Define the function\n```haskell\nmaxThreeOccurs :: Int -> Int -> Int -> (Int,Int)\n```\nwhich returns the maximum of three integers paired with the number of times\nit occurs among the three.\nA natural solution first finds the maximum, and then investigates how often\nit occurs among the three. Discuss how you would write your solution if\nyou were not allowed to use `where`-definitions."
+  },
+  "5.1": {
+    "chapter": 5,
+    "text": "Give a definition of the function\n```haskell\nmaxOccurs :: Integer -> Integer -> (Integer,Integer)\n```\nwhich returns the maximum of two integers, together with the number of times\nit occurs. Using this, or otherwise, define the function\n```haskell\nmaxThreeOccurs :: Integer -> Integer -> Integer -> (Integer,Integer)\n```\nwhich does a similar thing for three arguments."
+  },
+  "5.10": {
+    "chapter": 5,
+    "text": "Define an `==` function over `Shape` so that all circles of negative radius are\nequated. How would you treat rectangles with negative sides?"
+  },
+  "5.11": {
+    "chapter": 5,
+    "text": "The type `Shape` takes no account of the position or orientation of a \nshape. After deciding how to represent points, how would you modify the\noriginal definition of `Shape` to contain the centre of each object? You\ncan assume that rectangles lie with their sides parallel to the axes, thus:\ncenter\n[width=3in]Pictures/rectanglePos.pdf\ncenter"
+  },
+  "5.12": {
+    "chapter": 5,
+    "text": "Calling the new shape type `NewShape`, define a function \n```haskell\nmove :: Float -> Float -> NewShape -> NewShape \n```\nwhich moves a shape by the two offsets given:\ncenter\n[width=3.5in]Pictures/rectangleMove.pdf\ncenter"
+  },
+  "5.13": {
+    "chapter": 5,
+    "text": "Define a function to test whether two `NewShapes` overlap."
+  },
+  "5.14": {
+    "chapter": 5,
+    "text": "Some houses have a number; others have a name.\nHow would you implement the type of `strings or numbers' used as a part of an\naddress? Write a function which gives the textual form of one of these objects. Give a\ndefinition of a type of names and addresses using the type you have defined."
+  },
+  "5.15": {
+    "chapter": 5,
+    "text": "What value has the expression `[0, 0.1 .. 1]`? Check your answer\nin GHCi and explain any discrepancy there might be between the two."
+  },
+  "5.16": {
+    "chapter": 5,
+    "text": "How many items does the list `[2,3]` contain? How many does `[[2,3]]`\ncontain? What is the type of `[[2,3]]`?"
+  },
+  "5.17": {
+    "chapter": 5,
+    "text": "What is the result of evaluating `[2 .. 2]`? What about `[2,7 .. 4]`?\nTry evaluating `[2,2 .. 2]`; to interrupt evaluation\n in GHCi under Windows or Unix you\nneed to type `Ctrl-C`."
+  },
+  "5.18": {
+    "chapter": 5,
+    "text": "Give a definition of a function\n```haskell\ndoubleAll :: [Integer] -> [Integer]\n```\nwhich doubles all the elements of a list of integers."
+  },
+  "5.19": {
+    "chapter": 5,
+    "text": "Give a definition of a function\n```haskell\ncapitalize :: String -> String\n```\nwhich converts all small letters in a `String`\ninto capitals, leaving the other characters unchanged. How would you\nmodify this function to give\n```haskell\ncapitalizeLetters :: String -> String\n```\nwhich behaves in the same way except that all non-letters are\nremoved from the list?"
+  },
+  "5.2": {
+    "chapter": 5,
+    "text": "Give a definition of a function\n```haskell\norderTriple :: (Integer,Integer,Integer) -> (Integer,Integer,Integer)\n``` \nwhich puts the elements of a triple of three integers into ascending order.\nYou might like to use the `maxThree`, `middle` and\n`minThree` functions defined earlier."
+  },
+  "5.20": {
+    "chapter": 5,
+    "text": "Define the function\n```haskell\ndivisors :: Integer -> [Integer]\n```\nwhich returns the list of divisors of a positive integer (and the empty\nlist for other inputs). For instance,\n```haskell\ndivisors 12 ~>[1,2,3,4,6,12]\n```\nA prime number `n` is a number whose only divisors are\n`1` and `n`. Using `divisors`\nor otherwise define a function\n```haskell\nisPrime :: Integer -> Bool\n```\nwhich checks whether or not a positive integer is prime (and returns\n`False` if its input is not a positive integer)."
+  },
+  "5.21": {
+    "chapter": 5,
+    "text": "Define the function\n```haskell\nmatches :: Integer -> [Integer] -> [Integer]\n```\nwhich picks out all occurrences of an integer n in a list. For instance,\n```haskell\nmatches 1 [1,2,1,4,5,1] ~>[1,1,1]\nmatches 1 [2,3,4,6]     ~>[]\n```\nUsing `matches` or otherwise, define a function\n```haskell\nelem :: Integer -> [Integer] -> Bool\n```\nwhich is `True`\nif the `Integer` is an element of the list, and `False`\notherwise. For the examples above, we have\n```haskell\nelem 1 [1,2,1,4,5,1] ~>True\nelem 1 [2,3,4,6]     ~>False\n```\nSince `elem` is a prelude function, you need to hide it as\ndescribed."
+  },
+  "5.22": {
+    "chapter": 5,
+    "text": "Define a function \n```haskell\nonSeparateLines :: [String] -> String\n```\nwhich takes a list of strings and returns a single string which when printed\nshows the strings on separate lines."
+  },
+  "5.23": {
+    "chapter": 5,
+    "text": "Give a function \n```haskell\nduplicate :: String -> Integer -> String\n```\nwhich takes a string and an integer, `n`. The result is `n`\ncopies of the string joined together.\nIf `n` is less than or equal to `0`, the result should be\nthe empty string, `\"\"`, and if `n` is `1`, the result will be the\nstring itself."
+  },
+  "5.24": {
+    "chapter": 5,
+    "text": "Give a function \n```haskell\npushRight :: String -> String\n```\nwhich takes a string and\nforms a string of length `linelength` by putting spaces at the front of\nthe\nstring. If `linelength` were `12` then `pushRight \"crocodile\"`\nwould be `\" crocodile\"`. How would you make `linelength`\na parameter of this function?"
+  },
+  "5.25": {
+    "chapter": 5,
+    "text": "Can you criticize the way the previous function is specified? Look for a\ncase in which it is not defined what it should do -- it is an exceptional\ncase."
+  },
+  "5.26": {
+    "chapter": 5,
+    "text": "Define a function \n```haskell\nfibTable :: Integer -> String\n```\nwhich produces a table of Fibonacci numbers. For instance, the effect of\n`putStr (fibTable 6)`\nshould be\n```haskell\n        n        fib n\n        0            0\n        1            1\n        2            1\n        3            2\n        4            3\n        5            5\n        6            8                \n```"
+  },
+  "5.27": {
+    "chapter": 5,
+    "text": "Go through the calculation of\n```haskell\nbooks exampleBase \"Charlie\" \nbooks exampleBase \"Rory\"\n```"
+  },
+  "5.28": {
+    "chapter": 5,
+    "text": "Define the functions `borrowers`,\n`borrowed` and `numBorrowed`. To define\n`numBorrowed` you will probably need the\n`length`\nfunction which returns the length of a list."
+  },
+  "5.29": {
+    "chapter": 5,
+    "text": "Give calculations of \n```haskell\nreturnLoan exampleBase \"Alice\" \"Asterix\"\nreturnLoan exampleBase \"Alice\" \"Little Women\"\n```"
+  },
+  "5.3": {
+    "chapter": 5,
+    "text": "Define the function which finds where a straight line crosses the x-axis. \nYou will need to think about how to supply the information about the\nstraight line to the function."
+  },
+  "5.30": {
+    "chapter": 5,
+    "text": "How would you have to modify the database functions if you had used the type\n```haskell\ndata Loan = Loan Person Book\n```\nto model individual loans, rather than the tuple type?"
+  },
+  "5.31": {
+    "chapter": 5,
+    "text": "How would you express this as a QuickCheck property: quote``Suppose that a particular `bk` is not loaned to a `pers`. Now make a random loan of `bk2` to `pers2`. `bk` should still not be loaned to `pers`.''quote\nWould you expect this property to hold? If so, why? If not, why not, and how would you modify it so that it does hold?"
+  },
+  "5.32": {
+    "chapter": 5,
+    "text": "Discuss how you would implement the database functions had you used\nthe representation `[(Person,[Book])]` rather than\n`[(Person,Book)]`for the database."
+  },
+  "5.33": {
+    "chapter": 5,
+    "text": "How would the tests for the database have to be modified to work with the implementation defined in the previous question? Would the QuickCheck properties have to be modified: if so, how? If not, why not?"
+  },
+  "5.34": {
+    "chapter": 5,
+    "text": "Define functions to give more readable output from the database\noperations of this section."
+  },
+  "5.4": {
+    "chapter": 5,
+    "text": "Design test data for the preceding exercises; explain the choices you\nhave made in each case. Give a sample evaluation of each of your functions."
+  },
+  "5.5": {
+    "chapter": 5,
+    "text": "Define a function to give the length of the perimeter of a geometrical shape,\nof type `Shape`. What is the type of this function?"
+  },
+  "5.6": {
+    "chapter": 5,
+    "text": "Re-define the `Item` type for supermarket products so that it uses a `data` definition rather than a `type` definition."
+  },
+  "5.7": {
+    "chapter": 5,
+    "text": "Add an extra constructor to `Shape` for triangles, and extend the\nfunctions `isRound`, `area` and `perimeter` to include triangles."
+  },
+  "5.8": {
+    "chapter": 5,
+    "text": "Define a function which decides whether a `Shape` is regular: a circle is\nregular, a square is a regular rectangle and being equilateral makes a\ntriangle regular."
+  },
+  "5.9": {
+    "chapter": 5,
+    "text": "Investigate the derived definitions for `Move` and `Shape`: what form\ndo the `show` functions take, for example?"
+  },
+  "6.1": {
+    "chapter": 6,
+    "text": "Give the most general types for the functions `snd` and\n`sing` defined by\n```haskell\nsnd (x,y) = y\nsing x = [x]\n```"
+  },
+  "6.10": {
+    "chapter": 6,
+    "text": "[Harder] Define the function\n```haskell\nscale :: Picture -> Int -> Picture\n```\nwhich scales the input picture by the integer provided as the second\nargument. For instance, if `exPic` is the picture\n```haskell\n#.#\n..#\n```\nthen the result of `scale exPic 2` should be\n```haskell\n##..##\n##..##\n....##\n....##\n```\nIn the case of a zero or negative scale factor, you should\nreturn an empty picture."
+  },
+  "6.11": {
+    "chapter": 6,
+    "text": "Correct the property `prop_AboveFlipH` given earlier."
+  },
+  "6.12": {
+    "chapter": 6,
+    "text": "Define properties which describe how `beside` interacts with `flipH` and `flipV`."
+  },
+  "6.13": {
+    "chapter": 6,
+    "text": "One property we can show holds is that if we take the same picture and put four copies of it together using `beside` and `above` in the two different ways, then the results are the same. Express this as a quick check property."
+  },
+  "6.14": {
+    "chapter": 6,
+    "text": "You can test your implementation of `rotate90` using QuickCheck. Can you think of properties which only use `rotate90` and others that use `rotate`? You may want to impose a condition that any picture involved is rectangular: the function is given in the program code for this chapter."
+  },
+  "6.15": {
+    "chapter": 6,
+    "text": "What property would you expect `invertColour` to have? Can you be sure that this will hold for randomly generated data?"
+  },
+  "6.16": {
+    "chapter": 6,
+    "text": "[Harder]\nWrite the analogue of `propAboveBeside3Correct` where two pictures are again used, but with two the same at the top (call them `n`) and two the same at the bottom (`s`, say). Do you need the condition in this case?"
+  },
+  "6.17": {
+    "chapter": 6,
+    "text": "Redefine the functions over pictures to pad pictures in the way just described. One way to solve the problem is to use the function\n```haskell\nreplicate :: Int -> a -> [a]\n```\n`replicate n x` returns a list containing `n` `x`s, so `replicate 3 'g'` is `\"ggg\"`."
+  },
+  "6.18": {
+    "chapter": 6,
+    "text": "How would you work with basic pictures that were not rectangular? Define a function which will take a picture - as a list of `String`s -- and return a rectangular list of strings, padding out each line as necessary. Once you start with rectangular pictures the functions you defined in the first part of this exercise should be enough to preserve them as rectangular."
+  },
+  "6.19": {
+    "chapter": 6,
+    "text": "An alternative representation of `Picture` is the type\n```haskell\n[[Bool]]\n```\nwhere `True`\nand `False` represent black and white points in a picture. How\nwould you have to modify the functions working over `Picture` to\naccommodate this change? What are the advantages and disadvantages of\nthe two representations?"
+  },
+  "6.2": {
+    "chapter": 6,
+    "text": "Explain why \n```haskell\n[[a]] -> [[a]]\n```\nis a type for `id` but why it is not the most general type\nfor this function."
+  },
+  "6.20": {
+    "chapter": 6,
+    "text": "We have represented pictures as a list of rows: how would you redefine the functions working over pictures if they are represented as a list of columns."
+  },
+  "6.21": {
+    "chapter": 6,
+    "text": "[Harder]\nHow would you re-implement the function `printPicture`, defined in the solution to exercise 6.7, so that it works over this column-based representation?"
+  },
+  "6.22": {
+    "chapter": 6,
+    "text": "It would be possible to represent a `Picture` as a single list of characters, with 'n' terminating each line of the picture, as in\n```haskell\n\".##.\\n.#.#\\n.###\\n####\\n\"\n```\nHow would you redefine the picture manipulating functions over this representation? Which functions become easier to define? Which more difficult?"
+  },
+  "6.23": {
+    "chapter": 6,
+    "text": "Re-implement the functions over pictures to work with this new representation. In particular, how would you print pictures which were represented in this way?"
+  },
+  "6.24": {
+    "chapter": 6,
+    "text": "Is it the case that all your answers to the last question give the most compact representation, so that you don't have adjacent runs of the same character, as in \n```haskell\n[(1,'.'), (2,'.'), (1,'#')]\n```\nwhich could be given more compactly as\n```haskell\n[(3,'.'), (1,'#')]\n```\nIf this can happen with your functions, how could you change your definitions to avoid it?"
+  },
+  "6.25": {
+    "chapter": 6,
+    "text": "Take another look at the QuickCheck properties you wrote to test pictures: rewrite these for your alternative implementations. How many of the properties carry over to the alternative implementations without alteration, and how many have to be modified in some way?"
+  },
+  "6.26": {
+    "chapter": 6,
+    "text": "[Harder]\nThe run-length encoding above works a line at a time, but it would be possible to give a more compact representation which combines runs in different lines. The earlier example could then be given by \n```haskell\n[(1,'.'), (2,'#'), (2,'.'),\n (1,'#'), (1,'.'), (1,'#'),\n (1,'.'), (7,'#')]\n```\nThis representation loses the length of the rows, so you would have to keep information about the row length in the type too, giving\n```haskell\ntype Picture = (Int, [(Int,Char)] )\n```\nas the representation. Re-implement the picture functions to work over this type."
+  },
+  "6.27": {
+    "chapter": 6,
+    "text": "[Harder]\nIf you know that only the characters `'.'` and `'#'` are used in a picture, how could you make the representation of the previous question even more compact?"
+  },
+  "6.28": {
+    "chapter": 6,
+    "text": "[Harder]\nDefine two more representations of pictures yourself, and re-implement the picture functions over these types."
+  },
+  "6.29": {
+    "chapter": 6,
+    "text": "Define a function\n```haskell\nmakeImage :: Picture -> Position -> Image\n```\nwhich makes an `Image`\nfrom a `Picture` and a `Position`."
+  },
+  "6.3": {
+    "chapter": 6,
+    "text": "Earlier in the chapter we saw the example of \n```haskell\nshift :: ((Integer,Integer),Integer) -> (Integer,(Integer,Integer))\nshift ((x,y),z) = (x,(y,z))\n```\nWhat is the most general type for `shift`, if the type\ndeclaration is omitted?"
+  },
+  "6.30": {
+    "chapter": 6,
+    "text": "Define a function\n```haskell\nchangePosition :: Image -> Position -> Image\n```\nwhich takes an `Image`\nand returns a new `Image` whose `Picture` is unchanged but whose `Position`\nis given by the second argument to `changePosition`."
+  },
+  "6.31": {
+    "chapter": 6,
+    "text": "Give a definition of the function\n```haskell\nmoveImage :: Image -> Int -> Int -> Image\n```\nso that the effect of `moveImage img xMove yMove` is to move `img`\nby `xMove` in the horizontal (`x`) direction and by `yMove` in\nthe vertical (`y`) direction."
+  },
+  "6.32": {
+    "chapter": 6,
+    "text": "Define a function\n```haskell\nprintImage :: Image -> IO ()\n```\nwhose action is the analogue of `printPicture` for pictures.\n\nfigure[t]\ncenter\n[width=4in]Pictures/transfPos.pdf\ncenter\nThe geometrical view of `flipV` and `rotate`.\ntransfPos\nfigure"
+  },
+  "6.33": {
+    "chapter": 6,
+    "text": "Implement for `Image` the analogues of `flipH`, `flipV`,\n`rotate` and `rotate90` under the naive view of how to lift the \ntransformations."
+  },
+  "6.34": {
+    "chapter": 6,
+    "text": "Implement for `Image` the analogues of `flipH`, `flipV`,\n`rotate` and `rotate90` under the geometrical view."
+  },
+  "6.35": {
+    "chapter": 6,
+    "text": "Define functions to `pad out' a `Picture`\nwith an amount of white space, as shown in Superimposing two Images..\n\nYou will need to think carefully about\nthe intended effect of the functions before you start to\nimplement them. You will need to have function parameters for the amount of padding\nto the left, right, bottom and top of the image.\n\nNote, in particular, that the `Position` of an\n`Image` might change as a result of padding."
+  },
+  "6.36": {
+    "chapter": 6,
+    "text": "Using the padding functions, define a superimposition function for\nthe `Image` type."
+  },
+  "6.37": {
+    "chapter": 6,
+    "text": "How would you use `Image` superimposition to give analogues of \n`above` and `beside` for `Images`?"
+  },
+  "6.38": {
+    "chapter": 6,
+    "text": "Define QuickCheck properties to check the implementation of the functions over the `Image` type. How many carry over from the `Picture` type, and how many have to be re-defined?"
+  },
+  "6.39": {
+    "chapter": 6,
+    "text": "Given a number of pence, `1023` say, the pounds and pence parts are given\nby `1023 `div` 100` and `1023 `mod` 100`. Using this fact, and the \n`show` function, define a function\n```haskell\nformatPence :: Price -> String\n```\nso that, for example, `formatPence 1023 = \"10.23\"`; you need to be\ncareful about cases like `\"12.02\"`."
+  },
+  "6.4": {
+    "chapter": 6,
+    "text": "Define a function\n```haskell\nsuperimposeChar :: Char -> Char -> Char\n```\nso that the superimposition of ``.`' with itself gives\n``.`' while any other combination of characters gives\n``#`'."
+  },
+  "6.40": {
+    "chapter": 6,
+    "text": "Using the `formatPence` function, define a function\n```haskell\nformatLine  :: (Name,Price) -> String\n```\nwhich formats a line of a bill, thus\n```haskell\nformatLine (\"Dry Sherry, 1lt\",540) \n               = \"Dry Sherry, 1lt...........5.40\\n\"\n```\nRecall that 'n' is the newline character, \nthat `++` can be used\nto join two strings together, and that `length` will give the length of a\nstring. You might also find the `replicate` function useful."
+  },
+  "6.41": {
+    "chapter": 6,
+    "text": "Using the `formatLine` function, define\n```haskell\nformatLines :: [ (Name,Price) ] -> String\n```\nwhich applies `formatLine` to each `(Name,Price)` pair, and joins the\nresults together."
+  },
+  "6.42": {
+    "chapter": 6,
+    "text": "Define a function \n```haskell\nmakeTotal :: BillType -> Price\n```\nwhich takes a list of `(Name,Price)` pairs, and gives the total of the\nprices. For instance,\n```haskell\nmakeTotal [(\" ... \",540),(\" ... \",121)] = 661\n```"
+  },
+  "6.43": {
+    "chapter": 6,
+    "text": "Define the function\n```haskell\nformatTotal :: Price -> String\n```\nso that, for example,\n```haskell\nformatTotal 661 = \"\\nTotal.....................6.61\"\n```"
+  },
+  "6.44": {
+    "chapter": 6,
+    "text": "Using the functions `formatLines`, `makeTotal` and `formatTotal`,\ndefine \n```haskell\nformatBill :: BillType -> String\n``` \nso that on the input\n```haskell\n[(\"Dry Sherry, 1lt\",540),(\"Fish Fingers\",121),\n(\"Orange Jelly\",56),(\"Hula Hoops (Giant)\",133),\n(\"Unknown Item\",0),(\"Dry Sherry, 1lt\",540)]\n```\nthe example bill at the start of the section is produced."
+  },
+  "6.45": {
+    "chapter": 6,
+    "text": "Define a function\n```haskell\nlook :: Database -> BarCode -> (Name,Price)\n```\nwhich returns the `(Name,Price)` pair corresponding to the `BarCode`\nin the `Database`. If the `BarCode` does not appear in the database,\nthen the pair `(\"Unknown Item\", 0)` should be the result.\n\nHint: using the ideas of the library database you might find that you\nare returning a list of `(Name,Price)`\nrather than a single value. You can assume\nthat each bar code occurs only once in the database, so you can extract\nthis value by taking the `head` of such a list if it is non-empty."
+  },
+  "6.46": {
+    "chapter": 6,
+    "text": "Define a function\n```haskell\nlookup :: BarCode -> (Name,Price)\n```\nwhich uses `look` to look up an item in the particular database `codeIndex`. This function clashes with a function `lookup`\ndefined in the prelude; consult for details of how to\nhandle this."
+  },
+  "6.47": {
+    "chapter": 6,
+    "text": "Define the function \n```haskell\nmakeBill   :: TillType -> BillType\n```\nwhich applies `lookup` to every item in the input list. For instance,\nwhen applied to `[1234,4719,3814,1112,1113,1234]` the result will be\nthe list of `(Name,Price)` pairs given in Exercise 6.25.\nNote that `1113` does not appear in `codeIndex` and so is converted\nto `(\"Unknown Item\",0)`.\n\nThis completes the definition of `makeBill` and together\nwith \n`formatBill` gives the conversion program."
+  },
+  "6.48": {
+    "chapter": 6,
+    "text": "You are asked to add a discount for multiple buys\nof sherry: for every two bottles bought, there is a % \n`1.00` discount. From the example list of bar codes\n```haskell\n[1234,4719,3814,1112,1113,1234]\n```\nthe bill should be as illustrated in \nBills with `multibuy' discounts..\n\n```haskell\n                          Haskell Stores\n                     \n                  Dry Sherry, 1lt...........5.40\n                  Fish Fingers..............1.21\n                  Orange Jelly..............0.56\n                  Hula Hoops (Giant)........1.33\n                  Unknown Item..............0.00\n                  Dry Sherry, 1lt...........5.40\n                     \n                  Discount..................1.00\n                     \n                  Total....................12.90\n```\n\nCAPTIONSENTINELOPEN Bills with `multibuy' discounts. CAPTIONSENTINELCLOSE\n\nYou will probably find it helpful to define functions\n```haskell\nmakeDiscount :: BillType -> Price\nformatDiscount :: Price -> String\n```\nwhich you can use in a redefined\n```haskell\nformatBill :: BillType -> String\n```"
+  },
+  "6.49": {
+    "chapter": 6,
+    "text": "Design functions which update the database of bar codes. You will need a\nfunction to add a `BarCode` and a `(Name,Price)` pair to the `Database`, while at the same time removing any other reference to the bar\ncode already present in the database."
+  },
+  "6.5": {
+    "chapter": 6,
+    "text": "Define a function\n```haskell\nsuperimposeLine :: [Char] -> [Char] -> [Char]\n```\nwhich takes two lines -- which you can assume are of the same length --\nand superimposes their corresponding characters using `superimposeChar`, so that, for example,\n```haskell\nsuperimposeLine \".##.\" \".#.#\" = \".###\"\n```\nYou may want to use `zip` in your solution."
+  },
+  "6.50": {
+    "chapter": 6,
+    "text": "Re-design your system so that bar codes which do not appear in the database\ngive no entry in the final bill. There are (at least) two ways of doing this.\nitemize\n Keep the function `makeBill` as it is, and modify the \nformatting functions, or\n modify the `makeBill` function to remove the `unknown item' pairs.\nitemize"
+  },
+  "6.51": {
+    "chapter": 6,
+    "text": "[Harder]\nHow appropriate would it be to test your supermarket billing system using QuickCheck? Could you check parts of the system using QuickCheck? Could you use it to test the whole system, or could you do both?"
+  },
+  "6.52": {
+    "chapter": 6,
+    "text": "[Project] Design a script of functions to analyse collections\nof sales. Given a list of `TillType`, produce a table\nshowing the total sales of each item. You might also analyse\nthe bills to see which pairs of items are bought\ntogether; this could assist with placing items in the\nsupermarket."
+  },
+  "6.53": {
+    "chapter": 6,
+    "text": "Define a type `Suit` to represent suits and a type `Value` to represent the value of cards. Using these or otherwise, define a type `Deck` to represent a deck of cards. You may use type synonyms (`type`) or data type definitions (`data`), or both."
+  },
+  "6.54": {
+    "chapter": 6,
+    "text": "Try to give a rationale for the choices you have made in answering the previous question: if you can, give alternative definitions which use the other mechanism, and compare your solutions."
+  },
+  "6.55": {
+    "chapter": 6,
+    "text": "Define a type `Player` to represent the four players."
+  },
+  "6.56": {
+    "chapter": 6,
+    "text": "How would you represent a trick? Define a type `Trick`, using either a `type` or a `data` definition. Remember that you need to know which player has played which card, and also who led."
+  },
+  "6.57": {
+    "chapter": 6,
+    "text": "Define a function\n```haskell\nwinNT :: Trick -> Player\n```\nwhich decides the winner of a trick, assuming that there is no trump suit."
+  },
+  "6.58": {
+    "chapter": 6,
+    "text": "Define a function\n```haskell\nwinT :: Suit -> Trick -> Player\n```\nwhich decides the winner of a trick, assuming that there is a trump suit, which is passed in as the first argument."
+  },
+  "6.59": {
+    "chapter": 6,
+    "text": "Define a type `Hand` which represents the collection of cards held by a player at one point during a game. In the earlier example, the hand held by North is \u2660 A, 2; \u2665 K, 7; \u2666 3 (and no \u2663 cards)."
+  },
+  "6.6": {
+    "chapter": 6,
+    "text": "In a similar way to `superimposeLine`,\ndefine the function\n```haskell\nsuperimpose :: Picture -> Picture -> Picture\n```\nwhich superimposes two pictures, which you may assume have the same\ndimensions."
+  },
+  "6.60": {
+    "chapter": 6,
+    "text": "Define a type `Hands` which describes the hands held by the four players at one point in the game. This should represent the four hands shown in the diagram above, for example."
+  },
+  "6.61": {
+    "chapter": 6,
+    "text": "Define a function\n```haskell\ncheckPlay :: Hands -> Trick -> Bool\n```\nwhich checks whether the play in a particular trick is both possible and legal. It should be possible in the sense that the card played by each player (given in the `Trick`) should be in their hand, as given in the `Hands`. It should be legal in following the rule that players should follow suit if they can."
+  },
+  "6.62": {
+    "chapter": 6,
+    "text": "Define a type `Team` to represent the two teams North/South and East/West. Define a function \n```haskell\nwinnerNT :: [Trick] -> Team\n``` \nwhich will give the winning team from the list of tricks, assuming that there are no trumps. Also define the function\n```haskell\nwinnerT :: Suit -> [Trick] -> Team\n``` \nwhere the trump suit is passed in as the first argument."
+  },
+  "6.63": {
+    "chapter": 6,
+    "text": "[Harder]\nDefine a function \n```haskell\ncheckPlay :: [Trick] -> Bool\n```\nwhich checks whether the play in each trick is both possible and legal.\nHint: you will need to deduce the hand in each case from the cards played subsequently: once you have done this, you can use `checkPlay` as defined earlier."
+  },
+  "6.7": {
+    "chapter": 6,
+    "text": "Using the function \n`putStr :: String -> IO ()`\nand any other functions you might need, define the function \n```haskell\nprintPicture :: Picture -> IO ()\n```\nso that the effect of \n`printPicture [ \".##.\" , \".#.#\" , \".###\" , \"####\" ]`\nis that\n```haskell\n.##.\n.#.#\n.###\n####\n```\nis printed at the terminal window. Hint: it is enough to transform this list of strings to the single string\n```haskell\n\".##.\\n.#.#\\n.###\\n####\\n\"\n```\nand to pass that to `putStr`."
+  },
+  "6.8": {
+    "chapter": 6,
+    "text": "[Harder] \nDefine a function\n```haskell\nrotate90 :: Picture -> Picture\n```\nwhich rotates a picture through `90\u00b0` clockwise. For\ninstance, the effect of `rotate90` on the picture in the previous exercise\nwould be to give\n```haskell\n#...\n####\n##.#\n###.\n``` \nHint: you need to make a line of the new picture by picking out the\n`i`th elements in each of the lines of the original picture, reflected \nin a horizontal mirror."
+  },
+  "6.9": {
+    "chapter": 6,
+    "text": "Using `rotate90` or otherwise, define a function which rotates a picture through\n`90\u00b0` anticlockwise."
+  },
+  "7.1": {
+    "chapter": 7,
+    "text": "Give a pattern-matching definition of a function which returns the\nfirst integer in a list plus one, if there is one, and returns zero otherwise."
+  },
+  "7.10": {
+    "chapter": 7,
+    "text": "Can you write a property which links `elemNum` and `unique` from the previous two questions? Check to see whether this property does hold using QuickCheck."
+  },
+  "7.11": {
+    "chapter": 7,
+    "text": "Give primitive recursive definitions of the prelude functions\n`reverse` and `unzip`."
+  },
+  "7.12": {
+    "chapter": 7,
+    "text": "Can you use the `iSort` function to find the minimum and maximum\nelements of a list of numbers? How would you find these elements without using\n`iSort`?"
+  },
+  "7.13": {
+    "chapter": 7,
+    "text": "Design test data for the `ins` function. Your data should address\ndifferent possible points of insertion, and also look at any exceptional\ncases."
+  },
+  "7.14": {
+    "chapter": 7,
+    "text": "Define a function\n```haskell\nisSorted :: [Integer] -> Bool\n```\nwhich is true when its argument is sorted in ascending order. How could you use this to write QuickCheck properties to check your `iSort` and `ins` functions?"
+  },
+  "7.15": {
+    "chapter": 7,
+    "text": "[Harder]\nIs it enough to test that the result of `iSort` is sorted? What other property should a sorting function have? Can you write a QuickCheck property to check this?"
+  },
+  "7.16": {
+    "chapter": 7,
+    "text": "By modifying the definition of the `ins` function we can change the\nbehaviour of the sort, `iSort`. Redefine `ins` in two different ways\nso that \nitemize\n the list is sorted in descending order;\n duplicates are removed from the list. For example,\n```haskell\niSort [2,1,4,1,2] = [1,2,4]\n```\nunder this definition. \nitemize"
+  },
+  "7.17": {
+    "chapter": 7,
+    "text": "Would you need to redefine your function `isSorted` to deal with the two different variations of sorting discussed in the last question? If so, how would you modify it; if not, explain why not."
+  },
+  "7.18": {
+    "chapter": 7,
+    "text": "Design test data for the duplicate-removing version of\n`iSort`, explaining your choices."
+  },
+  "7.19": {
+    "chapter": 7,
+    "text": "By modifying the definition of the `ins` and `iSort` functions, \ndefine a function to sort lists of pairs of numbers. The ordering should\nbe lexicographic -- the dictionary ordering. \n This ordering first\nlooks at the first halves of the pairs; only if these values are equal\nare the second halves compared. For instance, `(2,73)`\nis smaller than `(3,0)`, and this is smaller than `(3,2)`."
+  },
+  "7.2": {
+    "chapter": 7,
+    "text": "Give a pattern-matching definition of a function which adds together the\nfirst two integers in a list, if a list contains at least two elements;\nreturns the head element if the list contains one, and returns zero\notherwise."
+  },
+  "7.20": {
+    "chapter": 7,
+    "text": "Using the definition of `take` as a guide,\ndefine the prelude functions `drop` and `splitAt`. Write QuickCheck tests for these re-defined functions."
+  },
+  "7.21": {
+    "chapter": 7,
+    "text": "What is the value of `take (-3) []` according to the definition\nof `take` given earlier? How would you modify the definition so\nthat there is an error reported whenever the `Int` argument is\nnegative?"
+  },
+  "7.22": {
+    "chapter": 7,
+    "text": "The `zip` function takes its two arguments separately: we can define this variant to take the arguments as a pair:\n```haskell\nzip' :: ([a],[b]) -> [(a,b)]\nzip' (xs,ys) = zip xs ys\n```\nThere's a built-in function, which has the reverse effect, taking a list of pairs into a pair of lists:\n```haskell\nunzip :: [(a,b)] -> ([a],[b])\n```\nWrite a property for `zip'` and `unzip` that expresses that they are the `inverse' of each other: does it matter the order in which they are applied? Try both ways, and see what happens when you apply `quickCheck` in each case."
+  },
+  "7.23": {
+    "chapter": 7,
+    "text": "How would you define a function `zip3` which zips together three\nlists? Try to write a recursive definition and also one which \nuses `zip` instead; what are the advantages and disadvantages\nof the two different definitions?"
+  },
+  "7.24": {
+    "chapter": 7,
+    "text": "How would you modify `qSort` to sort a list into descending order?\nHow would you ensure that `qSort` removed duplicate elements?"
+  },
+  "7.25": {
+    "chapter": 7,
+    "text": "One list is a sublist of another if the elements of the first occur in the\nsecond, in the same order. For instance, `\"ship\"` is a sublist\nof `\"Fish & Chips\"`, but not of `\"hippies\"`.\n\nA list is a subsequence of another if it occurs as a sequence\nof elements next to each other. For example, `\"Chip\"` is a\nsubsequence\nof `\"Fish & Chips\"`, but not of `\"Chin up\"`.\n\nDefine functions which decide whether one string is a sublist or a\nsubsequence of another string."
+  },
+  "7.26": {
+    "chapter": 7,
+    "text": "Write QuickCheck properties which test your implementations of the tests for `sublist' and `subsequence'."
+  },
+  "7.27": {
+    "chapter": 7,
+    "text": "Define the function `dropLine`\nspecified in the text."
+  },
+  "7.28": {
+    "chapter": 7,
+    "text": "Give a definition of the function\n```haskell\njoinLine :: Line -> String\n```\nwhich turns a line into printable form. For example,\n```haskell\njoinLine [ \"dog\" , \"cat\" ] = \"dog cat\"\n```"
+  },
+  "7.29": {
+    "chapter": 7,
+    "text": "Using the function `joinLine`, or otherwise, define the function\n```haskell\njoinLines :: [Line] -> String\n```\nwhich joins together the lines, separated by newlines."
+  },
+  "7.3": {
+    "chapter": 7,
+    "text": "Give solutions to the previous two questions without using\npattern matching, using built-in functions instead."
+  },
+  "7.30": {
+    "chapter": 7,
+    "text": "In this case study we have defined separate `take' and `drop' functions for\nwords and lines.\nRedesign the program so that it uses `split' functions -- like the prelude\nfunction `splitAt` -- instead."
+  },
+  "7.31": {
+    "chapter": 7,
+    "text": "[Harder] Modify the function `joinLine` so that it justifies the\nline to length `lineLen` by adding the appropriate number of spaces\nbetween the words."
+  },
+  "7.32": {
+    "chapter": 7,
+    "text": "Design a function\n```haskell\nwc :: String -> (Int,Int,Int)\n```\nwhich when given a text string returns the number of characters, words and\nlines in the string. The end of a line in the string is signalled by the\nnewline character, 'n'. Define a similar function\n```haskell\nwcFormat :: String -> (Int,Int,Int)\n```\nwhich returns the same statistics for the text after it has been\nfilled."
+  },
+  "7.33": {
+    "chapter": 7,
+    "text": "Define a function\n```haskell\nisPalin :: String -> Bool\n```\nwhich tests whether a string is a palindrome -- that is whether it is the\nsame read both backwards and forwards. An example is the string\n```haskell\nMadam I'm Adam\n```\nNote that punctuation and white space are ignored in the test, and that no\ndistinction is made between capital and small letters. You might first like to\ndevelop a test which simply tests whether the string is exactly the same\nbackwards and forwards, and only afterwards take account of punctuation and\ncapital letters."
+  },
+  "7.34": {
+    "chapter": 7,
+    "text": "[Harder] Design a function\n```haskell\nsubst :: String -> String -> String -> String\n```\nso that\n```haskell\nsubst oldSub newSub st\n```\n is the result of replacing the first\noccurrence in `st` of the substring `oldSub` by the substring `newSub`. For instance,\n```haskell\nsubst \"much  \" \"tall \" \"How much  is that?\"\n  = \"How tall is that?\"\n```\nIf the substring `oldSub` does not occur in `st`, the result should\nbe `st`."
+  },
+  "7.35": {
+    "chapter": 7,
+    "text": "[Harder] \nDefine QuickCheck properties which test the behaviour of your `subst` function, defined in the previous question."
+  },
+  "7.4": {
+    "chapter": 7,
+    "text": "Give a definition of the `firstDigit` function without using a `case` expression."
+  },
+  "7.5": {
+    "chapter": 7,
+    "text": "Define the function\n```haskell\nproduct :: [Integer] -> Integer\n```\nwhich gives the product of a list of integers, and returns `1`\nfor an empty list; why is this particular value \nchosen as the result for the empty list?"
+  },
+  "7.6": {
+    "chapter": 7,
+    "text": "Define the functions\n```haskell\nand, or :: [Bool] -> Bool\n```\nwhich give the conjunction and disjunction of a list of Booleans. For\ninstance,\n```haskell\nand [False, True] = False\nor  [False, True] = True\n```\nOn an empty list `and` gives `True` and `or` gives\n`False`; explain the reason for these choices."
+  },
+  "7.7": {
+    "chapter": 7,
+    "text": "Test your implementations against the built-in definitions, using the method outlined."
+  },
+  "7.8": {
+    "chapter": 7,
+    "text": "Using primitive recursion over lists, define a function\n```haskell\nelemNum :: Integer -> [Integer] -> Integer\n```\nso that `elemNum x xs` returns the number of times that\n`x` occurs in the list `xs`. \n\nCan you define `elemNum` without using primitive recursion,\nusing list comprehensions and built-in functions instead?"
+  },
+  "7.9": {
+    "chapter": 7,
+    "text": "Define a function\n```haskell\nunique :: [Integer] -> [Integer]\n```\nso that `unique xs` returns the list of elements of `xs`\nwhich occur exactly once. For example, `unique [4,2,1,3,2,3]` is\n`[4,1]`. You might like to think of two solutions to this\nproblem: one using list comprehensions and the other not."
+  },
+  "8.1": {
+    "chapter": 8,
+    "text": "Define a function \n```haskell\noutcome :: Move -> Move -> Integer\n```\nwhich gives the outcome as 1, 0, or -1 according to whether the first `Move` beats, draws with or loses against the second `Move`. For example, we expect that \n```haskell\noutcome Rock Scissors = 1\n```"
+  },
+  "8.10": {
+    "chapter": 8,
+    "text": "Write an I/O program which will read a line of input and test whether the\ninput is a palindrome. The program should\n`prompt' for its input and also\noutput an appropriate message after testing."
+  },
+  "8.11": {
+    "chapter": 8,
+    "text": "Write an I/O program which will read two integers, each on a separate line, and return\ntheir sum. The program should prompt for input and explain its output."
+  },
+  "8.12": {
+    "chapter": 8,
+    "text": "Define a function\n```haskell\nputNtimes :: Integer -> String -> IO ()\n```\nso that the effect of `putNtimes n str` is to output `str`, a string, `n` times, one per line."
+  },
+  "8.13": {
+    "chapter": 8,
+    "text": "Write an I/O program which will first read a positive integer,\n`n` say, and then read `n` integers and write their sum. \nThe program should prompt appropriately for its inputs and explain its output."
+  },
+  "8.14": {
+    "chapter": 8,
+    "text": "Define a `wc` function which copies input to output until an empty line is read. The program should then output the number of lines, words and characters that have been copied. [`wc` is a standard unix command line program.]"
+  },
+  "8.15": {
+    "chapter": 8,
+    "text": "Define an interactive palindrome checker. You should neglect capitalisation, white space and punctuation, so that\n```haskell\nMadam I'm Adam.\n```\nis recognised as a palindrome."
+  },
+  "8.16": {
+    "chapter": 8,
+    "text": "Write a program which repeatedly reads lines and tests whether they are\npalindromes until an empty line is read. The program should explain\nclearly to the user what input is expected and output is produced."
+  },
+  "8.17": {
+    "chapter": 8,
+    "text": "Write a program which repeatedly reads integers (one per line) until finding\na zero value and\noutputs the sum of the inputs read."
+  },
+  "8.18": {
+    "chapter": 8,
+    "text": "Write a program which repeatedly reads integers (one per line) until finding\na zero value and\noutputs a sorted version of the inputs read. Which sorting algorithm is\nmost appropriate in such a case?"
+  },
+  "8.19": {
+    "chapter": 8,
+    "text": "Explain the behaviour of this `copy` program\n```haskell\ncopy :: IO ()\n\ncopy =\n    do\n      line <- getLine\n      let whileCopy = \n              do\n                if (line == \"\")\n                  then (return ())\n                  else \n                    do putStrLn line\n                       line <- getLine\n                       whileCopy \n      whileCopy\n```\nwhere the definition of `whileCopy` is modelled on a `while` loop in a traditional programming language."
+  },
+  "8.2": {
+    "chapter": 8,
+    "text": "Using the function `outcome` that you defined in the previous exercise, define a function\n```haskell\ntournamentOutcome :: Tournament -> Integer\n```\nwhich gives the outcome of a tournament, giving positive scores to player A, the first player. For example, we should expect\n```haskell\ntournamentOutcome ([Rock,Rock,Paper],[Scissors,Paper,Rock]) = 1\n```\nbecause the scores for the three rounds are 1, -1 and 1, summing to 1."
+  },
+  "8.20": {
+    "chapter": 8,
+    "text": "Complete the definition of the function `playSvsS`."
+  },
+  "8.21": {
+    "chapter": 8,
+    "text": "The result of applying `playSvsS` is a value of type `Tournament`. Define a function which prints out the results of such a tournament, including both the numerical score and the sequences of moves made. Hint: it will be enough to define a function \n```haskell\nshowTournament :: Tournament -> String\n```\nYou can then print out the result by applying `putStr` to the string."
+  },
+  "8.22": {
+    "chapter": 8,
+    "text": "We have chosen to represent a strategy by a function \n```haskell\ntype Strategy = [Move] -> Move\n```\nwhich takes the list of the opponent's moves and computes our next move from that. An alternative definition would be\n```haskell\ntype Strategy2 = Tournament -> Move\n```\nwhere we have access to both our moves and our opponent's moves in deciding our next move. What are the advantages of doing this? Are there any disadvantages to doing it?\nCan you define any strategies using `Strategy2` that you couldn't do using `Strategy`?"
+  },
+  "8.23": {
+    "chapter": 8,
+    "text": "[Harder]\nAfter trying out tournaments of different strategies against each other, can you conclude anything about what is the best strategy for playing Rock - Paper - Scissors?\nCan you turn this strategy into a `Strategy`?"
+  },
+  "8.3": {
+    "chapter": 8,
+    "text": "Define a strategy which plays the move which would have won against the opponent's last move. Define a strategy which plays the move which would have lost against the opponent's last move. Which of these do you think will be a better strategy in practice? Explain your answer."
+  },
+  "8.4": {
+    "chapter": 8,
+    "text": "Define a strategy which plays a random choice except when the opponent's last two moves have been the same one. In this case we guess that her next move will not be the same: how does that help? Well, if we know that she's only got two choices, we can play not to lose. \n\nTake the concrete example of `Rock` being played twice by our opponent. We guess that her next move will be `Paper` or `Scissors`: what should we play? The answer is `Scissors`, because then we'll win if she plays `Paper` or draw if she also plays `Scissors`!"
+  },
+  "8.5": {
+    "chapter": 8,
+    "text": "Define a strategy which looks at the frequencies that the opponent has played the three choices. If you assume they are making random plays, then why not predict they are about to play the least frequent, and use the trick from the previous exercise to make a choice."
+  },
+  "8.6": {
+    "chapter": 8,
+    "text": "[Harder]\nGo to the World RPS website -- see the box at the end of this section -- to find out more strategies, and try to implement them."
+  },
+  "8.7": {
+    "chapter": 8,
+    "text": "[Harder]\nDefine a function \n```haskell\nalternate :: Strategy -> Strategy -> Strategy\n```\nso that the strategy given by\n```haskell\nalternate str1 str2\n```\nis to combine the two strategies `str1` and `str2`, using them alternately."
+  },
+  "8.8": {
+    "chapter": 8,
+    "text": "[Hard]\nCan you write a function which will analyse an arbitrary strategy to work out what it does? You will need to think about how to represent this result: is it a string describing what the strategy does, or something a bit less informal?"
+  },
+  "8.9": {
+    "chapter": 8,
+    "text": "[Hard]\nCan you use the facilities of QuickCheck -- described in more detail in DSLs for computation: generating data in QuickCheck -- to help to analyse what an arbitrary strategy does?"
+  },
+  "9.1": {
+    "chapter": 9,
+    "text": "Given the definition of `fact` above, what are the results of\nevaluating the following expressions?\n```haskell\n(4 > 2) || (fact (-1) == 17)\n(4 > 2) && (fact (-1) == 17)\n```\nDiscuss the reasons why you think that you obtained these answers."
+  },
+  "9.10": {
+    "chapter": 9,
+    "text": "[Harder] Show for all finite `xs` and defined `n` that\n```haskell\ntake n xs ++ drop n xs = xs\n```"
+  },
+  "9.11": {
+    "chapter": 9,
+    "text": "Write QuickCheck properties for the propositions that you have proved, and check that they indeed hold."
+  },
+  "9.12": {
+    "chapter": 9,
+    "text": "Prove for all finite lists `xs` and `ys` that\n```haskell\nrev (xs ++ ys) = rev ys ++ rev xs\n```"
+  },
+  "9.13": {
+    "chapter": 9,
+    "text": "Using the function\n```haskell\nfacAux :: Integer -> Integer -> Integer\nfacAux 0 p = p\nfacAux n p = facAux (n-1) (n*p)\n```\nwe can define\n```haskell\nfac2 n = facAux n 1\n```\nProve that for all defined natural numbers `n`,\n```haskell\nfac n = fac2 n\n```"
+  },
+  "9.14": {
+    "chapter": 9,
+    "text": "Write a property expressing that the old and new `reverse` functions have the same behaviour."
+  },
+  "9.15": {
+    "chapter": 9,
+    "text": "Write a property expressing that the old and new factorial functions have the same behaviour. What happens to the QuickCheck of the property if you allow arbitrary integer inputs to the factorial functions? how can you remedy this?"
+  },
+  "9.2": {
+    "chapter": 9,
+    "text": "Give a definition of a multiplication function\n```haskell\nmult :: Integer -> Integer -> Integer\n```\nso that ` mult 0 (fact (-2))` evaluates to `0`.\n\nWhat is the result of ` mult (fact (-2)) 0` for your function?\nExplain why."
+  },
+  "9.3": {
+    "chapter": 9,
+    "text": "Prove the properties for functions over `Picture` first discussed in Tests, properties and proofs, that is, for all finite `pic`:\n```haskell\nflipV (flipH pic) = flipH (flipV pic)\nflipV (flipV pic) = pic\nflipH (flipV pic) = pic\n```"
+  },
+  "9.4": {
+    "chapter": 9,
+    "text": "Look again at the properties for functions over `Picture` discussed in The Picture example: implementation, and prove those properties which should hold for all pictures."
+  },
+  "9.5": {
+    "chapter": 9,
+    "text": "Prove for all finite `xs` and `ys` that\n```haskell\nsum (xs ++ ys) = sum xs + sum ys\t  -- (sum++)\n```"
+  },
+  "9.6": {
+    "chapter": 9,
+    "text": "Prove the two rules for `++`:\n```haskell\nxs ++ [] = xs  -- (++.3)\nxs ++ (ys ++ zs) = (xs ++ ys) ++ zs  -- (++.4)\n```\nfor all finite `xs`, `ys` and `zs`."
+  },
+  "9.7": {
+    "chapter": 9,
+    "text": "Show for all finite `xs` that\n```haskell\nsum (reverse xs)    = sum xs\nlength (reverse xs) = length xs\n```\nWhat common factors can you see in your two proofs?"
+  },
+  "9.8": {
+    "chapter": 9,
+    "text": "Show for all finite integer lists `xs` and `ys` that\n```haskell\nelem z (xs ++ ys) = elem z xs || elem z ys\n```"
+  },
+  "9.9": {
+    "chapter": 9,
+    "text": "Show for all finite lists `ps` that\n```haskell\nzip (fst (unzip ps)) (snd (unzip ps)) = ps\n```\nUnder what conditions on `xs` and `ys` is it the case that\n```haskell\nunzip (zip xs ys) = (xs,ys)\n```\nwhen `unzip` is defined by\n```haskell\nunzip [] = ([],[])\nunzip ((x,y):ps) \n  = (x:xs,y:ys)\n    where\n    (xs,ys) = unzip ps                   \n```\nGive a proof in that case."
+  }
+}

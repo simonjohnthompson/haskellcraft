@@ -75,3 +75,7 @@ Admin/pdf/*.pdf
 
 ## Locally-edited scratch file, not part of the tracked source:
 Code/Craft3e/svgOut.xml
+
+## Cloudflare Worker (AI exercise feedback) build/auth state:
+Worker/node_modules/
+.wrangler/

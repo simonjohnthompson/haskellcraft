@@ -47,14 +47,22 @@ Feedback:`;
 // token -- not that it was issued for this site's own widget. Checking
 // `hostname` too ties the verification to the book's actual domain.
 async function verifyTurnstile(token, env) {
-  const resp = await fetch("https://challenges.cloudflare.com/turnstile/siteverify", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ secret: env.TURNSTILE_SECRET_KEY, response: token }),
-  });
-  const result = await resp.json();
-  const expectedHost = new URL(env.ALLOWED_ORIGIN).hostname;
-  return result.success === true && result.hostname === expectedHost;
+  // Fail closed: a network hiccup or a non-JSON response from Cloudflare's
+  // own endpoint means "not verified", not an unhandled exception that
+  // surfaces to the client as a generic platform error page instead of a
+  // proper response.
+  try {
+    const resp = await fetch("https://challenges.cloudflare.com/turnstile/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ secret: env.TURNSTILE_SECRET_KEY, response: token }),
+    });
+    const result = await resp.json();
+    const expectedHost = new URL(env.ALLOWED_ORIGIN).hostname;
+    return result.success === true && result.hostname === expectedHost;
+  } catch {
+    return false;
+  }
 }
 
 // Workers KV has no atomic increment, so a tight concurrent burst from one

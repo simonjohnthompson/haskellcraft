@@ -28,6 +28,74 @@ function loadTurnstile() {
     return turnstileLoadPromise;
 }
 
+function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Gemini's feedback comes back as Markdown-ish text (bold, inline code,
+// fenced code blocks, bullet lists). Render it for readability without
+// ever trusting the model's output as HTML: escape the whole string
+// first, then only ever wrap that already-escaped, inert text in a
+// fixed, hardcoded set of tags. A literal "<script>" in the feedback
+// becomes the harmless text "&lt;script&gt;" before any of the markup
+// rules below ever run, so there's no way for model output to introduce
+// a real tag.
+function renderFeedback(markdown) {
+    const codeBlocks = [];
+    let html = escapeHtml(markdown);
+
+    // Fenced code blocks first, and stashed out, so a later rule (inline
+    // code, bold) can't reach inside one and mangle code that itself
+    // contains a backtick or asterisk (e.g. Haskell's infix `div`).
+    html = html.replace(/```[^\n]*\n([\s\S]*?)```/g, (_, code) => {
+        codeBlocks.push(`<pre><code>${code}</code></pre>`);
+        return `\x00${codeBlocks.length - 1}\x00`;
+    });
+
+    const inline = (text) =>
+        text
+            .replace(/`([^`\n]+)`/g, "<code>$1</code>")
+            .replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
+
+    // Within one blank-line-separated block, a run of "- "/"* " lines
+    // becomes a <ul>, even directly following a lead-in line with no
+    // blank line between them -- how feedback text commonly reads.
+    function renderBlock(block) {
+        const lines = block.split("\n");
+        const parts = [];
+        let buffer = [];
+        let bufferIsList = null;
+        const flush = () => {
+            if (buffer.length === 0) return;
+            if (bufferIsList) {
+                const items = buffer.map((line) => inline(line.replace(/^[-*]\s+/, "")));
+                parts.push(`<ul>${items.map((i) => `<li>${i}</li>`).join("")}</ul>`);
+            } else {
+                parts.push(`<p>${buffer.map(inline).join("<br>")}</p>`);
+            }
+            buffer = [];
+        };
+        for (const line of lines) {
+            const isListLine = /^[-*]\s+/.test(line);
+            if (bufferIsList !== null && isListLine !== bufferIsList) flush();
+            bufferIsList = isListLine;
+            buffer.push(line);
+        }
+        flush();
+        return parts.join("\n");
+    }
+
+    html = html
+        .split(/\n{2,}/)
+        .map((block) => {
+            const trimmed = block.trim();
+            return /^\x00\d+\x00$/.test(trimmed) ? trimmed : renderBlock(trimmed);
+        })
+        .join("\n");
+
+    return html.replace(/\x00(\d+)\x00/g, (_, i) => codeBlocks[Number(i)]);
+}
+
 function statusMessage(status) {
     switch (status) {
         case 403:
@@ -130,9 +198,7 @@ function setupWidget(container) {
                 result.textContent = statusMessage(response.status);
             } else {
                 const data = await response.json();
-                // Escaped text, never raw HTML -- the model's own output
-                // is not something to trust as markup.
-                result.textContent = data.feedback;
+                result.innerHTML = renderFeedback(data.feedback);
             }
         } catch {
             result.classList.add("is-error");

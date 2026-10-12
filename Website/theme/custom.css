@@ -147,11 +147,51 @@
     padding: 0.75em;
     border-radius: 4px;
     background: var(--bg);
-    white-space: pre-wrap;
 }
 
 .content .exercise-feedback-result.is-error {
     border: 1px solid var(--warning-border);
+}
+
+/* Rendered feedback markup (see exercise-feedback.js's renderFeedback) --
+   the result div itself holds no whitespace-driven formatting, since its
+   content is now real HTML, not preformatted text. */
+.content .exercise-feedback-result > :first-child {
+    margin-top: 0;
+}
+
+.content .exercise-feedback-result > :last-child {
+    margin-bottom: 0;
+}
+
+.content .exercise-feedback-result p {
+    margin: 0.6em 0;
+}
+
+.content .exercise-feedback-result ul {
+    margin: 0.6em 0;
+    padding-inline-start: 1.4em;
+}
+
+.content .exercise-feedback-result code {
+    font-family: var(--mono-font);
+    font-size: 0.9em;
+    background: var(--quote-bg);
+    border-radius: 3px;
+    padding: 0.1em 0.3em;
+}
+
+.content .exercise-feedback-result pre {
+    margin: 0.6em 0;
+    padding: 0.6em;
+    border-radius: 4px;
+    background: var(--quote-bg);
+    overflow-x: auto;
+}
+
+.content .exercise-feedback-result pre code {
+    padding: 0;
+    background: none;
 }
 
 .content .cf-turnstile {

@@ -149,7 +149,14 @@ function setupWidget(container) {
         if (opening && widgetId === null) {
             try {
                 const turnstile = await loadTurnstile();
-                widgetId = turnstile.render(turnstileMount, { sitekey: TURNSTILE_SITE_KEY });
+                // "interaction-only" -- a fresh token is still required for
+                // every submission (Turnstile tokens are single-use), but
+                // this lets Cloudflare's risk engine resolve silently when
+                // it can, rather than always showing a checkbox to click.
+                widgetId = turnstile.render(turnstileMount, {
+                    sitekey: TURNSTILE_SITE_KEY,
+                    appearance: "interaction-only",
+                });
             } catch {
                 result.hidden = false;
                 result.classList.add("is-error");

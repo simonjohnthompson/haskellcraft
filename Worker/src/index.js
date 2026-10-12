@@ -52,7 +52,7 @@ async function verifyTurnstile(token, env) {
   // surfaces to the client as a generic platform error page instead of a
   // proper response.
   try {
-    const resp = await fetch("https://challenges.cloudflare.com/turnstile/siteverify", {
+    const resp = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ secret: env.TURNSTILE_SECRET_KEY, response: token }),

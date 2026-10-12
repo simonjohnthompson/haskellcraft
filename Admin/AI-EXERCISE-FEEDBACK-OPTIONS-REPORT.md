@@ -111,6 +111,12 @@ building against them) for feedback at the level this needs ("here's what's
 off about your pattern match"), without being expensive if usage ever did
 need to graduate off the free tier.
 
+(As built: `gemini-2.0-flash-lite` was retired by the time this feature went
+live, and the deployed Worker uses `gemini-3.5-flash-lite` instead -- see
+`Admin/AI-EXERCISE-FEEDBACK-IMPLEMENTATION-PLAN-REPORT.md` for the current
+configuration. The model-naming churn this implies is itself worth planning
+around in any future work that pins a specific model name in code.)
+
 ## Option B: a fully client-side, local model
 
 Run a small open model (e.g. Phi-3, Gemma) directly in the browser via

@@ -82,3 +82,78 @@
     font-size: 0.9em;
     text-align: center;
 }
+
+/* AI feedback widget on each numbered exercise (see tex2md.py's
+   EXERCISEOPEN/EXERCISEMID/EXERCISECLOSE sentinel). The markup inside
+   .exercise-feedback is built entirely by exercise-feedback.js; this
+   only styles it. */
+.content .exercise-feedback {
+    margin-top: 0.75em;
+}
+
+.content .exercise-feedback-toggle {
+    font-size: 0.85em;
+    padding: 0.4em 0.9em;
+    border: 1px solid var(--quote-border);
+    border-radius: 4px;
+    background: var(--quote-bg);
+    color: var(--fg);
+    cursor: pointer;
+}
+
+.content .exercise-feedback-toggle:hover {
+    background: var(--theme-hover);
+}
+
+.content .exercise-feedback-panel {
+    margin-top: 0.75em;
+    padding: 1em;
+    border-radius: 6px;
+    background: var(--quote-bg);
+}
+
+.content .exercise-feedback-code {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 8em;
+    padding: 0.5em;
+    font-family: var(--mono-font);
+    font-size: var(--code-font-size);
+    border: 1px solid var(--quote-border);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--fg);
+    resize: vertical;
+}
+
+.content .exercise-feedback-submit {
+    margin-top: 0.6em;
+    padding: 0.4em 1.1em;
+    border: 1px solid var(--quote-border);
+    border-radius: 4px;
+    background: var(--links);
+    color: var(--bg);
+    cursor: pointer;
+}
+
+.content .exercise-feedback-submit:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.content .exercise-feedback-result {
+    margin-top: 0.75em;
+    padding: 0.75em;
+    border-radius: 4px;
+    background: var(--bg);
+    white-space: pre-wrap;
+}
+
+.content .exercise-feedback-result.is-error {
+    border: 1px solid var(--warning-border);
+}
+
+.content .cf-turnstile {
+    margin-top: 0.6em;
+}

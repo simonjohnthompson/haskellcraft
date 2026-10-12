@@ -10,6 +10,7 @@ default-theme = "light"
 preferred-dark-theme = "navy"
 git-repository-url = "https://github.com/simonjohnthompson/haskellcraft"
 additional-css = ["theme/custom.css"]
+additional-js = ["theme/exercise-feedback.js"]
 
 [output.html.search]
 enable = true

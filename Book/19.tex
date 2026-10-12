@@ -310,7 +310,7 @@ programs that raise \emph{exceptions}, and can have those exceptions handled wit
 \end{titemize}
 Well, we \emph{can} do this, so long as the types have the analogue of the bind and return functions. In other words, we need to implement functions in a particular kind of \emph{interface}, and we know from Chapter \ref{classes} that this is given in Haskell by the \texttt{Monad} class, like this:
 \begin{alltt}\minx{Monad}
-class Monad m where
+class Applicative m => Monad m where
   (>>=)  :: m a -> (a -> m b) -> m b
   return :: a -> m a
 \end{alltt}
@@ -363,7 +363,7 @@ A monad is a family of types \texttt{m a}, based on a polymorphic type
 constructor \texttt{m}, with functions \texttt{return}, \texttt{(>>=)} and
 \texttt{(>>)}:
 \begin{alltt}
-class Monad m where
+class Applicative m => Monad m where
   (>>=)  :: m a -> (a -> m b) -> m b
   return :: a -> m a
   (>>)   :: m a -> m b -> m b
@@ -581,13 +581,13 @@ a value of type \texttt{b}.
 
 \subsection*{Some standard functions and the \texttt{Functor} class}
 
-There is a set of standard functions over monads, defined in \texttt{Control.Monad}; we just look at two of these here. Their types should be
+There is a set of standard functions over monads, some defined in \texttt{Control.Monad} and some inherited from the \texttt{Functor} class; we just look at two of these here. Their types should be
 familiar from the list case
 \begin{alltt}\minx{fmap}\minx{join}
-fmap :: Monad m => (a -> b) -> m a -> m b
+fmap :: Functor m => (a -> b) -> m a -> m b
 join :: Monad m => m (m a) -> m a
 \end{alltt}
-and their definitions are
+and their (re-)definitions are
 \begin{alltt}
 fmap f m 
   = do x <- m 
@@ -603,12 +603,12 @@ that for all \texttt{f} and \texttt{g}
 \begin{alltt}
 fmap (f.g) = fmap f . fmap g\hfill(M4)
 \end{alltt}
-In fact, \texttt{fmap} is defined over a wider set of types that monads, and it is the function that characterises the \texttt{Functor}\minx{Functor} class that we saw earlier:
+As we said earlier, \texttt{fmap} is defined over a wider set of types that monads, and it is the function that characterises the \texttt{Functor}\minx{Functor} class that we saw earlier:
 \begin{alltt}
 class Functor f where
   fmap :: (a -> b) -> f a -> f b
 \end{alltt}
-Example instances of \texttt{Functor} which are not monads include \texttt{(a,a)}, \texttt{([a],[a])} and \texttt{Tree a} (from the next section).
+The definition given here redefines \texttt{fmap} for \texttt{Functor} instances that are also instances of \texttt{Monad}; that the redefinition defines the same function is a consequence of the \texttt{Functor} and \texttt{Monad} laws.
 
 \begin{exercises}
 
@@ -651,7 +651,7 @@ rather than \texttt{(>*>)} and \texttt{build}. Contrast the two
 approaches.
 
 \item
-Show that the type functions \texttt{(a,a)}, \texttt{([a],[a])} and \texttt{Tree a} are instances of \texttt{Functor}.
+Show that the type functions \texttt{(a,a)} and \texttt{([a],[a])} are instances of \texttt{Functor}.
 
 \end{exercises}
 

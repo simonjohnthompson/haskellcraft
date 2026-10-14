@@ -1,0 +1,122 @@
+/* Open Sans is licensed under the Apache License, Version 2.0. See http://www.apache.org/licenses/LICENSE-2.0 */
+/* Source Code Pro is under the Open Font License. See https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL */
+
+/* Overrides mdBook's bundled theme/fonts/fonts.css to add font-display: swap,
+   so Safari (which otherwise appears to do extra layout/paint/composite work
+   as each of these faces finishes loading) renders with a fallback font
+   immediately and swaps once, instead of blocking/repeatedly reflowing text
+   while these load. Otherwise identical to mdBook's own template, including
+   its use of the `resource` helper (confirmed by inspecting strings in the
+   mdbook binary) -- only font-display is added. The .woff2 files in this
+   directory are mdBook's own bundled fonts, copied here (under their
+   unhashed original names) only because overriding fonts.css makes mdBook
+   stop auto-copying its embedded font binaries alongside it. */
+
+/* open-sans-300 - latin_vietnamese_latin-ext_greek-ext_greek_cyrillic-ext_cyrillic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: local('Open Sans Light'), local('OpenSans-Light'),
+       url('{{ resource "fonts/open-sans-v17-all-charsets-300.woff2" }}') format('woff2');
+}
+
+/* open-sans-300italic - latin_vietnamese_latin-ext_greek-ext_greek_cyrillic-ext_cyrillic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 300;
+  font-display: swap;
+  src: local('Open Sans Light Italic'), local('OpenSans-LightItalic'),
+       url('{{ resource "fonts/open-sans-v17-all-charsets-300italic.woff2" }}') format('woff2');
+}
+
+/* open-sans-regular - latin_vietnamese_latin-ext_greek-ext_greek_cyrillic-ext_cyrillic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Open Sans Regular'), local('OpenSans-Regular'),
+       url('{{ resource "fonts/open-sans-v17-all-charsets-regular.woff2" }}') format('woff2');
+}
+
+/* open-sans-italic - latin_vietnamese_latin-ext_greek-ext_greek_cyrillic-ext_cyrillic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Open Sans Italic'), local('OpenSans-Italic'),
+       url('{{ resource "fonts/open-sans-v17-all-charsets-italic.woff2" }}') format('woff2');
+}
+
+/* open-sans-600 - latin_vietnamese_latin-ext_greek-ext_greek_cyrillic-ext_cyrillic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'),
+       url('{{ resource "fonts/open-sans-v17-all-charsets-600.woff2" }}') format('woff2');
+}
+
+/* open-sans-600italic - latin_vietnamese_latin-ext_greek-ext_greek_cyrillic-ext_cyrillic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Open Sans SemiBold Italic'), local('OpenSans-SemiBoldItalic'),
+       url('{{ resource "fonts/open-sans-v17-all-charsets-600italic.woff2" }}') format('woff2');
+}
+
+/* open-sans-700 - latin_vietnamese_latin-ext_greek-ext_greek_cyrillic-ext_cyrillic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'),
+       url('{{ resource "fonts/open-sans-v17-all-charsets-700.woff2" }}') format('woff2');
+}
+
+/* open-sans-700italic - latin_vietnamese_latin-ext_greek-ext_greek_cyrillic-ext_cyrillic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Open Sans Bold Italic'), local('OpenSans-BoldItalic'),
+       url('{{ resource "fonts/open-sans-v17-all-charsets-700italic.woff2" }}') format('woff2');
+}
+
+/* open-sans-800 - latin_vietnamese_latin-ext_greek-ext_greek_cyrillic-ext_cyrillic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: local('Open Sans ExtraBold'), local('OpenSans-ExtraBold'),
+       url('{{ resource "fonts/open-sans-v17-all-charsets-800.woff2" }}') format('woff2');
+}
+
+/* open-sans-800italic - latin_vietnamese_latin-ext_greek-ext_greek_cyrillic-ext_cyrillic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 800;
+  font-display: swap;
+  src: local('Open Sans ExtraBold Italic'), local('OpenSans-ExtraBoldItalic'),
+       url('{{ resource "fonts/open-sans-v17-all-charsets-800italic.woff2" }}') format('woff2');
+}
+
+/* source-code-pro-500 - latin_vietnamese_latin-ext_greek_cyrillic-ext_cyrillic */
+@font-face {
+  font-family: 'Source Code Pro';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('{{ resource "fonts/source-code-pro-v11-all-charsets-500.woff2" }}') format('woff2');
+}

@@ -837,7 +837,7 @@ part of your translation.
 This section looks at style of programming made possible by lazy evaluation,
 \textbf{data-directed programming}. This is an approach where we design the program by thinking about it as a sequence of transformations of data.  
 
-`In a traditional language it may well be too efficient to do this in practice, as we might have to compute a series of complex data structures which are `internal' to the program. In a lazy language these are only constructed as they are needed, and in practice they may never be constructed completely: we just build the data structures incrementally, and once a part of it has been used, it can be `recycled'. Luckily this is done by the implementation, and we do not have to worry about it ourselves. 
+In a traditional language it may well be too inefficient to do this in practice, as we might have to compute a series of complex data structures which are `internal' to the program. In a lazy language these are only constructed as they are needed, and in practice they may never be constructed completely: we just build the data structures incrementally, and once a part of it has been used, it can be `recycled'. Luckily this is done by the implementation, and we do not have to worry about it ourselves. 
 
 
 All this should become clearer as we look at a particular example; let's start by looking at the example of finding the sum

@@ -454,12 +454,10 @@ class Monad m => MonadFail m where
   fail   :: String -> m a
 \end{alltt}
 The value \texttt{fail} \texttt{s} corresponds to a computation which
-\textbf{fails}, giving the error message \texttt{s}. \index{monad!failure in (\texttt{fail})}
+\textbf{fails}, giving the error message \texttt{s}. The definition of \texttt{MonadFail} does not contains a default declaration for \texttt{fail}; it is expected that each instance should explicitly implement it. \index{monad!failure in (\texttt{MonadFail})}
 
-The definition of \texttt{MonadFail} also contains a default declaration for \texttt{fail}
-\begin{alltt}
-fail s = error s
-\end{alltt}
+The \texttt{do} notation provides binding to patterns, such as \texttt{x <- e} and \texttt{[x] <- e} in case of the list monad. The former pattern is irrefutable: whatever \texttt{e} returns, \texttt{x} is guaranteed to be bound to a value (if \texttt{e} terminates); the latter pattern is more problematic. If the value returned by \texttt{e} is not a singleton list, then the binding should fail, and this has the knock-on effect that the  \texttt{do} block itself should fail: the semantics for this is provided by calling the \texttt{fail} function.
+
 
 \begin{exercises}
  

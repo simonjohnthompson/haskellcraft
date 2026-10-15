@@ -611,7 +611,7 @@ Index
   - and imperative programming — [Ch. 19](19.md#ix-19-monad-and-imperative-programming)
   - definition — [Ch. 19](19.md#ix-19-monad-definition)
   - examples — [Ch. 19](19.md#ix-19-monad-examples)
-  - failure in (fail) — [Ch. 19](19.md#ix-19-monad-failure-in-fail)
+  - failure in (MonadFail) — [Ch. 19](19.md#ix-19-monad-failure-in-monadfail)
   - further reading — [Ch. 19](19.md#ix-19-monad-further-reading)
   - identity — [Ch. 19](19.md#ix-19-monad-identity)
   - list — [Ch. 19](19.md)

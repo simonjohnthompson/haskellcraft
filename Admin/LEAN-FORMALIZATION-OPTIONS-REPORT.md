@@ -1,16 +1,18 @@
 # Options for formalizing the book's proofs in Lean
 
 Prepared in response to a request to investigate how the book's treatment of reasoning about
-Haskell programs -- Chapter 9, "Reasoning about programs", and the "Proof revisited" section of
-Chapter 17, "Lazy programming" -- could be formalized in Lean, bearing in mind that Haskell types
-contain `undefined` and infinite values that Lean's own types do not. No files have been changed
-to produce this report; it records the investigation and the options it surfaced, for review
-before any formalization work is started.
+Haskell programs -- Chapter 9 ("Reasoning about programs"), the "Verification and general
+functions" section of Chapter 11, the "Reasoning about algebraic types" section of Chapter 14, and
+the "Proof revisited" section of Chapter 17 ("Lazy programming") -- could be formalized in Lean,
+bearing in mind that Haskell types contain `undefined` and infinite values that Lean's own types do
+not. No files have been changed to produce this report; it records the investigation and the
+options it surfaced, for review before any formalization work is started.
 
 ## What the book already does
 
 The book is already more careful about this than a first glance suggests, which matters for
-scoping the Lean work.
+scoping the Lean work, and the proof material is spread across four chapters, each adding
+something distinct.
 
 **Chapter 9** introduces the issue directly, in "Definedness, termination and finiteness"
 (`Book/9.tex`): evaluating a Haskell expression can fail to terminate, giving the **undefined**
@@ -22,8 +24,39 @@ majority of the time." Every induction in those chapters is ordinary structural/
 induction over finite lists and natural numbers, with no domain theory needed to state or follow
 it.
 
-**Chapter 17's "Proof revisited"** is where the book picks the restriction back up and partly lifts
-it, for lists specifically:
+**Chapter 11's "Verification and general functions"** (`Book/11.tex`) adds two things beyond
+Chapter 9's list induction:
+
+- **Extensionality**: "Two functions `f` and `g` are equal if they have the same value at every
+  argument." The chapter uses this to prove equations *between functions themselves*, not just
+  between the values they return -- `f . id = f`, `flip . flip = id`, `curry`/`uncurry` being
+  inverses, `abs`/`signum` being idempotent.
+- **General, polymorphic higher-order laws**: results like `map (f . g) = map f . map g` (`map.3`)
+  and filter promotion, `filter p . map f = map f . filter (p . f)`, proved by structural induction
+  over finite lists but stated for *arbitrary* `f`, `g`, `p` rather than for one specific function.
+  The chapter is explicit that these are proved "for finite lists", and each time notes that the
+  result "holds, in fact, for all lists" once Chapter 17's machinery is available -- the same
+  finite-first, lift-to-all-lists-later pattern as Chapter 9.
+
+**Chapter 14's "Reasoning about algebraic types"** (`Book/14.tex`) generalizes Chapter 9's
+structural induction from lists to algebraic types in general, with three representative cases:
+
+- **`Tree`**: a recursive, two-constructor type (`Nil`/`Node`), inducting over `tr` with two
+  induction hypotheses in the `Node` case (one per subtree) -- the proof that
+  `map f (collapse tr) = collapse (mapTree f tr)` is the chapter's running example.
+- **`Maybe t`**: a non-recursive type, where structural induction degenerates to proof by cases
+  (`Nothing`, `Just y`) with no induction hypothesis at all. The book is explicit here in a way
+  worth keeping: "An object of this type is defined if it is `Nothing`, or `Just y` for a defined
+  `y`" -- the same "defined values" convention from Chapter 9, now stated generically for an
+  arbitrary algebraic type rather than just for lists.
+- **`Expr`** and the `assoc` function: an example of **induction on a decreasing measure** (the
+  number of left-nested `Add`s) rather than plain structural induction, needed because `assoc` is
+  not defined by primitive recursion on `Expr`'s own structure. The book notes this explicitly:
+  "this result shows that verification is possible for functions defined in a more general way
+  than primitive recursion."
+
+**Chapter 17's "Proof revisited"** is where the book picks the definedness/finiteness restriction
+back up and partly lifts it, for lists specifically:
 
 - **fp-list induction**: to prove `P(xs)` for all finite-or-partial lists, prove `P([])` **and**
   `P(undef)` (two base cases, not one), then the usual inductive step `P(x:xs)` assuming `P(xs)`.
@@ -39,33 +72,51 @@ it, for lists specifically:
   further reading -- i.e. the book already points at the domain-theoretic literature this question
   is really asking about, it just doesn't name it as such for an undergraduate audience.
 
-So the book's own structure already separates "ordinary, needs nothing special" (Ch 9-16) from
-"genuinely needs domain-theoretic care" (Ch 17's fp-lists and infinite lists) -- and that split maps
-almost directly onto where Lean's native types are adequate versus where they are not.
+So the book's own structure already separates "ordinary, needs nothing special" (Ch 9, 11, 14) from
+"genuinely needs domain-theoretic care" (Ch 17's fp-lists and infinite lists, and the "holds for all
+lists" promises made in Chapters 9, 11 and 14) -- and that split maps almost directly onto where
+Lean's native types and logic are adequate versus where they are not.
 
 ## The core translation issue
 
-Lean's built-in types don't have the feature that makes this hard in Haskell. A Lean `Nat` is
-always a genuine natural number; a Lean `List α` is always finite and, once its elements are
-total, fully defined. Neither has anything playing the role of Haskell's `undef :: a`, and there is
-no infinite `List α` -- `List` is an ordinary (strictly positive) inductive type, not a lazy,
-possibly-infinite structure.
+Lean's built-in types don't have the feature that makes this hard in Haskell, and that turns out to
+be true more broadly than just for lists.
 
-The consequence cuts both ways:
+- **Finiteness and definedness are automatic for any Lean `inductive` type, not just `List`.** A
+  Lean `Nat` is always a genuine natural number; a value of any ordinary Lean inductive type --
+  `List α`, or direct Lean counterparts of the book's own `Tree`, `Expr` and `Maybe` types -- is
+  always finite and, once its components are total, fully defined. None of them have anything
+  playing the role of Haskell's `undef :: a`. Chapter 14's own generalization (structural induction
+  works the same way for `Tree`, `Expr` and `Maybe` as it does for lists) matches this exactly:
+  Lean's `induction` tactic derives a structural induction principle automatically from *any*
+  `inductive` declaration -- the `Nil`/`Node`, `Lit`/`Add`/`Sub`, and `Nothing`/`Just` case splits
+  the book writes out by hand in Chapter 14 are exactly what `induction` produces for free from a
+  matching Lean `inductive Tree`/`Expr`/`Option` definition.
+- **Extensionality is free.** Chapter 11's extensionality principle is not something that needs a
+  library or a domain-theoretic detour at all: it is `funext` in Lean's own core logic
+  (`funext : (∀ x, f x = g x) → f = g`), available unconditionally. The `f . id = f`,
+  `flip . flip = id`, and `curry`/`uncurry`-are-inverses proofs translate close to line-for-line.
+- **Measure-based (well-founded) induction is native, and arguably easier than the book's manual
+  version.** Chapter 14's `assoc`/`Expr` proof, which argues by induction on the number of
+  left-nested `Add`s rather than `Expr`'s own structure, is exactly what Lean's `termination_by`/
+  `decreasing_by` machinery and `WellFoundedRecursion` are for. Lean automates the "show the measure
+  decreases" bookkeeping that the book has to do by hand, which makes this a good showcase example
+  rather than a hard one.
+- **For Chapters 9, 11 and 14's results generally, this is good news, not a problem.** A theorem
+  like `sum (doubleAll xs) = 2 * sum xs`, or `map (f . g) xs = (map f . map g) xs`, or
+  `map f (collapse tr) = collapse (mapTree f tr)`, stated in Lean over `xs : List Int` or
+  `tr : Tree α`, is automatically a theorem about *defined, finite* values, because that's the only
+  kind of value those Lean types have. That is exactly the scope the book already restricts itself
+  to. No restatement is needed beyond saying so once, up front: translating "for all defined, finite
+  `x`" into "for all `x : T`" is not a weakening, it's making the book's own stated restriction
+  precise rather than informal.
+- **For Chapter 17's fp-lists and infinite lists -- and the "holds for all lists" promises attached
+  to specific results in Chapters 9, 11 and 14 -- this is the real gap.** `list1 = 2:3:undef` and
+  the infinite `facs = 1 : zipWith (*) [1 ..] facs` have no Lean `List α` counterpart at all. A type
+  that can actually represent "possibly partial, possibly infinite" is needed before any of that
+  material can even be *stated* in Lean, let alone proved.
 
-- **For Chapters 9-16's results, this is good news, not a problem.** A theorem like
-  `sum (doubleAll xs) = 2 * sum xs` stated in Lean over `xs : List Int` is automatically a theorem
-  about *defined, finite* lists, because that's the only kind of `List Int` Lean has. That is
-  exactly the scope the book already restricts itself to for these results. No restatement is
-  needed beyond saying so once, up front: translating "for all defined, finite `xs`" into "for all
-  `xs : List Int`" is not a weakening, it's making the book's own stated restriction precise rather
-  than informal.
-- **For Chapter 17's fp-lists and infinite lists, this is the real gap.** `list1 = 2:3:undef` and
-  the infinite `facs = 1 : zipWith (*) [1 ..] facs` have no Lean `List α` counterpart at all. A
-  type that can actually represent "possibly partial, possibly infinite" is needed before any of
-  that section's results can even be *stated* in Lean, let alone proved.
-
-## Lean mechanisms for the Chapter 17 material
+## Lean mechanisms for the genuinely partial material (Chapter 17)
 
 Investigated in decreasing order of fit for this specific job.
 
@@ -139,27 +190,50 @@ dependency to build teaching material on today.
   a largely-total fragment of real Haskell source to Coq directly, and treats genuine partiality
   (`error`, non-structural recursion) as an axiomatized, explicitly out-of-scope edge, verified
   only where surrounding invariants rule it out in practice. This is a much closer match to how
-  Chapters 9-16 of the book already work than a from-scratch domain-theory project would be, and is
-  the realistic model for "how much of the book's *existing* proof content needs zero special
-  machinery" (see Tier 1 below).
+  Chapters 9, 11 and 14 of the book already work than a from-scratch domain-theory project would
+  be, and is the realistic model for "how much of the book's *existing* proof content needs zero
+  special machinery" (see Tier 1 below).
 
 ## Recommendation: a tiered approach
 
-1. **Tier 1 -- Chapters 9-16, as ordinary total Lean theorems.** Translate a representative sample
-   of these proofs (structural induction over `List`/`Nat`, the equational-reasoning style proofs,
-   the generalization examples) directly, stated over Lean's native `List α`/`Nat`. This needs no
-   special library, follows the book's existing restriction to defined, finite values exactly, and
-   gives the most direct evidence for whether this formalization project is worth continuing before
-   any of the harder Chapter 17 material is attempted. Lowest cost, immediate payoff.
-2. **Tier 2 -- a pilot from Chapter 17's "Proof revisited".** The `facMap!!n = facs!!n` proof is a
-   strong single candidate: self-contained, already a complete worked proof in the book, and a
-   direct fit for `WSeq`/`Computation`'s `Equiv`/bisimulation machinery and `take`. Formalizing it
-   would be a genuine, checkable demonstration that the book's informal take-lemma argument
-   corresponds to an actual Lean coinductive bisimulation proof -- interesting in its own right, and
-   arguably a natural extension of the "Proof in functional programming" survey already cited in
-   that chapter. The `reverse++` counterexample (showing a finite-list result that provably fails
-   to lift to fp-lists) would make a good second pilot, since a *failure* proof exercises
-   `WSeq`/fp-list induction slightly differently than an equality proof does.
+1. **Tier 1 -- Chapters 9, 11 and 14, as ordinary total Lean theorems.** Translate a representative
+   sample directly, with no special library:
+   - Chapter 9-style structural induction over `List α`/`Nat` (e.g. `sum`/`doubleAll`, `++`
+     associativity).
+   - Chapter 11's extensionality proofs (`f . id = f`, `flip . flip = id`, `curry`/`uncurry` as
+     inverses) via `funext` -- essentially a free win, needing nothing beyond Lean's own logic.
+   - Chapter 11's general higher-order laws (`map (f . g) = map f . map g`, filter promotion,
+     `map`/`reverse`) over `List α`. Worth noting as a finding in its own right: some of this
+     "library of theorems" already exists as named, proven lemmas in Lean's `Std`/core `List` API
+     or Mathlib (for instance, `map (f . g) = map f . map g` is essentially `List.map_map`) --
+     formalizing part of Chapter 11 is partly a matter of *locating and citing* existing Lean
+     lemmas against the book's statements of them, which is lower-effort than writing new proofs
+     and an interesting finding to report on its own.
+   - Chapter 14's structural induction over custom algebraic types (`Tree`/`collapse`/`mapTree`,
+     `Maybe`/`maybe`) via Lean's `induction` tactic on matching `inductive` definitions, and the
+     `assoc`/`Expr` proof via `termination_by`-based well-founded recursion as a showcase of Lean
+     automating bookkeeping the book has to do by hand.
+
+   This needs no special library, follows the book's existing restriction to defined, finite values
+   exactly, and gives the most direct evidence for whether this formalization project is worth
+   continuing before any of the harder Chapter 17 material is attempted. Lowest cost, immediate
+   payoff, and now has a wide enough pool of candidate theorems (list, tree, expression, and
+   function-level results) to make a genuinely representative pilot rather than a list-only one.
+2. **Tier 2 -- lifting specific results to fp-lists and infinite lists, via Chapter 17.** Two steps,
+   increasing in difficulty:
+   - First, lift one of the Tier 1 results that the book explicitly flags as extending to all
+     lists -- `map (f . g) = map f . map g` (Chapter 11's `map.3`) or `map f . reverse = reverse .
+     map f` (Chapter 11's `map/reverse`) are good candidates, since both are named in the book as
+     "holds, in fact, for all lists" once Chapter 17 is available. This exercises `WSeq`'s two-base-
+     case (`nil`/`undef`-via-`think`) induction without needing genuine infinite-list equality yet.
+   - Second, the harder step: `facMap!!n = facs!!n`, Chapter 17's own worked example, using
+     `WSeq`/`Computation`'s `Equiv`/bisimulation and `take`. This is a direct demonstration that the
+     book's informal take-lemma argument corresponds to an actual Lean coinductive bisimulation
+     proof -- interesting in its own right, and arguably a natural extension of the "Proof in
+     functional programming" survey already cited in that chapter. The `reverse++` counterexample
+     (showing a finite-list result that provably fails to lift to fp-lists) would make a good third
+     pilot, since a *failure* proof exercises fp-list induction slightly differently than an
+     equality proof does.
 3. **Tier 3 -- optional.** A short note using `OmegaCompletePartialOrder`/`LawfulFix` to justify
    that `facs`'s self-referential definition denotes a well-defined value in the first place --
    worth having once Tier 2 exists, not before.
@@ -175,19 +249,24 @@ dependency to build teaching material on today.
    artifact (e.g. a `Lean/` directory with a handful of worked proofs and a short write-up), or is
    it meant to eventually become book content itself (an appendix, or references alongside the
    existing exercises)? The two have different bars for polish and exposition.
-2. **Scope of the pilot**: Tier 2 above proposes `facMap!!n = facs!!n` (and optionally `reverse++`)
-   as the first genuinely domain-theoretic proof to attempt. Confirm that's the right starting
-   point, or substitute a different Chapter 17 result if another one matters more.
-3. **Lean/Mathlib version pinning**: Mathlib moves quickly and the `WSeq`/`Computation` API seen
+2. **Tier 1 scope**: confirm the candidate list above (Ch 9 list induction, Ch 11 extensionality
+   and HOF laws, Ch 14 tree/`Maybe`/`Expr` induction and the `assoc` measure proof) is the right
+   representative sample, or narrow/extend it.
+3. **Tier 2 pilots**: confirm `map.3`/`map/reverse` (as the fp-list warm-up) and `facMap!!n =
+   facs!!n` (as the infinite-list proof proper) are the right starting points, or substitute
+   different Chapter 17/11 results if others matter more.
+4. **Lean/Mathlib version pinning**: Mathlib moves quickly and the `WSeq`/`Computation` API seen
    during this investigation is current as of this report's date; any actual Lean project should
    pin a specific Mathlib commit/release rather than tracking latest, the same way `Worker/package.json`
    pins `wrangler` rather than floating it.
 
 ## Recommendation
 
-Proceed with Tier 1 first, as a low-cost way to confirm the overall approach is worth continuing,
-then Tier 2 as the project's actual interesting content -- a small number of fully worked Chapter 17
-proofs using `Mathlib.Data.Seq.WSeq`, which turns out to be a closer structural match to this
-book's own fp-list/approximant apparatus than any other option investigated, without requiring the
-much heavier, less mature alternatives (a from-scratch domain theory development, or a full
-HOLCF-style system) that a maximally rigorous treatment would otherwise call for.
+Proceed with Tier 1 first, across all three "ordinary" chapters (9, 11, 14) rather than lists alone,
+as a low-cost way to confirm the overall approach is worth continuing and to surface how much of it
+already exists as named Lean/Mathlib lemmas. Then Tier 2 as the project's actual interesting
+content -- a small, graduated sequence of Chapter 11/17 proofs using `Mathlib.Data.Seq.WSeq`, which
+turns out to be a closer structural match to this book's own fp-list/approximant apparatus than any
+other option investigated, without requiring the much heavier, less mature alternatives (a
+from-scratch domain theory development, or a full HOLCF-style system) that a maximally rigorous
+treatment would otherwise call for.

@@ -1,5 +1,6 @@
-Haskell: the Craft of Functional Programming 
+# Haskell: the Craft of Functional Programming
 
-Online edition: https://simonjohnthompson.github.io/haskellcraft/
+This is the repo for a substantially revised version of the third edition (2011) of *Haskell: the Craft of Functional Programming* bringing the book up to date with changes in Haskell and its infrastructure, including implementations, editor support, discussion channels and so on. It also includes feedback on exercise attempts and solutions powered by an LLM service. The book is [available online](https://simonjohnthompson.github.io/haskellcraft/) and in a [PDF version](https://github.com/simonjohnthompson/haskellcraft/blob/main/Book/root.pdf), and is supported by a YouTube video lecture course: [Introduction to Functional Programming in Haskell](https://www.youtube.com/playlist?list=PLqu19-ygE4ocMda7XgriK0BHL8vmlyKPU). The project is freely available under a Creative Commons licence. 
 
-PDF: https://github.com/simonjohnthompson/haskellcraft/blob/main/Book/root.pdf
+In common with the times, the revision itself was assisted by LLM: specifically Claude Code v2.1.236 (Claude Sonnet 5) from Anthropic. The LLM provided guidance on the upgrade, including advice on changes to the ecosystem, as well as programming the infrastructure for translation from LaTeX input to mdBook output, running the code in github codespaces etc. It also provided substantial rewrites to chapters on *Finding your way around the Haskell libraries* and *Haskell practicalities*, as well as smaller corrections throughout.
+

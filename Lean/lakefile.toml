@@ -1,0 +1,6 @@
+name = "haskellcraft"
+version = "0.1.0"
+defaultTargets = ["HaskellCraft"]
+
+[[lean_lib]]
+name = "HaskellCraft"

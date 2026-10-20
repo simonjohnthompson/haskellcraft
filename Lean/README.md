@@ -16,9 +16,12 @@ structure step for step.
 - `HaskellCraft/Chapter11.lean` -- the "Verification and general
   functions" section of Chapter 11: extensionality via `funext`
   (`f . id = f`, `iter 2 f = twice f`), `map`/composition, filter
-  promotion, and `map`/`reverse` with the `Picture` corollary. The
-  worked proofs from the text are complete; the section's exercises are
-  stated with `sorry` as their proofs, to be filled in.
+  promotion, and `map`/`reverse` with the `Picture` corollary, all
+  complete. The one exercise left here is (map++), which
+  `map`/`reverse` uses; its proof is `sorry`, to be filled in.
+- `HaskellCraft/AdditionalChapter11.lean` -- the rest of that section's
+  exercises (composition, `flip`, `curry`/`uncurry`, `iter`,
+  idempotence, and `foldr`/`++`), stated with `sorry` as their proofs.
 
 ## Building
 

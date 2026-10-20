@@ -13,6 +13,12 @@ structure step for step.
 - `HaskellCraft/Chapter9.lean` -- the worked list-induction proofs from
   Chapter 9 (`sum`/`doubleAll`, `length`/`++`, `reverse`/`++`, and the
   `shunt`/`rev` "generalizing the proof goal" example).
+- `HaskellCraft/Chapter11.lean` -- the "Verification and general
+  functions" section of Chapter 11: extensionality via `funext`
+  (`f . id = f`, `iter 2 f = twice f`), `map`/composition, filter
+  promotion, and `map`/`reverse` with the `Picture` corollary. The
+  worked proofs from the text are complete; the section's exercises are
+  stated with `sorry` as their proofs, to be filled in.
 
 ## Building
 

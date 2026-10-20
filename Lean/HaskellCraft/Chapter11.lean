@@ -10,7 +10,7 @@ Chapter 9 lemmas about them are reused from Chapter9.lean.
 
 The worked proofs from the text are given in full. The section's
 exercises are in AdditionalChapter11.lean, apart from (map++), which
-stays here because the worked proof of (map/reverse) uses it.
+is proved here because the worked proof of (map/reverse) uses it.
 
 Two things are new compared with Chapter 9:
 - Equality between functions: the book's principle of extensionality is
@@ -125,16 +125,15 @@ theorem filter_map (p : β → Bool) (f : α → β) (xs : List α) :
 -- `map`, `reverse` and the `Picture` case study
 -- ---------------------------------------------------------------------
 
-/-- (map++): left as an exercise in the book, and used in `map_reverse`
-below. -/
+/-- (map++): left as an exercise in the book, and used in `map_reverse` below. Completely standard proof: induction and simp with the function definitions -/
 theorem map_append (f : α → β) (ys zs : List α) :
     myMap f (ys +++ zs) = myMap f ys +++ myMap f zs := by
-  sorry
+  induction ys with
+  | nil => simp[myMap,myAppend]
+  | cons w ws hyp => simp[myMap,myAppend,hyp]
 
 /-- (map/reverse): `map f (reverse xs) = reverse (map f xs)`, using
-(map++) in the induction step. Lean only warns about a `sorry` used
-directly, so this compiles silently even before `map_append` is proved;
-`#print axioms map_reverse` shows whether it still depends on `sorryAx`. -/
+(map++) in the induction step. -/
 theorem map_reverse (f : α → β) (xs : List α) :
     myMap f (myReverse xs) = myReverse (myMap f xs) := by
   induction xs with

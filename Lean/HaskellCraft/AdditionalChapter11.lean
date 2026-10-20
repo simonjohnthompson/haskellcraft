@@ -4,8 +4,8 @@ section, stated with `sorry` in place of a proof, to be filled in.
 
 The definitions they use (`comp` and `∘'`, `myId`, `iter`, `myFoldr`,
 ...) are in Chapter11.lean, and `+++`, `mySum`, `append_assoc` and
-`append_nil` are in Chapter9.lean. The one remaining exercise, (map++),
-is in Chapter11.lean as `map_append`, because the worked proof of
+`append_nil` are in Chapter9.lean. The section's other exercise, (map++),
+is proved in Chapter11.lean as `map_append`, because the worked proof of
 (map/reverse) there uses it.
 -/
 

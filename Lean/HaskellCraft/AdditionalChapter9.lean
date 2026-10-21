@@ -130,7 +130,6 @@ theorem unzip_zip_inverse {α β} (xs : List α) (ys : List β) :
       cases ys with
       | nil => simp_all [zip,unzip]
       | cons w ws =>
-          intro h
           have := hyp ws
           simp_all [zip,unzip,pcons,Prod.ext_iff]
 

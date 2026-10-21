@@ -13,6 +13,9 @@ structure step for step.
 - `HaskellCraft/Chapter9.lean` -- the worked list-induction proofs from
   Chapter 9 (`sum`/`doubleAll`, `length`/`++`, `reverse`/`++`, and the
   `shunt`/`rev` "generalizing the proof goal" example).
+- `HaskellCraft/AdditionalChapter9.lean` -- further Chapter 9 proofs:
+  associativity of `||`, `elem` and `++` (using `BEq`/`LawfulBEq`),
+  arithmetic on `Nat`, and `zip`/`unzip`.
 - `HaskellCraft/Chapter11.lean` -- the "Verification and general
   functions" section of Chapter 11: extensionality via `funext`
   (`f . id = f`, `iter 2 f = twice f`), `map`/composition, filter
@@ -20,8 +23,9 @@ structure step for step.
   complete, together with the exercise (map++), which `map`/`reverse`
   uses.
 - `HaskellCraft/AdditionalChapter11.lean` -- the rest of that section's
-  exercises (composition, `flip`, `curry`/`uncurry`, `iter`,
-  idempotence, and `foldr`/`++`), stated with `sorry` as their proofs.
+  exercises, all proved: composition, `flip`, `curry`/`uncurry`, `iter`,
+  idempotence, and `foldr`/`++`, including a general form of (foldr.3)
+  for any `f : α → β → β`, from which the book's version follows.
 
 ## Building
 

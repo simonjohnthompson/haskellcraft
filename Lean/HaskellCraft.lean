@@ -1,3 +1,4 @@
 import HaskellCraft.Chapter9
+import HaskellCraft.AdditionalChapter9
 import HaskellCraft.Chapter11
 import HaskellCraft.AdditionalChapter11

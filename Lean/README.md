@@ -35,6 +35,16 @@ structure step for step.
   field, with π as a parameter, in place of the book's `Float`), `size`,
   `depth` and `occurs` for trees of integers, `twist`, and
   (map-collapse) for general trees by mutual induction.
+- `HaskellCraft/Chapter17.lean` -- the finite and partial lists
+  (fp-lists) of Chapter 17's "Proof revisited": a list type with an
+  `undef` constructor, whose induction principle has the book's two
+  base cases; (sum-double) and `map f . map g = map (f . g)` for all
+  fp-lists, and the counterexample showing (reverse++) does not hold for
+  them. Infinite lists are not covered yet.
+- `HaskellCraft/AdditionalChapter17.lean` -- that section's fp-list
+  exercises, all proved: associativity of `++`, `rev` via `shunt`,
+  indexing with `map` and `zipWith`, and the equations between
+  functions for `filter`, `map` and `concat`.
 
 ## Building
 

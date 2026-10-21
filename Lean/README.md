@@ -26,6 +26,15 @@ structure step for step.
   exercises, all proved: composition, `flip`, `curry`/`uncurry`, `iter`,
   idempotence, and `foldr`/`++`, including a general form of (foldr.3)
   for any `f : α → β → β`, from which the book's version follows.
+- `HaskellCraft/Chapter14.lean` -- the "Reasoning about algebraic types"
+  section of Chapter 14: (map-collapse) for trees, proof by cases for
+  `Maybe`, and (eval-assoc), where `assoc` needs a termination proof and
+  the induction follows its recursion (`assoc.induct`).
+- `HaskellCraft/AdditionalChapter14.lean` -- that section's exercises,
+  all proved: `weather`, non-negative areas of shapes (over any ordered
+  field, with π as a parameter, in place of the book's `Float`), `size`,
+  `depth` and `occurs` for trees of integers, `twist`, and
+  (map-collapse) for general trees by mutual induction.
 
 ## Building
 

@@ -1,6 +1,6 @@
 /-
 Exercises from Chapter 11's "Verification and general functions"
-section, stated with `sorry` in place of a proof, to be filled in.
+section, with their proofs.
 
 The definitions they use (`comp` and `∘'`, `myId`, `iter`, `myFoldr`,
 ...) are in Chapter11.lean, and `+++`, `mySum`, `append_assoc` and

@@ -2,3 +2,5 @@ import HaskellCraft.Chapter9
 import HaskellCraft.AdditionalChapter9
 import HaskellCraft.Chapter11
 import HaskellCraft.AdditionalChapter11
+import HaskellCraft.Chapter14
+import HaskellCraft.AdditionalChapter14

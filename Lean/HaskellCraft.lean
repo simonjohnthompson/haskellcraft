@@ -8,3 +8,4 @@ import HaskellCraft.Chapter17
 import HaskellCraft.AdditionalChapter17
 import HaskellCraft.Streams
 import HaskellCraft.AdditionalStreams
+import HaskellCraft.Expr

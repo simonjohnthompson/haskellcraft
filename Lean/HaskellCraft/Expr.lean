@@ -1,0 +1,272 @@
+/-
+Expr.hs in Lean: arithmetical expressions with variables, a printer and
+parser, evaluation in an environment, a compiler to a stack machine,
+and simplification. The theorems about the compiler and `simplify` are
+stated with `sorry` in place of a proof, to be filled in.
+
+Most of the definitions carry over directly. The differences:
+- `run` is partial in Haskell: it has no equation for a stack that runs
+  out, or for an empty stack at the end. Here it returns an `Option Int`,
+  with `none` for those cases.
+- `parse` is partial too, and its recursion is not structural, so it is
+  a `partial def`, returning an `Option`. It can be run with `#eval`, but
+  nothing can be proved about it.
+- `simplify` terminates, but not because its recursion is structural:
+  it calls itself again on the simplified expression. That terminates
+  because simplifying either leaves an expression unchanged or makes it
+  smaller, and Lean needs that fact while `simplify` is being defined.
+  So `simp'` returns the simplified expression together with that fact,
+  and `simplify` takes the expression part.
+- Haskell's `Int` has a fixed size; Lean's `Int` is unbounded.
+
+`Expr` and `eval` are also names in Chapter14.lean; the namespace keeps
+them apart.
+-/
+
+namespace Expressions
+
+inductive Expr where
+  | num : Int → Expr
+  | var : Char → Expr
+  | add : Expr → Expr → Expr
+  | mul : Expr → Expr → Expr
+  deriving DecidableEq, Repr
+
+open Expr
+
+def expr1 : Expr := add (var 'a') (mul (num 2) (var 'b'))
+
+def expr2 : Expr :=
+  add (mul (num 1) (var 'b'))
+      (mul (add (mul (num 2) (var 'b')) (mul (num 1) (var 'b'))) (num 0))
+
+-- ---------------------------------------------------------------------
+-- Printing
+-- ---------------------------------------------------------------------
+
+/-- `add (var 'a') (mul (num 2) (var 'b'))` prints as `"(a+(2*b))"`. -/
+def print : Expr → String
+  | num n     => toString n
+  | var v     => v.toString
+  | add e1 e2 => "(" ++ print e1 ++ "+" ++ print e2 ++ ")"
+  | mul e1 e2 => "(" ++ print e1 ++ "*" ++ print e2 ++ ")"
+
+#eval print expr1
+
+-- ---------------------------------------------------------------------
+-- Parsing
+-- ---------------------------------------------------------------------
+
+def is_digit (ch : Char) : Bool := '0' ≤ ch && ch ≤ '9'
+
+/-- The longest initial segment whose elements satisfy `p`, and the
+rest of the list. -/
+def get_while (p : α → Bool) : List α → List α × List α
+  | y :: ys =>
+      if p y then
+        let (zs, rest) := get_while p ys
+        (y :: zs, rest)
+      else
+        ([], y :: ys)
+  | [] => ([], [])
+
+def get_digits : List Char → List Char × List Char := get_while is_digit
+
+/-- An integer: a sequence of digits, with an optional `-` at the start. -/
+def get_int : List Char → List Char × List Char
+  | [] => ([], [])
+  | y :: ys =>
+      if y == '-' then
+        let (n, rest) := get_digits ys
+        (y :: n, rest)
+      else
+        get_digits (y :: ys)
+
+/-- A list of digits, with an optional `-`, as an `Int`. -/
+def list_to_int (chars : List Char) : Int :=
+  match chars with
+  | '-' :: rest => -1 * worker rest.reverse
+  | xs          => worker xs.reverse
+where
+  worker : List Char → Int
+    | []      => 0
+    | d :: ds => (d.toNat - '0'.toNat : Int) + 10 * worker ds
+
+/-- A fully bracketed expression at the start of the string, and the
+rest of the string; `none` where the Haskell `parse` would fail. -/
+partial def parse : List Char → Option (Expr × List Char)
+  | '(' :: rest => do
+      let (e1, rest1) ← parse rest
+      match rest1 with
+      | op :: rest2 =>
+          let (e2, rest3) ← parse rest2
+          match op, rest3 with
+          | '+', ')' :: rest4 => some (add e1 e2, rest4)
+          | '*', ')' :: rest4 => some (mul e1 e2, rest4)
+          | _, _ => none
+      | [] => none
+  | ch :: rest =>
+      if 'a' ≤ ch && ch ≤ 'z' then
+        some (var ch, rest)
+      else
+        let (ns, rest1) := get_int (ch :: rest)
+        some (num (list_to_int ns), rest1)
+  | [] => none
+
+#eval parse "(-55*e)+1111)".toList
+
+-- ---------------------------------------------------------------------
+-- Evaluation
+-- ---------------------------------------------------------------------
+
+abbrev Env := List (Char × Int)
+
+def env1 : Env := [('a', 12), ('b', -11)]
+
+def lookup (v : Char) : Env → Int
+  | []            => 0
+  | (x, n) :: ps  => if x == v then n else lookup v ps
+
+def eval (env : Env) : Expr → Int
+  | num n     => n
+  | var v     => lookup v env
+  | add e1 e2 => eval env e1 + eval env e2
+  | mul e1 e2 => eval env e1 * eval env e2
+
+#eval eval env1 expr1
+
+-- ---------------------------------------------------------------------
+-- Compiler and virtual machine
+-- ---------------------------------------------------------------------
+
+/-- `push n` pushes `n`; `fetch v` pushes the value of `v`; `add2` and
+`mul2` pop the top two elements, and push their sum or product. -/
+inductive Instr where
+  | push  : Int → Instr
+  | fetch : Char → Instr
+  | add2  : Instr
+  | mul2  : Instr
+
+open Instr
+
+abbrev Program := List Instr
+
+abbrev Stack := List Int
+
+def compile : Expr → Program
+  | num n     => [push n]
+  | var v     => [fetch v]
+  | add e1 e2 => compile e2 ++ compile e1 ++ [add2]
+  | mul e1 e2 => compile e2 ++ compile e1 ++ [mul2]
+
+/-- Execute the instructions, and when they run out, return the top of
+the stack: `none` if the stack runs out first. -/
+def run : Program → Env → Stack → Option Int
+  | push n :: cont,  env, stack             => run cont env (n :: stack)
+  | fetch v :: cont, env, stack             => run cont env (lookup v env :: stack)
+  | add2 :: cont,    env, n1 :: n2 :: rest  => run cont env ((n1 + n2) :: rest)
+  | mul2 :: cont,    env, n1 :: n2 :: rest  => run cont env ((n1 * n2) :: rest)
+  | [],              _,   n :: _            => some n
+  | _,               _,   _                 => none
+
+/-- Compile then run: this should be the same as `eval`. -/
+def execute (env : Env) (e : Expr) : Option Int :=
+  run (compile e) env []
+
+#eval execute env1 expr1
+
+/-- Running the code for `e`, then `cont`, is running `cont` with the
+value of `e` pushed on the stack. This is the general form of
+`execute_eval` below, needed because `run` takes the rest of the program
+and the stack as arguments; compare `shunt` in Chapter9.lean. Hint:
+induction on `e`, generalizing `cont` and `stack`; `List.append_assoc`
+is useful. -/
+theorem run_compile (env : Env) (e : Expr) (cont : Program) (stack : Stack) :
+    run (compile e ++ cont) env stack = run cont env (eval env e :: stack) := by
+  sorry
+
+/-- Compiler correctness. -/
+theorem execute_eval (env : Env) (e : Expr) :
+    execute env e = some (eval env e) := by
+  sorry
+
+-- ---------------------------------------------------------------------
+-- Simplification
+-- ---------------------------------------------------------------------
+
+def size : Expr → Nat
+  | num _     => 1
+  | var _     => 1
+  | add e1 e2 => 1 + size e1 + size e2
+  | mul e1 e2 => 1 + size e1 + size e2
+
+/-- `e'` is `e` unchanged, or is smaller than `e`. -/
+def NoBigger (e' e : Expr) : Prop := e' = e ∨ size e' < size e
+
+theorem smaller_of_changed {s1 e1 s2 e2 : Expr}
+    (h1 : NoBigger s1 e1) (h2 : NoBigger s2 e2) (h : ¬(s1 = e1 ∧ s2 = e2)) :
+    size s1 + size s2 < size e1 + size e2 := by
+  unfold NoBigger at h1 h2
+  rcases h1 with h1 | h1 <;> rcases h2 with h2 | h2 <;> simp_all <;> omega
+
+theorem noBigger_trans {a b c : Expr} (h1 : NoBigger a b) (h2 : size b < size c) :
+    NoBigger a c := by
+  unfold NoBigger at *
+  right
+  rcases h1 with h1 | h1
+  · subst h1; exact h2
+  · omega
+
+/-- `simplify`, returning the simplified expression together with the
+fact that it is no bigger. The equations are the Haskell ones, in the
+same order; the proofs in `⟨_, _⟩` and the `have hlt` are what Lean
+needs to see that the recursion terminates. -/
+def simp' (e : Expr) : {e' : Expr // NoBigger e' e} :=
+  match e with
+  | add e1 (num 0)      => let r := simp' e1; ⟨r.1, noBigger_trans r.2 (by simp [size] <;> omega)⟩
+  | add (num 0) e2      => let r := simp' e2; ⟨r.1, noBigger_trans r.2 (by simp [size] <;> omega)⟩
+  | add (num n) (num m) => ⟨num (n + m), Or.inr (by simp [size])⟩
+  | mul e1 (num 1)      => let r := simp' e1; ⟨r.1, noBigger_trans r.2 (by simp [size] <;> omega)⟩
+  | mul (num 1) e2      => let r := simp' e2; ⟨r.1, noBigger_trans r.2 (by simp [size] <;> omega)⟩
+  | mul _ (num 0)       => ⟨num 0, Or.inr (by simp [size] <;> omega)⟩
+  | mul (num 0) _       => ⟨num 0, Or.inr (by simp [size] <;> omega)⟩
+  | add e1 e2 =>
+      let s1 := simp' e1
+      let s2 := simp' e2
+      if h : ¬(s1.1 = e1 ∧ s2.1 = e2) then
+        have hlt : size (add s1.1 s2.1) < size (add e1 e2) := by
+          have := smaller_of_changed s1.2 s2.2 h
+          simp [size]; omega
+        let r := simp' (add s1.1 s2.1)
+        ⟨r.1, noBigger_trans r.2 hlt⟩
+      else
+        ⟨add s1.1 s2.1, Or.inl (by simp_all)⟩
+  | mul e1 e2 =>
+      let s1 := simp' e1
+      let s2 := simp' e2
+      if h : ¬(s1.1 = e1 ∧ s2.1 = e2) then
+        have hlt : size (mul s1.1 s2.1) < size (mul e1 e2) := by
+          have := smaller_of_changed s1.2 s2.2 h
+          simp [size]; omega
+        let r := simp' (mul s1.1 s2.1)
+        ⟨r.1, noBigger_trans r.2 hlt⟩
+      else
+        ⟨mul s1.1 s2.1, Or.inl (by simp_all)⟩
+  | e => ⟨e, Or.inl rfl⟩
+termination_by size e
+decreasing_by all_goals first | assumption | (simp [size] <;> omega)
+
+def simplify (e : Expr) : Expr := (simp' e).1
+
+#eval simplify expr2
+
+/-- Simplifying doesn't change the value. Hint: prove it for `simp'`,
+by `fun_induction simp' e`, which inducts along the recursion of
+`simp'`, giving one case for each equation. The `let`s in `simp'` show
+up as local definitions, `r✝ : ... := simp' e1`; `simp +zetaDelta`
+unfolds them. -/
+theorem simplify_eval (env : Env) (e : Expr) :
+    eval env (simplify e) = eval env e := by
+  sorry
+
+end Expressions

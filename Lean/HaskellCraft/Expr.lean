@@ -153,6 +153,60 @@ def parse (s : List Char) : Option (Expr × List Char) := (parse' s).map (·.1)
 
 #eval parse "(-55*e)+1111)".toList
 
+/-- All the variables in an expression are lower case. -/
+def lowerVars : Expr → Bool
+  | num _     => true
+  | var v     => 'a' ≤ v && v ≤ 'z'
+  | add e1 e2 => lowerVars e1 && lowerVars e2
+  | mul e1 e2 => lowerVars e1 && lowerVars e2
+
+/-- What can follow an expression without changing how it is parsed:
+nothing, or a character that is not a digit. -/
+def okNext : List Char → Bool
+  | []     => true
+  | c :: _ => !is_digit c
+
+/-- Parsing what has been printed gives back the expression, with the
+rest of the string left over.
+
+Both conditions are needed. An upper-case variable prints as itself, as
+in `print (var 'A') = "A"`, but `parse` reads it as the number 0: try
+`#eval parse (print (var 'A')).toList`. And if a number is followed by
+a digit, the two are read together: `num 1` followed by `"2"` is read as
+`num 12`.
+
+Hints:
+- Induction on `e`, generalizing `rest`. In the `add` and `mul` cases,
+  use the induction hypotheses with the `rest` that follows each
+  subexpression: `'+' :: ...` (or `'*'`) after `e1`, and `')' :: rest`
+  after `e2`.
+- `parse` is `parse'` without the proof, so it helps first to show that
+  `parse s = some (e, r)` exactly when `parse' s` returns `(e, r)`
+  together with some proof.
+- `parse'` returns a proof that depends on its argument, so rewriting
+  that argument inside `parse' s = ...` fails with "motive is not type
+  correct". Instead, rewrite `(print e).toList ++ rest` into a list
+  starting with `'('` while the goal is still about `parse`, and only
+  then unfold, with `rw [parse, parse'.eq_def]`.
+- `String.toList_append` turns `(s ++ t).toList` into
+  `s.toList ++ t.toList`.
+- The `num` case is the hardest, and needs some lemmas of its own.
+  `toString n` for `n : Int` is `n.repr`: the digits of `n.natAbs`, with
+  `"-"` in front if `n` is negative. From the library:
+  `Nat.toList_repr` says that `n.repr.toList = Nat.toDigits 10 n`;
+  `Nat.isDigit_of_mem_toDigits` says that these are all digits; and
+  `Nat.toDigits_eq_ite` splits off the last digit, for an induction on
+  `n` with `Nat.strongRecOn` that shows `list_to_int` gives back `n`. -/
+theorem parse_print_gen (e : Expr) (hv : lowerVars e) (rest : List Char)
+    (hr : okNext rest) :
+    parse ((print e).toList ++ rest) = some (e, rest) := by
+  sorry
+
+/-- Parsing a printed expression gives it back. -/
+theorem parse_print (e : Expr) (hv : lowerVars e) :
+    parse (print e).toList = some (e, []) := by
+  sorry
+
 -- ---------------------------------------------------------------------
 -- Evaluation
 -- ---------------------------------------------------------------------

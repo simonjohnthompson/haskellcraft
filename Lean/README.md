@@ -40,11 +40,18 @@ structure step for step.
   `undef` constructor, whose induction principle has the book's two
   base cases; (sum-double) and `map f . map g = map (f . g)` for all
   fp-lists, and the counterexample showing (reverse++) does not hold for
-  them. Infinite lists are not covered yet.
+  them.
 - `HaskellCraft/AdditionalChapter17.lean` -- that section's fp-list
   exercises, all proved: associativity of `++`, `rev` via `shunt`,
   indexing with `map` and `zipWith`, and the equations between
   functions for `filter`, `map` and `concat`.
+- `HaskellCraft/Streams.lean` -- the infinite lists of the same section,
+  as a stream type used only through `head`, `tail`, corecursion and
+  coinduction (bisimulation). The two factorial lists are proved equal
+  both by the book's induction on indices and by coinduction.
+- `HaskellCraft/AdditionalStreams.lean` -- the section's infinite-list
+  exercises, on indexing and on equations proved by coinduction, stated
+  with `sorry`. Only the stream interface is visible here.
 
 ## Building
 

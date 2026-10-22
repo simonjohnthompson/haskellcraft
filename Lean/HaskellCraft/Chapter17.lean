@@ -1,7 +1,7 @@
 /-
 Chapter 17 ("Lazy programming"), section "Proof revisited", re-done in
 Lean: the part on finite and partial lists (fp-lists). The part on
-infinite lists, with the two factorial lists, is not covered here.
+infinite lists, with the two factorial lists, is in Streams.lean.
 
 Lean's `List α` has only finite, fully defined lists, so the fp-lists
 need a type of their own. `PList α` adds a third constructor, `undef`,
@@ -141,5 +141,4 @@ theorem map_comp_fun (f : β → γ) (g : α → β) :
     pmap f ∘' pmap g = pmap (f ∘' g) := by
   funext xs
   exact map_comp f g xs
-
 end Chapter17

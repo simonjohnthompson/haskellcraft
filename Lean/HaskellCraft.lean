@@ -6,3 +6,5 @@ import HaskellCraft.Chapter14
 import HaskellCraft.AdditionalChapter14
 import HaskellCraft.Chapter17
 import HaskellCraft.AdditionalChapter17
+import HaskellCraft.Streams
+import HaskellCraft.AdditionalStreams

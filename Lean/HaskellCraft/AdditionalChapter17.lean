@@ -1,15 +1,12 @@
 /-
 Exercises from Chapter 17's "Proof revisited" section, with their
-proofs: the ones about fp-lists.
-The two about infinite lists, (map f [m ..])!!n = f (m+n) and that
-`facMap` and `facs` are infinite, are not included, since infinite
-lists are not covered yet.
+proofs: the ones about fp-lists. The ones about infinite lists are in
+Streams.lean.
 
 `PList`, `app`, `rev`, `pmap` and `single` are in Chapter17.lean, and
-`∘'` is in Chapter11.lean. The functions that only the exercises use are
-defined here, each with its `undef` equation.
-
-Every proof is by induction with the two base cases `nil` and `undef`.
+`∘'` is in Chapter11.lean. The functions that only these exercises use
+are defined here, each with its `undef` equation. Every proof is by
+induction with the two base cases `nil` and `undef`.
 -/
 
 import HaskellCraft.Chapter17
@@ -172,5 +169,4 @@ theorem concat_map (f : α → β) :
   | cons ws wss hyp =>
     simp [comp] at hyp
     simp [comp,pmap,pconcat,hyp,map_app]
-
 end AdditionalChapter17

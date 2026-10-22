@@ -57,6 +57,9 @@ structure step for step.
   machine, and simplification. Proves compiler correctness, the
   correctness of `simplify`, and that parsing a printed expression gives
   it back.
+- `HaskellCraft/Logic.lean` -- proofs in Lean's own logic: implication,
+  `∧`, `∨`, `¬`, `↔`, classical logic, and `∀` and `∃`. Each section has
+  worked examples, then exercises stated with `sorry`.
 
 ## Building
 

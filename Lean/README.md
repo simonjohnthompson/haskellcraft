@@ -52,6 +52,11 @@ structure step for step.
 - `HaskellCraft/AdditionalStreams.lean` -- the section's infinite-list
   exercises, on indexing and on equations proved by coinduction, stated
   with `sorry`. Only the stream interface is visible here.
+- `HaskellCraft/Expr.lean` -- `Expr.hs` in Lean: expressions with
+  variables, printing, parsing, evaluation, a compiler to a stack
+  machine, and simplification. Compiler correctness, the correctness of
+  `simplify`, and that parsing a printed expression gives it back are
+  stated with `sorry`.
 
 ## Building
 

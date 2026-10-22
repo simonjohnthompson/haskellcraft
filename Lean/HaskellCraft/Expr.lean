@@ -1,8 +1,9 @@
 /-
 Expr.hs in Lean: arithmetical expressions with variables, a printer and
 parser, evaluation in an environment, a compiler to a stack machine,
-and simplification. The theorems about the compiler and `simplify` are
-stated with `sorry` in place of a proof, to be filled in.
+and simplification, with proofs of three theorems: compiler
+correctness, that `simplify` doesn't change the value of an expression,
+and that parsing a printed expression gives it back.
 
 Most of the definitions carry over directly. The differences:
 - `run` is partial in Haskell: it has no equation for a stack that runs
@@ -166,6 +167,127 @@ def okNext : List Char → Bool
   | []     => true
   | c :: _ => !is_digit c
 
+-- Lemmas for `parse_print_gen`: digits, numbers, and `parse` in terms
+-- of `parse'`.
+
+/-- Our `is_digit` is the library's `Char.isDigit`. -/
+theorem is_digit_eq (c : Char) : is_digit c = c.isDigit := rfl
+
+theorem get_while_digits (ds rest : List Char) (hd : ∀ c ∈ ds, is_digit c = true)
+    (hr : okNext rest = true) : get_while is_digit (ds ++ rest) = (ds, rest) := by
+  induction ds with
+  | nil =>
+      cases rest with
+      | nil => simp [get_while]
+      | cons c cs => simp [okNext] at hr; simp [get_while, hr]
+  | cons d ds ih =>
+      have h1 : is_digit d = true := hd d (by simp)
+      have h2 := ih (fun c hc => hd c (by simp [hc]))
+      simp [get_while, h1, h2]
+
+theorem toDigits_digits (m : Nat) : ∀ c ∈ Nat.toDigits 10 m, is_digit c = true := by
+  intro c hc
+  rw [is_digit_eq]
+  exact Nat.isDigit_of_mem_toDigits (by decide) (by decide) hc
+
+theorem digit_val (d : Nat) (h : d < 10) : (Nat.digitChar d).toNat = d + 48 := by
+  have : d = 0 ∨ d = 1 ∨ d = 2 ∨ d = 3 ∨ d = 4 ∨ d = 5 ∨ d = 6 ∨ d = 7 ∨ d = 8 ∨ d = 9 := by
+    omega
+  rcases this with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> rfl
+
+theorem worker_toDigits (n : Nat) :
+    list_to_int.worker (Nat.toDigits 10 n).reverse = n := by
+  induction n using Nat.strongRecOn with
+  | ind n ih =>
+    rw [Nat.toDigits_eq_ite (by decide)]
+    split
+    · have := digit_val n ‹_›
+      simp [list_to_int.worker]; omega
+    · have := digit_val (n % 10) (by omega)
+      have h10 : n / 10 < n := by omega
+      simp [list_to_int.worker, ih (n / 10) h10]
+      omega
+
+theorem list_to_int_digits (m : Nat) : list_to_int (Nat.toDigits 10 m) = m := by
+  unfold list_to_int
+  split
+  · rename_i rest h
+    have := toDigits_digits m '-' (by rw [h]; simp)
+    simp [is_digit] at this
+  · exact worker_toDigits m
+
+theorem list_to_int_neg (m : Nat) : list_to_int ('-' :: Nat.toDigits 10 m) = -m := by
+  simp [list_to_int, worker_toDigits]
+
+/-- A number followed by `rest`: the first character is a digit or `-`. -/
+theorem parse_digits (c : Char) (cs rest : List Char) (hc : c ≠ '(')
+    (hl : ¬('a' ≤ c ∧ c ≤ 'z')) :
+    parse (c :: cs ++ rest) =
+      some (num (list_to_int (get_int (c :: (cs ++ rest))).1), (get_int (c :: (cs ++ rest))).2) := by
+  rw [List.cons_append, parse, parse'.eq_def]
+  simp only
+  split
+  · rename_i h; simp at h; exact absurd h hl
+  · rfl
+
+theorem digit_not_letter (c : Char) (h : is_digit c = true) :
+    c ≠ '(' ∧ ¬('a' ≤ c ∧ c ≤ 'z') ∧ c ≠ '-' := by
+  simp [is_digit] at h
+  obtain ⟨h1, h2⟩ := h
+  refine ⟨?_, ?_, ?_⟩
+  · rintro rfl; simp at h1
+  · rintro ⟨h3, _⟩
+    have := Char.le_trans h3 h2
+    simp at this
+  · rintro rfl; simp at h1
+
+theorem parse_num (n : Int) (rest : List Char) (hr : okNext rest = true) :
+    parse ((toString n).toList ++ rest) = some (num n, rest) := by
+  cases n with
+  | ofNat m =>
+      have hs : (toString (Int.ofNat m)).toList = Nat.toDigits 10 m := Nat.toList_repr
+      obtain ⟨c, cs, hcs⟩ : ∃ c cs, Nat.toDigits 10 m = c :: cs := by
+        cases h : Nat.toDigits 10 m with
+        | nil => exact absurd h Nat.toDigits_ne_nil
+        | cons c cs => exact ⟨c, cs, rfl⟩
+      have hd := toDigits_digits m
+      rw [hcs] at hd
+      obtain ⟨h1, h2, h3⟩ := digit_not_letter c (hd c (by simp))
+      rw [hs, hcs, parse_digits c cs rest h1 h2]
+      have hg : get_int (c :: (cs ++ rest)) = (c :: cs, rest) := by
+        have := get_while_digits (c :: cs) rest hd hr
+        simp only [List.cons_append] at this
+        simp [get_int, h3, get_digits, this]
+      rw [hg]
+      simp only [Option.some.injEq, Prod.mk.injEq, and_true]
+      rw [← hcs, list_to_int_digits]
+      rfl
+  | negSucc m =>
+      have hs : (toString (Int.negSucc m)).toList = '-' :: Nat.toDigits 10 (m + 1) := by
+        show ("-" ++ (m + 1).repr).toList = _
+        simp [String.toList_append, Nat.toList_repr]
+      rw [hs, parse_digits '-' _ rest (by decide) (by decide)]
+      have hg : get_int ('-' :: (Nat.toDigits 10 (m + 1) ++ rest)) =
+          ('-' :: Nat.toDigits 10 (m + 1), rest) := by
+        simp [get_int, get_digits, get_while_digits _ rest (toDigits_digits (m + 1)) hr]
+      rw [hg, list_to_int_neg]
+      rfl
+
+theorem parse_eq_some {s : List Char} {e : Expr} {r : List Char} :
+    parse s = some (e, r) ↔ ∃ h, parse' s = some ⟨(e, r), h⟩ := by
+  unfold parse
+  constructor
+  · intro hp
+    cases hq : parse' s with
+    | none => simp [hq] at hp
+    | some p =>
+        obtain ⟨⟨a, b⟩, hh⟩ := p
+        simp [hq] at hp
+        obtain ⟨rfl, rfl⟩ := hp
+        exact ⟨hh, rfl⟩
+  · rintro ⟨h, hq⟩
+    simp [hq]
+
 /-- Parsing what has been printed gives back the expression, with the
 rest of the string left over.
 
@@ -175,7 +297,7 @@ in `print (var 'A') = "A"`, but `parse` reads it as the number 0: try
 a digit, the two are read together: `num 1` followed by `"2"` is read as
 `num 12`.
 
-Hints:
+How the proof goes:
 - Induction on `e`, generalizing `rest`. In the `add` and `mul` cases,
   use the induction hypotheses with the `rest` that follows each
   subexpression: `'+' :: ...` (or `'*'`) after `e1`, and `')' :: rest`
@@ -200,12 +322,48 @@ Hints:
 theorem parse_print_gen (e : Expr) (hv : lowerVars e) (rest : List Char)
     (hr : okNext rest) :
     parse ((print e).toList ++ rest) = some (e, rest) := by
-  sorry
+  induction e generalizing rest with
+  | num n => exact parse_num n rest hr
+  | var v =>
+      simp [lowerVars] at hv
+      have hp : v ≠ '(' := by
+        rintro rfl; simp at hv
+      have e : (print (var v)).toList ++ rest = v :: rest := by
+        simp [print]
+      rw [e, parse, parse'.eq_def]
+      simp only
+      split
+      · rfl
+      · rename_i h; simp at h; exact absurd (h hv.1) (by simpa using hv.2)
+  | add e1 e2 ih1 ih2 =>
+      simp [lowerVars] at hv
+      obtain ⟨_, h1⟩ := parse_eq_some.mp
+        (ih1 hv.1 ('+' :: ((print e2).toList ++ ')' :: rest)) (by simp [okNext, is_digit]))
+      obtain ⟨_, h2⟩ := parse_eq_some.mp (ih2 hv.2 (')' :: rest) (by simp [okNext, is_digit]))
+      have e : (print (add e1 e2)).toList ++ rest =
+          '(' :: ((print e1).toList ++ '+' :: ((print e2).toList ++ ')' :: rest)) := by
+        simp [print, String.toList_append]
+      rw [e, parse, parse'.eq_def]
+      simp only [h1, h2]
+      rfl
+  | mul e1 e2 ih1 ih2 =>
+      simp [lowerVars] at hv
+      obtain ⟨_, h1⟩ := parse_eq_some.mp
+        (ih1 hv.1 ('*' :: ((print e2).toList ++ ')' :: rest)) (by simp [okNext, is_digit]))
+      obtain ⟨_, h2⟩ := parse_eq_some.mp (ih2 hv.2 (')' :: rest) (by simp [okNext, is_digit]))
+      have e : (print (mul e1 e2)).toList ++ rest =
+          '(' :: ((print e1).toList ++ '*' :: ((print e2).toList ++ ')' :: rest)) := by
+        simp [print, String.toList_append]
+      rw [e, parse, parse'.eq_def]
+      simp only [h1, h2]
+      rfl
 
 /-- Parsing a printed expression gives it back. -/
 theorem parse_print (e : Expr) (hv : lowerVars e) :
     parse (print e).toList = some (e, []) := by
-  sorry
+  have h := parse_print_gen e hv [] rfl
+  simp at h
+  exact h
 
 -- ---------------------------------------------------------------------
 -- Evaluation
@@ -275,12 +433,22 @@ induction on `e`, generalizing `cont` and `stack`; `List.append_assoc`
 is useful. -/
 theorem run_compile (env : Env) (e : Expr) (cont : Program) (stack : Stack) :
     run (compile e ++ cont) env stack = run cont env (eval env e :: stack) := by
-  sorry
+  induction e generalizing cont stack with
+  | num n    => simp [compile,run,eval]
+  | var      => simp [compile,run,eval]
+  | add e1 e2 hyp1 hyp2 =>
+    simp [compile,eval,hyp2,hyp1,run]
+  | mul e1 e2 hyp1 hyp2 =>
+    simp [compile,eval,hyp2,hyp1,run]
+
 
 /-- Compiler correctness. -/
 theorem execute_eval (env : Env) (e : Expr) :
     execute env e = some (eval env e) := by
-  sorry
+  simp [execute]
+  have h := run_compile env e [] []
+  simp [List.append_nil,run] at h
+  exact h
 
 -- ---------------------------------------------------------------------
 -- Simplification
@@ -359,6 +527,23 @@ up as local definitions, `r✝ : ... := simp' e1`; `simp +zetaDelta`
 unfolds them. -/
 theorem simplify_eval (env : Env) (e : Expr) :
     eval env (simplify e) = eval env e := by
-  sorry
+  unfold simplify
+  fun_induction simp' e with
+  | case1 e1 r hyp => simp [eval] ; exact hyp
+  | case2 e2 n r hyp => simp [eval] ; exact hyp
+  | case3 n m nem nen => simp [eval]
+  | case4 e1 r hyp => simp [eval] ; exact hyp
+  | case5 e1 ne r hyp => simp [eval] ; exact hyp
+  | case6 e ne => simp [eval]
+  | case7 e ne => simp [eval]
+  | case8 e1 e2 ne1 ne2 x s1 s2 h hlt r ih4 ih3 ih2 ih1 =>
+      simp +zetaDelta [eval,ih1,ih3,ih4]
+  | case9 e1 e2 ne2 ne1 x s1 s2 h ih2 ih1 =>
+      simp +zetaDelta [eval,ih1,ih2]
+  | case10 e1 e2 ne1 ne2 x2 x1 s1 s2 h hlt r ih4 ih3 ih2 ih1 =>
+      simp +zetaDelta [eval,ih1,ih3,ih4]
+  | case11 e1 e2 ne1 ne2 ne3 ne4 s1 s2 h ih2 ih1 =>
+      simp +zetaDelta [eval,ih1,ih2]
+  | case12 => eq_refl
 
 end Expressions

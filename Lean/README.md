@@ -54,9 +54,9 @@ structure step for step.
   with `sorry`. Only the stream interface is visible here.
 - `HaskellCraft/Expr.lean` -- `Expr.hs` in Lean: expressions with
   variables, printing, parsing, evaluation, a compiler to a stack
-  machine, and simplification. Compiler correctness, the correctness of
-  `simplify`, and that parsing a printed expression gives it back are
-  stated with `sorry`.
+  machine, and simplification. Proves compiler correctness, the
+  correctness of `simplify`, and that parsing a printed expression gives
+  it back.
 
 ## Building
 

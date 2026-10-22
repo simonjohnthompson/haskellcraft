@@ -8,9 +8,11 @@ Most of the definitions carry over directly. The differences:
 - `run` is partial in Haskell: it has no equation for a stack that runs
   out, or for an empty stack at the end. Here it returns an `Option Int`,
   with `none` for those cases.
-- `parse` is partial too, and its recursion is not structural, so it is
-  a `partial def`, returning an `Option`. It can be run with `#eval`, but
-  nothing can be proved about it.
+- `parse` is partial too: it returns an `Option`, with `none` where the
+  Haskell would fail. Its second recursive call is not on a part of its
+  argument, so, as for `simplify` below, Lean needs to know a fact about
+  `parse` while it is being defined: here, that what it leaves of the
+  string is no longer than the string.
 - `simplify` terminates, but not because its recursion is structural:
   it calls itself again on the simplified expression. That terminates
   because simplifying either leaves an expression unchanged or makes it
@@ -92,26 +94,62 @@ where
     | []      => 0
     | d :: ds => (d.toNat - '0'.toNat : Int) + 10 * worker ds
 
-/-- A fully bracketed expression at the start of the string, and the
-rest of the string; `none` where the Haskell `parse` would fail. -/
-partial def parse : List Char → Option (Expr × List Char)
-  | '(' :: rest => do
-      let (e1, rest1) ← parse rest
-      match rest1 with
-      | op :: rest2 =>
-          let (e2, rest3) ← parse rest2
-          match op, rest3 with
-          | '+', ')' :: rest4 => some (add e1 e2, rest4)
-          | '*', ')' :: rest4 => some (mul e1 e2, rest4)
-          | _, _ => none
-      | [] => none
+/-- `get_while` never makes the list longer. -/
+theorem get_while_length (p : α → Bool) (xs : List α) :
+    (get_while p xs).2.length ≤ xs.length := by
+  induction xs with
+  | nil => simp [get_while]
+  | cons y ys ih => by_cases h : p y <;> simp [get_while, h] <;> omega
+
+/-- ... and so neither does `get_int`. -/
+theorem get_int_length (xs : List Char) : (get_int xs).2.length ≤ xs.length := by
+  cases xs with
+  | nil => simp [get_int]
+  | cons y ys =>
+      by_cases h : y = '-'
+      · have := get_while_length is_digit ys
+        simp [get_int, h, get_digits]; omega
+      · simpa [get_int, h, get_digits] using get_while_length is_digit (y :: ys)
+
+/-- `parse`, returning the result together with the fact that what is
+left of the string is no longer than the string itself. Lean needs that
+fact to see that the second recursive call, on `rest2`, is on a shorter
+string: `rest2` is what the first call left, minus the operator.
+
+What is left can be the whole string: on a character that is not a
+letter, a digit or `-`, an empty number is read, as in the Haskell, so
+`parse "+"` gives `num 0` with `"+"` left. -/
+def parse' (s : List Char) : Option {p : Expr × List Char // p.2.length ≤ s.length} :=
+  match s with
+  | '(' :: rest =>
+      match parse' rest with
+      | none => none
+      | some ⟨(e1, rest1), h1⟩ =>
+          have h1' : rest1.length ≤ rest.length := h1
+          match rest1, h1' with
+          | op :: rest2, h1 =>
+              have : rest2.length < ('(' :: rest).length := by simp at h1 ⊢; omega
+              match parse' rest2 with
+              | none => none
+              | some ⟨(e2, rest3), h3⟩ =>
+                  have h3' : rest3.length ≤ rest2.length := h3
+                  match op, rest3, h3' with
+                  | '+', ')' :: rest4, h3 => some ⟨(add e1 e2, rest4), by simp at *; omega⟩
+                  | '*', ')' :: rest4, h3 => some ⟨(mul e1 e2, rest4), by simp at *; omega⟩
+                  | _, _, _ => none
+          | [], _ => none
   | ch :: rest =>
       if 'a' ≤ ch && ch ≤ 'z' then
-        some (var ch, rest)
+        some ⟨(var ch, rest), by simp⟩
       else
-        let (ns, rest1) := get_int (ch :: rest)
-        some (num (list_to_int ns), rest1)
+        some ⟨(num (list_to_int (get_int (ch :: rest)).1), (get_int (ch :: rest)).2),
+              get_int_length _⟩
   | [] => none
+termination_by s.length
+
+/-- A fully bracketed expression at the start of the string, and the
+rest of the string; `none` where the Haskell `parse` would fail. -/
+def parse (s : List Char) : Option (Expr × List Char) := (parse' s).map (·.1)
 
 #eval parse "(-55*e)+1111)".toList
 

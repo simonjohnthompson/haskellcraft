@@ -994,6 +994,47 @@ def convert_ttfamily_table_columns(tex):
     return "".join(out)
 
 
+def strip_index_trailing_percent(tex):
+    """Drop a bare "%" immediately following \\index{...}/\\minx{...} --
+    the common "\\index{term}%" idiom authors use so the index call
+    doesn't introduce a spurious paragraph break (real LaTeX's "%"
+    comments out the rest of the line *and* the newline after it,
+    gluing the next line straight on with no space). The generic
+    \\index/\\minx strip further down deletes the macro itself but
+    leaves this trailing "%" behind as plain orphaned text.
+
+    Almost everywhere this is harmless: pandoc's own LaTeX reader (we
+    run it with `-f latex`) treats that orphaned "%" exactly as real
+    LaTeX would, silently dropping the rest of its line -- which is
+    usually empty anyway. But number_exercises() runs earlier in this
+    same preprocess() pass and, for the last exercise in a
+    \\begin{exercises} block, glues its own EXERCISECLOSE sentinel
+    directly onto the end of that exercise's text with no separator --
+    so when that text ends in one of these orphaned "%"s (e.g. Chapter
+    3's "\\index{numbers!integers|)}%" right before \\end{exercises}),
+    pandoc's comment handling silently eats EXERCISECLOSE itself,
+    leaving that exercise's wrapper div unclosed and the *next*
+    exercise's raw, unprocessed sentinel leaking straight into the
+    rendered page (GitHub issue #3). Removing the "%" here, before
+    number_exercises() ever sees the text, fixes this at the source
+    rather than special-casing the glue point.
+    """
+    out = []
+    pos = 0
+    pattern = re.compile(r"\\(?:index|minx)\{")
+    while True:
+        m = pattern.search(tex, pos)
+        if not m:
+            out.append(tex[pos:])
+            break
+        j = _find_matching_brace(tex, m.end() - 1)
+        out.append(tex[pos:j])
+        pos = j
+        if pos < len(tex) and tex[pos] == "%":
+            pos += 1
+    return "".join(out)
+
+
 def collapse_standalone_index_lines(tex):
     """\\index{X}/\\minx{X} planted alone on its own source line --
     e.g. Chapter 3's "...the guards and results\\n\\index{clause}\\nare
@@ -3090,6 +3131,9 @@ def preprocess(tex, stem):
     # leave a mid-sentence \index{}/\minx{} on its own line as a blank
     # line (a spurious paragraph break) once its own text is gone.
     tex = collapse_standalone_index_lines(tex)
+
+    # Must also run before the generic strip -- see its own docstring.
+    tex = strip_index_trailing_percent(tex)
 
     # Index entries carry no reader-visible content -> drop entirely.
     tex = strip_balanced_macro(tex, "index", lambda arg: "")

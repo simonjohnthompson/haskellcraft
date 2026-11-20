@@ -80,31 +80,33 @@ There is quite a lot to understand in this code. First, it is a definition. What
 
 But how should we understand the initial goal, and how it is solved by breaking it down into sub-goals that are themselves progressively broken down, and solved? 
 
-We can only do this by loading the file into the Lean system, and interacting with it in the **Lean InfoView** window. This lets us see the state at each stage in the proof: the state will be a list of (named) hypotheses before the turnstile `⊢`, and following it the current goal.
+We can only do this by loading the file into the Lean system, and interacting with it in the **Lean InfoView** window. This lets us see the state at each stage in the proof: the state is a list of (named) hypotheses before the turnstile `⊢`, and following it the current goal. The stages we look at are labelled 1–6 in this diagram:
 
-- Immediately following `by`, we can see the hypothesis, or assumption that `xs : List Int` and the goal which is the theorem itself.
+  ![Cursor positions](HaskellCraft/Images/CursorPositions.png)
+
+- Immediately following `by`, position 1, we can see the hypothesis, or assumption that `xs : List Int` and the goal which is the theorem itself.
 
   ![DoubleAll 1](HaskellCraft/Images/DoubleAll1.png)
 
   This is broken down into two subgoals by `induction xs with`  
 
-- Following `nil =>` we see the first subgoal: proving the theorem in the case of the empty list
+- Following `nil =>`, position 2, we see the first subgoal: proving the theorem in the case of the empty list
   
   ![DoubleAll 2](HaskellCraft/Images/DoubleAll2.png)
 
-- At the end of the same line, we see that this has been solved, by `simp`lifying the goal using the definitions of the two functions, which both give the result 0.
+- At the end of the same line, position 3, we see that this has been solved, by `simp`lifying the goal using the definitions of the two functions, which both give the result 0.
 
   ![DoubleAll 3](HaskellCraft/Images/DoubleAll3.png)
 
-- Following `cons x xs hyp =>` we see three hypotheses: the names of values on which we're trying to prove the induction step, and the induction `hyp`othesis, which is named in the case too
+- Following `cons x xs hyp =>`, position 4, we see three hypotheses: the names of values on which we're trying to prove the induction step, and the induction `hyp`othesis, which is named in the case too
 
   ![DoubleAll 4](HaskellCraft/Images/DoubleAll4.png)
 
-- At the end of the `simp` line we see the goal has been simplified by using the definitions of the functions, but that we need some properties of arithmetic to make some progress.
+- At the end of the `simp` line, position 5, we see the goal has been simplified by using the definitions of the functions, but that we need some properties of arithmetic to make some progress.
 
   ![DoubleAll 5](HaskellCraft/Images/DoubleAll5.png)
 
-- At the end of the proof, we see that `omega` has given us the needed arithmetic, and has also automatically applied the induction hypothesis too.
+- At the end of the proof, position 6, we see that `omega` has given us the needed arithmetic, and has also automatically applied the induction hypothesis too.
 
   ![DoubleAll 6](HaskellCraft/Images/DoubleAll6.png)
 

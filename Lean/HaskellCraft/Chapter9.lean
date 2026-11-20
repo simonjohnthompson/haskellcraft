@@ -32,7 +32,7 @@ theorem sum_doubleAll (xs : List Int) :
   induction xs with
   | nil => simp [mySum, doubleAll]
   | cons x xs hyp =>
-      simp only [mySum, doubleAll]
+      simp [mySum, doubleAll]
       omega
 
 -- ---------------------------------------------------------------------

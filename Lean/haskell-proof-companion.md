@@ -84,29 +84,29 @@ We can only do this by loading the file into the Lean system, and interacting wi
 
 - Immediately following `by`, we can see the hypothesis, or assumption that `xs : List Int` and the goal which is the theorem itself.
 
-  ![DoubleAll 1](Images/DoubleAll1.png)
+  ![DoubleAll 1](HaskellCraft/Images/DoubleAll1.png)
 
   This is broken down into two subgoals by `induxtion xs with`  
 
 - Following `nil =>` we see the first subgoal: proving the theorem in the case of the empty list
   
-  ![DoubleAll 2](Images/DoubleAll2.png)
+  ![DoubleAll 2](HaskellCraft/Images/DoubleAll2.png)
 
 - At the end of the same line, we see that this has been solved, by `simp`lifying the goal using the definitions of the two functions, which both give the result 0.
 
-  ![DoubleAll 3](Images/DoubleAll3.png)
+  ![DoubleAll 3](HaskellCraft/Images/DoubleAll3.png)
 
 - Following `cons x xs hyp =>` we see three hypotheses: the names of values on which we're trying to prove the induction step, and the induction `hyp`othesis, which is named in the case too
 
-  ![DoubleAll 4](Images/DoubleAll4.png)
+  ![DoubleAll 4](HaskellCraft/Images/DoubleAll4.png)
 
 - At the end of the `symp` line we see the goal has been simplified by using the definitions of the functions, but that we need some properties of arithmetic to make some progress.
 
-  ![DoubleAll 5](Images/DoubleAll5.png)
+  ![DoubleAll 5](HaskellCraft/Images/DoubleAll5.png)
 
 - At the end of the proof, we see that `omega` has given us the needed arithmetic, and has also automatically applied the induction hypothesis too.
 
-  ![DoubleAll 6](Images/DoubleAll6.png)
+  ![DoubleAll 6](HaskellCraft/Images/DoubleAll6.png)
 
 
 # NOTES

@@ -1,6 +1,6 @@
 # Mechanical proof for Haskell programs: a companion in Lean
 
-It is no accident that definitions of functions in Haskell look like equations. Function definitions in Haskell can be read as statements in logic, and properties of functions follow logically from these definitions. _Haskell: the Craft of Functional Programming_ takes a informal, but mathematical, approach to showing this in Chapter 9 (functions over lists), Chapter 11 (higher-order functions), Chapter 14 (algebraic data types) and Chapter 17 (lazy programs). 
+It is no accident that definitions of functions in Haskell look like equations. Function definitions in Haskell can be read as statements in logic, and properties of functions follow logically from these definitions. _Haskell: the Craft of Functional Programming_ takes an informal, but mathematical, approach to showing this in Chapter 9 (functions over lists), Chapter 11 (higher-order functions), Chapter 14 (algebraic data types) and Chapter 17 (lazy programs). 
 
 While there is little doubt that these proofs are valid, it is possible to be more rigorous, and to formalise the propositions and proofs in a _mechanised proof assistant_ such as [Lean](https://lean-lang.org) or [Rocq](https://rocq-prover.org), which would make sure that the proofs were valid, just as a compiler of a programming language checks the validity of a program in the language. In this companion we show how to take definitions from Haskell into Lean, and then how to mechanise results about them in the logic of Lean.
 
@@ -86,7 +86,7 @@ We can only do this by loading the file into the Lean system, and interacting wi
 
   ![DoubleAll 1](HaskellCraft/Images/DoubleAll1.png)
 
-  This is broken down into two subgoals by `induxtion xs with`  
+  This is broken down into two subgoals by `induction xs with`  
 
 - Following `nil =>` we see the first subgoal: proving the theorem in the case of the empty list
   
@@ -100,7 +100,7 @@ We can only do this by loading the file into the Lean system, and interacting wi
 
   ![DoubleAll 4](HaskellCraft/Images/DoubleAll4.png)
 
-- At the end of the `symp` line we see the goal has been simplified by using the definitions of the functions, but that we need some properties of arithmetic to make some progress.
+- At the end of the `simp` line we see the goal has been simplified by using the definitions of the functions, but that we need some properties of arithmetic to make some progress.
 
   ![DoubleAll 5](HaskellCraft/Images/DoubleAll5.png)
 
